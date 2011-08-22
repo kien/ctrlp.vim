@@ -1,19 +1,21 @@
 " ============================================================
 " File:          plugin/ctrlp.vim
-" Description:   File finder, fuzzy style.
+" Description:   Full path fuzzy file finder for Vim.
 " Author:        Kien Nguyen <info@designtomarkup.com>
 " License:       MIT
 " ============================================================
 
 if exists('g:loaded_ctrlp') && g:loaded_ctrlp
-	finish
+	fini
 endif
 let g:loaded_ctrlp = 1
 
-if !exists('g:CtrlP_Key')
-	let g:CtrlP_Key = '<leader>l'
+if !exists('g:ctrlp_map')
+	let g:ctrlp_map = '<c-p>'
 endif
 
-com! CtrlP cal ctrlp#init()
+com! CtrlP               cal ctrlp#init()
+com! ClearCtrlPCache     cal ctrlp#clearcache()
+com! ClearAllCtrlPCaches cal ctrlp#clearallcaches()
 
-exe 'nn <silent>' g:CtrlP_Key ':<c-u>CtrlP<cr>'
+exe 'nn <silent>' g:ctrlp_map ':<c-u>CtrlP<cr>'

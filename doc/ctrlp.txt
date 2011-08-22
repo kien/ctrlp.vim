@@ -1,0 +1,268 @@
+*ctrlp.txt*       Full path fuzzy file finder for Vim.
+*CtrlP* *ControlP* *'ctrlp'* *'ctrl-p'*
+===============================================================================
+#                                                                             #
+#          :::::::: ::::::::::: :::::::::  :::             :::::::::          #
+#         :+:    :+:    :+:     :+:    :+: :+:             :+:    :+:         #
+#         +:+           +:+     +:+    +:+ +:+             +:+    +:+         #
+#         +#+           +#+     +#++:++#:  +#+             +#++:++#+          #
+#         +#+           +#+     +#+    +#+ +#+             +#+                #
+#         #+#    #+#    #+#     #+#    #+# #+#             #+#                #
+#          ########     ###     ###    ### ##########      ###                #
+#                                                                             #
+===============================================================================
+CONTENTS                                                       *ctrlp-contents*
+
+    1.Intro...................................|ctrlp-intro|
+    2.Options.................................|ctrlp-options|
+    3.Commands................................|ctrlp-commands|
+    4.Mappings................................|ctrlp-mappings|
+    5.Input Formats...........................|ctrlp-input-formats|
+    6.Credits.................................|ctrlp-credits|
+
+===============================================================================
+1. Intro                                                          *ctrlp-intro*
+
+Full path fuzzy file finder with an intuitive interface. Has full support for
+Vim’s |regexp| as search pattern, and more.
+
+See also |ctrlp-input-formats| and |ctrlp-fullregexp|.
+
+===============================================================================
+2. Options                                                      *ctrlp-options*
+
+Below are the available options and their default values.
+
+                                                                *'g:ctrlp_map'*
+Use this option to change the mapping to invoke |CtrlP| in |Normal| mode: >
+  let g:ctrlp_map = '<c-p>'
+<
+
+                                                             *'g:loaded_ctrlp'*
+Use this option to disable the plugin completely: >
+  let g:loaded_ctrlp = 1
+<
+
+                                              *'g:ctrlp_match_window_reversed'*
+Reverse the sort order of the matched files in the match window. The default
+setting is from bottom to top: >
+  let g:ctrlp_match_window_reversed = 1
+<
+
+                                                  *'g:ctrlp_persistence_input'*
+Remember the last input string and position of the selection in the match
+window: >
+  let g:ctrlp_persistence_input = 1
+<
+
+                                                       *'g:ctrlp_split_window'*
+Use this option to specify how the file is to be opened when pressing <cr>:
+  1 - in a new tab
+  2 - in a new horizontal split
+  3 - in a new vertical split
+  0 - in the current window/split
+>
+  let g:ctrlp_split_window = 0
+<
+
+                                                       *'g:ctrlp_ignore_space'*
+if you want the search to include whitespaces, change this to 0: >
+  let g:ctrlp_ignore_space = 1
+<
+
+                                                  *'g:ctrlp_working_path_mode'*
+                                                             *SetWorkingPath()*
+When starting up the prompt, automatically set the working directory (i.e. the
+|current-directory|) to:
+  1 - the parent directory of the current file.
+  2 - the nearest ancestor that contains one of these directories/files:
+      .git/
+      .hg/
+      .bzr/
+      _darcs/
+      root.dir
+      .vimprojects
+  0 - don’t manage working directory.
+>
+  let g:ctrlp_working_path_mode = 1
+<
+You can use this functionality outside of |CtrlP| by adding the following line
+to your |.vimrc|; the parameter is the same (1, 2 and 0): >
+  au BufEnter * cal ctrlp#SetWorkingPath(2)
+<
+
+                                                         *'g:ctrlp_max_height'*
+Set the maximum height of the match window: >
+  let g:ctrlp_max_height = 10
+<
+
+                                                      *'g:ctrlp_regexp_search'*
+Set this to 1 to set full |regexp| search as the default mode: >
+  let g:ctrlp_regexp_search = 0
+<
+
+                                                          *'g:ctrlp_cache_dir'*
+Set the parent directory for the '.ctrlp_cache' directory: >
+  let g:ctrlp_cache_dir = $HOME
+<
+
+                                                        *'g:ctrlp_use_caching'*
+Set this to 1 to always enable caching. Caching is also temporarily enabled if
+the working directory has more than 4000 files: >
+  let g:ctrlp_use_caching = 0
+<
+
+                                                        *'g:ctrlp_by_filename'*
+Set this to 1 to set search by-file-name as the default: >
+  let g:ctrlp_by_filename = 0
+<
+
+                                                    *'g:ctrlp_prompt_mappings'*
+Use this to customize the mappings inside |CtrlP|’s prompt to your liking. You
+only need to keep the lines that you’ve changed the values (inside []): >
+  let g:ctrlp_prompt_mappings = {
+    \ 'PrtBS()':                    ['<bs>'],
+    \ 'PrtDelete()':                ['<del>'],
+    \ 'PrtDeleteWord()':            ['<c-w>'],
+    \ 'PrtClear()':                 ['<c-u>'],
+    \ 'PrtSelectMove("j")':         ['<c-n>', '<c-j>', '<down>'],
+    \ 'PrtSelectMove("k")':         ['<c-p>', '<c-k>', '<up>'],
+    \ 'AcceptSelection("e")':       ['<cr>'],
+    \ 'AcceptSelection("h")':       ['<c-cr>', '<c-s>'],
+    \ 'AcceptSelection("t")':       ['<c-t>'],
+    \ 'AcceptSelection("v")':       ['<c-v>'],
+    \ 'ToggleFocus()':              ['<tab>'],
+    \ 'ToggleRegex()':              ['<c-r>'],
+    \ 'ToggleByFname()':            ['<c-d>'],
+    \ 'PrtCurStart()':              ['<c-a>'],
+    \ 'PrtCurEnd()':                ['<c-e>'],
+    \ 'PrtCurLeft()':               ['<c-h>', '<left>'],
+    \ 'PrtCurRight()':              ['<c-l>', '<right>'],
+    \ 'BufOpen("ControlP", "del")': ['<esc>', '<c-c>', '<c-g>'],
+    \ }
+<
+
+===============================================================================
+3. Commands                                                    *ctrlp-commands*
+
+                                                                       *:CtrlP*
+:CtrlP
+   Open the |CtrlP| prompt.
+
+                                                             *:ClearCtrlPCache*
+:ClearCtrlPCache
+   Flush the cache for the current working directory.
+
+                                                         *:ClearAllCtrlPCaches*
+:ClearAllCtrlPCaches
+   Delete all the saved cache files in |ctrlp_cache_dir|.
+
+===============================================================================
+4. Mappings                                                    *ctrlp-mappings*
+
+                                                                *'ctrlp-<c-p>'*
+<c-p>
+   Default |Normal| mode mapping to open the |CtrlP| prompt.
+
+Once inside the prompt:
+
+  <c-r>                                                    *'ctrlp-fullregexp'*
+    Toggle between the smart |regexp|/string mode (section 5.c) and full
+    |regexp| mode.
+    (note: in full |regexp| mode, the prompt’s base is 'r>>' instead of '>>>')
+
+    See also |input-formats|.
+
+  <c-d>
+    Toggle between full path search and file name only search.
+    (note: in file name mode, the prompt’s base is '>d>' instead of '>>>')
+
+  <c-n>,
+  <c-j>,
+  <down>
+    Move selection down
+
+  <c-p>,
+  <c-k>,
+  <up>
+    Move selection up
+
+  <c-a>
+    Move the cursor to the 'start' of the prompt
+
+  <c-e>
+    Move the cursor to the 'end' of the prompt
+
+  <c-h>,
+  <left>
+    Move the cursor one character to the 'left'
+
+  <c-l>,
+  <right>
+    Move the cursor one character to the 'right'
+
+  <c-w>
+    Delete a preceding (inner) word
+
+  <c-u>
+    Clear the input field
+
+  <cr>
+    Open selected file with the method specified with |g:ctrlp_split_window|
+
+  <c-t>
+    Open selected file in a new 'tab'
+
+  <c-v>
+    Open selected file in a 'vertical' split
+
+  <c-cr>,
+  <c-s>
+    Open selected file in a 'horizontal' split
+
+  <tab>
+    Toggle the focus between the match window and the prompt.
+
+  <esc>,
+  <c-c>,
+  <c-g>
+    Exit |CtrlP|
+
+Chose your own mappings with |g:ctrlp_prompt_mappings|.
+
+===============================================================================
+5. Input Formats                                          *ctrlp-input-formats*
+
+                                                   *ctrlp-prompt-input-formats*
+Formats for inputting in the prompt:
+
+a)  Simple string. e.g. 'abc' is understood internally as 'a.*b.*c'
+
+b)  Strings end with a colon ':' followed by an arbitrary number will be read
+    as a line number to jump to after opening the file.
+    e.g. 'abc:45' will open the selected file and jump to line 45.
+
+c)  Vim |regexp|. If the input string contains '*', '^', '$', '+' or '$', it’ll
+    be treated as a Vim’s |regexp| |pattern| without any modification.
+    e.g. 'abc\d*efg' will be read as 'abc\d*efg'.
+
+    See also |ctrlp-fullregexp|.
+
+===============================================================================
+6. Credits                                                      *ctrlp-credits*
+
+Developed by Kien Nguyen (github.com/kien), based on the Command-T and the
+LustyExplorer plugins. No code was taken from these plugins, but I did clone
+the majority of their (awesome) interfaces and the way they work.
+
+This was originally written as a module for a would-be larger plugin called
+AutoDoc.vim which I’ve stopped developing because of lost of interest. I really
+liked the way Command-T and LustyExplorer deal with user’s input, so I
+wrote a pure Vimscript version of their prompt window, intended to use it for
+the aforementioned plugin.
+
+Git repository:       https://github.com/kien/ctrlp.vim
+Mercurial repository: https://bitbucket.org/kien/ctrlp.vim
+
+===============================================================================
+vim:nofen:et:ts=2:sw=2:sts=2
