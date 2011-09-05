@@ -36,18 +36,18 @@ _Screenshot: filename only mode with the match window focused._
     1 - the parent directory of the current file.  
     2 - the nearest ancestor that contains one of these directories or files:  
 
-        ```
         .git/
         .hg/
         .bzr/
         _darcs/
         root.dir
         .vimprojects
-        ```
 
     0 - don’t manage working directory.
 * You can also use the set-working-directory functionality outside of CtrlP by
-adding the following line to your vimrc; the parameter is the same (1, 2 or 0):
+adding the following line to your vimrc.  
+The parameter is the same (1, 2 or 0):
+
     ```vim
     au BufEnter * cal ctrlp#SetWorkingPath(2)
     ```
