@@ -1,7 +1,8 @@
 ## About
-* Full path fuzzy file finder with an intuitive interface.
-* Has full support for Vim’s regexp as search pattern, and more.
+Full path fuzzy file and buffer finder for Vim.
+
 * Written in pure Vimscript for MacVim and Vim 7.0+.
+* Has full support for Vim’s regexp as search pattern, and more.
 
 ![ctrlp][1]
 
@@ -47,7 +48,7 @@ adding the following line to your vimrc; the parameter is the same (1, 2 or 0):
     au BufEnter * cal ctrlp#SetWorkingPath(2)
     ```
 
-Check the docs for more mappings, commands and options.
+_Check the docs for more mappings, commands and options._
 
 [1]: http://designslicer.com/vim/images/ctrlp1.png
 [2]: http://designslicer.com/vim/images/ctrlp2.png

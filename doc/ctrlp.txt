@@ -1,4 +1,4 @@
-*ctrlp.txt*       Full path fuzzy file finder for Vim.
+*ctrlp.txt*       Full path fuzzy file and buffer finder for Vim.
 *CtrlP* *ControlP* *'ctrlp'* *'ctrl-p'*
 ===============================================================================
 #                                                                             #
@@ -23,8 +23,9 @@ CONTENTS                                                       *ctrlp-contents*
 ===============================================================================
 1. Intro                                                          *ctrlp-intro*
 
-Full path fuzzy file finder with an intuitive interface. Has full support for
-Vim’s |regexp| as search pattern, and more.
+Full path fuzzy file and buffer finder with an intuitive interface. Written in
+pure Vimscript for MacVim and Vim 7.0+. Has full support for Vim’s |regexp| as
+search pattern, and more.
 
 See also |ctrlp-input-formats| and |ctrlp-fullregexp|.
 
@@ -264,9 +265,9 @@ the majority of their (awesome) interfaces and the way they work.
 
 This was originally written as a module for a would-be larger plugin called
 AutoDoc.vim which I’ve stopped developing because of lost of interest. I really
-liked the way Command-T and LustyExplorer deal with user’s input, so I
-wrote a pure Vimscript version of their prompt window, intended to use it for
-the aforementioned plugin.
+liked the way Command-T and LustyExplorer deal with user’s input, so I wrote a
+pure Vimscript version of their prompt window, intended to use it for the
+aforementioned plugin.
 
 Git repository:       https://github.com/kien/ctrlp.vim
 Mercurial repository: https://bitbucket.org/kien/ctrlp.vim

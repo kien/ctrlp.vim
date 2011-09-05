@@ -1,9 +1,9 @@
-" ============================================================
+" =============================================================================
 " File:          plugin/ctrlp.vim
-" Description:   Full path fuzzy file finder for Vim.
-" Author:        Kien Nguyen <info@designtomarkup.com>
+" Description:   Full path fuzzy file and buffer finder for Vim.
+" Author:        Kien Nguyen <github.com/kien>
 " License:       MIT
-" ============================================================
+" =============================================================================
 
 if ( exists('g:loaded_ctrlp') && g:loaded_ctrlp )
 			\ || v:version < '700'

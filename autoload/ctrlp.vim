@@ -1,9 +1,9 @@
-" ============================================================
+" =============================================================================
 " File:          autoload/ctrlp.vim
-" Description:   Full path fuzzy file finder for Vim.
-" Author:        Kien Nguyen <info@designtomarkup.com>
+" Description:   Full path fuzzy file and buffer finder for Vim.
+" Author:        Kien Nguyen <github.com/kien>
 " License:       MIT
-" ============================================================
+" =============================================================================
 
 let s:save_cpo = &cpo "{{{
 set cpo&vim "}}}
