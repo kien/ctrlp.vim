@@ -96,10 +96,6 @@ else
 	let s:byfname = g:ctrlp_by_filename
 	unl g:ctrlp_by_filename
 endif
-
-if !exists('g:ctrlp_prompt_mappings')
-	let g:ctrlp_prompt_mappings = 0
-endif
 "}}}
 
 " Caching {{{
@@ -535,7 +531,7 @@ func! s:MapSpecs(...)
 				\ 'PrtCurRight()':              ['<c-l>', '<right>'],
 				\ 'BufOpen("ControlP", "del")': ['<esc>', '<c-c>', '<c-g>'],
 				\ }
-	if type(g:ctrlp_prompt_mappings) == 4
+	if exists('g:ctrlp_prompt_mappings') && type(g:ctrlp_prompt_mappings) == 4
 		sil! cal extend(prtmaps, g:ctrlp_prompt_mappings)
 	endif
 	if exists('a:1') && a:1 == 'unmap'
