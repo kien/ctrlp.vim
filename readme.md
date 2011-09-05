@@ -50,5 +50,5 @@ adding the following line to your vimrc; the parameter is the same (1, 2 or 0):
 
 _Check the docs for more mappings, commands and options._
 
-[1]: http://designslicer.com/vim/images/ctrlp1.png
-[2]: http://designslicer.com/vim/images/ctrlp2.png
+[1]: http://i.imgur.com/lQScr.png
+[2]: http://i.imgur.com/MyRIv.png
