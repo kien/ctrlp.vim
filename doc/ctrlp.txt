@@ -107,13 +107,13 @@ Set the parent directory for the '.ctrlp_cache' directory: >
 <
 
                                                         *'g:ctrlp_use_caching'*
-Set this to 1 to always enable caching. Caching is also temporarily enabled if
-the working directory has more than 4000 files: >
+Set this to 1 to always enable caching (flat files). Caching’s also temporarily
+enabled if the working directory has more than 4000 files: >
   let g:ctrlp_use_caching = 0
 <
 
                                                         *'g:ctrlp_by_filename'*
-Set this to 1 to set search by-file-name as the default: >
+Set this to 1 to set search by file-name (not full path) as the default: >
   let g:ctrlp_by_filename = 0
 <
 
@@ -134,6 +134,7 @@ only need to keep the lines that you’ve changed the values (inside []): >
     \ 'ToggleFocus()':              ['<tab>'],
     \ 'ToggleRegex()':              ['<c-r>'],
     \ 'ToggleByFname()':            ['<c-d>'],
+    \ 'ToggleType()':               ['<c-f>'],
     \ 'PrtCurStart()':              ['<c-a>'],
     \ 'PrtCurEnd()':                ['<c-e>'],
     \ 'PrtCurLeft()':               ['<c-h>', '<left>'],
@@ -147,7 +148,10 @@ only need to keep the lines that you’ve changed the values (inside []): >
 
                                                                        *:CtrlP*
 :CtrlP
-   Open the |CtrlP| prompt.
+   Open the |CtrlP| prompt in find file mode.
+                                                                 *:CtrlPBuffer*
+:CtrlPBuffer
+   Open the |CtrlP| prompt in find buffer mode.
 
                                                              *:ClearCtrlPCache*
 :ClearCtrlPCache
@@ -176,6 +180,9 @@ Once inside the prompt:
   <c-d>
     Toggle between full path search and file name only search.
     (note: in file name mode, the prompt’s base is '>d>' instead of '>>>')
+
+  <c-f>
+    Toggle between searching files and searching buffers.
 
   <c-n>,
   <c-j>,
@@ -261,8 +268,7 @@ liked the way Command-T and LustyExplorer deal with user’s input, so I
 wrote a pure Vimscript version of their prompt window, intended to use it for
 the aforementioned plugin.
 
-Git repository:       https://github.com/kien/ctrlp.vim
-Mercurial repository: https://bitbucket.org/kien/ctrlp.vim
+Git repository: https://github.com/kien/ctrlp.vim
 
 ===============================================================================
 vim:nofen:et:ts=2:sw=2:sts=2

@@ -16,6 +16,7 @@ back to full path search.
 line in the selected file.
     e.g. `abc:45` to open the file matched the pattern `abc` and jump to
     line 45.
+* Press `<c-f>` to switch to find buffer mode. Or run `:CtrlPBuffer`.
 
 ## Basic Options
 

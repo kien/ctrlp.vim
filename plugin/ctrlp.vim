@@ -14,7 +14,8 @@ if !exists('g:ctrlp_map')
 	let g:ctrlp_map = '<c-p>'
 endif
 
-com! CtrlP               cal ctrlp#init()
+com! CtrlP               cal ctrlp#init(0)
+com! CtrlPBuffer         cal ctrlp#init(1)
 com! ClearCtrlPCache     cal ctrlp#clearcache()
 com! ClearAllCtrlPCaches cal ctrlp#clearallcaches()
 
