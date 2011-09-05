@@ -111,39 +111,23 @@ func! s:GetDataFile(file)
 endfunc
 
 func! s:CacheDir()
-	let cache_dir = exists('*mkdir') ? s:cache_dir.s:lash().'.ctrlp_cache' : s:cache_dir
-	retu cache_dir
+	retu exists('*mkdir') ? s:cache_dir.s:lash().'.ctrlp_cache' : s:cache_dir
 endfunc
 
 func! s:CacheFile()
-	let cache_dir = s:CacheDir()
-	let cache_file = substitute(getcwd(), '\([\/]\|^\a\zs:\)', '%', 'g').'.txt'
-	retu cache_dir.s:lash().cache_file
+	retu s:CacheDir().s:lash().substitute(getcwd(), '\([\/]\|^\a\zs:\)', '%', 'g').'.txt'
 endfunc
 
 func! s:WriteCache(lines)
 	let cache_dir = s:CacheDir()
 	" create directory if not existed
 	if exists('*mkdir') && !isdirectory(cache_dir)
-		try
-			cal mkdir(cache_dir)
-		catch
-			echoh Error
-			ec 'Can''t create caching directory'
-			echoh None
-		endtry
+		sil! cal mkdir(cache_dir)
 	endif
 	" write cache
 	if isdirectory(cache_dir)
-		try
-			cal writefile(a:lines, s:CacheFile())
-		catch
-			echoh Error
-			ec 'Can''t write cache file'
-			echoh None
-		finally
-			let g:ctrlp_newcache = 0
-		endtry
+		sil! cal writefile(a:lines, s:CacheFile())
+		let g:ctrlp_newcache = 0
 	endif
 endfunc
 
@@ -201,6 +185,20 @@ func! s:ListAllFiles(path) "{{{
 		cal s:WriteCache(allfiles)
 	endif
 	retu allfiles
+endfunc "}}}
+
+func! s:ListAllBuffers() "{{{
+	let nbufs = bufnr('$')
+	let allbufs = []
+	for each in range(1, nbufs)
+		if getbufvar(each, '&bl')
+			let bufname = bufname(each)
+			if strlen(bufname) && getbufvar(each, '&ma') && bufname != 'ControlP'
+				cal add(allbufs, fnamemodify(bufname, ':p'))
+			endif
+		endif
+	endfor
+	retu allbufs
 endfunc "}}}
 
 func! s:SplitPattern(str,...) "{{{
@@ -532,6 +530,7 @@ func! s:MapKeys(...)
 	for each in range(32,126)
 		sil! exe "nn \<buffer> \<silent> \<char-".each."> :cal \<SID>".func."(\"".escape(nr2char(each), '"|\')."\"".sjbyfname.")\<cr>"
 	endfor
+	if exists('a:2') | retu | endif
 	" Special keystrokes
 	if exists('a:1') && a:1 == 0
 		sil! cal s:MapSpecs('unmap')
@@ -555,6 +554,7 @@ func! s:MapSpecs(...)
 				\ 'ToggleFocus()':              ['<tab>'],
 				\ 'ToggleRegex()':              ['<c-r>'],
 				\ 'ToggleByFname()':            ['<c-d>'],
+				\ 'ToggleType()':               ['<c-f>'],
 				\ 'PrtCurStart()':              ['<c-a>'],
 				\ 'PrtCurEnd()':                ['<c-e>'],
 				\ 'PrtCurLeft()':               ['<c-h>', '<left>'],
@@ -598,7 +598,7 @@ func! s:ToggleFocus()
 endfunc
 "}}}
 
-"Todo: Cycle through matches. /high
+"Mightdo: Cycle through matches. /high
 func! s:SelectJump(char,...) "{{{
 	let lines = map(b:matched, 'substitute(v:val, "^> ", "", "g")')
 	if exists('a:1')
@@ -617,6 +617,13 @@ endfunc "}}}
 
 func! s:ToggleByFname() "{{{
 	let s:byfname = s:byfname ? 0 : 1
+	cal s:MapKeys(s:Focus(), 1)
+	cal s:BuildPrompt(s:Focus())
+endfunc "}}}
+
+func! s:ToggleType() "{{{
+	let s:itemtype = s:itemtype ? 0 : 1
+	cal s:SetLines(s:itemtype)
 	cal s:BuildPrompt(s:Focus())
 endfunc "}}}
 
@@ -673,7 +680,8 @@ endfunc
 func! s:AcceptSelection(mode) "{{{
 	let md = a:mode
 	let line = getline('.')
-	let filepath = getcwd().s:lash().matchstr(line, '^> \zs.\+\ze\t*$')
+	let matchstr = matchstr(line, '^> \zs.\+\ze\t*$')
+	let filepath = s:itemtype ? matchstr : getcwd().s:lash().matchstr
 	let filename = split(filepath, s:lash())[-1]
 	" Remove the prompt and match window
 	sil! cal s:BufOpen('ControlP', 'del')
@@ -711,8 +719,7 @@ func! s:compare(s1, s2)
 endfunc
 
 func! s:matchsubstr(item, pat)
-	let tail = split(a:item, '[\/]\ze[^\/]\+$')[-1]
-	retu match(tail, a:pat)
+	retu match(split(a:item, '[\/]\ze[^\/]\+$')[-1], a:pat)
 endfunc
 
 func! s:matchlists(item, lst)
@@ -734,16 +741,23 @@ func! s:Syntax()
 endfunc
 "}}}
 
-func! ctrlp#init() "{{{
+" Initialization {{{
+func! s:SetLines(type)
+	let s:itemtype = a:type
+	let s:lines = s:itemtype ? s:ListAllBuffers() : s:ListAllFiles(getcwd())
+endfunc
+
+func! ctrlp#init(type)
 	cal ctrlp#SetWorkingPath()
-	let s:lines = s:ListAllFiles(getcwd())
+	cal s:SetLines(a:type)
 	cal s:BufOpen('ControlP')
 	cal s:SetupBlank('ctrlp')
 	cal s:MapKeys()
 	cal s:Renderer(s:lines)
 	cal s:BuildPrompt()
 	cal s:Syntax()
-endfunc "}}}
+endfunc
+"}}}
 
 aug CtrlPAug "{{{
 	au!
