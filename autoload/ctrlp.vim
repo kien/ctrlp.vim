@@ -8,10 +8,10 @@
 let s:save_cpo = &cpo "{{{
 set cpo&vim "}}}
 
-if v:version < '702' "{{{
-	echoh Error
-	ec 'CtrlP requires Vim 7.2+'
-	echoh None
+if v:version < '700' "{{{
+	func! ctrlp#init(...)
+		echoh Error | ec 'CtrlP requires Vim 7.0+' | echoh None
+	endfunc
 	fini
 endif "}}}
 
@@ -104,10 +104,7 @@ endif
 
 " Caching {{{
 func! s:GetDataFile(file)
-	if filereadable(a:file)
-		let lines = readfile(a:file)
-		retu lines
-	endif
+	if filereadable(a:file) | retu readfile(a:file) | endif
 endfunc
 
 func! s:CacheDir()
@@ -140,18 +137,12 @@ func! ctrlp#clearallcaches()
 	if isdirectory(cache_dir) && match(cache_dir, '.ctrlp_cache') >= 0
 		let cache_files = split(globpath(cache_dir, '*.txt'), '\n')
 		try
-			for each in cache_files
-				cal delete(each)
-			endfor
+			for each in cache_files | cal delete(each) | endfor
 		catch
-			echoh Error
-			ec 'Can''t delete cache files'
-			echoh None
+			echoh Error | ec 'Can''t delete cache files' | echoh None
 		endtry
 	else
-		echoh Error
-		ec 'Caching directory not found. Nothing to delete.'
-		echoh None
+		echoh Error | ec 'Caching directory not found. Nothing to delete.' | echoh None
 	endif
 	cal ctrlp#clearcache()
 endfunc
@@ -173,15 +164,11 @@ func! s:ListAllFiles(path) "{{{
 	else
 		let allfiles = s:GetDataFile(cache_file)
 	endif
-	if len(allfiles) <= 3000
-		cal sort(allfiles, 's:compare')
-	endif
+	if len(allfiles) <= 3000 | cal sort(allfiles, 's:compare') | endif
 	" write cache
 	if ( g:ctrlp_newcache || !filereadable(cache_file) ) && s:caching
 				\ || len(allfiles) > 4000
-		if len(allfiles) > 4000
-			let s:caching = 1
-		endif
+		if len(allfiles) > 4000 | let s:caching = 1 | endif
 		cal s:WriteCache(allfiles)
 	endif
 	retu allfiles
@@ -224,11 +211,7 @@ func! s:SplitPattern(str,...) "{{{
 		let array = split(str, '\zs')
 	endif
 	" Build the new pattern
-	if !empty(array)
-		let nitem = array[0]
-	else
-		let nitem = ''
-	endif
+	let nitem = !empty(array) ? array[0] : ''
 	let newpats = [nitem]
 	if len(array) > 1
 		for i in range(1, len(array) - 1)
@@ -247,9 +230,7 @@ func! s:GetMatchedItems(items, pats, limit) "{{{
 	let limit = a:limit
 	" if pattern contains line number
 	if match(pats[-1], ':\d*$') >= 0
-		if exists('s:line')
-			unl s:line
-		endif
+		if exists('s:line') | unl s:line | endif
 		let s:line = substitute(pats[-1], '.*\ze:\d*$', '', 'g')
 		cal remove(pats, -1)
 	endif
@@ -269,18 +250,12 @@ func! s:GetMatchedItems(items, pats, limit) "{{{
 			" loop through the items
 			for item in items
 				if s:byfname
-					if s:matchsubstr(item, each) >= 0
-						cal add(newitems, item)
-					endif
+					if s:matchsubstr(item, each) >= 0 | cal add(newitems, item) | endif
 				else
-					if match(item, each) >= 0
-						cal add(newitems, item)
-					endif
+					if match(item, each) >= 0 | cal add(newitems, item) | endif
 				endif
 				" stop if reached the limit
-				if a:limit > 0 && len(newitems) == limit
-					break
-				endif
+				if a:limit > 0 && len(newitems) == limit | break | endif
 			endfor
 		endif
 	endfor
@@ -412,9 +387,8 @@ endfunc "}}}
 func! s:UpdateMatches(pat) "{{{
 	" Delete the buffer's content
 	sil! %d _
-	let limit = s:mxheight
 	let newpat = s:SplitPattern(a:pat)
-	let lines = s:GetMatchedItems(s:lines, newpat, limit)
+	let lines = s:GetMatchedItems(s:lines, newpat, s:mxheight)
 	cal s:Renderer(lines)
 	cal s:Highlight(newpat)
 endfunc "}}}
@@ -598,7 +572,7 @@ func! s:ToggleFocus()
 endfunc
 "}}}
 
-"Mightdo: Cycle through matches. /high
+"Mightdo: Cycle through matches. /medium
 func! s:SelectJump(char,...) "{{{
 	let lines = map(b:matched, 'substitute(v:val, "^> ", "", "g")')
 	if exists('a:1')
@@ -679,8 +653,7 @@ endfunc
 
 func! s:AcceptSelection(mode) "{{{
 	let md = a:mode
-	let line = getline('.')
-	let matchstr = matchstr(line, '^> \zs.\+\ze\t*$')
+	let matchstr = matchstr(getline('.'), '^> \zs.\+\ze\t*$')
 	let filepath = s:itemtype ? matchstr : getcwd().s:lash().matchstr
 	let filename = split(filepath, s:lash())[-1]
 	" Remove the prompt and match window

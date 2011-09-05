@@ -171,18 +171,21 @@ only need to keep the lines that you’ve changed the values (inside []): >
 Once inside the prompt:
 
   <c-r>                                                    *'ctrlp-fullregexp'*
-    Toggle between the smart |regexp|/string mode (section 5.c) and full
+    Toggle between the smart |regexp|/string mode (section 5.b) and full
     |regexp| mode.
     (note: in full |regexp| mode, the prompt’s base is 'r>>' instead of '>>>')
 
     See also |input-formats|.
 
   <c-d>
-    Toggle between full path search and file name only search.
-    (note: in file name mode, the prompt’s base is '>d>' instead of '>>>')
+    Toggle between full path search and filename only search.
+    (note: in filename mode, the prompt’s base is '>d>' instead of '>>>')
 
   <c-f>
     Toggle between searching files and searching buffers.
+
+  <tab>
+    Toggle the focus between the match window and the prompt.
 
   <c-n>,
   <c-j>,
@@ -227,9 +230,6 @@ Once inside the prompt:
   <c-s>
     Open selected file in a 'horizontal' split
 
-  <tab>
-    Toggle the focus between the match window and the prompt.
-
   <esc>,
   <c-c>,
   <c-g>
@@ -245,15 +245,15 @@ Formats for inputting in the prompt:
 
 a)  Simple string. e.g. 'abc' is understood internally as 'a.*b.*c'
 
-b)  Strings end with a colon ':' followed by an arbitrary number will be read
-    as a line number to jump to after opening the file.
-    e.g. 'abc:45' will open the selected file and jump to line 45.
-
-c)  Vim |regexp|. If the input string contains '*', '^', '$', '+' or '$', it’ll
+b)  Vim |regexp|. If the input string contains '*', '^', '$', '+' or '$', it’ll
     be treated as a Vim’s |regexp| |pattern| without any modification.
     e.g. 'abc\d*efg' will be read as 'abc\d*efg'.
 
     See also |ctrlp-fullregexp|.
+
+c)  Strings end with a colon ':' followed by an arbitrary number will be read
+    as a line number to jump to after opening the file.
+    e.g. 'abc:45' will open the selected file and jump to line 45.
 
 ===============================================================================
 6. Credits                                                      *ctrlp-credits*
