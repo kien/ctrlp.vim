@@ -1,4 +1,4 @@
-## About
+### About
 Full path fuzzy file and buffer finder for Vim.
 
 * Written in pure Vimscript for MacVim and Vim 7.0+.
