@@ -268,7 +268,8 @@ liked the way Command-T and LustyExplorer deal with user’s input, so I
 wrote a pure Vimscript version of their prompt window, intended to use it for
 the aforementioned plugin.
 
-Git repository: https://github.com/kien/ctrlp.vim
+Git repository:       https://github.com/kien/ctrlp.vim
+Mercurial repository: https://bitbucket.org/kien/ctrlp.vim
 
 ===============================================================================
 vim:nofen:et:ts=2:sw=2:sts=2
