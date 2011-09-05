@@ -28,11 +28,14 @@ _Screenshot: filename only mode with the match window focused._
     let g:ctrlp_map = '<c-p>'
     ```
 * When starting up CtrlP, it automatically sets the working directory to:  
+
     ```vim
     let g:ctrlp_working_path_mode = 1
     ```
+
     1 - the parent directory of the current file.  
     2 - the nearest ancestor that contains one of these directories or files:  
+
         ```
         .git/
         .hg/
@@ -41,6 +44,7 @@ _Screenshot: filename only mode with the match window focused._
         root.dir
         .vimprojects
         ```
+
     0 - don’t manage working directory.
 * You can also use the set-working-directory functionality outside of CtrlP by
 adding the following line to your vimrc; the parameter is the same (1, 2 or 0):
@@ -48,7 +52,8 @@ adding the following line to your vimrc; the parameter is the same (1, 2 or 0):
     au BufEnter * cal ctrlp#SetWorkingPath(2)
     ```
 
-_Check the docs for more mappings, commands and options._
+_Check [the docs][3] for more mappings, commands and options._
 
 [1]: http://i.imgur.com/lQScr.png
 [2]: http://i.imgur.com/MyRIv.png
+[3]: https://github.com/kien/ctrlp.vim/blob/master/doc/ctrlp.txt
