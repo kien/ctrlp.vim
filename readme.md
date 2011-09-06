@@ -20,9 +20,11 @@ _Screenshot: filename only mode with the match window focused._
 
 ## Basic Options
 * Change the mapping to invoke CtrlP:
+
     ```vim
     let g:ctrlp_map = '<c-p>'
     ```
+
 * When starting up CtrlP, it automatically sets the working directory according
 to this variable:  
 
@@ -42,7 +44,8 @@ to this variable:
         .vimprojects
 
 * You can also use the set-working-directory functionality above outside of CtrlP
-by adding the following line to your vimrc. The parameter is the same (1, 2 or 0):
+by adding the following line to your vimrc.  
+The parameter is the same (0, 1 or 2):
 
     ```vim
     au BufEnter * cal ctrlp#SetWorkingPath(2)
