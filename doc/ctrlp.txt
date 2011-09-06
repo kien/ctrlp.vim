@@ -93,8 +93,8 @@ to your |.vimrc|; the parameter is the same (1, 2 and 0): >
 <
 
                                                        *'g:ctrlp_root_markers'*
-Use this to set your own root markers for the SetWorkingPath() function instead
-of the default ones: >
+Use this to set your own root markers for the SetWorkingPath() function, in
+addition to the default ones: >
   let g:ctrlp_root_markers = ['']
 <
 
