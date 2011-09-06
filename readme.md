@@ -10,7 +10,7 @@ Full path fuzzy file and buffer finder for Vim.
 * Press `<c-p>` or run `:CtrlP` to invoke CtrlP.
 * Ever remember only a file’s name but not where it is? Press `<c-d>` while CtrlP is open to switch to filename only search.
 * Use `*` `?` `^` `+` or `|` in the prompt to submit the string as a Vim’s regexp pattern.
-* Press `<c-r>` to switch to full regexp mode.
+* Or press `<c-r>` while CtrlP is open to switch to full regexp search mode.
 * End the input string with a colon `:` followed by a number to jump to that line in the selected file.  
 e.g. `abc:45` to open the file matched the pattern and jump to line 45.
 * Press `<c-f>` to toggle find buffer mode/find file mode while CtrlP is open.
@@ -41,9 +41,8 @@ to this variable:
         root.dir
         .vimprojects
 
-* You can also use the set-working-directory functionality above outside of
-CtrlP by adding the following line to your vimrc.  
-The parameter is the same (1, 2 or 0):
+* You can also use the set-working-directory functionality above outside of CtrlP
+by adding the following line to your vimrc. The parameter is the same (1, 2 or 0):
 
     ```vim
     au BufEnter * cal ctrlp#SetWorkingPath(2)
