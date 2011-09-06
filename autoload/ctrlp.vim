@@ -643,7 +643,7 @@ func! ctrlp#SetWorkingPath(...)
 	if exists('g:ctrlp_root_markers')
 				\ && type(g:ctrlp_root_markers) == 3
 				\ && !empty(g:ctrlp_root_markers)
-		let markers = g:ctrlp_root_markers
+		sil! cal extend(markers, g:ctrlp_root_markers, 0)
 	endif
 	for marker in markers
 		sil! cal s:FindRoot(getcwd(), marker)
