@@ -5,8 +5,7 @@
 " License:       MIT
 " =============================================================================
 
-if ( exists('g:loaded_ctrlp') && g:loaded_ctrlp )
-			\ || v:version < '700'
+if ( exists('g:loaded_ctrlp') && g:loaded_ctrlp ) || v:version < '700' || &cp
 	fini
 endif
 let g:loaded_ctrlp = 1
