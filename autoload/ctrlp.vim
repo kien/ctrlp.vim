@@ -420,6 +420,7 @@ func! s:BuildPrompt(...) "{{{
 	sil! cal s:UpdateMatches(start.mid.end)
 endfunc "}}}
 
+"Mightdo: PrtSelectJump() cycles through matches. /medium
 " Prt Actions {{{
 func! s:PrtClear()
 	let g:CtrlP_prompt = ['','','']
@@ -490,13 +491,24 @@ func! s:PrtSelectMove(dir)
 	exe 'keepj norm!' a:dir
 	let g:CtrlP_cline = line('.')
 endfunc
+
+func! s:PrtSelectJump(char,...)
+	let lines = map(b:matched, 'substitute(v:val, "^> ", "", "g")')
+	if exists('a:1')
+		let lines = map(lines, 'split(v:val, ''[\/]\ze[^\/]\+$'')[-1]')
+	endif
+	if match(lines, '\c^'.a:char) >= 0
+		exe match(lines, '\c^'.a:char) + 1
+		let g:CtrlP_cline = line('.')
+	endif
+endfunc
 "}}}
 
 " s:MapKeys() && s:MapSpecs() {{{
 func! s:MapKeys(...)
 	" Normal keystrokes
-	let func = !exists('a:1') || ( exists('a:1') && a:1 ) ? 'PrtAdd' : 'SelectJump'
-	let sjbyfname = s:byfname && func == 'SelectJump' ? ', 1' : ''
+	let func = !exists('a:1') || ( exists('a:1') && a:1 ) ? 'PrtAdd' : 'PrtSelectJump'
+	let sjbyfname = s:byfname && func == 'PrtSelectJump' ? ', 1' : ''
 	for each in range(32,126)
 		sil! exe "nn \<buffer> \<silent> \<char-".each."> :cal \<SID>".func."(\"".escape(nr2char(each), '"|\')."\"".sjbyfname.")\<cr>"
 	endfor
@@ -567,18 +579,6 @@ func! s:ToggleFocus()
 	cal s:BuildPrompt(b:focus)
 endfunc
 "}}}
-
-"Mightdo: Cycle through matches. /medium
-func! s:SelectJump(char,...) "{{{
-	let lines = map(b:matched, 'substitute(v:val, "^> ", "", "g")')
-	if exists('a:1')
-		let lines = map(lines, 'split(v:val, ''[\/]\ze[^\/]\+$'')[-1]')
-	endif
-	if match(lines, '\c^'.a:char) >= 0
-		exe match(lines, '\c^'.a:char) + 1
-		let g:CtrlP_cline = line('.')
-	endif
-endfunc "}}}
 
 func! s:ToggleRegex() "{{{
 	let s:regexp = s:regexp ? 0 : 1
