@@ -631,7 +631,7 @@ func! ctrlp#SetWorkingPath(...)
 		se noacd
 	endif
 	sil! exe 'chdir' fnameescape(expand('%:p:h'))
-	if s:pathmode || l:pathmode | retu | endif
+	if s:pathmode == 1 || l:pathmode == 1 | retu | endif
 	let markers = [
 				\ 'root.dir',
 				\ '.vimprojects',
@@ -640,6 +640,11 @@ func! ctrlp#SetWorkingPath(...)
 				\ '.hg/',
 				\ '.bzr/',
 				\ ]
+	if exists('g:ctrlp_root_markers')
+				\ && type(g:ctrlp_root_markers) == 3
+				\ && !empty(g:ctrlp_root_markers)
+		let markers = g:ctrlp_root_markers
+	endif
 	for marker in markers
 		sil! cal s:FindRoot(getcwd(), marker)
 		if getcwd() != expand('%:p:h') | break | endif

@@ -92,6 +92,12 @@ to your |.vimrc|; the parameter is the same (1, 2 and 0): >
   au BufEnter * cal ctrlp#SetWorkingPath(2)
 <
 
+                                                       *'g:ctrlp_root_markers'*
+Use this to set your own root markers for the SetWorkingPath() function instead
+of the default ones: >
+  let g:ctrlp_root_markers = ['']
+<
+
                                                          *'g:ctrlp_max_height'*
 Set the maximum height of the match window: >
   let g:ctrlp_max_height = 10
