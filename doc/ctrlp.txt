@@ -50,10 +50,10 @@ setting is from bottom to top: >
   let g:ctrlp_match_window_reversed = 1
 <
 
-                                                  *'g:ctrlp_persistence_input'*
+                                                   *'g:ctrlp_persistent_input'*
 Remember the last input string and position of the selection in the match
 window: >
-  let g:ctrlp_persistence_input = 1
+  let g:ctrlp_persistent_input = 1
 <
 
                                                        *'g:ctrlp_split_window'*
@@ -67,7 +67,7 @@ Use this option to specify how the file is to be opened when pressing <cr>:
 <
 
                                                        *'g:ctrlp_ignore_space'*
-if you want the search to include whitespaces, change this to 0: >
+If you want the search to include whitespaces, change this to 0: >
   let g:ctrlp_ignore_space = 1
 <
 
@@ -176,7 +176,7 @@ And if you want |CtrlP| to only remember some files, specify them here: >
   let g:ctrlp_mruf_include = ''
 <
 Example: >
-  let g:ctrlp_mruf_exclude = '\.py$\|\.rb$'
+  let g:ctrlp_mruf_include = '\.py$\|\.rb$'
 <
 
 ===============================================================================

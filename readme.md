@@ -9,11 +9,11 @@ Full path fuzzy file, buffer and MRU file finder for Vim.
 
 ## Basic Usage
 * Press `<c-p>` or run `:CtrlP` to invoke CtrlP.
-* Press `<c-f>` `<c-b> while CtrlP is open to switch between find file, find buffer, and find MRU file modes.
+* Press `<c-f>` and `<c-b>` while CtrlP is open to switch between find file, find buffer, and find MRU file modes.
 * Ever remember only a file’s name but not where it is? Press `<c-d>` while CtrlP is open to switch to filename only search.
 * Use `*` `?` `^` `+` or `|` in the prompt to submit the string as a Vim’s regexp pattern.
 * Or press `<c-r>` while CtrlP is open to switch to full regexp search mode.
-* End the input string with a colon `:` followed by a number to jump to that line in the selected file.  
+* End the input string with a colon `:` followed with a number to jump to that line in the selected file.  
 e.g. `abc:45` to open the file matched the pattern and jump to line 45.
 
 _Screenshot: filename only mode with the match window focused._  
@@ -26,7 +26,7 @@ _Screenshot: filename only mode with the match window focused._
     let g:ctrlp_map = '<c-p>'
     ```
 
-* When CtrlP is invoke, it automatically sets the working directory according to this variable:
+* When CtrlP is invoked, it automatically sets the working directory according to this variable:
 
     ```vim
     let g:ctrlp_working_path_mode = 1

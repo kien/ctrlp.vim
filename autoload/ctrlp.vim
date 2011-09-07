@@ -23,11 +23,11 @@ else
 	unl g:ctrlp_match_window_reversed
 endif
 
-if !exists('g:ctrlp_persistence_input')
+if !exists('g:ctrlp_persistent_input')
 	let s:pinput = 1
 else
-	let s:pinput = g:ctrlp_persistence_input
-	unl g:ctrlp_persistence_input
+	let s:pinput = g:ctrlp_persistent_input
+	unl g:ctrlp_persistent_input
 endif
 
 if !exists('g:ctrlp_split_window')
@@ -153,9 +153,8 @@ func! s:ListAllFiles(path) "{{{
 endfunc "}}}
 
 func! s:ListAllBuffers() "{{{
-	let nbufs = bufnr('$')
 	let allbufs = []
-	for each in range(1, nbufs)
+	for each in range(1, bufnr('$'))
 		if getbufvar(each, '&bl')
 			let bufname = bufname(each)
 			if strlen(bufname) && getbufvar(each, '&ma') && bufname != 'ControlP'
@@ -204,7 +203,7 @@ endfunc "}}}
 
 func! s:GetMatchedItems(items, pats, limit) "{{{
 	let items = a:items
-	let pats = a:pats
+	let pats  = a:pats
 	let limit = a:limit
 	" if pattern contains line number
 	if match(pats[-1], ':\d*$') >= 0
@@ -367,7 +366,7 @@ func! s:UpdateMatches(pat) "{{{
 	" Delete the buffer's content
 	sil! %d _
 	let newpat = s:SplitPattern(a:pat)
-	let lines = s:GetMatchedItems(s:lines, newpat, s:mxheight)
+	let lines  = s:GetMatchedItems(s:lines, newpat, s:mxheight)
 	cal s:Renderer(lines)
 	"cal s:Highlight(newpat)
 endfunc "}}}
@@ -607,10 +606,12 @@ func! s:Type(type) "{{{
 endfunc "}}}
 
 "Mightdo: Highlight matched characters/strings. /low
-func! s:Highlight(pat) "{{{
+func! s:Highlight(...) "{{{
+	hi clear CtrlPKeywords
 	hi link CtrlPKeywords Normal
-	if !empty(a:pat)
-		exe 'syn match CtrlPKeywords /\c'.a:pat.'/'
+	if exists('a:1') && !empty(a:1)
+		let pat = substitute(a:1[-1], ':\d*$', '', 'g')
+		exe 'syn match CtrlPKeywords /\c'.pat.'/'
 		hi link CtrlPKeywords Constant
 	endif
 endfunc "}}}
@@ -725,10 +726,8 @@ func! s:statusline(...)
 		cal remove(itemtypes, 2)
 	endif
 	let max     = len(itemtypes) - 1
-	let next    = s:walker(max, s:itemtype, 1, 1)
-	let prev    = s:walker(max, s:itemtype, -1, 1)
-	let next    = itemtypes[next][1]
-	let prev    = itemtypes[prev][1]
+	let next    = itemtypes[s:walker(max, s:itemtype, 1, 1)][1]
+	let prev    = itemtypes[s:walker(max, s:itemtype, -1, 1)][1]
 	let regex   = s:regexp ? '[regex]' : ''
 	let byfname = s:byfname ? '[file]' : '[path]'
 	let focus   = s:Focus() ? '[prt]' : '[win]'

@@ -30,8 +30,7 @@ func! ctrlp#utils#readfile(file)
 	if filereadable(a:file)
 		let data = readfile(a:file)
 		if empty(data) || type(data) != 3
-			unl data
-			let data = []
+			unl data | let data = []
 		endif
 		retu data
 	else
