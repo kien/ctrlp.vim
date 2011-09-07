@@ -241,7 +241,8 @@ func! s:GetMatchedItems(items, pats, limit) "{{{
 endfunc "}}}
 
 func! s:SetupBlank(name) "{{{
-	cal s:item2buf()
+	cal s:statusline()
+	setf ctrlp
 	setl bt=nofile
 	setl bh=delete
 	setl noswf
@@ -573,18 +574,21 @@ endfunc
 func! s:ToggleFocus()
 	let b:focus = !exists('b:focus') || b:focus ? 0 : 1
 	cal s:MapKeys(b:focus)
+	cal s:statusline(b:focus)
 	cal s:BuildPrompt(b:focus)
 endfunc
 "}}}
 
 func! s:ToggleRegex() "{{{
 	let s:regexp = s:regexp ? 0 : 1
+	cal s:statusline()
 	cal s:BuildPrompt(s:Focus())
 endfunc "}}}
 
 func! s:ToggleByFname() "{{{
 	let s:byfname = s:byfname ? 0 : 1
 	cal s:MapKeys(s:Focus(), 1)
+	cal s:statusline()
 	cal s:BuildPrompt(s:Focus())
 endfunc "}}}
 
@@ -596,9 +600,9 @@ endfunc "}}}
 
 func! s:Type(type) "{{{
 	let s:itemtype = a:type
-	cal s:item2buf()
 	cal s:syntax()
 	cal s:SetLines(s:itemtype)
+	cal s:statusline()
 	cal s:BuildPrompt(s:Focus())
 endfunc "}}}
 
@@ -697,7 +701,7 @@ func! s:compare(s1, s2)
 	retu str1 == str2 ? 0 : str1 > str2 ? 1 : -1
 endfunc
 
-func! s:walker(max, pos, dir)
+func! s:walker(max, pos, dir, ...)
 	if a:dir == 1
 		if a:pos < a:max
 			let pos = a:pos + 1
@@ -711,19 +715,27 @@ func! s:walker(max, pos, dir)
 			let pos = a:max
 		endif
 	endif
-	if g:ctrlp_mru_files == 0 && pos == 2
+	if g:ctrlp_mru_files == 0 && pos == 2 && !exists('a:1')
 		let pos = a:pos == 1 ? 3 : 1
 	endif
 	retu pos
 endfunc
 
-func! s:item2buf()
-	let item2buf = {
-				\ 0: '_Files',
-				\ 1: '_Buffers',
-				\ 2: '_Recent_Files',
+func! s:statusline(...)
+	let itemtypes = {
+				\ 0: ['files', 'fil'],
+				\ 1: ['buffers', 'buf'],
+				\ 2: ['recent\ files', 'mru'],
 				\ }
-	exe 'setf' item2buf[s:itemtype]
+	let max = len(itemtypes) - 1
+	let next = s:walker(max, s:itemtype, 1, 1)
+	let prev = s:walker(max, s:itemtype, -1, 1)
+	let next = itemtypes[next][1]
+	let prev = itemtypes[prev][1]
+	let regex = s:regexp ? '[regex]' : ''
+	let byfname = s:byfname ? '[file]' : '[path]'
+	let focus = !exists('a:1') || ( exists('a:1') && a:1 ) ? '[prt]' : '[win]'
+	exe 'setl stl='.focus.byfname.regex.'--('.prev.')-[['.itemtypes[s:itemtype][0].']]-('.next.')--'
 endfunc
 
 func! s:matchsubstr(item, pat)
