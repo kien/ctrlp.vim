@@ -727,14 +727,14 @@ func! s:statusline(...)
 				\ 1: ['buffers', 'buf'],
 				\ 2: ['recent\ files', 'mru'],
 				\ }
-	let max = len(itemtypes) - 1
-	let next = s:walker(max, s:itemtype, 1, 1)
-	let prev = s:walker(max, s:itemtype, -1, 1)
-	let next = itemtypes[next][1]
-	let prev = itemtypes[prev][1]
-	let regex = s:regexp ? '[regex]' : ''
+	let max     = len(itemtypes) - 1
+	let next    = s:walker(max, s:itemtype, 1, 1)
+	let prev    = s:walker(max, s:itemtype, -1, 1)
+	let next    = itemtypes[next][1]
+	let prev    = itemtypes[prev][1]
+	let regex   = s:regexp ? '[regex]' : ''
 	let byfname = s:byfname ? '[file]' : '[path]'
-	let focus = !exists('a:1') || ( exists('a:1') && a:1 ) ? '[prt]' : '[win]'
+	let focus   = s:Focus() ? '[prt]' : '[win]'
 	exe 'setl stl='.focus.byfname.regex.'--('.prev.')-[['.itemtypes[s:itemtype][0].']]-('.next.')--'
 endfunc
 
