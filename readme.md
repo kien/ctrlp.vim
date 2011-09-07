@@ -1,14 +1,15 @@
 # ctrlp.vim
-Full path fuzzy file and buffer finder for Vim.
+Full path fuzzy files, buffers and MRU files finder for Vim.
 
 * Written in pure Vimscript for MacVim and Vim 7.0+.
 * Has full support for Vim’s regexp as search pattern, and more.
+* Also: find files in most recently opened files (i.e. MRU files).
 
 ![ctrlp][1]
 
 ## Basic Usage
 * Press `<c-p>` or run `:CtrlP` to invoke CtrlP.
-* Press `<c-f>` while CtrlP is open to toggle between find buffer mode and find file mode.
+* Press `<c-f>` while CtrlP is open to toggle between find files, find buffers, and find MRU files modes.
 * Ever remember only a file’s name but not where it is? Press `<c-d>` while CtrlP is open to switch to filename only search.
 * Use `*` `?` `^` `+` or `|` in the prompt to submit the string as a Vim’s regexp pattern.
 * Or press `<c-r>` while CtrlP is open to switch to full regexp search mode.
@@ -25,8 +26,7 @@ _Screenshot: filename only mode with the match window focused._
     let g:ctrlp_map = '<c-p>'
     ```
 
-* When starting up CtrlP, it automatically sets the working directory according
-to this variable:  
+* When CtrlP is invoke, it automatically sets the working directory according to this variable:
 
     ```vim
     let g:ctrlp_working_path_mode = 1
@@ -34,7 +34,7 @@ to this variable:
 
     0 - don’t manage working directory.  
     1 - the parent directory of the current file.  
-    2 - the nearest ancestor that contains one of these directories or files:  
+    2 - the nearest ancestor that contains one of these directories or files:
 
         .git/
         .hg/
@@ -49,6 +49,12 @@ The parameter is the same (0, 1 or 2):
 
     ```vim
     au BufEnter * cal ctrlp#SetWorkingPath(2)
+    ```
+
+* Enable/Disable Most Recently Used files monitoring and its functionalities:
+
+    ```vim
+    let g:ctrlp_mru_files = 1
     ```
 
 _Check [the docs][3] for more mappings, commands and options._

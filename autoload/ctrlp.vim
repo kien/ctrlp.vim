@@ -83,7 +83,6 @@ if !exists('g:ctrlp_cache_dir')
 	let s:cache_dir = $HOME
 else
 	let s:cache_dir = g:ctrlp_cache_dir
-	unl g:ctrlp_cache_dir
 endif
 
 if !exists('g:ctrlp_newcache')
@@ -96,42 +95,25 @@ else
 	let s:byfname = g:ctrlp_by_filename
 	unl g:ctrlp_by_filename
 endif
+
+if !exists('g:ctrlp_prompt_mappings')
+	let s:urprtmaps = 0
+else
+	let s:urprtmaps = g:ctrlp_prompt_mappings
+	unl g:ctrlp_prompt_mappings
+endif
 "}}}
 
-" Caching {{{
-func! s:GetDataFile(file)
-	if filereadable(a:file) | retu readfile(a:file) | endif
-endfunc
-
-func! s:CacheDir()
-	retu exists('*mkdir') ? s:cache_dir.s:lash().'.ctrlp_cache' : s:cache_dir
-endfunc
-
-func! s:CacheFile()
-	retu s:CacheDir().s:lash().substitute(getcwd(), '\([\/]\|^\a\zs:\)', '%', 'g').'.txt'
-endfunc
-
-func! s:WriteCache(lines)
-	let cache_dir = s:CacheDir()
-	" create directory if not existed
-	if exists('*mkdir') && !isdirectory(cache_dir)
-		sil! cal mkdir(cache_dir)
-	endif
-	" write cache
-	if isdirectory(cache_dir)
-		sil! cal writefile(a:lines, s:CacheFile())
-		let g:ctrlp_newcache = 0
-	endif
-endfunc
-
+" Clear caches {{{
 func! ctrlp#clearcache()
 	let g:ctrlp_newcache = 1
 endfunc
 
 func! ctrlp#clearallcaches()
-	let cache_dir = s:CacheDir()
+	let cache_dir = ctrlp#utils#cachedir()
 	if isdirectory(cache_dir) && match(cache_dir, '.ctrlp_cache') >= 0
 		let cache_files = split(globpath(cache_dir, '*.txt'), '\n')
+		cal filter(cache_files, '!isdirectory(v:val)')
 		try
 			for each in cache_files | cal delete(each) | endfor
 		catch
@@ -145,27 +127,27 @@ endfunc
 "}}}
 
 func! s:ListAllFiles(path) "{{{
-	let cache_file = s:CacheFile()
+	let cache_file = ctrlp#utils#cachefile()
 	if g:ctrlp_newcache || !filereadable(cache_file) || s:caching == 0
 		let allfiles = split(globpath(a:path, '**'), '\n')
 		cal filter(allfiles, '!isdirectory(v:val)')
 		" filter all entries matched wildignore's patterns (in addition to globpath's)
 		if exists('+wig') && !empty(&wig)
 			let ignores = map(split(&wig, ','), 'substitute(v:val, "\\W\\+", ".*", "g")')
-			cal filter(allfiles, 's:matchlists(v:val, "'.string(ignores).'")')
+			cal filter(allfiles, 's:matchlists(v:val, string(ignores))')
 		endif
 		" remove base directory
-		let path = &ssl || !exists('+ssl') ? getcwd().'/' : substitute(getcwd(), '\', '\\\\\\\\', 'g').'\\\\'
-		cal map(allfiles, 'substitute(v:val, "'.path.'", "", "g")')
+		let path = &ssl || !exists('+ssl') ? getcwd().'/' : substitute(getcwd(), '\', '\\\\', 'g').'\\'
+		cal map(allfiles, 'substitute(v:val, path, "", "g")')
 	else
-		let allfiles = s:GetDataFile(cache_file)
+		let allfiles = ctrlp#utils#readfile(cache_file)
 	endif
 	if len(allfiles) <= 3000 | cal sort(allfiles, 's:compare') | endif
 	" write cache
 	if ( g:ctrlp_newcache || !filereadable(cache_file) ) && s:caching
 				\ || len(allfiles) > 4000
 		if len(allfiles) > 4000 | let s:caching = 1 | endif
-		cal s:WriteCache(allfiles)
+		cal ctrlp#utils#writecache(allfiles)
 	endif
 	retu allfiles
 endfunc "}}}
@@ -240,7 +222,7 @@ func! s:GetMatchedItems(items, pats, limit) "{{{
 			let items = newitems
 		endif
 		if empty(items)
-			retu newitems
+			retu exists('newitems') ? newitems : []
 		else
 			let newitems = []
 			" loop through the items
@@ -259,7 +241,7 @@ func! s:GetMatchedItems(items, pats, limit) "{{{
 endfunc "}}}
 
 func! s:SetupBlank(name) "{{{
-	exe 'setl ft='.a:name
+	cal s:item2buf()
 	setl bt=nofile
 	setl bh=delete
 	setl noswf
@@ -372,7 +354,7 @@ func! s:Renderer(lines) "{{{
 	else
 		" If empty
 		setl nocul
-		cal setline('1', '== NO MATCHES ==')
+		cal setline('1', ' == NO MATCHES ==')
 	endif
 	" Remember selected line
 	if exists('g:CtrlP_cline')
@@ -386,7 +368,7 @@ func! s:UpdateMatches(pat) "{{{
 	let newpat = s:SplitPattern(a:pat)
 	let lines = s:GetMatchedItems(s:lines, newpat, s:mxheight)
 	cal s:Renderer(lines)
-	cal s:Highlight(newpat)
+	"cal s:Highlight(newpat)
 endfunc "}}}
 
 func! s:BuildPrompt(...) "{{{
@@ -398,10 +380,11 @@ func! s:BuildPrompt(...) "{{{
 	let start = escape(g:CtrlP_prompt[0], estr)
 	let mid   = escape(g:CtrlP_prompt[1], estr)
 	let end   = escape(g:CtrlP_prompt[2], estr)
+	cal s:UpdateMatches(start.mid.end)
 	" Toggling
-	if !exists('a:1') || a:1
+	if !exists('a:1') || ( exists('a:1') && a:1 )
 		let hiactive = 'Normal'
-	elseif exists('a:1') || a:1 == 0
+	elseif exists('a:1') || ( exists('a:1') && a:1 == 0 )
 		let hiactive = 'Comment'
 		let base = substitute(base, '>', '-', 'g')
 	endif
@@ -417,7 +400,6 @@ func! s:BuildPrompt(...) "{{{
 	if empty(mid) && ( !exists('a:1') || ( exists('a:1') && a:1 ) )
 		exe 'echohl' hibase '| echon "'.cur.'" | echohl None'
 	endif
-	sil! cal s:UpdateMatches(start.mid.end)
 endfunc "}}}
 
 "Mightdo: PrtSelectJump() cycles through matches. /medium
@@ -510,14 +492,14 @@ func! s:MapKeys(...)
 	let func = !exists('a:1') || ( exists('a:1') && a:1 ) ? 'PrtAdd' : 'PrtSelectJump'
 	let sjbyfname = s:byfname && func == 'PrtSelectJump' ? ', 1' : ''
 	for each in range(32,126)
-		sil! exe "nn \<buffer> \<silent> \<char-".each."> :cal \<SID>".func."(\"".escape(nr2char(each), '"|\')."\"".sjbyfname.")\<cr>"
+		exe "nn \<buffer> \<silent> \<char-".each."> :cal \<SID>".func."(\"".escape(nr2char(each), '"|\')."\"".sjbyfname.")\<cr>"
 	endfor
 	if exists('a:2') | retu | endif
 	" Special keystrokes
 	if exists('a:1') && a:1 == 0
-		sil! cal s:MapSpecs('unmap')
+		cal s:MapSpecs('unmap')
 	else
-		sil! cal s:MapSpecs()
+		cal s:MapSpecs()
 	endif
 endfunc
 
@@ -536,16 +518,31 @@ func! s:MapSpecs(...)
 				\ 'ToggleFocus()':              ['<tab>'],
 				\ 'ToggleRegex()':              ['<c-r>'],
 				\ 'ToggleByFname()':            ['<c-d>'],
-				\ 'ToggleType()':               ['<c-f>'],
+				\ 'ToggleType(1)':              ['<c-f>', '<c-up'],
+				\ 'ToggleType(-1)':             ['<c-b>', '<c-down>'],
+				\ 'Type(0)':                    ['<m-1>'],
+				\ 'Type(1)':                    ['<m-2>'],
+				\ 'Type(2)':                    ['<m-3>'],
 				\ 'PrtCurStart()':              ['<c-a>'],
 				\ 'PrtCurEnd()':                ['<c-e>'],
 				\ 'PrtCurLeft()':               ['<c-h>', '<left>'],
 				\ 'PrtCurRight()':              ['<c-l>', '<right>'],
-				\ 'BufOpen("ControlP", "del")': ['<esc>', '<c-c>', '<c-g>'],
+				\ 'BufOpen("ControlP", "del")': ['<esc>', '<c-c>'],
 				\ }
-	if exists('g:ctrlp_prompt_mappings') && type(g:ctrlp_prompt_mappings) == 4
-		sil! cal extend(prtmaps, g:ctrlp_prompt_mappings)
+	if type(s:urprtmaps) == 4
+		cal extend(prtmaps, s:urprtmaps)
 	endif
+	" toggleable mappings for toggleable features
+	let prttempdis = {
+				\ 'Type(2)': ['<m-3>'],
+				\ }
+	for each in keys(prttempdis)
+		if g:ctrlp_mru_files && !has_key(prtmaps, each)
+			cal extend(prtmaps, {each:prttempdis[each]})
+		elseif g:ctrlp_mru_files == 0
+			cal remove(prtmaps, each)
+		endif
+	endfor
 	if exists('a:1') && a:1 == 'unmap'
 		let prtunmaps = [
 					\ 'PrtBS()',
@@ -558,11 +555,11 @@ func! s:MapSpecs(...)
 					\ 'PrtCurRight()',
 					\ ]
 		for each in prtunmaps | for kp in prtmaps[each]
-			sil! exe 'nn <buffer> <silent>' kp '<Nop>'
+			exe 'nn <buffer> <silent>' kp '<Nop>'
 		endfor | endfor
 	else
 		for each in keys(prtmaps) | for kp in prtmaps[each]
-			sil! exe 'nn <buffer> <silent>' kp ':cal <SID>'.each.'<cr>'
+			exe 'nn <buffer> <silent>' kp ':cal <SID>'.each.'<cr>'
 		endfor | endfor
 	endif
 endfunc
@@ -591,8 +588,16 @@ func! s:ToggleByFname() "{{{
 	cal s:BuildPrompt(s:Focus())
 endfunc "}}}
 
-func! s:ToggleType() "{{{
-	let s:itemtype = s:itemtype ? 0 : 1
+func! s:ToggleType(dir) "{{{
+	let len = 1 + g:ctrlp_mru_files
+	let s:itemtype = s:walker(len, s:itemtype, a:dir)
+	cal s:Type(s:itemtype)
+endfunc "}}}
+
+func! s:Type(type) "{{{
+	let s:itemtype = a:type
+	cal s:item2buf()
+	cal s:syntax()
 	cal s:SetLines(s:itemtype)
 	cal s:BuildPrompt(s:Focus())
 endfunc "}}}
@@ -609,11 +614,11 @@ endfunc "}}}
 " ctrlp#SetWorkingPath(...) {{{
 func! s:FindRoot(curr, mark)
 	if !empty(globpath(a:curr, a:mark))
-		sil! exe 'chdir' a:curr
+		exe 'chdir' a:curr
 	else
 		let parent = substitute(a:curr, '[\/]\zs[^\/]\+[\/]*$', '', '')
 		if parent != a:curr
-			sil! cal s:FindRoot(parent, a:mark)
+			cal s:FindRoot(parent, a:mark)
 		endif
 	endif
 endfunc
@@ -630,7 +635,7 @@ func! ctrlp#SetWorkingPath(...)
 	if exists('+acd')
 		se noacd
 	endif
-	sil! exe 'chdir' fnameescape(expand('%:p:h'))
+	exe 'chdir' fnameescape(expand('%:p:h'))
 	if s:pathmode == 1 || l:pathmode == 1 | retu | endif
 	let markers = [
 				\ 'root.dir',
@@ -643,10 +648,10 @@ func! ctrlp#SetWorkingPath(...)
 	if exists('g:ctrlp_root_markers')
 				\ && type(g:ctrlp_root_markers) == 3
 				\ && !empty(g:ctrlp_root_markers)
-		sil! cal extend(markers, g:ctrlp_root_markers, 0)
+		cal extend(markers, g:ctrlp_root_markers, 0)
 	endif
 	for marker in markers
-		sil! cal s:FindRoot(getcwd(), marker)
+		cal s:FindRoot(getcwd(), marker)
 		if getcwd() != expand('%:p:h') | break | endif
 	endfor
 endfunc
@@ -655,11 +660,11 @@ endfunc
 func! s:AcceptSelection(mode) "{{{
 	let md = a:mode
 	let matchstr = matchstr(getline('.'), '^> \zs.\+\ze\t*$')
-	let filepath = s:itemtype ? matchstr : getcwd().s:lash().matchstr
-	let filename = split(filepath, s:lash())[-1]
+	let filepath = s:itemtype ? matchstr : getcwd().ctrlp#utils#lash().matchstr
+	let filename = split(filepath, ctrlp#utils#lash())[-1]
 	" Remove the prompt and match window
-	sil! cal s:BufOpen('ControlP', 'del')
-	" Setup a new window for the selected entry
+	cal s:BufOpen('ControlP', 'del')
+	" Do an action on the selected entry
 	if md == 't' || s:splitwin == 1 " in new tab
 		tabnew
 		let cmd = 'e'
@@ -692,6 +697,35 @@ func! s:compare(s1, s2)
 	retu str1 == str2 ? 0 : str1 > str2 ? 1 : -1
 endfunc
 
+func! s:walker(max, pos, dir)
+	if a:dir == 1
+		if a:pos < a:max
+			let pos = a:pos + 1
+		elseif a:pos == a:max
+			let pos = 0
+		endif
+	elseif a:dir == -1
+		if a:pos > 0
+			let pos = a:pos - 1
+		elseif a:pos == 0
+			let pos = a:max
+		endif
+	endif
+	if g:ctrlp_mru_files == 0 && pos == 2
+		let pos = a:pos == 1 ? 3 : 1
+	endif
+	retu pos
+endfunc
+
+func! s:item2buf()
+	let item2buf = {
+				\ 0: '_Files',
+				\ 1: '_Buffers',
+				\ 2: '_Recent_Files',
+				\ }
+	exe 'setf' item2buf[s:itemtype]
+endfunc
+
 func! s:matchsubstr(item, pat)
 	retu match(split(a:item, '[\/]\ze[^\/]\+$')[-1], a:pat)
 endfunc
@@ -703,35 +737,43 @@ func! s:matchlists(item, lst)
 	retu 1
 endfunc
 
-func! s:lash()
-	retu &ssl || !exists('+ssl') ? '/' : '\'
-endfunc
-
-func! s:Syntax()
-	syn match CtrlPNoEntries '^== NO MATCHES ==$'
+func! s:syntax()
+	syn match CtrlPNoEntries '^ == NO MATCHES ==$'
+	syn match CtrlPNoEntries '^ == DISABLED ==$'
 	syn match CtrlPLineMarker '^>'
 	hi link CtrlPNoEntries Error
 	hi CtrlPLineMarker guifg=bg
 endfunc
 "}}}
 
-" Initialization {{{
-func! s:SetLines(type)
+func! s:SetLines(type) "{{{
 	let s:itemtype = a:type
-	let s:lines = s:itemtype ? s:ListAllBuffers() : s:ListAllFiles(getcwd())
-endfunc
+	if s:itemtype == 0
+		let s:lines = s:ListAllFiles(getcwd())
+	elseif s:itemtype == 1
+		let s:lines = s:ListAllBuffers()
+	elseif s:itemtype >= 2
+		let s:lines = s:hooks(s:itemtype)
+	endif
+endfunc "}}}
 
-func! ctrlp#init(type)
-	cal ctrlp#SetWorkingPath()
-	cal s:SetLines(a:type)
-	cal s:BufOpen('ControlP')
-	cal s:SetupBlank('ctrlp')
-	cal s:MapKeys()
-	cal s:Renderer(s:lines)
+func! s:hooks(type) "{{{
+	let types = {
+				\ '2': 'ctrlp#mrufiles#list(-1)'
+				\ }
+	retu eval(types[a:type])
+endfunc "}}}
+
+func! ctrlp#init(type) "{{{
+	sil! cal ctrlp#SetWorkingPath()
+	sil! cal s:SetLines(a:type)
+	sil! cal s:BufOpen('ControlP')
+	sil! cal s:SetupBlank(s:itemtype)
+	sil! cal s:MapKeys()
+	sil! cal s:Renderer(s:lines)
 	cal s:BuildPrompt()
-	cal s:Syntax()
-endfunc
-"}}}
+	sil! cal s:syntax()
+endfunc "}}}
 
 aug CtrlPAug "{{{
 	au!

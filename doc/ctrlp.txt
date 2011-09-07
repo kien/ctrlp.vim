@@ -1,4 +1,4 @@
-*ctrlp.txt*       Full path fuzzy file and buffer finder for Vim.
+*ctrlp.txt*       Full path fuzzy files, buffers and mru files finder for Vim.
 *CtrlP* *ControlP* *'ctrlp'* *'ctrl-p'*
 ===============================================================================
 #                                                                             #
@@ -23,9 +23,9 @@ CONTENTS                                                       *ctrlp-contents*
 ===============================================================================
 1. Intro                                                          *ctrlp-intro*
 
-Full path fuzzy file and buffer finder with an intuitive interface. Written in
-pure Vimscript for MacVim and Vim 7.0+. Has full support for Vim’s |regexp| as
-search pattern, and more.
+Full path fuzzy files, buffers and mru files finder with an intuitive
+interface. Written in pure Vimscript for MacVim and Vim version 7.0+. Has full
+support for Vim’s |regexp| as search pattern, and more.
 
 See also |ctrlp-input-formats| and |ctrlp-fullregexp|.
 
@@ -93,7 +93,7 @@ to your |.vimrc|; the parameter is the same (1, 2 and 0): >
 <
 
                                                        *'g:ctrlp_root_markers'*
-Use this to set your own root markers for the SetWorkingPath() function, in
+Use this to set your own root markers for the |SetWorkingPath()| function, in
 addition to the default ones: >
   let g:ctrlp_root_markers = ['']
 <
@@ -141,7 +141,8 @@ only need to keep the lines that you’ve changed the values (inside []): >
     \ 'ToggleFocus()':              ['<tab>'],
     \ 'ToggleRegex()':              ['<c-r>'],
     \ 'ToggleByFname()':            ['<c-d>'],
-    \ 'ToggleType()':               ['<c-f>'],
+    \ 'ToggleType(1)':              ['<c-f>', '<c-up'],
+    \ 'ToggleType(-1)':             ['<c-b>', '<c-down>'],
     \ 'PrtCurStart()':              ['<c-a>'],
     \ 'PrtCurEnd()':                ['<c-e>'],
     \ 'PrtCurLeft()':               ['<c-h>', '<left>'],
@@ -150,15 +151,48 @@ only need to keep the lines that you’ve changed the values (inside []): >
     \ }
 <
 
+                                                          *'g:ctrlp_mru_files'*
+Set this to 0 to completely disable the Most Recently Used files feature: >
+  let g:ctrlp_mru_files = 1
+<
+
+                                                           *'g:ctrlp_mruf_max'*
+Specify the number of recently opened files you want |CtrlP| to remember: >
+  let g:ctrlp_mruf_max = 50
+<
+
+                                                       *'g:ctrlp_mruf_exclude'*
+Files you don’t want |CtrlP| to remember; use |regexp| to specify the patterns:
+>
+  let g:ctrlp_mruf_exclude = ''
+<
+Examples: >
+  let g:ctrlp_mruf_exclude = '/tmp/.*\|/temp/.*' " MacOSX/Linux
+  let g:ctrlp_mruf_exclude = '^C:\\dev\\tmp\\.*' " Windows
+<
+
+                                                       *'g:ctrlp_mruf_include'*
+And if you want |CtrlP| to only remember some files, specify them here: >
+  let g:ctrlp_mruf_include = ''
+<
+Example: >
+  let g:ctrlp_mruf_exclude = '\.py$\|\.rb$'
+<
+
 ===============================================================================
 3. Commands                                                    *ctrlp-commands*
 
                                                                        *:CtrlP*
 :CtrlP
-   Open the |CtrlP| prompt in find file mode.
+   Open the |CtrlP| prompt in find files mode.
+
                                                                  *:CtrlPBuffer*
 :CtrlPBuffer
-   Open the |CtrlP| prompt in find buffer mode.
+   Open the |CtrlP| prompt in find buffers mode.
+
+                                                               *:CtrlPMRUFiles*
+:CtrlPMRUFiles
+   Open the |CtrlP| prompt in find Most-Recently-Used files mode.
 
                                                              *:ClearCtrlPCache*
 :ClearCtrlPCache
@@ -188,8 +222,16 @@ Once inside the prompt:
     Toggle between full path search and filename only search.
     (note: in filename mode, the prompt’s base is '>d>' instead of '>>>')
 
-  <c-f>
-    Toggle between searching files and searching buffers.
+  <c-f>, 'forward'
+  <c-up>
+    Toggle between searching files and searching buffers. Or switch to the
+    'next' search type in the sequence; currently files, buffers and most
+    recently used files (MRU Files) are available.
+
+  <c-b>, 'backward'
+  <c-down>
+    Toggle between searching files and searching buffers. Or switch to the
+    'previous' search type in the sequence.
 
   <tab>
     Toggle the focus between the match window and the prompt.
@@ -277,6 +319,19 @@ aforementioned plugin.
 
 Git repository:       https://github.com/kien/ctrlp.vim
 Mercurial repository: https://bitbucket.org/kien/ctrlp.vim
+
+===============================================================================
+CHANGELOG
+
+                                                               *ctrlp-update-1*
+Update #1~
+    + New mapping: <c-b>.
+    + Extended the behavior of <c-f>.
+    + New options: |g:ctrlp_mru_files|,
+                   |g:ctrlp_mruf_max|,
+                   |g:ctrlp_mruf_exclude|,
+                   |g:ctrlp_mruf_include|
+    + New command: |:CtrlPMRUFiles|
 
 ===============================================================================
 vim:nofen:et:ts=2:sw=2:sts=2
