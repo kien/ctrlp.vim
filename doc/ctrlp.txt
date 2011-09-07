@@ -1,4 +1,4 @@
-*ctrlp.txt*       Full path fuzzy files, buffers and mru files finder for Vim.
+*ctrlp.txt*       Full path fuzzy file, buffer and MRU file finder for Vim.
 *CtrlP* *ControlP* *'ctrlp'* *'ctrl-p'*
 ===============================================================================
 #                                                                             #
@@ -23,9 +23,9 @@ CONTENTS                                                       *ctrlp-contents*
 ===============================================================================
 1. Intro                                                          *ctrlp-intro*
 
-Full path fuzzy files, buffers and mru files finder with an intuitive
-interface. Written in pure Vimscript for MacVim and Vim version 7.0+. Has full
-support for Vim’s |regexp| as search pattern, and more.
+Full path fuzzy file, buffer and MRU file finder with an intuitive interface.
+Written in pure Vimscript for MacVim and Vim version 7.0+. Has full support for
+Vim’s |regexp| as search pattern, and more.
 
 See also |ctrlp-input-formats| and |ctrlp-fullregexp|.
 
@@ -325,6 +325,7 @@ CHANGELOG
 
                                                                *ctrlp-update-1*
 Update #1~
+    + New feature: search in most recently used (MRU) files
     + New mapping: <c-b>.
     + Extended the behavior of <c-f>.
     + New options: |g:ctrlp_mru_files|,

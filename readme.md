@@ -1,15 +1,15 @@
 # ctrlp.vim
-Full path fuzzy files, buffers and MRU files finder for Vim.
+Full path fuzzy file, buffer and MRU file finder for Vim.
 
 * Written in pure Vimscript for MacVim and Vim 7.0+.
 * Has full support for Vim’s regexp as search pattern, and more.
-* Also: find files in most recently opened files (i.e. MRU files).
+* Can also find file in most recently used files.
 
 ![ctrlp][1]
 
 ## Basic Usage
 * Press `<c-p>` or run `:CtrlP` to invoke CtrlP.
-* Press `<c-f>` while CtrlP is open to toggle between find files, find buffers, and find MRU files modes.
+* Press `<c-f>` `<c-b> while CtrlP is open to switch between find file, find buffer, and find MRU file modes.
 * Ever remember only a file’s name but not where it is? Press `<c-d>` while CtrlP is open to switch to filename only search.
 * Use `*` `?` `^` `+` or `|` in the prompt to submit the string as a Vim’s regexp pattern.
 * Or press `<c-r>` while CtrlP is open to switch to full regexp search mode.
