@@ -703,20 +703,14 @@ endfunc
 
 func! s:walker(max, pos, dir, ...)
 	if a:dir == 1
-		if a:pos < a:max
-			let pos = a:pos + 1
-		elseif a:pos == a:max
-			let pos = 0
-		endif
+		let pos = a:pos < a:max ? a:pos + 1 : 0
 	elseif a:dir == -1
-		if a:pos > 0
-			let pos = a:pos - 1
-		elseif a:pos == 0
-			let pos = a:max
-		endif
+		let pos = a:pos > 0 ? a:pos - 1 : a:max
 	endif
-	if g:ctrlp_mru_files == 0 && pos == 2 && !exists('a:1')
-		let pos = a:pos == 1 ? 3 : 1
+	if g:ctrlp_mru_files == 0 && pos == 2
+				\ && !exists('a:1')
+		let jmp = pos == a:max ? 0 : 3
+		let pos = a:pos == 1 ? jmp : 1
 	endif
 	retu pos
 endfunc
@@ -727,6 +721,9 @@ func! s:statusline(...)
 				\ 1: ['buffers', 'buf'],
 				\ 2: ['recent\ files', 'mru'],
 				\ }
+	if g:ctrlp_mru_files == 0
+		cal remove(itemtypes, 2)
+	endif
 	let max     = len(itemtypes) - 1
 	let next    = s:walker(max, s:itemtype, 1, 1)
 	let prev    = s:walker(max, s:itemtype, -1, 1)
@@ -735,7 +732,8 @@ func! s:statusline(...)
 	let regex   = s:regexp ? '[regex]' : ''
 	let byfname = s:byfname ? '[file]' : '[path]'
 	let focus   = s:Focus() ? '[prt]' : '[win]'
-	exe 'setl stl='.focus.byfname.regex.'--('.prev.')-[['.itemtypes[s:itemtype][0].']]-('.next.')--'
+	let item    = itemtypes[s:itemtype][0]
+	exe 'setl stl='.focus.byfname.regex.'+-('.prev.')-[['.item.']]-('.next.')-+'
 endfunc
 
 func! s:matchsubstr(item, pat)
