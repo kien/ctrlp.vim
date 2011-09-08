@@ -19,8 +19,9 @@ com! CtrlPMRUFiles       cal ctrlp#init(2)
 com! ClearCtrlPCache     cal ctrlp#clearcache()
 com! ClearAllCtrlPCaches cal ctrlp#clearallcaches()
 
-com! CtrlPRoot   cal ctrlp#init(0, 2)
-com! CtrlPCurDir cal ctrlp#init(0, 1)
+com! CtrlPCurWD   cal ctrlp#init(0, 0)
+com! CtrlPCurFile cal ctrlp#init(0, 1)
+com! CtrlPRoot    cal ctrlp#init(0, 2)
 
 exe 'nn <silent>' g:ctrlp_map ':<c-u>CtrlP<cr>'
 

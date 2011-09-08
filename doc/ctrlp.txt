@@ -206,6 +206,7 @@ Example: >
                                                                   *:CtrlPCurWD*
 :CtrlPCurWD
    Find files in the current working directory.
+   Ignores |g:ctrlp_working_path_mode|.
 
                                                                 *:CtrlPCurFile*
 :CtrlPCurFile
@@ -213,7 +214,7 @@ Example: >
 
                                                                    *:CtrlPRoot*
 :CtrlPRoot
-   Same as |:CtrlPCurFile| but from the project’s root.
+   Same as |:CtrlPCurFile| but start from the project’s root.
    See also |g:ctrlp_working_path_mode|.
 
 ===============================================================================

@@ -125,13 +125,14 @@ endfunc
 
 " s:ListAllFiles(path) {{{
 func! s:List(path)
-	let allfiles = split(globpath(a:path, '**'), '\n')
+	" note: wildignore is ignored when using **, so find all the directories
+	" first then glob with * for the files
+	let alldirs = split(globpath(a:path, '**'), '\n')
+	cal filter(alldirs, 'isdirectory(v:val)')
+	let dirs = join(alldirs, ',')
+	let allfiles = split(globpath(a:path, '*'), '\n')
+	let allfiles = extend(allfiles, split(globpath(dirs, '*'), '\n'))
 	cal filter(allfiles, '!isdirectory(v:val)')
-	" filter all entries matched wildignore's patterns (in addition to globpath's)
-	if exists('+wig') && !empty(&wig)
-		let ignores = map(split(&wig, ','), 's:wigfilter(v:val)')
-		cal filter(allfiles, 's:matchlists(v:val, string(ignores))')
-	endif
 	" remove base directory
 	let path = &ssl || !exists('+ssl') ? getcwd().'/' : substitute(getcwd(), '\', '\\\\', 'g').'\\'
 	cal map(allfiles, 'substitute(v:val, path, "", "g")')
@@ -749,15 +750,10 @@ func! s:matchsubstr(item, pat)
 endfunc
 
 func! s:matchlists(item, lst)
-	for each in eval(a:lst)
+	for each in a:lst
 		if match(a:item, each) >= 0 | retu 0 | endif
 	endfor
 	retu 1
-endfunc
-
-func! s:wigfilter(val)
-	let val = substitute(a:val, '\\', '\\\\', 'g')
-	retu substitute(val, '*\+', '\.*', 'g')
 endfunc
 
 func! s:syntax()
