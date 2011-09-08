@@ -126,15 +126,11 @@ endfunc
 " ListAllFiles {{{
 func! s:List(dirs, allfiles)
 	" note: wildignore is ignored when using **
-	let entries = split(globpath(a:dirs, '*'), '\n')
+	let entries      = split(globpath(a:dirs, '*'), '\n')
 	let entries_copy = deepcopy(entries)
-	let alldirs = filter(entries, 'isdirectory(v:val)')
-	let allfiles = filter(entries_copy, '!isdirectory(v:val)')
-	if empty(allfiles)
-		let allfiles = a:allfiles
-	else
-		cal extend(allfiles, a:allfiles)
-	endif
+	let alldirs      = filter(entries, 'isdirectory(v:val)')
+	let allfiles     = filter(entries_copy, '!isdirectory(v:val)')
+	cal extend(allfiles, a:allfiles)
 	if empty(alldirs)
 		let s:allfiles = allfiles
 	else
@@ -146,8 +142,11 @@ endfunc
 func! s:ListAllFiles(path)
 	let cache_file = ctrlp#utils#cachefile()
 	if g:ctrlp_newcache || !filereadable(cache_file) || !s:caching
+		" get the files
 		cal s:List(a:path, [])
 		let allfiles = s:allfiles
+		unl s:allfiles
+		" remove base directory
 		let path = &ssl || !exists('+ssl') ? getcwd().'/' : substitute(getcwd(), '\', '\\\\', 'g').'\\'
 		cal map(allfiles, 'substitute(v:val, path, "", "g")')
 		let read_cache = 0
