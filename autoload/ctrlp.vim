@@ -200,7 +200,7 @@ func! s:SplitPattern(str,...) "{{{
 	if len(array) > 1
 		for i in range(1, len(array) - 1)
 			" Separator
-			let sp = exists('a:1') ? a:1 : '.*'
+			let sp = exists('a:1') ? a:1 : '.\{-}'
 			let nitem .= sp.array[i]
 			cal add(newpats, nitem)
 		endfor
@@ -375,7 +375,6 @@ func! s:UpdateMatches(pat) "{{{
 	let newpat = s:SplitPattern(a:pat)
 	let lines  = s:GetMatchedItems(s:lines, newpat, s:mxheight)
 	cal s:Renderer(lines)
-	"cal s:Highlight(newpat)
 endfunc "}}}
 
 func! s:BuildPrompt(...) "{{{
@@ -620,23 +619,12 @@ func! s:Type(type) "{{{
 	cal s:BuildPrompt(s:Focus())
 endfunc "}}}
 
-"Mightdo: Highlight matched characters/strings. /low
-func! s:Highlight(...) "{{{
-	hi clear CtrlPKeywords
-	hi link CtrlPKeywords Normal
-	if exists('a:1') && !empty(a:1)
-		let pat = substitute(a:1[-1], ':\d*$', '', 'g')
-		exe 'syn match CtrlPKeywords /\c'.pat.'/'
-		hi link CtrlPKeywords Constant
-	endif
-endfunc "}}}
-
 " ctrlp#SetWorkingPath(...) {{{
 func! s:FindRoot(curr, mark)
 	if !empty(globpath(a:curr, a:mark))
 		exe 'chdir' a:curr
 	else
-		let parent = substitute(a:curr, '[\/]\zs[^\/]\+[\/]*$', '', '')
+		let parent = substitute(a:curr, '[\/]\zs[^\/]\+[\/]\?$', '', '')
 		if parent != a:curr
 			cal s:FindRoot(parent, a:mark)
 		endif
@@ -715,7 +703,6 @@ func! s:AcceptSelection(mode,...) "{{{
 	ec
 endfunc "}}}
 
-"Mightdo: Further customizing s:compare(). Sort by file type. /low
 " Helper functions {{{
 func! s:compare(s1, s2)
 	" by length
@@ -780,6 +767,13 @@ func! s:syntax()
 	hi link CtrlPNoEntries Error
 	hi CtrlPLineMarker guifg=bg
 endfunc
+
+func! s:uniquefilter(val, pats)
+	for each in a:pats
+		if match(each, a:val) >= 0 && len(a:val) < len(each) | retu 0 | endif
+	endfor
+	retu 1
+endfunc
 "}}}
 
 func! s:SetLines(type) "{{{
@@ -800,8 +794,12 @@ func! s:hooks(type) "{{{
 	retu eval(types[a:type])
 endfunc "}}}
 
-func! ctrlp#init(type) "{{{
-	sil! cal ctrlp#SetWorkingPath()
+func! ctrlp#init(type, ...) "{{{
+	if exists('a:1')
+		sil! cal ctrlp#SetWorkingPath(a:1)
+	else
+		sil! cal ctrlp#SetWorkingPath()
+	endif
 	sil! cal s:SetLines(a:type)
 	sil! cal s:BufOpen('ControlP')
 	sil! cal s:SetupBlank()
