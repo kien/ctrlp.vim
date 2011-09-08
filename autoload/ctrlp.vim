@@ -5,9 +5,6 @@
 " License:       MIT
 " =============================================================================
 
-let s:save_cpo = &cpo "{{{
-set cpo&vim "}}}
-
 if v:version < '700' "{{{
 	func! ctrlp#init(...)
 		echoh Error | ec 'CtrlP requires Vim 7.0+' | echoh None
@@ -175,7 +172,7 @@ func! s:SplitPattern(str,...) "{{{
 		let str = substitute(str, '\\\\', '\', 'g')
 		let array = [str]
 		if match(str, ':\d*$') >= 0 " If pattern contains :\d (e.g. abc:25)
-			let s:line = matchstr(str, ':\d*$')
+			let s:jmpln = matchstr(str, ':\d*$')
 			let array[0] = substitute(array[0], ':\d*$', '', 'g')
 		endif
 	elseif match(str, ':\d*$') >= 0 " If string contains :\d
@@ -207,8 +204,8 @@ func! s:GetMatchedItems(items, pats, limit) "{{{
 	let limit = a:limit
 	" if pattern contains line number
 	if match(pats[-1], ':\d*$') >= 0
-		if exists('s:line') | unl s:line | endif
-		let s:line = substitute(pats[-1], '.*\ze:\d*$', '', 'g')
+		if exists('s:jmpln') | unl s:jmpln | endif
+		let s:jmpln = substitute(pats[-1], '.*\ze:\d*$', '', 'g')
 		cal remove(pats, -1)
 	endif
 	" if items is longer than 2000, use only the last pattern
@@ -239,7 +236,7 @@ func! s:GetMatchedItems(items, pats, limit) "{{{
 	retu newitems
 endfunc "}}}
 
-func! s:SetupBlank(name) "{{{
+func! s:SetupBlank() "{{{
 	cal s:statusline()
 	setf ctrlp
 	setl bt=nofile
@@ -686,8 +683,8 @@ func! s:AcceptSelection(mode) "{{{
 	else
 		exe 'bo '.cmd.' '.filepath
 	endif
-	if exists('s:line')
-		exe s:line
+	if exists('s:jmpln')
+		exe s:jmpln
 		keepj norm! 0zz
 	endif
 	ec
@@ -726,11 +723,11 @@ func! s:statusline(...)
 		cal remove(itemtypes, 2)
 	endif
 	let max     = len(itemtypes) - 1
-	let next    = itemtypes[s:walker(max, s:itemtype, 1, 1)][1]
+	let next    = itemtypes[s:walker(max, s:itemtype,  1, 1)][1]
 	let prev    = itemtypes[s:walker(max, s:itemtype, -1, 1)][1]
-	let regex   = s:regexp ? '[regex]' : ''
-	let byfname = s:byfname ? '[file]' : '[path]'
-	let focus   = s:Focus() ? '[prt]' : '[win]'
+	let regex   = s:regexp  ? '[regex]' : ''
+	let byfname = s:byfname ? '[file]'  : '[path]'
+	let focus   = s:Focus() ? '[prt]'   : '[win]'
 	let item    = itemtypes[s:itemtype][0]
 	exe 'setl stl='.focus.byfname.regex.'+-('.prev.')-[['.item.']]-('.next.')-+'
 endfunc
@@ -777,7 +774,7 @@ func! ctrlp#init(type) "{{{
 	sil! cal ctrlp#SetWorkingPath()
 	sil! cal s:SetLines(a:type)
 	sil! cal s:BufOpen('ControlP')
-	sil! cal s:SetupBlank(s:itemtype)
+	sil! cal s:SetupBlank()
 	sil! cal s:MapKeys()
 	sil! cal s:Renderer(s:lines)
 	cal s:BuildPrompt()
@@ -788,8 +785,5 @@ aug CtrlPAug "{{{
 	au!
 	au BufLeave,WinLeave ControlP cal s:BufOpen('ControlP', 'del')
 aug END "}}}
-
-let &cpo = s:save_cpo "{{{
-unl s:save_cpo "}}}
 
 " vim:fen:fdl=0:ts=2:sw=2:sts=2
