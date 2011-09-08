@@ -123,31 +123,41 @@ func! ctrlp#clearallcaches()
 endfunc
 "}}}
 
-func! s:ListAllFiles(path) "{{{
+" s:ListAllFiles(path) {{{
+func! s:List(path)
+	let allfiles = split(globpath(a:path, '**'), '\n')
+	cal filter(allfiles, '!isdirectory(v:val)')
+	" filter all entries matched wildignore's patterns (in addition to globpath's)
+	if exists('+wig') && !empty(&wig)
+		let ignores = map(split(&wig, ','), 's:wigfilter(v:val)')
+		cal filter(allfiles, 's:matchlists(v:val, string(ignores))')
+	endif
+	" remove base directory
+	let path = &ssl || !exists('+ssl') ? getcwd().'/' : substitute(getcwd(), '\', '\\\\', 'g').'\\'
+	cal map(allfiles, 'substitute(v:val, path, "", "g")')
+	retu allfiles
+endfunc
+
+func! s:ListAllFiles(path)
 	let cache_file = ctrlp#utils#cachefile()
-	if g:ctrlp_newcache || !filereadable(cache_file) || s:caching == 0
-		let allfiles = split(globpath(a:path, '**'), '\n')
-		cal filter(allfiles, '!isdirectory(v:val)')
-		" filter all entries matched wildignore's patterns (in addition to globpath's)
-		if exists('+wig') && !empty(&wig)
-			let ignores = map(split(&wig, ','), 'substitute(v:val, "\\W\\+", ".*", "g")')
-			cal filter(allfiles, 's:matchlists(v:val, string(ignores))')
-		endif
-		" remove base directory
-		let path = &ssl || !exists('+ssl') ? getcwd().'/' : substitute(getcwd(), '\', '\\\\', 'g').'\\'
-		cal map(allfiles, 'substitute(v:val, path, "", "g")')
+	if g:ctrlp_newcache || !filereadable(cache_file) || !s:caching
+		let allfiles = s:List(a:path)
+		let read_cache = 0
 	else
 		let allfiles = ctrlp#utils#readfile(cache_file)
+		let read_cache = 1
 	endif
 	if len(allfiles) <= 3000 | cal sort(allfiles, 's:compare') | endif
 	" write cache
-	if ( g:ctrlp_newcache || !filereadable(cache_file) ) && s:caching
-				\ || len(allfiles) > 4000
+	if !read_cache &&
+				\ ( ( g:ctrlp_newcache || !filereadable(cache_file) )
+				\ && s:caching || len(allfiles) > 4000 )
 		if len(allfiles) > 4000 | let s:caching = 1 | endif
 		cal ctrlp#utils#writecache(allfiles)
 	endif
 	retu allfiles
-endfunc "}}}
+endfunc
+"}}}
 
 func! s:ListAllBuffers() "{{{
 	let allbufs = []
@@ -305,7 +315,7 @@ func! s:BufOpen(...) "{{{
 		let s:CtrlP_ea     = &ea
 		let s:CtrlP_ut     = &ut
 		let s:CtrlP_gcr    = &gcr
-		if !exists('g:CtrlP_prompt') || s:pinput == 0
+		if !exists('g:CtrlP_prompt') || !s:pinput
 			let g:CtrlP_prompt = ['', '', '']
 		endif
 		se magic
@@ -381,7 +391,7 @@ func! s:BuildPrompt(...) "{{{
 	" Toggling
 	if !exists('a:1') || ( exists('a:1') && a:1 )
 		let hiactive = 'Normal'
-	elseif exists('a:1') || ( exists('a:1') && a:1 == 0 )
+	elseif exists('a:1') || ( exists('a:1') && !a:1 )
 		let hiactive = 'Comment'
 		let base = substitute(base, '>', '-', 'g')
 	endif
@@ -481,9 +491,16 @@ func! s:PrtSelectJump(char,...)
 		let g:CtrlP_cline = line('.')
 	endif
 endfunc
+
+func! s:PrtClearCache()
+	cal ctrlp#clearallcaches()
+	sil! cal s:SetLines(s:itemtype)
+	sil! cal s:Renderer(s:lines)
+	cal s:BuildPrompt()
+endfunc
 "}}}
 
-" s:MapKeys() && s:MapSpecs() {{{
+" s:MapKeys() {{{
 func! s:MapKeys(...)
 	" Normal keystrokes
 	let func = !exists('a:1') || ( exists('a:1') && a:1 ) ? 'PrtAdd' : 'PrtSelectJump'
@@ -493,7 +510,7 @@ func! s:MapKeys(...)
 	endfor
 	if exists('a:2') | retu | endif
 	" Special keystrokes
-	if exists('a:1') && a:1 == 0
+	if exists('a:1') && !a:1
 		cal s:MapSpecs('unmap')
 	else
 		cal s:MapSpecs()
@@ -524,6 +541,7 @@ func! s:MapSpecs(...)
 				\ 'PrtCurEnd()':                ['<c-e>'],
 				\ 'PrtCurLeft()':               ['<c-h>', '<left>'],
 				\ 'PrtCurRight()':              ['<c-l>', '<right>'],
+				\ 'PrtClearCache()':            ['<F5>'],
 				\ 'BufOpen("ControlP", "del")': ['<esc>', '<c-c>'],
 				\ }
 	if type(s:urprtmaps) == 4
@@ -536,7 +554,7 @@ func! s:MapSpecs(...)
 	for each in keys(prttempdis)
 		if g:ctrlp_mru_files && !has_key(prtmaps, each)
 			cal extend(prtmaps, {each:prttempdis[each]})
-		elseif g:ctrlp_mru_files == 0
+		elseif !g:ctrlp_mru_files
 			cal remove(prtmaps, each)
 		endif
 	endfor
@@ -562,7 +580,7 @@ func! s:MapSpecs(...)
 endfunc
 "}}}
 
-" s:ToggleFocus() && s:Focus() {{{
+" s:ToggleFocus() {{{
 func! s:Focus()
 	retu !exists('b:focus') ? 1 : b:focus
 endfunc
@@ -631,7 +649,7 @@ func! ctrlp#SetWorkingPath(...)
 		let l:pathmode = a:1
 	endif
 	if match(expand('%:p'), '^\<.\+\>://.*') >= 0
-				\ || s:pathmode == 0 || l:pathmode == 0
+				\ || !s:pathmode || !l:pathmode
 		retu
 	endif
 	if exists('+acd')
@@ -659,14 +677,21 @@ func! ctrlp#SetWorkingPath(...)
 endfunc
 "}}}
 
-func! s:AcceptSelection(mode) "{{{
+func! s:AcceptSelection(mode,...) "{{{
 	let md = a:mode
 	let matchstr = matchstr(getline('.'), '^> \zs.\+\ze\t*$')
 	let filepath = s:itemtype ? matchstr : getcwd().ctrlp#utils#lash().matchstr
 	let filename = split(filepath, ctrlp#utils#lash())[-1]
+	" If only need the full path
+	if exists('a:1') && a:1 | retu filepath | endif
 	" Remove the prompt and match window
 	cal s:BufOpen('ControlP', 'del')
-	" Do an action on the selected entry
+	" Split the mode string if it's longer than 1 char
+	if len(md) > 1
+		let mds = split(md, '\zs')
+		let md = mds[0]
+	endif
+	" Do something with the selected entry
 	if md == 't' || s:splitwin == 1 " in new tab
 		tabnew
 		let cmd = 'e'
@@ -674,7 +699,7 @@ func! s:AcceptSelection(mode) "{{{
 		let cmd = 'new'
 	elseif md == 'v' || s:splitwin == 3 " in new ver split
 		let cmd = 'vne'
-	elseif md == 'e' || s:splitwin == 0 " in current window
+	elseif md == 'e' || !s:splitwin " in current window
 		let cmd = 'e'
 	endif
 	let bufnum = bufnr(filename)
@@ -705,7 +730,7 @@ func! s:walker(max, pos, dir, ...)
 	elseif a:dir == -1
 		let pos = a:pos > 0 ? a:pos - 1 : a:max
 	endif
-	if g:ctrlp_mru_files == 0 && pos == 2
+	if !g:ctrlp_mru_files && pos == 2
 				\ && !exists('a:1')
 		let jmp = pos == a:max ? 0 : 3
 		let pos = a:pos == 1 ? jmp : 1
@@ -719,7 +744,7 @@ func! s:statusline(...)
 				\ 1: ['buffers', 'buf'],
 				\ 2: ['recent\ files', 'mru'],
 				\ }
-	if g:ctrlp_mru_files == 0
+	if !g:ctrlp_mru_files
 		cal remove(itemtypes, 2)
 	endif
 	let max     = len(itemtypes) - 1
@@ -743,6 +768,11 @@ func! s:matchlists(item, lst)
 	retu 1
 endfunc
 
+func! s:wigfilter(val)
+	let val = substitute(a:val, '\\', '\\\\', 'g')
+	retu substitute(val, '*\+', '\.*', 'g')
+endfunc
+
 func! s:syntax()
 	syn match CtrlPNoEntries '^ == NO MATCHES ==$'
 	syn match CtrlPNoEntries '^ == DISABLED ==$'
@@ -754,7 +784,7 @@ endfunc
 
 func! s:SetLines(type) "{{{
 	let s:itemtype = a:type
-	if s:itemtype == 0
+	if !s:itemtype
 		let s:lines = s:ListAllFiles(getcwd())
 	elseif s:itemtype == 1
 		let s:lines = s:ListAllBuffers()

@@ -147,6 +147,7 @@ only need to keep the lines that you’ve changed the values (inside []): >
     \ 'PrtCurEnd()':                ['<c-e>'],
     \ 'PrtCurLeft()':               ['<c-h>', '<left>'],
     \ 'PrtCurRight()':              ['<c-l>', '<right>'],
+    \ 'PrtClearCache()':            ['<F5>'],
     \ 'BufOpen("ControlP", "del")': ['<esc>', '<c-c>', '<c-g>'],
     \ }
 <
@@ -185,6 +186,12 @@ Example: >
                                                                        *:CtrlP*
 :CtrlP
    Open the |CtrlP| prompt in find files mode.
+   Can be used to pass a command string to |g:ctrlp_user_command|.
+Examples: >
+  :CtrlP ls -R1Ap %s | grep [^/:]$
+  :CtrlP ls -1ap %s | grep [^/]$
+  :CtrlP dir %s /-n /b /s /a-d
+<
 
                                                                  *:CtrlPBuffer*
 :CtrlPBuffer
@@ -279,6 +286,9 @@ Once inside the prompt:
   <c-s>
     Open selected file in a 'horizontal' split
 
+  <F5>
+    Refresh the match window.
+
   <esc>,
   <c-c>,
   <c-g>
@@ -322,6 +332,10 @@ Mercurial repository: https://bitbucket.org/kien/ctrlp.vim
 
 ===============================================================================
 CHANGELOG
+
+                                                               *ctrlp-update-2*
+Update #2~
+    + New mapping: <F5>.
 
                                                                *ctrlp-update-1*
 Update #1~
