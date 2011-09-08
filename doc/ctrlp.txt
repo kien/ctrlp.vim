@@ -186,12 +186,6 @@ Example: >
                                                                        *:CtrlP*
 :CtrlP
    Open the |CtrlP| prompt in find files mode.
-   Can be used to pass a command string to |g:ctrlp_user_command|.
-Examples: >
-  :CtrlP ls -R1Ap %s | grep [^/:]$
-  :CtrlP ls -1ap %s | grep [^/]$
-  :CtrlP dir %s /-n /b /s /a-d
-<
 
                                                                  *:CtrlPBuffer*
 :CtrlPBuffer
@@ -209,15 +203,18 @@ Examples: >
 :ClearAllCtrlPCaches
    Delete all the saved cache files in |ctrlp_cache_dir|.
 
-                                                                 *:CtrlPCurDir*
-:CtrlPCurDir
+                                                                  *:CtrlPCurWD*
+:CtrlPCurWD
+   Find files in the current working directory.
+
+                                                                *:CtrlPCurFile*
+:CtrlPCurFile
    Find files in the same directory as the current file, recursively.
-   This command ignores the current value of |g:ctrlp_working_path_mode|.
 
                                                                    *:CtrlPRoot*
 :CtrlPRoot
-   Same as |:CtrlPCurDir| but from the project’s root.
-   Also ignores the current value of |g:ctrlp_working_path_mode|.
+   Same as |:CtrlPCurFile| but from the project’s root.
+   See also |g:ctrlp_working_path_mode|.
 
 ===============================================================================
 4. Mappings                                                    *ctrlp-mappings*
@@ -347,7 +344,8 @@ CHANGELOG
 Update #2~
     + New mapping: <F5>.
     + New commands: |:CtrlPRoot|,
-                    |:CtrlPCurDir|
+                    |:CtrlPCurWD|
+                    |:CtrlPCurFile|
 
                                                                *ctrlp-update-1*
 Update #1~
