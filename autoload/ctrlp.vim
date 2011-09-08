@@ -123,26 +123,33 @@ func! ctrlp#clearallcaches()
 endfunc
 "}}}
 
-" s:ListAllFiles(path) {{{
-func! s:List(path)
-	" note: wildignore is ignored when using **, so find all the directories
-	" first then glob with * for the files
-	let alldirs = split(globpath(a:path, '**'), '\n')
-	cal filter(alldirs, 'isdirectory(v:val)')
-	let dirs = join(alldirs, ',')
-	let allfiles = split(globpath(a:path, '*'), '\n')
-	let allfiles = extend(allfiles, split(globpath(dirs, '*'), '\n'))
-	cal filter(allfiles, '!isdirectory(v:val)')
-	" remove base directory
-	let path = &ssl || !exists('+ssl') ? getcwd().'/' : substitute(getcwd(), '\', '\\\\', 'g').'\\'
-	cal map(allfiles, 'substitute(v:val, path, "", "g")')
-	retu allfiles
+" ListAllFiles {{{
+func! s:List(dirs, allfiles)
+	" note: wildignore is ignored when using **
+	let entries = split(globpath(a:dirs, '*'), '\n')
+	let entries_copy = deepcopy(entries)
+	let alldirs = filter(entries, 'isdirectory(v:val)')
+	let allfiles = filter(entries_copy, '!isdirectory(v:val)')
+	if empty(allfiles)
+		let allfiles = a:allfiles
+	else
+		cal extend(allfiles, a:allfiles)
+	endif
+	if empty(alldirs)
+		let s:allfiles = allfiles
+	else
+		let dirs = join(alldirs, ',')
+		cal s:List(dirs, allfiles)
+	endif
 endfunc
 
 func! s:ListAllFiles(path)
 	let cache_file = ctrlp#utils#cachefile()
 	if g:ctrlp_newcache || !filereadable(cache_file) || !s:caching
-		let allfiles = s:List(a:path)
+		cal s:List(a:path, [])
+		let allfiles = s:allfiles
+		let path = &ssl || !exists('+ssl') ? getcwd().'/' : substitute(getcwd(), '\', '\\\\', 'g').'\\'
+		cal map(allfiles, 'substitute(v:val, path, "", "g")')
 		let read_cache = 0
 	else
 		let allfiles = ctrlp#utils#readfile(cache_file)
@@ -500,7 +507,7 @@ func! s:PrtClearCache()
 endfunc
 "}}}
 
-" s:MapKeys() {{{
+" MapKeys {{{
 func! s:MapKeys(...)
 	" Normal keystrokes
 	let func = !exists('a:1') || ( exists('a:1') && a:1 ) ? 'PrtAdd' : 'PrtSelectJump'
@@ -580,7 +587,7 @@ func! s:MapSpecs(...)
 endfunc
 "}}}
 
-" s:ToggleFocus() {{{
+" ToggleFocus {{{
 func! s:Focus()
 	retu !exists('b:focus') ? 1 : b:focus
 endfunc
@@ -762,13 +769,6 @@ func! s:syntax()
 	syn match CtrlPLineMarker '^>'
 	hi link CtrlPNoEntries Error
 	hi CtrlPLineMarker guifg=bg
-endfunc
-
-func! s:uniquefilter(val, pats)
-	for each in a:pats
-		if match(each, a:val) >= 0 && len(a:val) < len(each) | retu 0 | endif
-	endfor
-	retu 1
 endfunc
 "}}}
 
