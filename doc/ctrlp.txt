@@ -147,6 +147,7 @@ only need to keep the lines that you’ve changed the values (inside []): >
     \ 'PrtCurEnd()':                ['<c-e>'],
     \ 'PrtCurLeft()':               ['<c-h>', '<left>'],
     \ 'PrtCurRight()':              ['<c-l>', '<right>'],
+    \ 'PrtClearCache()':            ['<F5>'],
     \ 'BufOpen("ControlP", "del")': ['<esc>', '<c-c>', '<c-g>'],
     \ }
 <
@@ -201,6 +202,20 @@ Example: >
                                                          *:ClearAllCtrlPCaches*
 :ClearAllCtrlPCaches
    Delete all the saved cache files in |ctrlp_cache_dir|.
+
+                                                                  *:CtrlPCurWD*
+:CtrlPCurWD
+   Find files in the current working directory.
+   Ignores |g:ctrlp_working_path_mode|.
+
+                                                                *:CtrlPCurFile*
+:CtrlPCurFile
+   Find files in the same directory as the current file, recursively.
+
+                                                                   *:CtrlPRoot*
+:CtrlPRoot
+   Same as |:CtrlPCurFile| but start from the project’s root.
+   See also |g:ctrlp_working_path_mode|.
 
 ===============================================================================
 4. Mappings                                                    *ctrlp-mappings*
@@ -279,6 +294,9 @@ Once inside the prompt:
   <c-s>
     Open selected file in a 'horizontal' split
 
+  <F5>
+    Refresh the match window.
+
   <esc>,
   <c-c>,
   <c-g>
@@ -292,7 +310,7 @@ Chose your own mappings with |g:ctrlp_prompt_mappings|.
                                                    *ctrlp-prompt-input-formats*
 Formats for inputting in the prompt:
 
-a)  Simple string. e.g. 'abc' is understood internally as 'a.*b.*c'
+a)  Simple string. e.g. 'abc' is understood internally as 'a.\{-}b.\{-}c'
 
 b)  Vim |regexp|. If the input string contains '*', '^', '$', '+' or '$', it’ll
     be treated as a Vim’s |regexp| |pattern| without any modification.
@@ -322,6 +340,13 @@ Mercurial repository: https://bitbucket.org/kien/ctrlp.vim
 
 ===============================================================================
 CHANGELOG
+
+                                                               *ctrlp-update-2*
+Update #2~
+    + New mapping: <F5>.
+    + New commands: |:CtrlPRoot|,
+                    |:CtrlPCurWD|
+                    |:CtrlPCurFile|
 
                                                                *ctrlp-update-1*
 Update #1~
