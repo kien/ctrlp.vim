@@ -99,6 +99,11 @@ else
 	let s:urprtmaps = g:ctrlp_prompt_mappings
 	unl g:ctrlp_prompt_mappings
 endif
+
+" Limiters
+let s:compare_lim = 3000
+let s:nocache_lim = 4000
+let s:mltipats_lim = 3000
 "}}}
 
 " Clear caches {{{
@@ -155,12 +160,12 @@ func! s:ListAllFiles(path)
 		let allfiles = ctrlp#utils#readfile(cache_file)
 		let read_cache = 1
 	endif
-	if len(allfiles) <= 3000 | cal sort(allfiles, 's:compare') | endif
+	if len(allfiles) <= s:compare_lim | cal sort(allfiles, 's:compare') | endif
 	" write cache
 	if !read_cache &&
 				\ ( ( g:ctrlp_newcache || !filereadable(cache_file) )
-				\ && s:caching || len(allfiles) > 4000 )
-		if len(allfiles) > 4000 | let s:caching = 1 | endif
+				\ && s:caching || len(allfiles) > s:nocache_lim )
+		if len(allfiles) > s:nocache_lim | let s:caching = 1 | endif
 		cal ctrlp#utils#writecache(allfiles)
 	endif
 	retu allfiles
@@ -226,8 +231,8 @@ func! s:GetMatchedItems(items, pats, limit) "{{{
 		let s:jmpln = substitute(pats[-1], '.*\ze:\d*$', '', 'g')
 		cal remove(pats, -1)
 	endif
-	" if items is longer than 2000, use only the last pattern
-	if len(items) >= 2000
+	" if items is longer than s:mltipats_lim, use only the last pattern
+	if len(items) >= s:mltipats_lim
 		let pats = [pats[-1]]
 	endif
 	" loop through the patterns
@@ -251,6 +256,7 @@ func! s:GetMatchedItems(items, pats, limit) "{{{
 			endfor
 		endif
 	endfor
+	let s:nomatches = len(newitems)
 	retu newitems
 endfunc "}}}
 
@@ -394,7 +400,10 @@ func! s:BuildPrompt(...) "{{{
 	let start = escape(g:CtrlP_prompt[0], estr)
 	let mid   = escape(g:CtrlP_prompt[1], estr)
 	let end   = escape(g:CtrlP_prompt[2], estr)
-	cal s:UpdateMatches(start.mid.end)
+	let str   = l:start.l:mid.l:end
+	if strpart(str, 0, 2) != '..' && s:nomatches
+		cal s:UpdateMatches(str)
+	endif
 	" Toggling
 	if !exists('a:1') || ( exists('a:1') && a:1 )
 		let hiactive = 'Normal'
@@ -419,59 +428,76 @@ endfunc "}}}
 "Mightdo: PrtSelectJump() cycles through matches. /medium
 " Prt Actions {{{
 func! s:PrtClear()
+	let s:nomatches = 1
 	let g:CtrlP_prompt = ['','','']
 	cal s:BuildPrompt()
 endfunc
 
 func! s:PrtAdd(char)
-	let g:CtrlP_prompt[0] = g:CtrlP_prompt[0] . a:char
+	let prt = g:CtrlP_prompt
+	let prt[0] = prt[0] . a:char
 	cal s:BuildPrompt()
 endfunc
 
 func! s:PrtBS()
-	let str = g:CtrlP_prompt[0]
-	let g:CtrlP_prompt[0] = strpart(str, -1, strlen(str))
+	let s:nomatches = 1
+	let prt = g:CtrlP_prompt
+	let prt[0] = strpart(prt[0], -1, strlen(prt[0]))
+	let g:CtrlP_prompt = prt
 	cal s:BuildPrompt()
 endfunc
 
 func! s:PrtDelete()
-	let g:CtrlP_prompt[1] = strpart(g:CtrlP_prompt[2], 0, 1)
-	let g:CtrlP_prompt[2] = strpart(g:CtrlP_prompt[2], 1)
+	let s:nomatches = 1
+	let prt = g:CtrlP_prompt
+	let prt[1] = strpart(prt[2], 0, 1)
+	let prt[2] = strpart(prt[2], 1)
+	let g:CtrlP_prompt = prt
 	cal s:BuildPrompt()
 endfunc
 
 func! s:PrtCurLeft()
 	if !empty(g:CtrlP_prompt[0])
-		let g:CtrlP_prompt[2] = g:CtrlP_prompt[1] . g:CtrlP_prompt[2]
-		let g:CtrlP_prompt[1] = strpart(g:CtrlP_prompt[0], strlen(g:CtrlP_prompt[0]) - 1)
-		let g:CtrlP_prompt[0] = strpart(g:CtrlP_prompt[0], -1, strlen(g:CtrlP_prompt[0]))
+		let prt = g:CtrlP_prompt
+		let prt[2] = prt[1] . prt[2]
+		let prt[1] = strpart(prt[0], strlen(prt[0]) - 1)
+		let prt[0] = strpart(prt[0], -1, strlen(prt[0]))
+		let g:CtrlP_prompt = prt
 	endif
 	cal s:BuildPrompt()
 endfunc
 
 func! s:PrtCurRight()
-	let g:CtrlP_prompt[0] = g:CtrlP_prompt[0] . g:CtrlP_prompt[1]
+	let prt = g:CtrlP_prompt
+	let prt[0] = prt[0] . prt[1]
+	let g:CtrlP_prompt = prt
 	cal s:PrtDelete()
 endfunc
 
 func! s:PrtCurStart()
-	let str = g:CtrlP_prompt[0] . g:CtrlP_prompt[1] . g:CtrlP_prompt[2]
-	let g:CtrlP_prompt[2] = strpart(str, 1)
-	let g:CtrlP_prompt[1] = strpart(str, 0, 1)
-	let g:CtrlP_prompt[0] = ''
+	let prt = g:CtrlP_prompt
+	let str = prt[0] . prt[1] . prt[2]
+	let prt[2] = strpart(str, 1)
+	let prt[1] = strpart(str, 0, 1)
+	let prt[0] = ''
+	let g:CtrlP_prompt = prt
 	cal s:BuildPrompt()
 endfunc
 
 func! s:PrtCurEnd()
-	let str = g:CtrlP_prompt[0] . g:CtrlP_prompt[1] . g:CtrlP_prompt[2]
-	let g:CtrlP_prompt[2] = ''
-	let g:CtrlP_prompt[1] = ''
-	let g:CtrlP_prompt[0] = str
+	let prt = g:CtrlP_prompt
+	let str = prt[0] . prt[1] . prt[2]
+	let prt[2] = ''
+	let prt[1] = ''
+	let prt[0] = str
+	let g:CtrlP_prompt = prt
 	cal s:BuildPrompt()
 endfunc
 
 func! s:PrtDeleteWord()
-	let str = g:CtrlP_prompt[0]
+	let s:nomatches = 1
+	let prt = g:CtrlP_prompt
+	let str = prt[0]
 	if match(str, ' [^ ]\+$') >= 0
 		let str = matchstr(str, '^.\+ \ze[^ ]\+$')
 	elseif match(str, '[ ]\+$') >= 0
@@ -675,6 +701,16 @@ endfunc
 
 func! s:AcceptSelection(mode,...) "{{{
 	let md = a:mode
+	" use .. to go back in the dir tree
+	if md == 'e'
+		let prt = g:CtrlP_prompt
+		let str = prt[0] . prt[1] . prt[2]
+		if str == '..'
+			cal s:parentdir(getcwd())
+			cal s:PrtClear()
+			retu
+		endif
+	endif
 	let matchstr = matchstr(getline('.'), '^> \zs.\+\ze\t*$')
 	let filepath = s:itemtype ? matchstr : getcwd().ctrlp#utils#lash().matchstr
 	let filename = split(filepath, ctrlp#utils#lash())[-1]
@@ -746,29 +782,31 @@ func! s:statusline(...)
 	let next    = itemtypes[s:walker(max, s:itemtype,  1, 1)][1]
 	let prev    = itemtypes[s:walker(max, s:itemtype, -1, 1)][1]
 	let item    = itemtypes[s:itemtype][0]
-	let focus   = s:Focus() ? 'prt'   : 'win'
-	let byfname = s:byfname ? 'file'  : 'path'
+	let focus   = s:Focus() ? 'prt'  : 'win'
+	let byfname = s:byfname ? 'file' : 'path'
 	let regex   = s:regexp  ? '%#Conditional#\ regex\ %*' : ''
 	let focus   = '%#MatchParen#\ '.focus.'\ %*'
 	let byfname = '%#Character#\ '.byfname.'\ %*'
 	let item    = '%#Constant#\ '.item.'\ %*'
-	exe 'setl stl='.focus.byfname.regex.'\ +-<'.prev.'>-{'.item.'}-<'.next.'>-+'
+	let slider  = '\ +-<'.prev.'>-{'.item.'}-<'.next.'>-+'
+	exe 'setl stl='.focus.byfname.regex.slider
 endfunc
 
 func! s:matchsubstr(item, pat)
 	retu match(split(a:item, '[\/]\ze[^\/]\+$')[-1], a:pat)
 endfunc
 
-func! s:matchlists(item, lst)
-	for each in a:lst
-		if match(a:item, each) >= 0 | retu 0 | endif
-	endfor
-	retu 1
-endfunc
-
 func! s:progress(entries)
 	exe 'setl stl=%#WarningMsg#\ '.len(a:entries).'\ %*\ '
 	redr
+endfunc
+
+func! s:parentdir(curr)
+	let parent = substitute(a:curr, '[\/]\zs[^\/]\+[\/]\?$', '', '')
+	if parent != a:curr
+		exe 'chdir' parent
+	endif
+	cal s:SetLines(s:itemtype)
 endfunc
 
 func! s:syntax()
@@ -799,6 +837,7 @@ func! s:hooks(type) "{{{
 endfunc "}}}
 
 func! ctrlp#init(type, ...) "{{{
+	let s:nomatches = 1
 	if exists('a:1')
 		sil! cal ctrlp#SetWorkingPath(a:1)
 	else

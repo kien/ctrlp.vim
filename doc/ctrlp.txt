@@ -322,6 +322,10 @@ c)  Strings end with a colon ':' followed by an arbitrary number will be read
     as a line number to jump to after opening the file.
     e.g. 'abc:45' will open the selected file and jump to line 45.
 
+d)  Type exactly two dots (..) at the start of the line and press enter to go
+    backward in the directory tree by 1 level. If the parent directory is
+    large, this might be slow.
+
 ===============================================================================
 6. Credits                                                      *ctrlp-credits*
 
@@ -343,10 +347,11 @@ CHANGELOG
 
                                                                *ctrlp-update-2*
 Update #2~
+    + New input format: '..' (section 5.d)
     + New mapping: <F5>.
-    + New commands: |:CtrlPRoot|,
-                    |:CtrlPCurWD|
-                    |:CtrlPCurFile|
+    + New commands: |:CtrlPCurWD|,
+                    |:CtrlPCurFile|,
+                    |:CtrlPRoot|
 
                                                                *ctrlp-update-1*
 Update #1~
