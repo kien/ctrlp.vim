@@ -747,7 +747,7 @@ func! s:AcceptSelection(mode,...) "{{{
 	else
 		exe 'bo '.cmd.' '.filepath
 	endif
-	if exists('s:jmpln') && empty('s:jmpln')
+	if exists('s:jmpln') && !empty('s:jmpln')
 		exe s:jmpln
 		keepj norm! 0zz
 	endif
