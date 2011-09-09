@@ -237,6 +237,8 @@ func! s:GetMatchedItems(items, pats, limit) "{{{
 	if len(items) >= s:mltipats_lim
 		let pats = [pats[-1]]
 	endif
+	" pesky little tilde
+	cal map(pats, 'substitute(v:val, "\\\~", "\\\\\\~", "g")')
 	" loop through the patterns
 	for each in pats
 		if exists('newitems') && len(newitems) < limit
