@@ -103,7 +103,7 @@ endif
 " Limiters
 let s:compare_lim = 3000
 let s:nocache_lim = 4000
-let s:mltipats_lim = 3000
+let s:mltipats_lim = 2000
 "}}}
 
 " Clear caches {{{
@@ -138,6 +138,7 @@ func! s:List(dirs, allfiles)
 	cal extend(allfiles, a:allfiles, 0)
 	if empty(alldirs)
 		let s:allfiles = allfiles
+		cal s:statusline()
 	else
 		let dirs = join(alldirs, ',')
 		cal s:progress(allfiles)
@@ -814,7 +815,6 @@ endfunc
 
 func! s:syntax()
 	syn match CtrlPNoEntries '^ == NO MATCHES ==$'
-	syn match CtrlPNoEntries '^ == DISABLED ==$'
 	syn match CtrlPLineMarker '^>'
 	hi link CtrlPNoEntries Error
 	hi CtrlPLineMarker guifg=bg
@@ -850,7 +850,6 @@ func! ctrlp#init(type, ...) "{{{
 	sil! cal s:SetupBlank()
 	sil! cal s:MapKeys()
 	sil! cal s:SetLines(a:type)
-	cal s:statusline()
 	cal s:BuildPrompt()
 	sil! cal s:syntax()
 endfunc "}}}
