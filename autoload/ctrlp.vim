@@ -502,6 +502,7 @@ endfunc
 func! s:PrtClearCache()
 	cal ctrlp#clearallcaches()
 	sil! cal s:SetLines(s:itemtype)
+	cal s:statusline()
 	cal s:BuildPrompt()
 endfunc
 "}}}
