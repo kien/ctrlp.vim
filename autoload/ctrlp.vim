@@ -191,20 +191,27 @@ func! s:SplitPattern(str,...) "{{{
 	if s:igspace
 		let str = substitute(a:str, ' ', '', 'g')
 	endif
+	" clear the jumptoline var
+	if exists('s:jmpln') | unl s:jmpln | endif
 	if s:regexp || match(str, '[*^$+|]') >= 0
 				\ || match(str, '\\\(zs\|ze\|<\|>\)') >= 0
 		let str = substitute(str, '\\\\', '\', 'g')
+		" If pattern contains :\d (e.g. abc:25)
+		if match(str, ':\d*$') >= 0
+			" get the line to jump to
+			let s:jmpln = matchstr(str, ':\zs\d*$')
+			" remove the line number
+			let str = substitute(str, '\zs:\d*$', '', 'g')
+		endif
+		" don't split but turn it into a patterns list with 1 entry
 		let array = [str]
-		if match(str, ':\d*$') >= 0 " If pattern contains :\d (e.g. abc:25)
-			let s:jmpln = matchstr(str, ':\d*$')
-			let array[0] = substitute(array[0], ':\d*$', '', 'g')
-		endif
 	elseif match(str, ':\d*$') >= 0 " If string contains :\d
-		let tmp = split(str, ':\ze\d*$')
-		let array = split(tmp[0], '\zs')
-		if len(tmp) >= 2
-			cal add(array, ':'.tmp[1])
-		endif
+		" get the line to jump to
+		let s:jmpln = matchstr(str, ':\zs\d*$')
+		" remove the line number
+		let str = substitute(str, '\zs:\d*$', '', 'g')
+		" split into chars
+		let array = split(str, '\zs')
 	else
 		let array = split(str, '\zs')
 	endif
@@ -226,12 +233,6 @@ func! s:GetMatchedItems(items, pats, limit) "{{{
 	let items = a:items
 	let pats  = a:pats
 	let limit = a:limit
-	" if pattern contains line number
-	if match(pats[-1], ':\d*$') >= 0
-		if exists('s:jmpln') | unl s:jmpln | endif
-		let s:jmpln = substitute(pats[-1], '.*\ze:\d*$', '', 'g')
-		cal remove(pats, -1)
-	endif
 	" if items is longer than s:mltipats_lim, use only the last pattern
 	if len(items) >= s:mltipats_lim
 		let pats = [pats[-1]]
@@ -361,7 +362,7 @@ func! s:Renderer(lines) "{{{
 	" Output to buffer
 	if len(nls) >= 1
 		setl cul
-		if s:itemtype != 2
+		if index([2], s:itemtype) < 0
 			cal sort(nls, 's:compare')
 		endif
 		if s:mwreverse
@@ -530,7 +531,7 @@ endfunc
 
 func! s:PrtClearCache()
 	cal ctrlp#clearallcaches()
-	sil! cal s:SetLines(s:itemtype)
+	cal s:SetLines(s:itemtype)
 	cal s:statusline()
 	cal s:BuildPrompt()
 endfunc
@@ -746,7 +747,7 @@ func! s:AcceptSelection(mode,...) "{{{
 	else
 		exe 'bo '.cmd.' '.filepath
 	endif
-	if exists('s:jmpln')
+	if exists('s:jmpln') && empty('s:jmpln')
 		exe s:jmpln
 		keepj norm! 0zz
 	endif
@@ -844,16 +845,16 @@ endfunc "}}}
 func! ctrlp#init(type, ...) "{{{
 	let s:nomatches = 1
 	if exists('a:1')
-		sil! cal ctrlp#SetWorkingPath(a:1)
+		cal ctrlp#SetWorkingPath(a:1)
 	else
-		sil! cal ctrlp#SetWorkingPath()
+		cal ctrlp#SetWorkingPath()
 	endif
-	sil! cal s:BufOpen('ControlP')
-	sil! cal s:SetupBlank()
-	sil! cal s:MapKeys()
-	sil! cal s:SetLines(a:type)
+	cal s:BufOpen('ControlP')
+	cal s:SetupBlank()
+	cal s:MapKeys()
+	cal s:SetLines(a:type)
 	cal s:BuildPrompt()
-	sil! cal s:syntax()
+	cal s:syntax()
 endfunc "}}}
 
 aug CtrlPAug "{{{
