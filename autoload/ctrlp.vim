@@ -629,6 +629,7 @@ endfunc
 func! s:ToggleRegex() "{{{
 	let s:regexp = s:regexp ? 0 : 1
 	cal s:statusline()
+	let s:nomatches = 1
 	cal s:BuildPrompt(s:Focus())
 endfunc "}}}
 
@@ -636,6 +637,7 @@ func! s:ToggleByFname() "{{{
 	let s:byfname = s:byfname ? 0 : 1
 	cal s:MapKeys(s:Focus(), 1)
 	cal s:statusline()
+	let s:nomatches = 1
 	cal s:BuildPrompt(s:Focus())
 endfunc "}}}
 
@@ -650,6 +652,7 @@ func! s:Type(type) "{{{
 	cal s:syntax()
 	cal s:SetLines(s:itemtype)
 	cal s:statusline()
+	let s:nomatches = 1
 	cal s:BuildPrompt(s:Focus())
 endfunc "}}}
 

@@ -15,6 +15,7 @@ Full path fuzzy file, buffer and MRU file finder for Vim.
 * Or press `<c-r>` while CtrlP is open to switch to full regexp search mode.
 * End the input string with a colon `:` followed with a number to jump to that line in the selected file.  
 e.g. `abc:45` to open the file matched the pattern and jump to line 45.
+* Submit two dots `..` as the input string to go backward the directory tree by 1 level.
 
 _Screenshot: filename only mode with the match window focused._  
 ![ctrlp filename mode, match window focused][2]
@@ -59,6 +60,6 @@ The parameter is the same (0, 1 or 2):
 
 _Check [the docs][3] for more mappings, commands and options._
 
-[1]: http://i.imgur.com/lQScr.png
+[1]: http://i.imgur.com/Gfntl.png
 [2]: http://i.imgur.com/MyRIv.png
 [3]: https://github.com/kien/ctrlp.vim/blob/master/doc/ctrlp.txt
