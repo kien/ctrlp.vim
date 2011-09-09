@@ -502,7 +502,6 @@ endfunc
 func! s:PrtClearCache()
 	cal ctrlp#clearallcaches()
 	sil! cal s:SetLines(s:itemtype)
-	sil! cal s:Renderer(s:lines)
 	cal s:BuildPrompt()
 endfunc
 "}}}
@@ -808,7 +807,6 @@ func! ctrlp#init(type, ...) "{{{
 	sil! cal s:SetupBlank()
 	sil! cal s:MapKeys()
 	sil! cal s:SetLines(a:type)
-	sil! cal s:Renderer(s:lines)
 	cal s:statusline()
 	cal s:BuildPrompt()
 	sil! cal s:syntax()
