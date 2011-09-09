@@ -788,11 +788,11 @@ func! s:statusline(...)
 	let item    = itemtypes[s:itemtype][0]
 	let focus   = s:Focus() ? 'prt'  : 'win'
 	let byfname = s:byfname ? 'file' : 'path'
-	let regex   = s:regexp  ? '%#Conditional#\ regex\ %*' : ''
-	let focus   = '%#MatchParen#\ '.focus.'\ %*'
+	let regex   = s:regexp  ? '%#LineNr#\ regex\ %*' : ''
+	let focus   = '%#LineNr#\ '.focus.'\ %*'
 	let byfname = '%#Character#\ '.byfname.'\ %*'
-	let item    = '%#Constant#\ '.item.'\ %*'
-	let slider  = '\ +-<'.prev.'>-{'.item.'}-<'.next.'>-+'
+	let item    = '%#Character#\ '.item.'\ %*'
+	let slider  = '\ <'.prev.'>={'.item.'}=<'.next.'>'
 	exe 'setl stl='.focus.byfname.regex.slider
 endfunc
 
@@ -801,7 +801,7 @@ func! s:matchsubstr(item, pat)
 endfunc
 
 func! s:progress(entries)
-	exe 'setl stl=%#WarningMsg#\ '.len(a:entries).'\ %*\ '
+	exe 'setl stl=%#Function#\ '.len(a:entries).'\ %*\ '
 	redr
 endfunc
 
