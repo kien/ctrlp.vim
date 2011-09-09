@@ -126,19 +126,16 @@ endfunc
 " ListAllFiles {{{
 func! s:List(dirs, allfiles)
 	" note: wildignore is ignored when using **
-	let entries = split(globpath(a:dirs, '*'), '\n')
+	let entries      = split(globpath(a:dirs, '*'), '\n')
 	let entries_copy = deepcopy(entries)
-	let alldirs = filter(entries, 'isdirectory(v:val)')
-	let allfiles = filter(entries_copy, '!isdirectory(v:val)')
-	if empty(allfiles)
-		let allfiles = a:allfiles
-	else
-		cal extend(allfiles, a:allfiles)
-	endif
+	let alldirs      = filter(entries, 'isdirectory(v:val)')
+	let allfiles     = filter(entries_copy, '!isdirectory(v:val)')
+	cal extend(allfiles, a:allfiles, 0)
 	if empty(alldirs)
 		let s:allfiles = allfiles
 	else
 		let dirs = join(alldirs, ',')
+		cal s:progress(allfiles)
 		cal s:List(dirs, allfiles)
 	endif
 endfunc
@@ -146,8 +143,11 @@ endfunc
 func! s:ListAllFiles(path)
 	let cache_file = ctrlp#utils#cachefile()
 	if g:ctrlp_newcache || !filereadable(cache_file) || !s:caching
+		" get the files
 		cal s:List(a:path, [])
 		let allfiles = s:allfiles
+		unl s:allfiles
+		" remove base directory
 		let path = &ssl || !exists('+ssl') ? getcwd().'/' : substitute(getcwd(), '\', '\\\\', 'g').'\\'
 		cal map(allfiles, 'substitute(v:val, path, "", "g")')
 		let read_cache = 0
@@ -255,7 +255,6 @@ func! s:GetMatchedItems(items, pats, limit) "{{{
 endfunc "}}}
 
 func! s:SetupBlank() "{{{
-	cal s:statusline()
 	setf ctrlp
 	setl bt=nofile
 	setl bh=delete
@@ -277,6 +276,7 @@ func! s:SetupBlank() "{{{
 		setl noudf
 		setl cc=0
 	endif
+	redr
 endfunc "}}}
 
 func! s:BufOpen(...) "{{{
@@ -745,11 +745,14 @@ func! s:statusline(...)
 	let max     = len(itemtypes) - 1
 	let next    = itemtypes[s:walker(max, s:itemtype,  1, 1)][1]
 	let prev    = itemtypes[s:walker(max, s:itemtype, -1, 1)][1]
-	let regex   = s:regexp  ? '[regex]' : ''
-	let byfname = s:byfname ? '[file]'  : '[path]'
-	let focus   = s:Focus() ? '[prt]'   : '[win]'
 	let item    = itemtypes[s:itemtype][0]
-	exe 'setl stl='.focus.byfname.regex.'+-('.prev.')-[['.item.']]-('.next.')-+'
+	let focus   = s:Focus() ? 'prt'   : 'win'
+	let byfname = s:byfname ? 'file'  : 'path'
+	let regex   = s:regexp  ? '%#Conditional#\ regex\ %*' : ''
+	let focus   = '%#MatchParen#\ '.focus.'\ %*'
+	let byfname = '%#Character#\ '.byfname.'\ %*'
+	let item    = '%#Constant#\ '.item.'\ %*'
+	exe 'setl stl='.focus.byfname.regex.'\ +-<'.prev.'>-{'.item.'}-<'.next.'>-+'
 endfunc
 
 func! s:matchsubstr(item, pat)
@@ -761,6 +764,11 @@ func! s:matchlists(item, lst)
 		if match(a:item, each) >= 0 | retu 0 | endif
 	endfor
 	retu 1
+endfunc
+
+func! s:progress(entries)
+	exe 'setl stl=%#WarningMsg#\ '.len(a:entries).'\ %*\ '
+	redr
 endfunc
 
 func! s:syntax()
@@ -796,11 +804,12 @@ func! ctrlp#init(type, ...) "{{{
 	else
 		sil! cal ctrlp#SetWorkingPath()
 	endif
-	sil! cal s:SetLines(a:type)
 	sil! cal s:BufOpen('ControlP')
 	sil! cal s:SetupBlank()
 	sil! cal s:MapKeys()
+	sil! cal s:SetLines(a:type)
 	sil! cal s:Renderer(s:lines)
+	cal s:statusline()
 	cal s:BuildPrompt()
 	sil! cal s:syntax()
 endfunc "}}}
