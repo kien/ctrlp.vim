@@ -361,7 +361,9 @@ func! s:Renderer(lines) "{{{
 	" Output to buffer
 	if len(nls) >= 1
 		setl cul
-		cal sort(nls, 's:compare')
+		if s:itemtype != 2
+			cal sort(nls, 's:compare')
+		endif
 		if s:mwreverse
 			cal reverse(nls)
 		endif
