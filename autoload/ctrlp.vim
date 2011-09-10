@@ -138,8 +138,8 @@ endfunc
 " ListAllFiles {{{
 func! s:List(dirs, allfiles)
 	" note: wildignore is ignored when using **
-	let entries  = split(globpath(a:dirs, '*'), '\n')
-	let entries  = s:dotfiles ? extend(entries, split(globpath(a:dirs, '.*'), '\n')) : entries
+	let glob     = s:dotfiles ? '.*\|*' : '*'
+	let entries  = split(globpath(a:dirs, glob), '\n')
 	let entries2 = deepcopy(entries)
 	let alldirs  = s:dotfiles ? filter(entries, 's:dirfilter(v:val)') : filter(entries, 'isdirectory(v:val)')
 	let allfiles = filter(entries2, '!isdirectory(v:val)')
@@ -195,7 +195,7 @@ func! s:ListAllBuffers() "{{{
 endfunc "}}}
 
 func! s:SplitPattern(str,...) "{{{
-	" Split into a list, ignoring spaces
+	" ignore spaces
 	if s:igspace
 		let str = substitute(a:str, ' ', '', 'g')
 	endif
@@ -273,7 +273,6 @@ func! s:GetMatchedItems(items, pats, limit) "{{{
 endfunc "}}}
 
 func! s:SetupBlank() "{{{
-	setf ctrlp
 	setl bt=nofile
 	setl bh=delete
 	setl noswf
