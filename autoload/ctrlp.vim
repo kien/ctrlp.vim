@@ -306,6 +306,9 @@ func! s:BufOpen(...) "{{{
 	if bufnum > 0 && bufwinnr(bufnum) > 0
 		exe bufwinnr(bufnum).'winc w'
 		exe 'winc c'
+		if s:pinput != 2 && exists('g:CtrlP_cline')
+			unl g:CtrlP_cline
+		endif
 	endif
 	if exists('a:2')
 		" Restore the changed global options
@@ -393,7 +396,7 @@ func! s:Renderer(lines) "{{{
 		cal setline('1', ' == NO MATCHES ==')
 	endif
 	" Remember selected line
-	if exists('g:CtrlP_cline') && s:pinput == 2
+	if exists('g:CtrlP_cline')
 		cal setpos('.', [0, g:CtrlP_cline, 1, 0])
 	endif
 endfunc "}}}
