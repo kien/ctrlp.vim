@@ -100,6 +100,13 @@ else
 	unl g:ctrlp_prompt_mappings
 endif
 
+if !exists('g:ctrlp_dotfiles')
+	let s:dotfiles = 1
+else
+	let s:dotfiles = g:ctrlp_dotfiles
+	unl g:ctrlp_dotfiles
+endif
+
 " Limiters
 let s:compare_lim = 3000
 let s:nocache_lim = 4000
@@ -131,10 +138,11 @@ endfunc
 " ListAllFiles {{{
 func! s:List(dirs, allfiles)
 	" note: wildignore is ignored when using **
-	let entries      = split(globpath(a:dirs, '*'), '\n')
-	let entries_copy = deepcopy(entries)
-	let alldirs      = filter(entries, 'isdirectory(v:val)')
-	let allfiles     = filter(entries_copy, '!isdirectory(v:val)')
+	let entries  = split(globpath(a:dirs, '*'), '\n')
+	let entries  = s:dotfiles ? extend(entries, split(globpath(a:dirs, '.*'), '\n')) : entries
+	let entries2 = deepcopy(entries)
+	let alldirs  = s:dotfiles ? filter(entries, 's:dirfilter(v:val)') : filter(entries, 'isdirectory(v:val)')
+	let allfiles = filter(entries2, '!isdirectory(v:val)')
 	cal extend(allfiles, a:allfiles, 0)
 	if empty(alldirs)
 		let s:allfiles = allfiles
@@ -449,7 +457,6 @@ func! s:PrtBS()
 	let s:nomatches = 1
 	let prt = g:CtrlP_prompt
 	let prt[0] = strpart(prt[0], -1, strlen(prt[0]))
-	let g:CtrlP_prompt = prt
 	cal s:BuildPrompt()
 endfunc
 
@@ -458,7 +465,6 @@ func! s:PrtDelete()
 	let prt = g:CtrlP_prompt
 	let prt[1] = strpart(prt[2], 0, 1)
 	let prt[2] = strpart(prt[2], 1)
-	let g:CtrlP_prompt = prt
 	cal s:BuildPrompt()
 endfunc
 
@@ -468,7 +474,6 @@ func! s:PrtCurLeft()
 		let prt[2] = prt[1] . prt[2]
 		let prt[1] = strpart(prt[0], strlen(prt[0]) - 1)
 		let prt[0] = strpart(prt[0], -1, strlen(prt[0]))
-		let g:CtrlP_prompt = prt
 	endif
 	cal s:BuildPrompt()
 endfunc
@@ -476,7 +481,6 @@ endfunc
 func! s:PrtCurRight()
 	let prt = g:CtrlP_prompt
 	let prt[0] = prt[0] . prt[1]
-	let g:CtrlP_prompt = prt
 	cal s:PrtDelete()
 endfunc
 
@@ -486,7 +490,6 @@ func! s:PrtCurStart()
 	let prt[2] = strpart(str, 1)
 	let prt[1] = strpart(str, 0, 1)
 	let prt[0] = ''
-	let g:CtrlP_prompt = prt
 	cal s:BuildPrompt()
 endfunc
 
@@ -496,7 +499,6 @@ func! s:PrtCurEnd()
 	let prt[2] = ''
 	let prt[1] = ''
 	let prt[0] = str
-	let g:CtrlP_prompt = prt
 	cal s:BuildPrompt()
 endfunc
 
@@ -511,7 +513,7 @@ func! s:PrtDeleteWord()
 	elseif match(str, ' ') <= 0
 		let str = ''
 	endif
-	let g:CtrlP_prompt[0] = str
+	let prt[0] = str
 	cal s:BuildPrompt()
 endfunc
 
@@ -581,7 +583,7 @@ func! s:MapSpecs(...)
 				\ 'PrtCurLeft()':               ['<c-h>', '<left>'],
 				\ 'PrtCurRight()':              ['<c-l>', '<right>'],
 				\ 'PrtClearCache()':            ['<F5>'],
-				\ 'BufOpen("ControlP", "del")': ['<esc>', '<c-c>'],
+				\ 'BufOpen("ControlP", "del")': ['<esc>', '<c-c>', '<c-g>'],
 				\ }
 	if type(s:urprtmaps) == 4
 		cal extend(prtmaps, s:urprtmaps)
@@ -808,6 +810,13 @@ endfunc
 func! s:progress(entries)
 	exe 'setl stl=%#Function#\ '.len(a:entries).'\ %*\ '
 	redr
+endfunc
+
+func! s:dirfilter(val)
+	if isdirectory(a:val) && match(a:val, '[\/]\.\{,2}$') < 0
+		retu 1
+	endif
+	retu 0
 endfunc
 
 func! s:parentdir(curr)

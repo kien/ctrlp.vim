@@ -180,6 +180,11 @@ Example: >
   let g:ctrlp_mruf_include = '\.py$\|\.rb$'
 <
 
+                                                           *'g:ctrlp_dotfiles'*
+Set this to 0 if you don’t want |CtrlP| to search for dotfiles: >
+  let g:ctrlp_dotfiles = 1
+<
+
 ===============================================================================
 3. Commands                                                    *ctrlp-commands*
 
@@ -349,6 +354,7 @@ CHANGELOG
 Update #2~
     + New input format: '..' (section 5.d)
     + New mapping: <F5>.
+    + New option: |g:ctrlp_dotfiles|
     + New commands: |:CtrlPCurWD|,
                     |:CtrlPCurFile|,
                     |:CtrlPRoot|
