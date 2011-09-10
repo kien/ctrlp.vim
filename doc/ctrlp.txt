@@ -301,7 +301,7 @@ Once inside the prompt:
     Open selected file in a 'horizontal' split
 
   <F5>
-    Refresh the match window and clear the cache.
+    Refresh the match window.
 
   <esc>,
   <c-c>,
@@ -354,7 +354,7 @@ CHANGELOG
                                                                *ctrlp-update-2*
 Update #2~
     + Extended the behavior of |g:ctrlp_persistent_input|
-    + New options: |g:ctrlp_dotfiles|
+    + New option: |g:ctrlp_dotfiles|
     + New input format: '..' (section 5.d)
     + New mapping: <F5>.
     + New commands: |:CtrlPCurWD|,

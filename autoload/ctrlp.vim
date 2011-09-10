@@ -146,10 +146,9 @@ func! s:List(dirs, allfiles)
 	cal extend(allfiles, a:allfiles, 0)
 	if empty(alldirs)
 		let s:allfiles = allfiles
-		cal s:statusline()
 	else
 		let dirs = join(alldirs, ',')
-		cal s:progress(allfiles)
+		cal s:progress(len(allfiles))
 		cal s:List(dirs, allfiles)
 	endif
 endfunc
@@ -211,7 +210,7 @@ func! s:SplitPattern(str,...) "{{{
 			" remove the line number
 			let str = substitute(str, '\zs:\d*$', '', 'g')
 		endif
-		" don't split but turn it into a patterns list with 1 entry
+		" don't split
 		let array = [str]
 	elseif match(str, ':\d*$') >= 0 " If string contains :\d
 		" get the line to jump to
@@ -304,8 +303,7 @@ func! s:BufOpen(...) "{{{
 	let bufnum = bufnr(buf)
 	" Closing
 	if bufnum > 0 && bufwinnr(bufnum) > 0
-		exe bufwinnr(bufnum).'winc w'
-		exe 'winc c'
+		exe 'bw!' a:1
 		if s:pinput != 2 && exists('g:CtrlP_cline')
 			unl g:CtrlP_cline
 		endif
@@ -376,6 +374,7 @@ func! s:Renderer(lines) "{{{
 	" Output to buffer
 	if len(nls) >= 1
 		setl cul
+		" don't sort
 		if index([2], s:itemtype) < 0
 			cal sort(nls, 's:compare')
 		endif
@@ -413,9 +412,9 @@ endfunc "}}}
 func! s:LinesFilter() "{{{
 	" tiny performance increase, but every little bit counts
 	if exists('g:CtrlP_prompt_prev')
-		let prt      = g:CtrlP_prompt
+		let prt = g:CtrlP_prompt
+		let str = prt[0] . prt[1] . prt[2]
 		let prt_prev = g:CtrlP_prompt_prev
-		let str      = prt[0] . prt[1] . prt[2]
 		let str_prev = prt_prev[0] . prt_prev[1] . prt_prev[2]
 	endif
 	if exists('s:matcheditems') && len(s:matcheditems) < s:mxheight
@@ -558,7 +557,7 @@ func! s:PrtSelectJump(char,...)
 endfunc
 
 func! s:PrtClearCache()
-	cal ctrlp#clearallcaches()
+	cal ctrlp#clearcache()
 	cal s:SetLines(s:itemtype)
 	cal s:statusline()
 	cal s:BuildPrompt()
@@ -831,8 +830,8 @@ func! s:matchsubstr(item, pat)
 	retu match(split(a:item, '[\/]\ze[^\/]\+$')[-1], a:pat)
 endfunc
 
-func! s:progress(entries)
-	exe 'setl stl=%#Function#\ '.len(a:entries).'\ %*\ '
+func! s:progress(len)
+	exe 'setl stl=%#Function#\ '.a:len.'\ %*\ '
 	redr
 endfunc
 
@@ -889,6 +888,7 @@ func! ctrlp#init(type, ...) "{{{
 	cal s:MapKeys()
 	cal s:SetLines(a:type)
 	cal s:BuildPrompt()
+	cal s:statusline()
 	cal s:syntax()
 endfunc "}}}
 
