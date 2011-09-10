@@ -76,6 +76,13 @@ else
 	unl g:ctrlp_use_caching
 endif
 
+if !exists('g:ctrlp_clear_cache_on_exit')
+	let s:cconex = 1
+else
+	let s:cconex = g:ctrlp_clear_cache_on_exit
+	unl g:ctrlp_clear_cache_on_exit
+endif
+
 if !exists('g:ctrlp_cache_dir')
 	let s:cache_dir = $HOME
 else
@@ -251,7 +258,6 @@ func! s:GetMatchedItems(items, pats, limit) "{{{
 		" if newitems is small, set it as items to search in
 		if exists('newitems') && len(newitems) < limit
 			let items = deepcopy(newitems)
-			let s:matcheditems = deepcopy(items)
 		endif
 		if empty(items) " end here
 			retu exists('newitems') ? newitems : []
@@ -403,26 +409,9 @@ endfunc "}}}
 func! s:UpdateMatches(pat) "{{{
 	" Delete the buffer's content
 	sil! %d _
-	let items = s:LinesFilter()
 	let pats  = s:SplitPattern(a:pat)
-	let lines = s:GetMatchedItems(items, pats, s:mxheight)
+	let lines = s:GetMatchedItems(s:lines, pats, s:mxheight)
 	cal s:Renderer(lines)
-endfunc "}}}
-
-func! s:LinesFilter() "{{{
-	" tiny performance increase, but every little bit counts
-	if exists('g:CtrlP_prompt_prev')
-		let prt = g:CtrlP_prompt
-		let str = prt[0] . prt[1] . prt[2]
-		let prt_prev = g:CtrlP_prompt_prev
-		let str_prev = prt_prev[0] . prt_prev[1] . prt_prev[2]
-	endif
-	if exists('s:matcheditems') && len(s:matcheditems) < s:mxheight
-				\ && exists('str') && match(str, str_prev) >= 0
-		retu s:matcheditems
-	else
-		retu s:lines
-	endif
 endfunc "}}}
 
 func! s:BuildPrompt(...) "{{{
@@ -469,7 +458,6 @@ endfunc
 
 func! s:PrtAdd(char)
 	let prt = g:CtrlP_prompt
-	let g:CtrlP_prompt_prev = deepcopy(g:CtrlP_prompt)
 	let prt[0] = prt[0] . a:char
 	cal s:BuildPrompt()
 endfunc
@@ -892,9 +880,15 @@ func! ctrlp#init(type, ...) "{{{
 	cal s:syntax()
 endfunc "}}}
 
-aug CtrlPAug "{{{
+" Autocmds {{{
+aug CtrlPAug
 	au!
 	au BufLeave,WinLeave ControlP cal s:BufOpen('ControlP', 'del')
-aug END "}}}
+	au VimLeavePre *
+				\ if s:cconex
+				\ | cal ctrlp#clearallcaches() |
+				\ endif
+aug END
+"}}}
 
 " vim:fen:fdl=0:ts=2:sw=2:sts=2

@@ -110,9 +110,16 @@ Set this to 1 to set full |regexp| search as the default mode: >
 <
 
                                                         *'g:ctrlp_use_caching'*
-Set this to 0 to disable cross-sessions caching (flat files). When disabled,
-it’ll still be enabled if the working directory has more than 4000 files: >
+Set this to 0 to disable per-session caching. When disabled, caching will still
+be enabled for directories that have more than 4000 files: >
   let g:ctrlp_use_caching = 1
+<
+Note: you can quickly purge the cache by pressing <F5>.
+
+                                                *'g:ctrlp_clear_cache_on_exit'*
+Set this to 0 to enable cross-sessions caching by not clearing caches upon
+exit: >
+  let g:ctrlp_clear_cache_on_exit = 1
 <
 
                                                           *'g:ctrlp_cache_dir'*
@@ -301,7 +308,7 @@ Once inside the prompt:
     Open selected file in a 'horizontal' split
 
   <F5>
-    Refresh the match window.
+    Refresh the match window and purge the cache for the current directory.
 
   <esc>,
   <c-c>,
@@ -354,7 +361,8 @@ CHANGELOG
                                                                *ctrlp-update-2*
 Update #2~
     + Extended the behavior of |g:ctrlp_persistent_input|
-    + New option: |g:ctrlp_dotfiles|
+    + New option: |g:ctrlp_dotfiles|,
+                  |g:ctrlp_clear_cache_on_exit|
     + New input format: '..' (section 5.d)
     + New mapping: <F5>.
     + New commands: |:CtrlPCurWD|,
