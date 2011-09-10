@@ -249,12 +249,14 @@ func! s:GetMatchedItems(items, pats, limit) "{{{
 	cal map(pats, 'substitute(v:val, "\\\~", "\\\\\\~", "g")')
 	" loop through the patterns
 	for each in pats
+		" if newitems is small, set it as items to search in
 		if exists('newitems') && len(newitems) < limit
-			let items = newitems
+			let items = deepcopy(newitems)
+			let s:matcheditems = deepcopy(items)
 		endif
-		if empty(items)
+		if empty(items) " end here
 			retu exists('newitems') ? newitems : []
-		else
+		else " start here, goes back up if has 2 or more in pats
 			let newitems = []
 			" loop through the items
 			for item in items
@@ -391,7 +393,7 @@ func! s:Renderer(lines) "{{{
 		cal setline('1', ' == NO MATCHES ==')
 	endif
 	" Remember selected line
-	if exists('g:CtrlP_cline')
+	if exists('g:CtrlP_cline') && s:pinput == 2
 		cal setpos('.', [0, g:CtrlP_cline, 1, 0])
 	endif
 endfunc "}}}
@@ -399,9 +401,26 @@ endfunc "}}}
 func! s:UpdateMatches(pat) "{{{
 	" Delete the buffer's content
 	sil! %d _
-	let newpat = s:SplitPattern(a:pat)
-	let lines  = s:GetMatchedItems(s:lines, newpat, s:mxheight)
+	let items = s:LinesFilter()
+	let pats  = s:SplitPattern(a:pat)
+	let lines = s:GetMatchedItems(items, pats, s:mxheight)
 	cal s:Renderer(lines)
+endfunc "}}}
+
+func! s:LinesFilter() "{{{
+	" tiny performance increase, but every little bit counts
+	if exists('g:CtrlP_prompt_prev')
+		let prt      = g:CtrlP_prompt
+		let prt_prev = g:CtrlP_prompt_prev
+		let str      = prt[0] . prt[1] . prt[2]
+		let str_prev = prt_prev[0] . prt_prev[1] . prt_prev[2]
+	endif
+	if exists('s:matcheditems') && len(s:matcheditems) < s:mxheight
+				\ && exists('str') && match(str, str_prev) >= 0
+		retu s:matcheditems
+	else
+		retu s:lines
+	endif
 endfunc "}}}
 
 func! s:BuildPrompt(...) "{{{
@@ -448,6 +467,7 @@ endfunc
 
 func! s:PrtAdd(char)
 	let prt = g:CtrlP_prompt
+	let g:CtrlP_prompt_prev = deepcopy(g:CtrlP_prompt)
 	let prt[0] = prt[0] . a:char
 	cal s:BuildPrompt()
 endfunc

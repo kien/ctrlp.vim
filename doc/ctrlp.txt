@@ -51,8 +51,9 @@ setting is from bottom to top: >
 <
 
                                                    *'g:ctrlp_persistent_input'*
-Remember the last input string and position of the selection in the match
-window: >
+Remember the last input string. Set this to 2 to also remember the last
+position of the selection in the match window and 0 to completely disable this
+feature: >
   let g:ctrlp_persistent_input = 1
 <
 
@@ -352,9 +353,10 @@ CHANGELOG
 
                                                                *ctrlp-update-2*
 Update #2~
+    + Extended the behavior of |g:ctrlp_persistent_input|
+    + New option: |g:ctrlp_dotfiles|
     + New input format: '..' (section 5.d)
     + New mapping: <F5>.
-    + New option: |g:ctrlp_dotfiles|
     + New commands: |:CtrlPCurWD|,
                     |:CtrlPCurFile|,
                     |:CtrlPRoot|
