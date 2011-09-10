@@ -70,7 +70,7 @@ else
 endif
 
 if !exists('g:ctrlp_use_caching')
-	let s:caching = 0
+	let s:caching = 1
 else
 	let s:caching = g:ctrlp_use_caching
 	unl g:ctrlp_use_caching
@@ -525,8 +525,10 @@ func! s:PrtDeleteWord()
 	let s:nomatches = 1
 	let prt = g:CtrlP_prompt
 	let str = prt[0]
-	if match(str, ' [^ ]\+$') >= 0
-		let str = matchstr(str, '^.\+ \ze[^ ]\+$')
+	if match(str, '\W\w\+$') >= 0
+		let str = matchstr(str, '^.\+\W\ze\w\+$')
+	elseif match(str, '\w\W\+$') >= 0
+		let str = matchstr(str, '^.\+\w\ze\W\+$')
 	elseif match(str, '[ ]\+$') >= 0
 		let str = matchstr(str, '^.*[^ ]\+\ze[ ]\+$')
 	elseif match(str, ' ') <= 0
