@@ -192,6 +192,11 @@ Example: >
 Set this to 0 if you don’t want |CtrlP| to search for dotfiles and dotdirs: >
   let g:ctrlp_dotfiles = 1
 <
+You can also use |'wildignore'| to exclude anything from the search.
+e.g. exclude version control directories from the results: >
+  set wildignore+=.git/*,.hg/*,.svn/*  " Linux/MacOSX
+  set wildignore+=.git\*,.hg\*,.svn\*  " Windows
+<
 
                                                     *'g:ctrlp_highlight_match'*
 Use this to enable/disable highlighting of the matched patterns and to specify

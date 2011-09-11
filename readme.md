@@ -1,5 +1,5 @@
 # ctrlp.vim
-Full path fuzzy file, buffer and MRU file finder for Vim.
+Full path fuzzy __file__, __buffer__ and __MRU__ file finder for Vim.
 
 * Written in pure Vimscript for MacVim and Vim 7.0+.
 * Has full support for Vim’s regexp as search pattern, and more.
@@ -56,6 +56,14 @@ The parameter is the same (0, 1 or 2):
 
     ```vim
     let g:ctrlp_mru_files = 1
+    ```
+
+* If you want to exclude directories or files from the search, you can use the Vim’s option `wildignore`.  
+e.g. Just have something like this in your vimrc:
+
+    ```vim
+    set wildignore+=.git/*,.hg/*,.svn/*   " for Linux/MacOSX
+    set wildignore+=.git\*,.hg\*,.svn\*   " for Windows
     ```
 
 _Check [the docs][3] for more mappings, commands and options._
