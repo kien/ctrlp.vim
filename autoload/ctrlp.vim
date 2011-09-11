@@ -187,7 +187,7 @@ func! s:ListAllFiles(path)
 			let allfiles = s:allfiles
 			unl s:allfiles
 		else
-			cal s:progress(escape('Indexing files...', ' '))
+			cal s:progress(escape('Waiting...', ' '))
 			try
 				let allfiles = split(system(printf(g:ctrlp_user_command, shellescape(a:path))), '\n')
 			catch

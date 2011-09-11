@@ -205,21 +205,24 @@ Use %s in place of the target directory: >
   let g:ctrlp_user_command = ''
 <
 Examples: >
-  " Linux/MacOSX:
-  let g:ctrlp_user_command = 'find %s -type f'
+  let g:ctrlp_user_command = 'find %s -type f'       " MacOSX/Linux
+  let g:ctrlp_user_command = 'dir %s /-n /b /s /a-d' " Windows
+<
 
-  " Windows:
-  let g:ctrlp_user_command = 'dir %s /-n /b /s /a-d'
+You can also use 'grep', 'findstr' or something else to filter the results.
+Examples: >
+  let g:ctrlp_user_command = 'find %s -type f | grep (?!tmp/.*)'
+  let g:ctrlp_user_command = 'dir %s /-n /b /s /a-d | findstr .*\.py$'
 <
 
 ===============================================================================
 3. Commands                                                    *ctrlp-commands*
 
                                                                        *:CtrlP*
-:CtrlP [<start-directory>]
+:CtrlP [starting-directory]
    Open the |CtrlP| prompt in find files mode.
    If no argument is given, the value of |g:ctrlp_working_path_mode| will be
-   used to determined the |current-directory|.
+   used to determined the starting directory.
 
                                                                  *:CtrlPBuffer*
 :CtrlPBuffer
@@ -393,6 +396,7 @@ CHANGELOG
 Update #2~
     + Ability to cycle through matched lines in the match window.
     + Extended the behavior of |g:ctrlp_persistent_input|
+    + Extended the behavior of |:CtrlP|
     + New option: |g:ctrlp_dotfiles|,
                   |g:ctrlp_clear_cache_on_exit|,
                   |g:ctrlp_highlight_match|,
