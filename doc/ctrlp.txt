@@ -44,6 +44,16 @@ Use this option to disable the plugin completely: >
   let g:loaded_ctrlp = 1
 <
 
+                                                        *'g:ctrlp_by_filename'*
+Set this to 1 to set search by filename (not full path) as the default: >
+  let g:ctrlp_by_filename = 0
+<
+
+                                                      *'g:ctrlp_regexp_search'*
+Set this to 1 to set full |regexp| search as the default mode: >
+  let g:ctrlp_regexp_search = 0
+<
+
                                               *'g:ctrlp_match_window_reversed'*
 Reverse the sort order of the matched files in the match window. The default
 setting is from bottom to top: >
@@ -104,11 +114,6 @@ Set the maximum height of the match window: >
   let g:ctrlp_max_height = 10
 <
 
-                                                      *'g:ctrlp_regexp_search'*
-Set this to 1 to set full |regexp| search as the default mode: >
-  let g:ctrlp_regexp_search = 0
-<
-
                                                         *'g:ctrlp_use_caching'*
 Set this to 0 to disable per-session caching. When disabled, caching will still
 be enabled for directories that have more than 4000 files: >
@@ -117,7 +122,7 @@ be enabled for directories that have more than 4000 files: >
 Note: you can quickly purge the cache by pressing <F5>.
 
                                                 *'g:ctrlp_clear_cache_on_exit'*
-Set this to 0 to enable cross-sessions caching by not clearing caches upon
+Set this to 0 to enable cross-sessions caching by not deleting the caches upon
 exit: >
   let g:ctrlp_clear_cache_on_exit = 1
 <
@@ -125,11 +130,6 @@ exit: >
                                                           *'g:ctrlp_cache_dir'*
 Set the parent directory for the '.ctrlp_cache' directory: >
   let g:ctrlp_cache_dir = $HOME
-<
-
-                                                        *'g:ctrlp_by_filename'*
-Set this to 1 to set search by filename (not full path) as the default: >
-  let g:ctrlp_by_filename = 0
 <
 
                                                     *'g:ctrlp_prompt_mappings'*
@@ -189,16 +189,37 @@ Example: >
 <
 
                                                            *'g:ctrlp_dotfiles'*
-Set this to 0 if you don’t want |CtrlP| to search for dotfiles: >
+Set this to 0 if you don’t want |CtrlP| to search for dotfiles and dotdirs: >
   let g:ctrlp_dotfiles = 1
+<
+
+                                                    *'g:ctrlp_highlight_match'*
+Use this to enable/disable highlighting of the matched patterns and to specify
+the highlight group that’ll be used: >
+  let g:ctrlp_highlight_match = [1, 'Function']
+<
+
+                                                       *'g:ctrlp_user_command'*
+Specify an external tool to use for indexing files instead of Vim’s globpath().
+Use %s in place of the target directory: >
+  let g:ctrlp_user_command = ''
+<
+Examples: >
+  " Linux/MacOSX:
+  let g:ctrlp_user_command = 'find %s -type f'
+
+  " Windows:
+  let g:ctrlp_user_command = 'dir %s /-n /b /s /a-d'
 <
 
 ===============================================================================
 3. Commands                                                    *ctrlp-commands*
 
                                                                        *:CtrlP*
-:CtrlP
+:CtrlP [<start-directory>]
    Open the |CtrlP| prompt in find files mode.
+   If no argument is given, the value of |g:ctrlp_working_path_mode| will be
+   used to determined the |current-directory|.
 
                                                                  *:CtrlPBuffer*
 :CtrlPBuffer
@@ -216,19 +237,21 @@ Set this to 0 if you don’t want |CtrlP| to search for dotfiles: >
 :ClearAllCtrlPCaches
    Delete all the saved cache files in |ctrlp_cache_dir|.
 
+The following commands ignore the value of |g:ctrlp_working_path_mode|:
+
                                                                   *:CtrlPCurWD*
 :CtrlPCurWD
-   Find files in the current working directory.
-   Ignores |g:ctrlp_working_path_mode|.
+   Find files in the |current-directory|.
 
                                                                 *:CtrlPCurFile*
 :CtrlPCurFile
-   Find files in the same directory as the current file, recursively.
+   Find files in the same directory as the current file, regardless of what the
+   |current-directory| is.
 
                                                                    *:CtrlPRoot*
 :CtrlPRoot
    Same as |:CtrlPCurFile| but start from the project’s root.
-   See also |g:ctrlp_working_path_mode|.
+   Check |g:ctrlp_working_path_mode| to see how |CtrlP| finds a root.
 
 ===============================================================================
 4. Mappings                                                    *ctrlp-mappings*
@@ -244,7 +267,7 @@ Once inside the prompt:
     |regexp| mode.
     (note: in full |regexp| mode, the prompt’s base is 'r>>' instead of '>>>')
 
-    See also |input-formats|.
+    See also |input-formats| and |g:ctrlp_regexp_search|.
 
   <c-d>
     Toggle between full path search and filename only search.
@@ -289,7 +312,7 @@ Once inside the prompt:
     Move the cursor one character to the 'right'
 
   <c-w>
-    Delete a preceding (inner) word
+    Delete a preceding inner word
 
   <c-u>
     Clear the input field
@@ -317,6 +340,14 @@ Once inside the prompt:
 
 Chose your own mappings with |g:ctrlp_prompt_mappings|.
 
+When inside the match window (press <tab> to switch to):
+
+  a-z
+  0-9
+  ~^-=;`',.+!@#$%&_(){}[]
+    Cycle through the lines with the first letter (paths or filenames) that
+    match that character.
+
 ===============================================================================
 5. Input Formats                                          *ctrlp-input-formats*
 
@@ -329,7 +360,7 @@ b)  Vim |regexp|. If the input string contains '*', '^', '$', '+' or '$', it’l
     be treated as a Vim’s |regexp| |pattern| without any modification.
     e.g. 'abc\d*efg' will be read as 'abc\d*efg'.
 
-    See also |ctrlp-fullregexp|.
+    See also |ctrlp-fullregexp| and |g:ctrlp_regexp_search|.
 
 c)  Strings end with a colon ':' followed by an arbitrary number will be read
     as a line number to jump to after opening the file.
@@ -360,9 +391,12 @@ CHANGELOG
 
                                                                *ctrlp-update-2*
 Update #2~
+    + Ability to cycle through matched lines in the match window.
     + Extended the behavior of |g:ctrlp_persistent_input|
     + New option: |g:ctrlp_dotfiles|,
-                  |g:ctrlp_clear_cache_on_exit|
+                  |g:ctrlp_clear_cache_on_exit|,
+                  |g:ctrlp_highlight_match|,
+                  |g:ctrlp_user_command|
     + New input format: '..' (section 5.d)
     + New mapping: <F5>.
     + New commands: |:CtrlPCurWD|,

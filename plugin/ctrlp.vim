@@ -1,6 +1,6 @@
 " =============================================================================
 " File:          plugin/ctrlp.vim
-" Description:   Full path fuzzy file and buffer finder for Vim.
+" Description:   Full path fuzzy file, buffer and MRU file finder for Vim.
 " Author:        Kien Nguyen <github.com/kien>
 " License:       MIT
 " =============================================================================
@@ -13,7 +13,7 @@ let g:loaded_ctrlp = 1
 if !exists('g:ctrlp_map')       | let g:ctrlp_map = '<c-p>' | endif
 if !exists('g:ctrlp_mru_files') | let g:ctrlp_mru_files = 1 | endif
 
-com! CtrlP               cal ctrlp#init(0)
+com! -nargs=? CtrlP      cal ctrlp#init(0, <q-args>)
 com! CtrlPBuffer         cal ctrlp#init(1)
 com! CtrlPMRUFiles       cal ctrlp#init(2)
 com! ClearCtrlPCache     cal ctrlp#clearcache()
