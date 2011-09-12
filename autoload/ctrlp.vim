@@ -774,10 +774,10 @@ func! s:AcceptSelection(mode,...) "{{{
 		endif
 	endif
 	let matchstr = matchstr(getline('.'), '^> \zs.\+\ze\t*$')
-	let filepath = s:itemtype ? matchstr : getcwd().ctrlp#utils#lash().matchstr
-	let filename = split(filepath, ctrlp#utils#lash())[-1]
+	let filpath = s:itemtype ? matchstr : getcwd().ctrlp#utils#lash().matchstr
+	let filname = split(filpath, ctrlp#utils#lash())[-1]
 	" If only need the full path
-	if exists('a:1') && a:1 | retu filepath | endif
+	if exists('a:1') && a:1 | retu filpath | endif
 	" Remove the prompt and match window
 	cal s:BufOpen('ControlP', 'del')
 	" Split the mode string if it's longer than 1 char
@@ -796,11 +796,41 @@ func! s:AcceptSelection(mode,...) "{{{
 	elseif md == 'e' || !s:splitwin " in current window
 		let cmd = 'e'
 	endif
-	let bufnum = bufnr(filename)
-	if bufnum > 0 && bufwinnr(bufnum) > 0
-		exe 'b' bufnum
+	let bufnum = bufnr(filname)
+	let bufwinnr = bufwinnr(bufnum)
+	" check if the buffer's already opened in a tab
+	let nr = 1
+	while nr <= tabpagenr('$')
+		" get list of buffers in the nr tab
+		let buflist = tabpagebuflist(nr)
+		" if it has the buffer we're looking for
+		if match(buflist, bufnum) >= 0
+			let buftabnr = nr
+			" get the number of windows
+			let tabwinnrs = tabpagewinnr(nr, '$')
+			" find the buffer that we know is in this tab
+			let ewin = 1
+			while ewin <= tabwinnrs
+				if buflist[ewin - 1] == bufnum
+					let buftabwinnr = ewin
+				endif
+				let ewin += 1
+			endwhile
+		endif
+		let nr += 1
+	endwhile
+	" switch to or open the file
+	if bufnum > 0
+		if exists('buftabwinnr')
+			exe 'norm!' buftabnr.'gt'
+			exe buftabwinnr.'winc w'
+		elseif bufwinnr > 0
+			exe bufwinnr.'winc w'
+		else
+			exe 'b' bufnum
+		endif
 	else
-		exe 'bo '.cmd.' '.filepath
+		exe 'bo '.cmd.' '.filpath
 	endif
 	if exists('s:jmpln') && !empty('s:jmpln')
 		exe s:jmpln
