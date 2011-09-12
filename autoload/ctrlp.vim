@@ -774,8 +774,8 @@ func! s:AcceptSelection(mode,...) "{{{
 		endif
 	endif
 	let matchstr = matchstr(getline('.'), '^> \zs.\+\ze\t*$')
+	" get the full path
 	let filpath = s:itemtype ? matchstr : getcwd().ctrlp#utils#lash().matchstr
-	let filname = split(filpath, ctrlp#utils#lash())[-1]
 	" If only need the full path
 	if exists('a:1') && a:1 | retu filpath | endif
 	" Remove the prompt and match window
@@ -796,7 +796,7 @@ func! s:AcceptSelection(mode,...) "{{{
 	elseif md == 'e' || !s:splitwin " in current window
 		let cmd = 'e'
 	endif
-	let bufnum = bufnr(filname)
+	let bufnum = bufnr(filpath)
 	let bufwinnr = bufwinnr(bufnum)
 	" check if the buffer's already opened in a tab
 	let nr = 1
@@ -819,7 +819,7 @@ func! s:AcceptSelection(mode,...) "{{{
 		endif
 		let nr += 1
 	endwhile
-	" switch to or open the file
+	" switch to the buffer or open the file
 	if bufnum > 0
 		if exists('buftabwinnr')
 			exe 'norm!' buftabnr.'gt'
@@ -832,6 +832,7 @@ func! s:AcceptSelection(mode,...) "{{{
 	else
 		exe 'bo '.cmd.' '.filpath
 	endif
+	" jump to line
 	if exists('s:jmpln') && !empty('s:jmpln')
 		exe s:jmpln
 		keepj norm! 0zz
@@ -946,6 +947,11 @@ func! s:highlight(pat, grp)
 		let pat = substitute(a:pat, '\~', '\\~', 'g')
 		if !s:regexp
 			let pat = escape(pat, '.')
+		endif
+		" match only filename
+		if s:byfname
+			let pat = substitute(pat, '\.\\{-}', '[^\\/]\\{-}', 'g')
+			let pat = substitute(pat, '$', '\\ze[^\\/]*$', 'g')
 		endif
 		cal matchadd(a:grp, '\c'.pat)
 		cal matchadd('CtrlPLineMarker', '^>')
