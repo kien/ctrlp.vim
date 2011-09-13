@@ -62,8 +62,8 @@ The parameter is the same (0, 1 or 2):
 e.g. Just have something like this in your vimrc:
 
     ```vim
-    set wildignore+=.git/*,.hg/*,.svn/*   " for Linux/MacOSX
-    set wildignore+=.git\*,.hg\*,.svn\*   " for Windows
+    set wildignore+=*/.git/*,*/.hg/*,*/.svn/*   " for Linux/MacOSX
+    set wildignore+=.git\*,.hg\*,.svn\*         " for Windows
     ```
 
 _Check [the docs][3] for more mappings, commands and options._

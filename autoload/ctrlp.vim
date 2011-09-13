@@ -658,7 +658,7 @@ func! s:MapSpecs(...)
 				\ }
 	for each in keys(prttempdis)
 		if g:ctrlp_mru_files && !has_key(prtmaps, each)
-			cal extend(prtmaps, {each:prttempdis[each]})
+			cal extend(prtmaps, { each : prttempdis[each] })
 		elseif !g:ctrlp_mru_files
 			cal remove(prtmaps, each)
 		endif
@@ -855,8 +855,10 @@ endfunc
 
 func! s:compmatlen(s1, s2)
 	" by match length
-	let mln1 = min(s:matchlens(a:s1, s:compat))
-	let mln2 = min(s:matchlens(a:s2, s:compat))
+	let lens1 = s:matchlens(a:s1, s:compat)
+	let lens2 = s:matchlens(a:s2, s:compat)
+	let mln1 = s:shortest(lens1) + ( s:wordonly(lens1) / 2 )
+	let mln2 = s:shortest(lens2) + ( s:wordonly(lens2) / 2 )
 	retu mln1 == mln2 ? 0 : mln1 > mln2 ? 1 : -1
 endfunc
 
@@ -865,20 +867,41 @@ func! s:matchlens(str, pat, ...)
 		retu []
 	endif
 	let st = exists('a:1') ? a:1 : 0
-	let lens = exists('a:2') ? a:2 : []
+	let lens = exists('a:2') ? a:2 : {}
+	let nr = exists('a:3') ? a:3 : 0
 	if match(a:str, a:pat, st) != -1
 		let start = match(a:str, a:pat, st)
 		let str = matchstr(a:str, a:pat, st)
 		let len = len(str)
 		let end = matchend(a:str, a:pat, st)
-		let lens = add(lens, len)
-		let lens = s:matchlens(a:str, a:pat, end, lens)
+		let lens = extend(lens, { nr : [len, str] })
+		let lens = s:matchlens(a:str, a:pat, end, lens, nr + 1)
 	endif
 	retu lens
 endfunc
 
+func! s:shortest(lens)
+	let lns = []
+	for nr in keys(a:lens)
+		cal add(lns, a:lens[nr][0])
+	endfor
+	retu min(lns)
+endfunc
+
+func! s:wordonly(lens)
+	let lens = a:lens
+	let minln = s:shortest(lens)
+	cal filter(lens, 'minln == v:val[0]')
+	for nr in keys(lens)
+		if match(lens[nr][1], '\W') >= 0
+			retu 1
+		endif
+	endfor
+	retu 0
+endfunc
+
 func! s:mixedsort(s1, s2)
-	retu 2 * s:compmatlen(a:s1, a:s2) + s:compare(a:s1, a:s2)
+	retu 3 * s:compmatlen(a:s1, a:s2) + s:compare(a:s1, a:s2)
 endfunc
 "}}}
 
