@@ -78,8 +78,8 @@ Use this option to specify how the file is to be opened when pressing <cr>:
 <
 
                                                        *'g:ctrlp_ignore_space'*
-If you want the search to include whitespaces, change this to 0: >
-  let g:ctrlp_ignore_space = 1
+Set this to 1 to ignore whitespaces in filenames and directory names: >
+  let g:ctrlp_ignore_space = 0
 <
 
                                                   *'g:ctrlp_working_path_mode'*
@@ -227,7 +227,7 @@ Examples: >
 :CtrlP [starting-directory]
    Open the |CtrlP| prompt in find files mode.
    If no argument is given, the value of |g:ctrlp_working_path_mode| will be
-   used to determined the starting directory.
+   used to determine the starting directory.
 
                                                                  *:CtrlPBuffer*
 :CtrlPBuffer
@@ -271,8 +271,7 @@ The following commands ignore the value of |g:ctrlp_working_path_mode|:
 Once inside the prompt:
 
   <c-r>                                                    *'ctrlp-fullregexp'*
-    Toggle between the smart |regexp|/string mode (section 5.b) and full
-    |regexp| mode.
+    Toggle between the string mode (section 5.a & b) and full |regexp| mode.
     (note: in full |regexp| mode, the prompt’s base is 'r>>' instead of '>>>')
 
     See also |input-formats| and |g:ctrlp_regexp_search|.
@@ -364,8 +363,8 @@ Formats for inputting in the prompt:
 
 a)  Simple string. e.g. 'abc' is understood internally as 'a.\{-}b.\{-}c'
 
-b)  Vim |regexp|. If the input string contains '*', '^', '$', '+' or '$', it’ll
-    be treated as a Vim’s |regexp| |pattern| without any modification.
+b)  Vim |regexp|. If the input string contains '*' or '|', it’ll be treated as
+    a Vim’s |regexp| |pattern| without any modification.
     e.g. 'abc\d*efg' will be read as 'abc\d*efg'.
 
     See also |ctrlp-fullregexp| and |g:ctrlp_regexp_search|.
@@ -397,8 +396,8 @@ Mercurial repository: https://bitbucket.org/kien/ctrlp.vim
 ===============================================================================
 CHANGELOG
 
-                                                               *ctrlp-update-2*
-Update #2~
+Before 2011/09/12
+
     + Ability to cycle through matched lines in the match window.
     + Extended the behavior of |g:ctrlp_persistent_input|
     + Extended the behavior of |:CtrlP|
@@ -412,8 +411,6 @@ Update #2~
                     |:CtrlPCurFile|,
                     |:CtrlPRoot|
 
-                                                               *ctrlp-update-1*
-Update #1~
     + New feature: search in most recently used (MRU) files
     + New mapping: <c-b>.
     + Extended the behavior of <c-f>.
@@ -422,6 +419,9 @@ Update #1~
                    |g:ctrlp_mruf_exclude|,
                    |g:ctrlp_mruf_include|
     + New command: |:CtrlPMRUFiles|
+
+The updates are shown in reverse chronological order, from newest (top) to
+oldest (bottom).
 
 ===============================================================================
 vim:nofen:et:ts=2:sw=2:sts=2

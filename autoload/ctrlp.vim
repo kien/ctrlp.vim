@@ -42,7 +42,7 @@ else
 endif
 
 if !exists('g:ctrlp_ignore_space')
-	let s:igspace = 1
+	let s:igspace = 0
 else
 	let s:igspace = g:ctrlp_ignore_space
 	unl g:ctrlp_ignore_space
@@ -228,9 +228,10 @@ func! s:ListAllBuffers() "{{{
 endfunc "}}}
 
 func! s:SplitPattern(str,...) "{{{
+	let str = a:str
 	" ignore spaces
 	if s:igspace
-		let str = substitute(a:str, ' ', '', 'g')
+		let str = substitute(str, ' ', '', 'g')
 	endif
 	" clear the jumptoline var
 	if exists('s:jmpln') | unl s:jmpln | endif
@@ -241,15 +242,19 @@ func! s:SplitPattern(str,...) "{{{
 		" remove the line number
 		let str = substitute(str, ':\d*$', '', 'g')
 	endif
-	if s:regexp || match(str, '[*^$+|]') >= 0
+	let str = substitute(str, '\\\\', '\', 'g')
+	if s:regexp || match(str, '[*|]') >= 0
 				\ || match(str, '\\\(zs\|ze\|<\|>\)') >= 0
-		let str = substitute(str, '\\\\', '\', 'g')
 		let array = [str]
 	else
 		let array = split(str, '\zs')
 		if exists('+ssl') && !&ssl
-			cal map(array, 'substitute(v:val, "\\", "\\\\\\\\", "g")')
+			cal map(array, 'substitute(v:val, "\\", "\\\\\\", "g")')
 		endif
+		" literal ^ and $
+		for each in ['^', '$']
+			cal map(array, 'substitute(v:val, "\\\'.each.'", "\\\\\\'.each.'", "g")')
+		endfor
 	endif
 	" Build the new pattern
 	let nitem = !empty(array) ? array[0] : ''
@@ -280,6 +285,7 @@ func! s:GetMatchedItems(items, pats, limit) "{{{
 		if exists('newitems') && len(newitems) < limit
 			let items = deepcopy(newitems)
 		endif
+		if !s:regexp | let each = escape(each, '.') | endif
 		if empty(items) " end here
 			retu exists('newitems') ? newitems : []
 		else " start here, goes back up if has 2 or more in pats
@@ -408,7 +414,7 @@ func! s:Renderer(lines, pat) "{{{
 		" don't sort
 		if index([2], s:itemtype) < 0
 			let s:compat = a:pat
-			cal sort(nls, 's:comatlen')
+			cal sort(nls, 's:mixedsort')
 			unl s:compat
 		endif
 		if s:mwreverse
@@ -436,8 +442,8 @@ func! s:UpdateMatches(pat) "{{{
 	" Delete the buffer's content
 	sil! %d _
 	let pats = s:SplitPattern(a:pat)
-	let pat = pats[-1]
 	let lines = s:GetMatchedItems(s:lines, pats, s:mxheight)
+	let pat = pats[-1]
 	cal s:Renderer(lines, pat)
 	" highlighting
 	if type(s:mathi) == 3 && len(s:mathi) == 2 && s:mathi[0] && exists('*clearmatches')
@@ -456,7 +462,8 @@ func! s:BuildPrompt(...) "{{{
 	cal map(prt, 'escape(v:val, estr)')
 	let str   = prt[0] . prt[1] . prt[2]
 	if s:nomatches
-		cal s:UpdateMatches(str)
+		" note: add sil! back after testing
+		sil! cal s:UpdateMatches(str)
 	endif
 	cal s:statusline()
 	" Toggling
@@ -769,6 +776,7 @@ func! s:AcceptSelection(mode,...) "{{{
 		let str = prt[0] . prt[1] . prt[2]
 		if str == '..'
 			cal s:parentdir(getcwd())
+			cal s:SetLines(s:itemtype)
 			cal s:PrtClear()
 			retu
 		endif
@@ -799,9 +807,8 @@ func! s:AcceptSelection(mode,...) "{{{
 	let bufnum = bufnr(filpath)
 	let bufwinnr = bufwinnr(bufnum)
 	" check if the buffer's already opened in a tab
-	let nr = 1
-	while nr <= tabpagenr('$')
-		" get list of buffers in the nr tab
+	for nr in range(1, tabpagenr('$'))
+		" get a list of the buffers in the nr tab
 		let buflist = tabpagebuflist(nr)
 		" if it has the buffer we're looking for
 		if match(buflist, bufnum) >= 0
@@ -809,16 +816,13 @@ func! s:AcceptSelection(mode,...) "{{{
 			" get the number of windows
 			let tabwinnrs = tabpagewinnr(nr, '$')
 			" find the buffer that we know is in this tab
-			let ewin = 1
-			while ewin <= tabwinnrs
+			for ewin in range(1, tabwinnrs)
 				if buflist[ewin - 1] == bufnum
 					let buftabwinnr = ewin
 				endif
-				let ewin += 1
-			endwhile
+			endfor
 		endif
-		let nr += 1
-	endwhile
+	endfor
 	" switch to the buffer or open the file
 	if bufnum > 0
 		if exists('buftabwinnr')
@@ -841,23 +845,22 @@ func! s:AcceptSelection(mode,...) "{{{
 endfunc "}}}
 
 " * Helper functions {{{
+" comparing and sorting {{{
 func! s:compare(s1, s2)
 	" by length
-	let str1 = strlen(a:s1)
-	let str2 = strlen(a:s2)
-	retu str1 == str2 ? 0 : str1 > str2 ? 1 : -1
+	let len1 = strlen(a:s1)
+	let len2 = strlen(a:s2)
+	retu len1 == len2 ? 0 : len1 > len2 ? 1 : -1
 endfunc
 
-func! s:comatlen(s1, s2)
+func! s:compmatlen(s1, s2)
 	" by match length
-	let str1 = min(s:smatstr(a:s1, s:compat))
-	let str2 = min(s:smatstr(a:s2, s:compat))
-	retu str1 == str2 ? 0 : str1 > str2 ? 1 : -1
+	let mln1 = min(s:matchlens(a:s1, s:compat))
+	let mln2 = min(s:matchlens(a:s2, s:compat))
+	retu mln1 == mln2 ? 0 : mln1 > mln2 ? 1 : -1
 endfunc
 
-" find shortest match in a string
-" return a list with lengths of the matches
-func! s:smatstr(str, pat, ...)
+func! s:matchlens(str, pat, ...)
 	if empty(a:pat) || a:pat == '$' || a:pat == '^'
 		retu []
 	endif
@@ -865,28 +868,21 @@ func! s:smatstr(str, pat, ...)
 	let lens = exists('a:2') ? a:2 : []
 	if match(a:str, a:pat, st) != -1
 		let start = match(a:str, a:pat, st)
-		let len = len(matchstr(a:str, a:pat, st))
+		let str = matchstr(a:str, a:pat, st)
+		let len = len(str)
 		let end = matchend(a:str, a:pat, st)
 		let lens = add(lens, len)
-		let lens = s:smatstr(a:str, a:pat, end, lens)
+		let lens = s:matchlens(a:str, a:pat, end, lens)
 	endif
 	retu lens
 endfunc
 
-func! s:walker(max, pos, dir, ...)
-	if a:dir == 1
-		let pos = a:pos < a:max ? a:pos + 1 : 0
-	elseif a:dir == -1
-		let pos = a:pos > 0 ? a:pos - 1 : a:max
-	endif
-	if !g:ctrlp_mru_files && pos == 2
-				\ && !exists('a:1')
-		let jmp = pos == a:max ? 0 : 3
-		let pos = a:pos == 1 ? jmp : 1
-	endif
-	retu pos
+func! s:mixedsort(s1, s2)
+	retu 2 * s:compmatlen(a:s1, a:s2) + s:compare(a:s1, a:s2)
 endfunc
+"}}}
 
+" dealing with statusline {{{
 func! s:statusline(...)
 	let itemtypes = {
 				\ 0: ['files', 'fil'],
@@ -910,15 +906,13 @@ func! s:statusline(...)
 	exe 'setl stl='.focus.byfname.regex.slider
 endfunc
 
-func! s:matchsubstr(item, pat)
-	retu match(split(a:item, '[\/]\ze[^\/]\+$')[-1], a:pat)
-endfunc
-
 func! s:progress(len)
 	exe 'setl stl=%#Function#\ '.a:len.'\ %*\ '
 	redr
 endfunc
+"}}}
 
+" working with paths {{{
 func! s:dirfilter(val)
 	if isdirectory(a:val) && match(a:val, '[\/]\.\{,2}$') < 0
 		retu 1
@@ -931,9 +925,10 @@ func! s:parentdir(curr)
 	if parent != a:curr
 		exe 'chdir' parent
 	endif
-	cal s:SetLines(s:itemtype)
 endfunc
+"}}}
 
+" syntax and coloring {{{
 func! s:syntax()
 	syn match CtrlPNoEntries '^ == NO MATCHES ==$'
 	syn match CtrlPLineMarker '^>'
@@ -945,18 +940,37 @@ func! s:highlight(pat, grp)
 	cal clearmatches()
 	if !empty(a:pat) && a:pat != '..'
 		let pat = substitute(a:pat, '\~', '\\~', 'g')
-		if !s:regexp
-			let pat = escape(pat, '.')
-		endif
+		if !s:regexp | let pat = escape(pat, '.') | endif
 		" match only filename
 		if s:byfname
-			let pat = substitute(pat, '\.\\{-}', '[^\\/]\\{-}', 'g')
+			let pat = substitute(pat, '\[\^\(.\{-}\)\]\\{-}', '[^\\/\1]\\{-}', 'g')
 			let pat = substitute(pat, '$', '\\ze[^\\/]*$', 'g')
 		endif
 		cal matchadd(a:grp, '\c'.pat)
 		cal matchadd('CtrlPLineMarker', '^>')
 	endif
 endfunc
+"}}}
+
+" misc {{{
+func! s:walker(max, pos, dir, ...)
+	if a:dir == 1
+		let pos = a:pos < a:max ? a:pos + 1 : 0
+	elseif a:dir == -1
+		let pos = a:pos > 0 ? a:pos - 1 : a:max
+	endif
+	if !g:ctrlp_mru_files && pos == 2
+				\ && !exists('a:1')
+		let jmp = pos == a:max ? 0 : 3
+		let pos = a:pos == 1 ? jmp : 1
+	endif
+	retu pos
+endfunc
+
+func! s:matchsubstr(item, pat)
+	retu match(split(a:item, '[\/]\ze[^\/]\+$')[-1], a:pat)
+endfunc
+"}}}
 "}}}
 
 " * Initialization {{{

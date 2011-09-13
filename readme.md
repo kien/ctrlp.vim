@@ -11,7 +11,7 @@ Full path fuzzy __file__, __buffer__ and __MRU__ file finder for Vim.
 * Press `<c-p>` or run `:CtrlP` to invoke CtrlP.
 * Press `<c-f>` and `<c-b>` while CtrlP is open to switch between find file, find buffer, and find MRU file modes.
 * Ever remember only a file’s name but not where it is? Press `<c-d>` while CtrlP is open to switch to filename only search.
-* Use `*` `?` `^` `+` or `|` in the prompt to submit the string as a Vim’s regexp pattern.
+* Use `*` or `|` in the prompt to submit the string as a Vim’s regexp pattern.
 * Or press `<c-r>` while CtrlP is open to switch to full regexp search mode.
 * End the input string with a colon `:` followed with a number to jump to that line in the selected file.  
 e.g. `abc:45` to open the file matched the pattern and jump to line 45.
