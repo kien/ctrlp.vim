@@ -670,6 +670,12 @@ func! s:MapSpecs(...)
 			cal remove(prtmaps, each)
 		endif
 	endfor
+	if &term =~? 'xterm' || &term =~? '^vt'
+		nmap <buffer> <esc>[A <up>
+		nmap <buffer> <esc>[B <down>
+		nmap <buffer> <esc>[C <right>
+		nmap <buffer> <esc>[D <left>
+	endif
 	if exists('a:1') && a:1 == 'unmap'
 		let prtunmaps = [
 					\ 'PrtBS()',
@@ -686,11 +692,7 @@ func! s:MapSpecs(...)
 		endfor | endfor
 	else
 		for each in keys(prtmaps) | for kp in prtmaps[each]
-			if kp == '<esc>' && ( &term =~? 'xterm' || &term =~? '^vt' )
-				" do nothing
-			else
-				exe 'nn <buffer> <silent>' kp ':cal <SID>'.each.'<cr>'
-			endif
+			exe 'nn <buffer> <silent>' kp ':cal <SID>'.each.'<cr>'
 		endfor | endfor
 	endif
 endfunc
@@ -948,14 +950,14 @@ func! s:statusline(...)
 	let byfname = '%#Character#\ '.byfname.'\ %*'
 	let item    = '%#Character#\ '.item.'\ %*'
 	let slider  = '\ <'.prev.'>={'.item.'}=<'.next.'>'
-	let dir     = '\ %#LineNr#\ '.escape(getcwd(), ' =#(){}%\').'\ %*'
+	let dir     = '\ %=%<%#LineNr#\ '.escape(getcwd(), ' =#(){}%\').'\ %*'
 	exe 'setl stl='.focus.byfname.regex.slider.dir
 endfunc
 
 func! s:progress(len)
-	let dir = '%#LineNr#\ Scanning:\ '.escape(getcwd(), ' =#(){}%\').'\ %*'
 	let cnt = '%#Function#\ '.a:len.'\ %*'
-	exe 'setl stl='.dir.cnt
+	let dir = '\ %=%<%#LineNr#\ '.escape(getcwd(), ' =#(){}%\').'\ %*'
+	exe 'setl stl='.cnt.dir
 	redr
 endfunc
 "}}}

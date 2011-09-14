@@ -208,8 +208,7 @@ the highlight group that’ll be used: >
 <
 
                                                           *'g:ctrlp_max_files'*
-The maximum number of files to scan, set this to a higher number if your hard
-drives are fast (SSDs, RAID 0, or both) and you work with large projects: >
+The maximum number of files to scan, set to 0 for no limit: >
   let g:ctrlp_max_files = 20000
 <
 
@@ -354,19 +353,15 @@ Once inside the prompt:
   <c-g>
     Exit |CtrlP|.
 
-    Note: The <esc> (also <c-[>) mapping isn’t available in terminal. Use <c-c>
-          or <c-g> to exit |CtrlP| instead.
-          http://linux.die.net/man/4/console_codes
-
 Chose your own mappings with |g:ctrlp_prompt_mappings|.
 
-When inside the match window (press <tab> to switch to):
+When inside the match window (press <tab> to switch):
 
   a-z
   0-9
   ~^-=;`',.+!@#$%&_(){}[]
     Cycle through the lines with the first letter (paths or filenames) that
-    match that character.
+    matches that key.
 
 ===============================================================================
 5. Input Formats                                          *ctrlp-input-formats*
@@ -409,7 +404,6 @@ Mercurial repository: https://bitbucket.org/kien/ctrlp.vim
 ===============================================================================
 CHANGELOG
 
-    + Remove <esc> mapping in term.
     + New option: |g:ctrlp_max_files|
 
 Before 2011/09/12
