@@ -207,6 +207,12 @@ the highlight group that’ll be used: >
   let g:ctrlp_highlight_match = [1, 'Function']
 <
 
+                                                          *'g:ctrlp_max_files'*
+The maximum number of files to scan, set this to a higher number if your hard
+drives are fast (SSDs, RAID 0, or both) and you work with large projects: >
+  let g:ctrlp_max_files = 20000
+<
+
                                                        *'g:ctrlp_user_command'*
 Specify an external tool to use for indexing files instead of Vim’s globpath().
 Use %s in place of the target directory: >
@@ -346,7 +352,11 @@ Once inside the prompt:
   <esc>,
   <c-c>,
   <c-g>
-    Exit |CtrlP|
+    Exit |CtrlP|.
+
+    Note: The <esc> (also <c-[>) mapping isn’t available in terminal. Use <c-c>
+          or <c-g> to exit |CtrlP| instead.
+          http://linux.die.net/man/4/console_codes
 
 Chose your own mappings with |g:ctrlp_prompt_mappings|.
 
@@ -398,6 +408,9 @@ Mercurial repository: https://bitbucket.org/kien/ctrlp.vim
 
 ===============================================================================
 CHANGELOG
+
+    + Remove <esc> mapping in term.
+    + New option: |g:ctrlp_max_files|
 
 Before 2011/09/12
 
