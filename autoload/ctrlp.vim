@@ -128,6 +128,13 @@ else
 	unl g:ctrlp_highlight_match
 endif
 
+if !exists('g:ctrlp_max_files')
+	let s:maxfiles = 20000
+else
+	let s:maxfiles = g:ctrlp_max_files
+	unl g:ctrlp_max_files
+endif
+
 if !exists('g:ctrlp_user_command')
 	let g:ctrlp_user_command = ''
 endif
@@ -169,7 +176,7 @@ func! s:List(dirs, allfiles)
 	let alldirs  = s:dotfiles ? filter(entries, 's:dirfilter(v:val)') : filter(entries, 'isdirectory(v:val)')
 	let allfiles = filter(entries2, '!isdirectory(v:val)')
 	cal extend(allfiles, a:allfiles, 0)
-	if empty(alldirs)
+	if empty(alldirs) || s:maxfiles(len(allfiles))
 		let s:allfiles = allfiles
 	else
 		let dirs = join(alldirs, ',')
@@ -321,7 +328,7 @@ func! s:SetupBlank() "{{{
 	setl cul
 	setl nocuc
 	setl tw=0
-	setl wfw
+	setl wfh
 	if v:version >= '703'
 		setl nornu
 		setl noudf
@@ -663,6 +670,12 @@ func! s:MapSpecs(...)
 			cal remove(prtmaps, each)
 		endif
 	endfor
+	let lcmap = 'nn <buffer> <silent>'
+	if &term =~? 'xterm' || &term =~? '^vt'
+		for each in ['\A <up>','\B <down>','\C <right>','\D <left>']
+			exe lcmap.' <esc>['.each
+		endfor
+	endif
 	if exists('a:1') && a:1 == 'unmap'
 		let prtunmaps = [
 					\ 'PrtBS()',
@@ -675,11 +688,11 @@ func! s:MapSpecs(...)
 					\ 'PrtCurRight()',
 					\ ]
 		for each in prtunmaps | for kp in prtmaps[each]
-			exe 'nn <buffer> <silent>' kp '<Nop>'
+			exe lcmap kp '<Nop>'
 		endfor | endfor
 	else
 		for each in keys(prtmaps) | for kp in prtmaps[each]
-			exe 'nn <buffer> <silent>' kp ':cal <SID>'.each.'<cr>'
+			exe lcmap kp ':cal <SID>'.each.'<cr>'
 		endfor | endfor
 	endif
 endfunc
@@ -824,6 +837,10 @@ func! s:AcceptSelection(mode,...) "{{{
 		endif
 	endfor
 	" switch to the buffer or open the file
+	let opened = 0
+	if s:normbuf()
+		exe s:normbuf().'winc w'
+	endif
 	if bufnum > 0
 		if exists('buftabwinnr')
 			exe 'norm!' buftabnr.'gt'
@@ -831,11 +848,18 @@ func! s:AcceptSelection(mode,...) "{{{
 		elseif bufwinnr > 0
 			exe bufwinnr.'winc w'
 		else
-			exe 'b' bufnum
+			if !s:normbuf()
+				exe 'bo vne'
+			endif
+			let cmd = 'b'.bufnum
 		endif
 	else
-		exe 'bo '.cmd.' '.filpath
+		if !s:normbuf() | if md == 'e'
+			exe 'bo vne'
+		endif | endif
+		let cmd = 'bo '.cmd.' '.filpath
 	endif
+	exe cmd
 	" jump to line
 	if exists('s:jmpln') && !empty('s:jmpln')
 		exe s:jmpln
@@ -926,11 +950,14 @@ func! s:statusline(...)
 	let byfname = '%#Character#\ '.byfname.'\ %*'
 	let item    = '%#Character#\ '.item.'\ %*'
 	let slider  = '\ <'.prev.'>={'.item.'}=<'.next.'>'
-	exe 'setl stl='.focus.byfname.regex.slider
+	let dir     = '\ %=%<%#LineNr#\ '.escape(getcwd(), ' =#(){}%\').'\ %*'
+	exe 'setl stl='.focus.byfname.regex.slider.dir
 endfunc
 
 func! s:progress(len)
-	exe 'setl stl=%#Function#\ '.a:len.'\ %*\ '
+	let cnt = '%#Function#\ '.a:len.'\ %*'
+	let dir = '\ %=%<%#LineNr#\ '.escape(getcwd(), ' =#(){}%\').'\ %*'
+	exe 'setl stl='.cnt.dir
 	redr
 endfunc
 "}}}
@@ -992,6 +1019,26 @@ endfunc
 
 func! s:matchsubstr(item, pat)
 	retu match(split(a:item, '[\/]\ze[^\/]\+$')[-1], a:pat)
+endfunc
+
+func! s:maxfiles(len)
+	if !s:maxfiles
+		retu 0
+	elseif s:maxfiles && a:len > s:maxfiles
+		retu 1
+	endif
+endfunc
+
+" return the first window number with a normal buffer
+func! s:normbuf()
+	if &l:bl && empty(&l:bt) && &l:ma
+		retu winnr()
+	endif
+	for each in range(1, winnr('$'))
+		winc w
+		if &l:bl && empty(&l:bt) && &l:ma | retu each | endif
+	endfor
+	retu 0
 endfunc
 "}}}
 "}}}

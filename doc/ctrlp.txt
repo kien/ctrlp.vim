@@ -207,6 +207,11 @@ the highlight group that’ll be used: >
   let g:ctrlp_highlight_match = [1, 'Function']
 <
 
+                                                          *'g:ctrlp_max_files'*
+The maximum number of files to scan, set to 0 for no limit: >
+  let g:ctrlp_max_files = 20000
+<
+
                                                        *'g:ctrlp_user_command'*
 Specify an external tool to use for indexing files instead of Vim’s globpath().
 Use %s in place of the target directory: >
@@ -346,17 +351,17 @@ Once inside the prompt:
   <esc>,
   <c-c>,
   <c-g>
-    Exit |CtrlP|
+    Exit |CtrlP|.
 
 Chose your own mappings with |g:ctrlp_prompt_mappings|.
 
-When inside the match window (press <tab> to switch to):
+When inside the match window (press <tab> to switch):
 
   a-z
   0-9
   ~^-=;`',.+!@#$%&_(){}[]
     Cycle through the lines with the first letter (paths or filenames) that
-    match that character.
+    matches that key.
 
 ===============================================================================
 5. Input Formats                                          *ctrlp-input-formats*
@@ -398,6 +403,8 @@ Mercurial repository: https://bitbucket.org/kien/ctrlp.vim
 
 ===============================================================================
 CHANGELOG
+
+    + New option: |g:ctrlp_max_files|
 
 Before 2011/09/12
 
