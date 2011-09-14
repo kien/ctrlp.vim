@@ -19,7 +19,6 @@ CONTENTS                                                       *ctrlp-contents*
     4.Mappings................................|ctrlp-mappings|
     5.Input Formats...........................|ctrlp-input-formats|
     6.Credits.................................|ctrlp-credits|
-    7.Credits.................................|ctrlp-changelog|
 
 ===============================================================================
 1. Intro                                                          *ctrlp-intro*
@@ -361,7 +360,7 @@ When inside the match window (press <tab> to switch):
   a-z
   0-9
   ~^-=;`',.+!@#$%&_(){}[]
-    Cycle through the lines with the first letter (paths or filenames) that
+    Cycle through the lines with the first letter (of paths or filenames) that
     matches that key.
 
 ===============================================================================
@@ -403,7 +402,7 @@ Git repository:       https://github.com/kien/ctrlp.vim
 Mercurial repository: https://bitbucket.org/kien/ctrlp.vim
 
 ===============================================================================
-CHANGELOG                                                     *ctrlp-changelog*
+CHANGELOG
 
     + New option: |g:ctrlp_max_files|
 
