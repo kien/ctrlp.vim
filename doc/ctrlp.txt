@@ -19,6 +19,7 @@ CONTENTS                                                       *ctrlp-contents*
     4.Mappings................................|ctrlp-mappings|
     5.Input Formats...........................|ctrlp-input-formats|
     6.Credits.................................|ctrlp-credits|
+    7.Credits.................................|ctrlp-changelog|
 
 ===============================================================================
 1. Intro                                                          *ctrlp-intro*
@@ -62,8 +63,7 @@ setting is from bottom to top: >
 
                                                    *'g:ctrlp_persistent_input'*
 Remember the last input string. Set this to 2 to also remember the last
-position of the selection in the match window and 0 to completely disable this
-feature: >
+position of the selection in the match window and 0 to disable this feature: >
   let g:ctrlp_persistent_input = 1
 <
 
@@ -84,7 +84,7 @@ Set this to 1 to ignore whitespaces in filenames and directory names: >
 
                                                   *'g:ctrlp_working_path_mode'*
                                                              *SetWorkingPath()*
-When starting up the prompt, automatically set the working directory (i.e. the
+When starting up the prompt, automatically sets the working directory (i.e. the
 |current-directory|) to:
   1 - the parent directory of the current file.
   2 - the nearest ancestor that contains one of these directories/files:
@@ -105,7 +105,7 @@ to your |.vimrc|; the parameter is the same (1, 2 and 0): >
 
                                                        *'g:ctrlp_root_markers'*
 Use this to set your own root markers for the |SetWorkingPath()| function, in
-addition to the default ones: >
+addition to the default ones, your markers will take precedence: >
   let g:ctrlp_root_markers = ['']
 <
 
@@ -197,9 +197,10 @@ e.g. exclude version control directories from the results: >
   set wildignore+=*/.git/*,*/.hg/*,*/.svn/*  " Linux/MacOSX
   set wildignore+=.git\*,.hg\*,.svn\*        " Windows
 <
-Note: the `*/` in front of each glob is required for the dotfiles search
-feature to work correctly along side with |wildignore|. If you’ve disabled
-dotfiles search (set |g:ctrlp_dotfiles| to 0), then you can ignore this.
+Note: the `*/` in front of each dotfile glob is required for the dotfiles
+search feature to work correctly along side with |wildignore|. If you’ve
+disabled dotfiles search (set |g:ctrlp_dotfiles| to 0), then you can ignore
+this.
 
                                                     *'g:ctrlp_highlight_match'*
 Use this to enable/disable highlighting of the matched patterns and to specify
@@ -247,17 +248,17 @@ Examples: >
 
                                                              *:ClearCtrlPCache*
 :ClearCtrlPCache
-   Flush the cache for the current working directory.
+   Flush the cache for the current working directory. Same as pressing <F5>.
 
                                                          *:ClearAllCtrlPCaches*
 :ClearAllCtrlPCaches
-   Delete all the saved cache files in |ctrlp_cache_dir|.
+   Delete all the cache files saved in |ctrlp_cache_dir|.
 
 The following commands ignore the value of |g:ctrlp_working_path_mode|:
 
                                                                   *:CtrlPCurWD*
 :CtrlPCurWD
-   Find files in the |current-directory|.
+   Find files in the |current-directory| (without changing it).
 
                                                                 *:CtrlPCurFile*
 :CtrlPCurFile
@@ -369,7 +370,7 @@ When inside the match window (press <tab> to switch):
                                                    *ctrlp-prompt-input-formats*
 Formats for inputting in the prompt:
 
-a)  Simple string. e.g. 'abc' is understood internally as 'a.\{-}b.\{-}c'
+a)  Simple string. e.g. 'abc' is understood internally as 'a[^a]\{-}b[^b]\{-}c'
 
 b)  Vim |regexp|. If the input string contains '*' or '|', it’ll be treated as
     a Vim’s |regexp| |pattern| without any modification.
@@ -402,7 +403,7 @@ Git repository:       https://github.com/kien/ctrlp.vim
 Mercurial repository: https://bitbucket.org/kien/ctrlp.vim
 
 ===============================================================================
-CHANGELOG
+CHANGELOG                                                     *ctrlp-changelog*
 
     + New option: |g:ctrlp_max_files|
 

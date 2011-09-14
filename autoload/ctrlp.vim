@@ -34,13 +34,6 @@ else
 	unl g:ctrlp_split_window
 endif
 
-if !exists('g:ctrlp_update_delay')
-	let s:udelay = 500
-else
-	let s:udelay = g:ctrlp_update_delay
-	unl g:ctrlp_update_delay
-endif
-
 if !exists('g:ctrlp_ignore_space')
 	let s:igspace = 0
 else
@@ -155,13 +148,7 @@ func! ctrlp#clearallcaches()
 	if isdirectory(cache_dir) && match(cache_dir, '.ctrlp_cache') >= 0
 		let cache_files = split(globpath(cache_dir, '*.txt'), '\n')
 		cal filter(cache_files, '!isdirectory(v:val)')
-		try
-			for each in cache_files | cal delete(each) | endfor
-		catch
-			echoh Error | ec 'Can''t delete cache files' | echoh None
-		endtry
-	else
-		echoh Error | ec 'Caching directory not found. Nothing to delete.' | echoh None
+		for each in cache_files | sil! cal delete(each) | endfor
 	endif
 	cal ctrlp#clearcache()
 endfunc
@@ -211,8 +198,7 @@ func! s:ListAllFiles(path)
 	endif
 	if len(allfiles) <= s:compare_lim | cal sort(allfiles, 's:compare') | endif
 	" write cache
-	if !read_cache &&
-				\ ( ( g:ctrlp_newcache || !filereadable(cache_file) )
+	if !read_cache && ( ( g:ctrlp_newcache || !filereadable(cache_file) )
 				\ && s:caching || len(allfiles) > s:nocache_lim )
 		if len(allfiles) > s:nocache_lim | let s:caching = 1 | endif
 		cal ctrlp#utils#writecache(allfiles)
@@ -361,7 +347,6 @@ func! s:BufOpen(...) "{{{
 		exe 'se ss='      . s:CtrlP_ss
 		exe 'se siso='    . s:CtrlP_siso
 		exe 'let &ea='    . s:CtrlP_ea
-		exe 'let &ut='    . s:CtrlP_ut
 		exe 'se gcr='     . s:CtrlP_gcr
 		if exists('s:cwd')
 			exe 'chdir' s:cwd
@@ -385,7 +370,6 @@ func! s:BufOpen(...) "{{{
 		let s:CtrlP_ss     = &ss
 		let s:CtrlP_siso   = &siso
 		let s:CtrlP_ea     = &ea
-		let s:CtrlP_ut     = &ut
 		let s:CtrlP_gcr    = &gcr
 		if !exists('g:CtrlP_prompt') || !s:pinput
 			let g:CtrlP_prompt = ['', '', '']
@@ -401,7 +385,6 @@ func! s:BufOpen(...) "{{{
 		se ss=0
 		se siso=0
 		se noea
-		exe 'se ut='.s:udelay
 		se gcr=a:block-PmenuSel-blinkon0
 	endif
 endfunc "}}}
@@ -671,6 +654,7 @@ func! s:MapSpecs(...)
 		endif
 	endfor
 	let lcmap = 'nn <buffer> <silent>'
+	" correct arrow keys in terminal
 	if &term =~? 'xterm' || &term =~? '^vt'
 		for each in ['\A <up>','\B <down>','\C <right>','\D <left>']
 			exe lcmap.' <esc>['.each
@@ -917,9 +901,7 @@ func! s:wordonly(lens)
 	let minln = s:shortest(lens)
 	cal filter(lens, 'minln == v:val[0]')
 	for nr in keys(lens)
-		if match(lens[nr][1], '\W') >= 0
-			retu 1
-		endif
+		if match(lens[nr][1], '\W') >= 0 | retu 1 | endif
 	endfor
 	retu 0
 endfunc
@@ -964,10 +946,7 @@ endfunc
 
 " working with paths {{{
 func! s:dirfilter(val)
-	if isdirectory(a:val) && match(a:val, '[\/]\.\{,2}$') < 0
-		retu 1
-	endif
-	retu 0
+	retu isdirectory(a:val) && match(a:val, '[\/]\.\{,2}$') < 0 ? 1 : 0
 endfunc
 
 func! s:parentdir(curr)
@@ -1009,8 +988,7 @@ func! s:walker(max, pos, dir, ...)
 	elseif a:dir == -1
 		let pos = a:pos > 0 ? a:pos - 1 : a:max
 	endif
-	if !g:ctrlp_mru_files && pos == 2
-				\ && !exists('a:1')
+	if !g:ctrlp_mru_files && pos == 2 && !exists('a:1')
 		let jmp = pos == a:max ? 0 : 3
 		let pos = a:pos == 1 ? jmp : 1
 	endif
@@ -1022,18 +1000,12 @@ func! s:matchsubstr(item, pat)
 endfunc
 
 func! s:maxfiles(len)
-	if !s:maxfiles
-		retu 0
-	elseif s:maxfiles && a:len > s:maxfiles
-		retu 1
-	endif
+	retu s:maxfiles && a:len > s:maxfiles ? 1 : 0
 endfunc
 
 " return the first window number with a normal buffer
 func! s:normbuf()
-	if &l:bl && empty(&l:bt) && &l:ma
-		retu winnr()
-	endif
+	if &l:bl && empty(&l:bt) && &l:ma | retu winnr() | endif
 	for each in range(1, winnr('$'))
 		winc w
 		if &l:bl && empty(&l:bt) && &l:ma | retu each | endif
