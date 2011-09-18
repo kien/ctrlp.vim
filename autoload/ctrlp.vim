@@ -315,7 +315,7 @@ func! s:GetMatchedItems(items, pats, limit)
 	let limit = a:limit
 	" if items is longer than s:mltipats_lim, use only the last pattern
 	if len(items) >= s:mltipats_lim
-		let pats = pats[-1]
+		let pats = [pats[-1]]
 	endif
 	cal map(pats, 'substitute(v:val, "\\\~", "\\\\\\~", "g")')
 	" loop through the patterns
