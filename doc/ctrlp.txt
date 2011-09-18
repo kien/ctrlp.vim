@@ -83,7 +83,7 @@ Set this to 1 to ignore whitespaces in filenames and directory names: >
 
                                                   *'g:ctrlp_working_path_mode'*
                                                              *SetWorkingPath()*
-When starting up the prompt, automatically sets the working directory (i.e. the
+When starting up the prompt, automatically set the working directory (i.e. the
 |current-directory|) to:
   1 - the parent directory of the current file.
   2 - the nearest ancestor that contains one of these directories/files:
@@ -150,6 +150,7 @@ only need to keep the lines that you’ve changed the values (inside []): >
     \ 'ToggleByFname()':            ['<c-d>'],
     \ 'ToggleType(1)':              ['<c-f>', '<c-up'],
     \ 'ToggleType(-1)':             ['<c-b>', '<c-down>'],
+    \ 'ForceUpdate()':              ['<c-o>'],
     \ 'PrtCurStart()':              ['<c-a>'],
     \ 'PrtCurEnd()':                ['<c-e>'],
     \ 'PrtCurLeft()':               ['<c-h>', '<left>'],
@@ -212,6 +213,18 @@ The maximum number of files to scan, set to 0 for no limit: >
   let g:ctrlp_max_files = 20000
 <
 
+                                                          *'g:ctrlp_max_depth'*
+The maximum depth of a directory tree to recurse into: >
+  let g:ctrlp_max_depth = 40
+<
+Note: keep it smaller than 200. The larger the value, the more memory Vim uses.
+
+                                                        *'g:ctrlp_live_update'*
+Set to 0 to disable the update-as-you-type functionality; press <c-o> to force
+an update: >
+  let g:ctrlp_live_update = 1
+<
+
                                                        *'g:ctrlp_user_command'*
 Specify an external tool to use for indexing files instead of Vim’s globpath().
 Use %s in place of the target directory: >
@@ -221,7 +234,6 @@ Examples: >
   let g:ctrlp_user_command = 'find %s -type f'       " MacOSX/Linux
   let g:ctrlp_user_command = 'dir %s /-n /b /s /a-d' " Windows
 <
-
 You can also use 'grep', 'findstr' or something else to filter the results.
 Examples: >
   let g:ctrlp_user_command = 'find %s -type f | grep (?!tmp/.*)'
@@ -252,6 +264,10 @@ Examples: >
                                                          *:ClearAllCtrlPCaches*
 :ClearAllCtrlPCaches
    Delete all the cache files saved in |ctrlp_cache_dir|.
+
+                                                                  *:ResetCtrlP*
+:ResetCtrlP
+   Reset all options, take in new values of the option variables (section 2).
 
 The following commands ignore the value of |g:ctrlp_working_path_mode|:
 
@@ -302,6 +318,10 @@ Once inside the prompt:
   <tab>
     Toggle the focus between the match window and the prompt.
 
+  <c-o>
+    Force update the match window.
+    Use this if |g:ctrlp_live_update| has been set to 0.
+
   <c-n>,
   <c-j>,
   <down>
@@ -351,7 +371,7 @@ Once inside the prompt:
   <esc>,
   <c-c>,
   <c-g>
-    Exit |CtrlP|.
+    Exit |CtrlP|. <c-c> can also be used to stop the files scan.
 
 Chose your own mappings with |g:ctrlp_prompt_mappings|.
 
@@ -404,17 +424,20 @@ Mercurial repository: https://bitbucket.org/kien/ctrlp.vim
 ===============================================================================
 CHANGELOG
 
-    + New option: |g:ctrlp_max_files|
+    + New command: |ResetCtrlP|
+    + New options: |g:ctrlp_max_files|,
+                   |g:ctrlp_max_depth|,
+                   |g:ctrlp_live_update|
 
 Before 2011/09/12
 
     + Ability to cycle through matched lines in the match window.
     + Extended the behavior of |g:ctrlp_persistent_input|
     + Extended the behavior of |:CtrlP|
-    + New option: |g:ctrlp_dotfiles|,
-                  |g:ctrlp_clear_cache_on_exit|,
-                  |g:ctrlp_highlight_match|,
-                  |g:ctrlp_user_command|
+    + New options: |g:ctrlp_dotfiles|,
+                   |g:ctrlp_clear_cache_on_exit|,
+                   |g:ctrlp_highlight_match|,
+                   |g:ctrlp_user_command|
     + New input format: '..' (section 5.d)
     + New mapping: <F5>.
     + New commands: |:CtrlPCurWD|,

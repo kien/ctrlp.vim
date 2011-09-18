@@ -10,26 +10,29 @@ if v:version < '700' "{{{
 endif "}}}
 
 " Option variables {{{
-if !exists('g:ctrlp_mruf_max')
-	let s:max = 50
-else
-	let s:max = g:ctrlp_mruf_max
-	unl g:ctrlp_mruf_max
-endif
+func! ctrlp#mrufiles#opts()
+	if !exists('g:ctrlp_mruf_max')
+		let s:max = 50
+	else
+		let s:max = g:ctrlp_mruf_max
+		unl g:ctrlp_mruf_max
+	endif
 
-if !exists('g:ctrlp_mruf_include')
-	let s:include = ''
-else
-	let s:include = g:ctrlp_mruf_include
-	unl g:ctrlp_mruf_include
-endif
+	if !exists('g:ctrlp_mruf_include')
+		let s:include = ''
+	else
+		let s:include = g:ctrlp_mruf_include
+		unl g:ctrlp_mruf_include
+	endif
 
-if !exists('g:ctrlp_mruf_exclude')
-	let s:exclude = ''
-else
-	let s:exclude = g:ctrlp_mruf_exclude
-	unl g:ctrlp_mruf_exclude
-endif
+	if !exists('g:ctrlp_mruf_exclude')
+		let s:exclude = ''
+	else
+		let s:exclude = g:ctrlp_mruf_exclude
+		unl g:ctrlp_mruf_exclude
+	endif
+endfunc
+cal ctrlp#mrufiles#opts()
 "}}}
 
 func! ctrlp#mrufiles#list(bufnr) "{{{

@@ -10,11 +10,14 @@ if v:version < '700' "{{{
 endif "}}}
 
 " Option variables {{{
-if !exists('g:ctrlp_cache_dir')
-	let s:cache_dir = $HOME
-else
-	let s:cache_dir = g:ctrlp_cache_dir
-endif
+func! ctrlp#utils#opts()
+	if !exists('g:ctrlp_cache_dir')
+		let s:cache_dir = $HOME
+	else
+		let s:cache_dir = g:ctrlp_cache_dir
+	endif
+endfunc
+cal ctrlp#utils#opts()
 "}}}
 
 " Files and Directories functions {{{

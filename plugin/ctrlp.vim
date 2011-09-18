@@ -23,6 +23,11 @@ com! CtrlPCurWD   cal ctrlp#init(0, 0)
 com! CtrlPCurFile cal ctrlp#init(0, 1)
 com! CtrlPRoot    cal ctrlp#init(0, 2)
 
+com! ResetCtrlP cal ctrlp#reset()
+
 exe 'nn <silent>' g:ctrlp_map ':<c-u>CtrlP<cr>'
 
 if g:ctrlp_mru_files | cal ctrlp#mrufiles#init() | endif
+
+let g:ctrlp_lines = []
+let g:ctrlp_allfiles = []
