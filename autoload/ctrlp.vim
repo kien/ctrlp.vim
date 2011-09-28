@@ -187,7 +187,7 @@ func! ctrlp#reset()
 	if g:ctrlp_mru_files | cal ctrlp#mrufiles#opts() | endif
 	" Clear user input
 	let g:CtrlP_prompt = ['','','']
-	if exists('g:CtrlP_cline') | unl g:CtrlP_cline | endif
+	unl! g:CtrlP_cline
 endfunc
 "}}}
 
@@ -269,7 +269,7 @@ func! s:SplitPattern(str,...) "{{{
 	" Ignore spaces
 	let str = s:igspace ? substitute(a:str, ' ', '', 'g') : a:str
 	" Clear the jumptoline var
-	if exists('s:jmpln') | unl s:jmpln | endif
+	unl! s:jmpln
 	" If pattern contains :\d (e.g. abc:25)
 	if match(str, ':\d*$') >= 0
 		" Get the line to jump to
@@ -360,18 +360,17 @@ func! s:SetupBlank() "{{{
 	redr
 endfunc "}}}
 
-"Mightdo: history of entered strings  /low /minor
 func! s:BufOpen(...) "{{{
 	" a:1 bufname; a:2 delete
 	let buf = a:1
 	" Closing, use s:winnr as a switch to avoid an issue with Vim 7.2
-	if exists('s:winnr') && s:winnr > 0
+	if exists('s:winnr')
 		try
 			bun!
 		catch
 			winc c
 		endtry
-		if exists('s:winnr') | unl s:winnr | endif
+		unl! s:winnr
 	endif
 	if exists('a:2')
 		" Restore the changed global options
@@ -389,31 +388,24 @@ func! s:BufOpen(...) "{{{
 		let &gcr    = s:CtrlP_gcr
 		let &mfd    = s:CtrlP_mfd
 		" Cleaning up
-		if s:pinput != 2 && exists('g:CtrlP_cline')
-			unl g:CtrlP_cline
+		if s:pinput != 2
+			unl! g:CtrlP_cline
 		endif
 		if exists('s:cwd')
 			exe 'chd!' s:cwd
 			unl s:cwd
 		endif
-		if exists('s:focus')
-			unl s:focus
-		endif
-		if exists('s:firstinit')
-			unl s:firstinit
-		endif
-		if exists('g:ctrlp_lines')
-			let g:ctrlp_lines = []
-		endif
-		if exists('g:ctrlp_allfiles')
-			let g:ctrlp_allfiles = []
-		endif
+		unl! s:focus
+		unl! s:firstinit
+		let g:ctrlp_lines = []
+		let g:ctrlp_allfiles = []
 		exe s:currwin.'winc w'
 		ec
 	else
 		let s:currwin = winnr()
 		" Open new buffer
 		exe 'sil! botright 1new' buf
+		let s:winnr = bufwinnr('%')
 		" Store global options
 		let s:CtrlP_magic  = &magic
 		let s:CtrlP_to     = &to
@@ -431,8 +423,9 @@ func! s:BufOpen(...) "{{{
 		if !exists('g:CtrlP_prompt') || !s:pinput
 			let g:CtrlP_prompt = ['', '', '']
 		endif
-		" Workaround for Vim 7.2
-		let s:winnr = bufwinnr('%')
+		if !exists('g:ctrlp_history')
+			let g:ctrlp_history = ['']
+		endif
 		se magic
 		se to
 		se tm=0
@@ -686,6 +679,19 @@ func! s:PrtClearCache()
 	cal s:SetLines(s:itemtype)
 	cal s:BuildPrompt()
 endfunc
+
+func! s:PrtHistory(...)
+	let prt = g:CtrlP_prompt
+	let str = prt[0] . prt[1] . prt[2]
+	let g:ctrlp_history[0] = str
+	let hislen = len(g:ctrlp_history)
+	let s:hisidx = exists('s:hisidx') ? s:hisidx + a:1 : a:1
+	let s:hisidx = s:hisidx < 0 ? 0 : s:hisidx >= hislen ? hislen - 1 : s:hisidx
+	let prt[0] = g:ctrlp_history[s:hisidx]
+	let prt[1] = ''
+	let prt[2] = ''
+	cal s:BuildPrompt()
+endfunc
 "}}}
 
 " * MapKeys {{{
@@ -711,8 +717,10 @@ func! s:MapSpecs(...)
 				\ 'PrtDelete()':                ['<del>'],
 				\ 'PrtDeleteWord()':            ['<c-w>'],
 				\ 'PrtClear()':                 ['<c-u>'],
-				\ 'PrtSelectMove("j")':         ['<c-n>', '<c-j>', '<down>'],
-				\ 'PrtSelectMove("k")':         ['<c-p>', '<c-k>', '<up>'],
+				\ 'PrtSelectMove("j")':         ['<c-j>', '<down>'],
+				\ 'PrtSelectMove("k")':         ['<c-k>', '<up>'],
+				\ 'PrtHistory(-1)':             ['<c-n>'],
+				\ 'PrtHistory(1)':              ['<c-p>'],
 				\ 'AcceptSelection("e")':       ['<cr>'],
 				\ 'AcceptSelection("h")':       ['<c-cr>', '<c-s>', '<c-x>'],
 				\ 'AcceptSelection("t")':       ['<c-t>'],
@@ -852,19 +860,16 @@ func! ctrlp#SetWorkingPath(...)
 endfunc
 "}}}
 
-"Mightdo: jump to tag (requires ctags) or to string in addition to line number  /low /big
 func! s:AcceptSelection(mode,...) "{{{
 	let md = a:mode
+	let prt = g:CtrlP_prompt
+	let str = prt[0] . prt[1] . prt[2]
 	" Walk backward the dir tree
-	if md == 'e' && !s:itemtype
-		let prt = g:CtrlP_prompt
-		let str = prt[0] . prt[1] . prt[2]
-		if str == '..'
-			cal s:parentdir(getcwd())
-			cal s:SetLines(s:itemtype)
-			cal s:PrtClear()
-			retu
-		endif
+	if md == 'e' && !s:itemtype && str == '..'
+		cal s:parentdir(getcwd())
+		cal s:SetLines(s:itemtype)
+		cal s:PrtClear()
+		retu
 	endif
 	" Get the full path
 	let matchstr = matchstr(getline('.'), '^> \zs.\+\ze\t*$')
@@ -873,6 +878,8 @@ func! s:AcceptSelection(mode,...) "{{{
 	if exists('a:1') && a:1 | retu filpath | endif
 	" Manually remove the prompt and match window
 	if !has('autocmd') | cal s:BufOpen('ControlP', 'del') | endif
+	" Record the input string
+	cal extend(g:ctrlp_history, [str], 1)
 	" Split the mode string if it's longer than 1 char
 	if len(md) > 1
 		let mds = split(md, '\zs')
@@ -913,6 +920,7 @@ func! s:AcceptSelection(mode,...) "{{{
 	if s:normbuf()
 		exe s:normbuf().'winc w'
 	endif
+	let efilpath = escape(filpath, '%#')
 	if bufnum > 0
 		if exists('buftabwinnr') " In a tab
 			exe 'norm!' buftabnr.'gt'
@@ -921,9 +929,9 @@ func! s:AcceptSelection(mode,...) "{{{
 			exe bufwinnr.'winc w'
 		else
 			if !s:normbuf()
-				exe 'bo vne' filpath
+				exe 'bo vne' efilpath
 			else
-				exe 'bo '.cmd.' '.filpath
+				exe 'bo '.cmd.' '.efilpath
 			endif
 		endif
 	else
@@ -932,7 +940,7 @@ func! s:AcceptSelection(mode,...) "{{{
 			exe pref 'vne'
 			let pref = ''
 		endif | endif
-		exe 'bo '.cmd.' '.filpath
+		exe 'bo '.cmd.' '.efilpath
 	endif
 	" Jump to line
 	if exists('s:jmpln') && !empty('s:jmpln')
