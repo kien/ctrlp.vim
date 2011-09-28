@@ -150,6 +150,13 @@ func! s:opts()
 	if !exists('g:ctrlp_user_command')
 		let g:ctrlp_user_command = ''
 	endif
+
+	if !exists('g:ctrlp_open_new_file')
+		let s:newfop = 3
+	else
+		let s:newfop = g:ctrlp_open_new_file
+		unl g:ctrlp_open_new_file
+	endif
 endfunc
 cal s:opts()
 
@@ -538,7 +545,31 @@ func! s:ForceUpdate() "{{{
 	cal s:UpdateMatches(str)
 endfunc "}}}
 
-"Mightdo: create new file and its parent dirs if not yet existed  /medium /minor
+func! s:CreateNewFile() "{{{
+	let prt = g:CtrlP_prompt
+	let str = prt[0] . prt[1] . prt[2]
+	let arr = split(str, '[\/]')
+	let fname = remove(arr, -1)
+	winc c
+	if s:newfop == 1 " In new tab
+		tabnew
+		let cmd = 'e'
+	elseif s:newfop == 2 " In new hor split
+		let cmd = 'new'
+	elseif s:newfop == 3 " In new ver split
+		let cmd = 'vne'
+	elseif !s:newfop " In current window
+		let cmd = 'e'
+	endif
+	if len(arr)
+		if isdirectory(s:createparentdirs(arr))
+			exe 'bo '.cmd.' '.str
+		endif
+	else
+		exe 'bo '.cmd.' '.fname
+	endif
+endfunc "}}}
+
 " * Prt Actions {{{
 func! s:PrtClear()
 	let s:nomatches = 1
@@ -697,6 +728,7 @@ func! s:MapSpecs(...)
 				\ 'PrtCurLeft()':               ['<c-h>', '<left>'],
 				\ 'PrtCurRight()':              ['<c-l>', '<right>'],
 				\ 'PrtClearCache()':            ['<F5>'],
+				\ 'CreateNewFile()':            ['<c-y>'],
 				\ 'BufOpen("ControlP", "del")': ['<esc>', '<c-c>', '<c-g>'],
 				\ }
 	if type(s:urprtmaps) == 4
@@ -1017,6 +1049,15 @@ func! s:parentdir(curr)
 	if parent != a:curr
 		sil! exe 'lc!' parent
 	endif
+endfunc
+
+func! s:createparentdirs(arr)
+	let curr = ''
+	for each in a:arr
+		let curr = empty(curr) ? each : curr.ctrlp#utils#lash().each
+		cal ctrlp#utils#mkdir(curr)
+	endfor
+	retu curr
 endfunc
 "}}}
 

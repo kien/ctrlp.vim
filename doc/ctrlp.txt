@@ -243,6 +243,17 @@ Examples: >
   let g:ctrlp_user_command = 'dir %s /-n /b /s /a-d | findstr .*\.py$'
 <
 
+                                                      *'g:ctrlp_open_new_file'*
+Use this option to specify how the newly created file is to be opened when
+pressing <c-y>:
+  1 - in a new tab
+  2 - in a new horizontal split
+  3 - in a new vertical split
+  0 - in the current window/split
+>
+  let g:ctrlp_open_new_file = 3
+<
+
 ===============================================================================
 3. Commands                                                    *ctrlp-commands*
 
@@ -369,6 +380,9 @@ Once inside the prompt:
   <c-x>
     Open selected file in a 'horizontal' split
 
+  <c-y>
+    Create a new file and its parent directories.
+
   <F5>
     Refresh the match window and purge the cache for the current directory.
 
@@ -428,6 +442,8 @@ Mercurial repository: https://bitbucket.org/kien/ctrlp.vim
 ===============================================================================
 CHANGELOG
 
+    + New mapping: <c-y> create new file and its parent dirs.
+    + New option:  |g:ctrlp_open_new_file|
     + Added a new open-in-horizontal-split mapping: <c-x>
 
 Before 2011/09/19
