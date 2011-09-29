@@ -22,7 +22,7 @@ func! s:opts()
 	endif
 
 	if !exists('g:ctrlp_persistent_input')
-		let s:pinput = 1
+		let s:pinput = 0
 	else
 		let s:pinput = g:ctrlp_persistent_input
 		unl g:ctrlp_persistent_input
@@ -156,6 +156,13 @@ func! s:opts()
 	else
 		let s:newfop = g:ctrlp_open_new_file
 		unl g:ctrlp_open_new_file
+	endif
+
+	if !exists('g:ctrlp_max_history')
+		let s:maxhst = exists('+hi') ? &hi : 20
+	else
+		let s:maxhst = g:ctrlp_max_history
+		unl g:ctrlp_max_history
 	endif
 endfunc
 cal s:opts()
@@ -397,6 +404,8 @@ func! s:BufOpen(...) "{{{
 		endif
 		unl! s:focus
 		unl! s:firstinit
+		unl! s:hisidx
+		unl! s:hstgot
 		let g:ctrlp_lines = []
 		let g:ctrlp_allfiles = []
 		exe s:currwin.'winc w'
@@ -423,8 +432,8 @@ func! s:BufOpen(...) "{{{
 		if !exists('g:CtrlP_prompt') || !s:pinput
 			let g:CtrlP_prompt = ['', '', '']
 		endif
-		if !exists('g:ctrlp_history')
-			let g:ctrlp_history = ['']
+		if !exists('s:ctrlp_history')
+			let s:ctrlp_history =  filereadable(s:gethistloc()[1]) ? s:gethistdata() : ['']
 		endif
 		se magic
 		se to
@@ -542,7 +551,9 @@ func! s:CreateNewFile() "{{{
 	let prt = g:CtrlP_prompt
 	let str = prt[0] . prt[1] . prt[2]
 	let arr = split(str, '[\/]')
+	cal map(arr, 'escape(v:val, "%#")')
 	let fname = remove(arr, -1)
+	cal s:recordhist(str)
 	winc c
 	if s:newfop == 1 " In new tab
 		tabnew
@@ -561,16 +572,19 @@ func! s:CreateNewFile() "{{{
 	else
 		exe 'bo '.cmd.' '.fname
 	endif
+	cal s:insertcache(str)
 endfunc "}}}
 
 " * Prt Actions {{{
 func! s:PrtClear()
 	let s:nomatches = 1
+	unl! s:hstgot
 	let g:CtrlP_prompt = ['','','']
 	cal s:BuildPrompt()
 endfunc
 
 func! s:PrtAdd(char)
+	unl! s:hstgot
 	let prt = g:CtrlP_prompt
 	let prt[0] = prt[0] . a:char
 	cal s:BuildPrompt()
@@ -578,6 +592,7 @@ endfunc
 
 func! s:PrtBS()
 	let s:nomatches = 1
+	unl! s:hstgot
 	let prt = g:CtrlP_prompt
 	let prt[0] = strpart(prt[0], -1, strlen(prt[0]))
 	cal s:BuildPrompt()
@@ -585,6 +600,7 @@ endfunc
 
 func! s:PrtDelete()
 	let s:nomatches = 1
+	unl! s:hstgot
 	let prt = g:CtrlP_prompt
 	let prt[1] = strpart(prt[2], 0, 1)
 	let prt[2] = strpart(prt[2], 1)
@@ -627,6 +643,7 @@ endfunc
 
 func! s:PrtDeleteWord()
 	let s:nomatches = 1
+	unl! s:hstgot
 	let prt = g:CtrlP_prompt
 	let str = prt[0]
 	if match(str, '\W\w\+$') >= 0
@@ -683,13 +700,14 @@ endfunc
 func! s:PrtHistory(...)
 	let prt = g:CtrlP_prompt
 	let str = prt[0] . prt[1] . prt[2]
-	let g:ctrlp_history[0] = str
-	let hislen = len(g:ctrlp_history)
-	let s:hisidx = exists('s:hisidx') ? s:hisidx + a:1 : a:1
-	let s:hisidx = s:hisidx < 0 ? 0 : s:hisidx >= hislen ? hislen - 1 : s:hisidx
-	let prt[0] = g:ctrlp_history[s:hisidx]
-	let prt[1] = ''
-	let prt[2] = ''
+	let hst = s:ctrlp_history
+	let hst[0] = exists('s:hstgot') ? hst[0] : str
+	let hslen = len(hst)
+	let idx = exists('s:hisidx') ? s:hisidx + a:1 : a:1
+	let idx = idx < 0 ? 0 : idx >= hslen ? hslen > 1 ? hslen - 1 : 0 : idx
+	let g:CtrlP_prompt = [hst[idx], '', '']
+	let s:hisidx = idx
+	let s:hstgot = 1
 	cal s:BuildPrompt()
 endfunc
 "}}}
@@ -879,7 +897,7 @@ func! s:AcceptSelection(mode,...) "{{{
 	" Manually remove the prompt and match window
 	if !has('autocmd') | cal s:BufOpen('ControlP', 'del') | endif
 	" Record the input string
-	cal extend(g:ctrlp_history, [str], 1)
+	cal s:recordhist(str)
 	" Split the mode string if it's longer than 1 char
 	if len(md) > 1
 		let mds = split(md, '\zs')
@@ -920,7 +938,7 @@ func! s:AcceptSelection(mode,...) "{{{
 	if s:normbuf()
 		exe s:normbuf().'winc w'
 	endif
-	let efilpath = escape(filpath, '%#')
+	let filpath = escape(filpath, '%#')
 	if bufnum > 0
 		if exists('buftabwinnr') " In a tab
 			exe 'norm!' buftabnr.'gt'
@@ -929,9 +947,9 @@ func! s:AcceptSelection(mode,...) "{{{
 			exe bufwinnr.'winc w'
 		else
 			if !s:normbuf()
-				exe 'bo vne' efilpath
+				exe 'bo vne' filpath
 			else
-				exe 'bo '.cmd.' '.efilpath
+				exe 'bo '.cmd.' '.filpath
 			endif
 		endif
 	else
@@ -940,7 +958,7 @@ func! s:AcceptSelection(mode,...) "{{{
 			exe pref 'vne'
 			let pref = ''
 		endif | endif
-		exe 'bo '.cmd.' '.efilpath
+		exe 'bo '.cmd.' '.filpath
 	endif
 	" Jump to line
 	if exists('s:jmpln') && !empty('s:jmpln')
@@ -1093,6 +1111,27 @@ func! s:highlight(pat, grp)
 endfunc
 "}}}
 
+" Prompt history {{{
+func! s:gethistloc()
+	let cache_dir = ctrlp#utils#cachedir().ctrlp#utils#lash().'hist'
+	let cache_file = cache_dir.ctrlp#utils#lash().'cache.txt'
+	retu [cache_dir, cache_file]
+endfunc
+
+func! s:gethistdata()
+	retu ctrlp#utils#readfile(s:gethistloc()[1])
+endfunc
+
+func! s:recordhist(str)
+	if empty(a:str) | retu | endif
+	let hst = s:ctrlp_history
+	cal extend(hst, [a:str], 1)
+	if len(hst) > s:maxhst
+		cal remove(hst, s:maxhst, -1)
+	endif
+endfunc
+"}}}
+
 " Misc {{{
 func! s:walker(max, pos, dir, ...)
 	if a:dir == 1
@@ -1123,6 +1162,31 @@ func! s:normbuf()
 	endfor
 	retu 0
 endfunc
+
+func! s:leavepre()
+	if s:cconex | cal ctrlp#clearallcaches() | endif
+	cal ctrlp#utils#writecache(s:ctrlp_history, s:gethistloc()[0], s:gethistloc()[1])
+endfunc
+
+func! s:insertcache(str)
+	let cache_file = ctrlp#utils#cachefile()
+	if filereadable(cache_file)
+		let data = readfile(cache_file)
+		if strlen(a:str) <= strlen(data[0])
+			let pos = 0
+		else
+			let strlen = abs((strlen(a:str) - strlen(data[0])) * 100000)
+			let fullen = abs(strlen(data[-1]) - strlen(data[0]))
+			let posi = string(len(data) * strlen / fullen)
+			let floatpos = stridx(posi, '.')
+			let posi = substitute(posi, '\.', '', 'g')
+			let posi = join(insert(split(posi, '\zs'), '.', floatpos - 5), '')
+			let pos = float2nr(round(str2float(posi)))
+		endif
+		cal insert(data, a:str, pos)
+		cal writefile(data, cache_file)
+	endif
+endfunc
 "}}}
 "}}}
 
@@ -1130,7 +1194,7 @@ if has('autocmd') "{{{
 	aug CtrlPAug
 		au!
 		au WinLeave,BufLeave ControlP cal s:BufOpen('ControlP', 'del')
-		au VimLeavePre * if s:cconex | cal ctrlp#clearallcaches() | endif
+		au VimLeavePre * cal s:leavepre()
 	aug END
 endif "}}}
 

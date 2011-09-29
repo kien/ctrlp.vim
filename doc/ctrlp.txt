@@ -60,7 +60,7 @@ Remember the last input string:
   2 - Also remember the position of the selection in the match window.
   0 - Clear the input field each time CtrlP starts.
 >
-  let g:ctrlp_persistent_input = 1
+  let g:ctrlp_persistent_input = 0
 <
 
                                               *'g:ctrlp_match_window_reversed'*
@@ -142,8 +142,10 @@ only need to keep the lines that you’ve changed the values (inside []): >
     \ 'PrtDelete()':                ['<del>'],
     \ 'PrtDeleteWord()':            ['<c-w>'],
     \ 'PrtClear()':                 ['<c-u>'],
-    \ 'PrtSelectMove("j")':         ['<c-n>', '<c-j>', '<down>'],
-    \ 'PrtSelectMove("k")':         ['<c-p>', '<c-k>', '<up>'],
+    \ 'PrtSelectMove("j")':         ['<c-j>', '<down>'],
+    \ 'PrtSelectMove("k")':         ['<c-k>', '<up>'],
+    \ 'PrtHistory(-1)':             ['<c-n>'],
+    \ 'PrtHistory(1)':              ['<c-p>'],
     \ 'AcceptSelection("e")':       ['<cr>'],
     \ 'AcceptSelection("h")':       ['<c-cr>', '<c-s>', '<c-x>'],
     \ 'AcceptSelection("t")':       ['<c-t>'],
@@ -159,6 +161,7 @@ only need to keep the lines that you’ve changed the values (inside []): >
     \ 'PrtCurLeft()':               ['<c-h>', '<left>'],
     \ 'PrtCurRight()':              ['<c-l>', '<right>'],
     \ 'PrtClearCache()':            ['<F5>'],
+    \ 'CreateNewFile()':            ['<c-y>'],
     \ 'BufOpen("ControlP", "del")': ['<esc>', '<c-c>', '<c-g>'],
     \ }
 <
@@ -254,6 +257,12 @@ pressing <c-y>:
   let g:ctrlp_open_new_file = 3
 <
 
+                                                        *'g:ctrlp_max_history'*
+The maximum number of input strings you want |CtrlP| to remember. The default
+value’s taken from Vim’s global |'history'| option. E.g. `set history=50`: >
+  let g:ctrlp_max_history = &history
+<
+
 ===============================================================================
 3. Commands                                                    *ctrlp-commands*
 
@@ -336,12 +345,10 @@ Once inside the prompt:
     Force update the match window.
     Use this if |g:ctrlp_live_update| has been set to 0.
 
-  <c-n>,
   <c-j>,
   <down>
     Move selection down
 
-  <c-p>,
   <c-k>,
   <up>
     Move selection up
@@ -382,6 +389,12 @@ Once inside the prompt:
 
   <c-y>
     Create a new file and its parent directories.
+
+  <c-n>
+    'Next' string in the prompt’s history (of accepted input strings)
+
+  <c-p>
+    'Previous' string in the prompt’s history
 
   <F5>
     Refresh the match window and purge the cache for the current directory.
@@ -442,8 +455,10 @@ Mercurial repository: https://bitbucket.org/kien/ctrlp.vim
 ===============================================================================
 CHANGELOG
 
-    + New mapping: <c-y> create new file and its parent dirs.
-    + New option:  |g:ctrlp_open_new_file|
+    + New mappings: <c-y> create new file and its parent dirs.
+                    <c-n>, <c-p> next/prev string in the input history.
+    + New options: |g:ctrlp_open_new_file|,
+                   |g:ctrlp_max_history|
     + Added a new open-in-horizontal-split mapping: <c-x>
 
 Before 2011/09/19
