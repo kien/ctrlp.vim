@@ -433,7 +433,8 @@ func! s:BufOpen(...) "{{{
 			let g:CtrlP_prompt = ['', '', '']
 		endif
 		if !exists('s:ctrlp_history')
-			let s:ctrlp_history =  filereadable(s:gethistloc()[1]) ? s:gethistdata() : ['']
+			let s:ctrlp_history = filereadable(s:gethistloc()[1]) ? s:gethistdata() : ['']
+			let s:ctrlp_history = empty(s:ctrlp_history) || !s:maxhst ? [''] : s:ctrlp_history
 		endif
 		se magic
 		se to
@@ -698,6 +699,7 @@ func! s:PrtClearCache()
 endfunc
 
 func! s:PrtHistory(...)
+	if !s:maxhst | retu | endif
 	let prt = g:CtrlP_prompt
 	let str = prt[0] . prt[1] . prt[2]
 	let hst = s:ctrlp_history
@@ -891,6 +893,7 @@ func! s:AcceptSelection(mode,...) "{{{
 	endif
 	" Get the full path
 	let matchstr = matchstr(getline('.'), '^> \zs.\+\ze\t*$')
+	if empty(matchstr) | retu | endif
 	let filpath = s:itemtype ? matchstr : getcwd().ctrlp#utils#lash().matchstr
 	" If only need the full path
 	if exists('a:1') && a:1 | retu filpath | endif
@@ -1123,7 +1126,7 @@ func! s:gethistdata()
 endfunc
 
 func! s:recordhist(str)
-	if empty(a:str) | retu | endif
+	if empty(a:str) || !s:maxhst | retu | endif
 	let hst = s:ctrlp_history
 	cal extend(hst, [a:str], 1)
 	if len(hst) > s:maxhst

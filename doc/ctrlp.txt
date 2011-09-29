@@ -259,9 +259,10 @@ pressing <c-y>:
 
                                                         *'g:ctrlp_max_history'*
 The maximum number of input strings you want |CtrlP| to remember. The default
-value’s taken from Vim’s global |'history'| option. E.g. `set history=50`: >
+value mirrors Vim’s global |'history'| option. E.g. `set history=50`: >
   let g:ctrlp_max_history = &history
 <
+Set it to 0 to disable prompt’s history.
 
 ===============================================================================
 3. Commands                                                    *ctrlp-commands*
