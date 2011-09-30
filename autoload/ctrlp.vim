@@ -380,6 +380,7 @@ func! s:BufOpen(...) "{{{
 		unl! s:winnr
 	endif
 	if exists('a:2')
+		exe s:currwin.'winc w'
 		" Restore the changed global options
 		let &magic  = s:CtrlP_magic
 		let &to     = s:CtrlP_to
@@ -391,7 +392,6 @@ func! s:BufOpen(...) "{{{
 		let &sc     = s:CtrlP_sc
 		let &ss     = s:CtrlP_ss
 		let &siso   = s:CtrlP_siso
-		let &ea     = s:CtrlP_ea
 		let &gcr    = s:CtrlP_gcr
 		let &mfd    = s:CtrlP_mfd
 		" Cleaning up
@@ -408,12 +408,11 @@ func! s:BufOpen(...) "{{{
 		unl! s:hstgot
 		let g:ctrlp_lines = []
 		let g:ctrlp_allfiles = []
-		exe s:currwin.'winc w'
 		ec
 	else
 		let s:currwin = winnr()
 		" Open new buffer
-		exe 'sil! botright 1new' buf
+		exe 'sil! bo 1new' buf
 		let s:winnr = bufwinnr('%')
 		" Store global options
 		let s:CtrlP_magic  = &magic
@@ -426,7 +425,6 @@ func! s:BufOpen(...) "{{{
 		let s:CtrlP_sc     = &sc
 		let s:CtrlP_ss     = &ss
 		let s:CtrlP_siso   = &siso
-		let s:CtrlP_ea     = &ea
 		let s:CtrlP_gcr    = &gcr
 		let s:CtrlP_mfd    = &mfd
 		if !s:pinput
@@ -446,7 +444,6 @@ func! s:BufOpen(...) "{{{
 		se nosc
 		se ss=0
 		se siso=0
-		se noea
 		se mfd=200
 		se gcr=a:block-PmenuSel-blinkon0
 	endif
@@ -555,7 +552,6 @@ func! s:CreateNewFile() "{{{
 	cal map(arr, 'escape(v:val, "%#")')
 	let fname = remove(arr, -1)
 	cal s:recordhist(str)
-	" Find 
 	winc c
 	if s:newfop == 1 " In new tab
 		tabnew
