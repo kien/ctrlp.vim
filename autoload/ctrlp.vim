@@ -429,7 +429,7 @@ func! s:BufOpen(...) "{{{
 		let s:CtrlP_ea     = &ea
 		let s:CtrlP_gcr    = &gcr
 		let s:CtrlP_mfd    = &mfd
-		if !exists('g:CtrlP_prompt') || !s:pinput
+		if !s:pinput
 			let g:CtrlP_prompt = ['', '', '']
 		endif
 		if !exists('s:ctrlp_history')
@@ -555,6 +555,7 @@ func! s:CreateNewFile() "{{{
 	cal map(arr, 'escape(v:val, "%#")')
 	let fname = remove(arr, -1)
 	cal s:recordhist(str)
+	" Find 
 	winc c
 	if s:newfop == 1 " In new tab
 		tabnew
@@ -919,6 +920,8 @@ func! s:AcceptSelection(mode,...) "{{{
 	endif
 	let bufnum = bufnr(filpath)
 	let bufwinnr = bufwinnr(bufnum)
+	let norbuf = s:normbuf()
+	exe s:currwin.'winc w'
 	" Check if the buffer's already opened in a tab
 	for nr in range(1, tabpagenr('$'))
 		" Get a list of the buffers in the nr tab
@@ -937,30 +940,29 @@ func! s:AcceptSelection(mode,...) "{{{
 		endif
 	endfor
 	" Switch to existing buffer or open new one
-	let opened = 0
-	if s:normbuf()
-		exe s:normbuf().'winc w'
-	endif
 	let filpath = escape(filpath, '%#')
-	if bufnum > 0
-		if exists('buftabwinnr') " In a tab
-			exe 'norm!' buftabnr.'gt'
-			exe buftabwinnr.'winc w'
-		elseif bufwinnr > 0 " In a window
-			exe bufwinnr.'winc w'
-		else
-			if !s:normbuf()
-				exe 'bo vne' filpath
+	" If the file's already loaded
+	if bufnum > 0 && exists('buftabwinnr') " In a tab
+		exe 'norm!' buftabnr.'gt'
+		exe buftabwinnr.'winc w'
+	elseif bufnum > 0 && bufwinnr > 0 " In a window
+		exe bufwinnr.'winc w'
+	else
+		" If mode is 'e'
+		if md == 'e'
+			" If there's at least 1 normal buffer
+			if norbuf
+				" But not the current one
+				if !&l:bl || !empty(&l:bt) || !&l:ma
+					" Go to the first one
+					exe norbuf.'winc w'
+				endif
 			else
-				exe 'bo '.cmd.' '.filpath
+				" No normal buffers
+				let cmd = 'vne'
 			endif
 		endif
-	else
-		let pref = 'bo'
-		if !s:normbuf() | if md == 'e'
-			exe pref 'vne'
-			let pref = ''
-		endif | endif
+		" Open new window/buffer
 		exe 'bo '.cmd.' '.filpath
 	endif
 	" Jump to line
@@ -1177,6 +1179,8 @@ func! s:insertcache(str)
 		let data = readfile(cache_file)
 		if strlen(a:str) <= strlen(data[0])
 			let pos = 0
+		elseif strlen(a:str) >= strlen(data[-1])
+			let pos = len(data) - 1
 		else
 			let strlen = abs((strlen(a:str) - strlen(data[0])) * 100000)
 			let fullen = abs(strlen(data[-1]) - strlen(data[0]))
@@ -1187,7 +1191,7 @@ func! s:insertcache(str)
 			let pos = float2nr(round(str2float(posi)))
 		endif
 		cal insert(data, a:str, pos)
-		cal writefile(data, cache_file)
+		cal ctrlp#utils#writecache(data)
 	endif
 endfunc
 "}}}
