@@ -1,4 +1,4 @@
-*ctrlp.txt*       Full path fuzzy file, buffer and MRU file finder for Vim.
+*ctrlp.txt*       Full path fuzzy file, buffer and MRU file finder. v1.5
 *CtrlP* *ControlP* *'ctrlp'* *'ctrl-p'*
 ===============================================================================
 #                                                                             #
@@ -69,6 +69,11 @@ setting is from bottom to top: >
   let g:ctrlp_match_window_reversed = 1
 <
 
+                                                         *'g:ctrlp_max_height'*
+Set the maximum height of the match window: >
+  let g:ctrlp_max_height = 10
+<
+
                                                        *'g:ctrlp_split_window'*
 Use this option to specify how the file is to be opened when pressing <cr>:
   1 - in a new tab
@@ -77,11 +82,6 @@ Use this option to specify how the file is to be opened when pressing <cr>:
   0 - in the current window/split
 >
   let g:ctrlp_split_window = 0
-<
-
-                                                       *'g:ctrlp_ignore_space'*
-Set this to 1 to ignore whitespaces in filenames and directory names: >
-  let g:ctrlp_ignore_space = 0
 <
 
                                                   *'g:ctrlp_working_path_mode'*
@@ -111,11 +111,6 @@ addition to the default ones, your markers will take precedence: >
   let g:ctrlp_root_markers = ['']
 <
 
-                                                         *'g:ctrlp_max_height'*
-Set the maximum height of the match window: >
-  let g:ctrlp_max_height = 10
-<
-
                                                         *'g:ctrlp_use_caching'*
 Set this to 0 to disable per-session caching. When disabled, caching will still
 be enabled for directories that have more than 4000 files: >
@@ -125,7 +120,7 @@ Note: you can quickly purge the cache by pressing <F5>.
 
                                                 *'g:ctrlp_clear_cache_on_exit'*
 Set this to 0 to enable cross-sessions caching by not deleting the caches upon
-exit: >
+exiting Vim: >
   let g:ctrlp_clear_cache_on_exit = 1
 <
 
@@ -147,7 +142,7 @@ only need to keep the lines that you’ve changed the values (inside []): >
     \ 'PrtHistory(-1)':             ['<c-n>'],
     \ 'PrtHistory(1)':              ['<c-p>'],
     \ 'AcceptSelection("e")':       ['<cr>'],
-    \ 'AcceptSelection("h")':       ['<c-cr>', '<c-s>', '<c-x>'],
+    \ 'AcceptSelection("h")':       ['<c-x>', '<c-cr>', '<c-s>'],
     \ 'AcceptSelection("t")':       ['<c-t>'],
     \ 'AcceptSelection("v")':       ['<c-v>'],
     \ 'ToggleFocus()':              ['<tab>'],
@@ -155,13 +150,15 @@ only need to keep the lines that you’ve changed the values (inside []): >
     \ 'ToggleByFname()':            ['<c-d>'],
     \ 'ToggleType(1)':              ['<c-f>', '<c-up'],
     \ 'ToggleType(-1)':             ['<c-b>', '<c-down>'],
-    \ 'ForceUpdate()':              ['<c-o>'],
+    \ 'ForceUpdate()':              ['<c-^>'],
     \ 'PrtCurStart()':              ['<c-a>'],
     \ 'PrtCurEnd()':                ['<c-e>'],
     \ 'PrtCurLeft()':               ['<c-h>', '<left>'],
     \ 'PrtCurRight()':              ['<c-l>', '<right>'],
     \ 'PrtClearCache()':            ['<F5>'],
     \ 'CreateNewFile()':            ['<c-y>'],
+    \ 'MarkToOpen()':               ['<c-z>'],
+    \ 'OpenMulti()':                ['<c-o>'],
     \ 'BufOpen("ControlP", "del")': ['<esc>', '<c-c>', '<c-g>'],
     \ }
 <
@@ -226,7 +223,7 @@ The maximum depth of a directory tree to recurse into: >
 Note: the larger the value, the more memory Vim uses.
 
                                                         *'g:ctrlp_live_update'*
-Set to 0 to disable the update-as-you-type functionality; press <c-o> to force
+Set to 0 to disable the update-as-you-type functionality; press <c-^> to force
 an update: >
   let g:ctrlp_live_update = 1
 <
@@ -262,7 +259,15 @@ The maximum number of input strings you want |CtrlP| to remember. The default
 value mirrors Vim’s global |'history'| option. E.g. `set history=50`: >
   let g:ctrlp_max_history = &history
 <
-Set it to 0 to disable prompt’s history.
+Set to 0 to disable prompt’s history.
+
+                                                         *'g:ctrlp_open_multi'*
+If non-zero this will enable opening multiple files with <c-z> and <c-o>: >
+  let g:ctrlp_open_multi = 0
+<
+If bigger than 1, it’ll be used as the maximum number of windows to create when
+opening the files (the rest will be hidden buffers). If is 1, it’ll open all
+files, each in a vertical split.
 
 ===============================================================================
 3. Commands                                                    *ctrlp-commands*
@@ -342,10 +347,6 @@ Once inside the prompt:
   <tab>
     Toggle the focus between the match window and the prompt.
 
-  <c-o>
-    Force update the match window.
-    Use this if |g:ctrlp_live_update| has been set to 0.
-
   <c-j>,
   <down>
     Move selection down
@@ -397,8 +398,18 @@ Once inside the prompt:
   <c-p>
     'Previous' string in the prompt’s history
 
+  <c-z>
+    Mark/unmark a file to be opened with <c-o>.
+
+  <c-o>
+    Open files marked by <c-z>.
+
   <F5>
     Refresh the match window and purge the cache for the current directory.
+
+  <c-^>
+    Force update the match window.
+    You only need to use this if |g:ctrlp_live_update| has been set to 0.
 
   <esc>,
   <c-c>,
@@ -429,13 +440,24 @@ b)  Vim |regexp|. If the input string contains '*' or '|', it’ll be treated as
 
     See also |ctrlp-fullregexp| and |g:ctrlp_regexp_search|.
 
-c)  Strings end with a colon ':' followed by an arbitrary number will be read
-    as a line number to jump to after opening the file.
+c)  End the string with a colon ':' followed by a Vim command to execute that
+    command after opening the file. If you need to use ':' in the command,
+    escape it with a backslash: '\:'.
     e.g. 'abc:45' will open the selected file and jump to line 45.
+         'abc:/my\:function' will open the selected file and jump to the first
+         instance of 'my:function'.
+         'abc:+setf\ myfiletype|50' will open the selected file and set its
+         filetype to 'myfiletype' then jump to line 50.
+
+         See also |++opt| and |+cmd|.
 
 d)  Type exactly two dots (..) at the start of the line and press enter to go
     backward in the directory tree by 1 level. If the parent directory is
     large, this might be slow.
+
+e)  Type the name of a non-existed file and press <c-y> to create it.
+    e.g. 'parentdir/file.txt' will create a directory named 'parentdir' as well
+    as 'file.txt'. Use '\' in place of '/' on Windows (if |'ssl'| is not set).
 
 ===============================================================================
 6. Credits                                                      *ctrlp-credits*
@@ -456,8 +478,16 @@ Mercurial repository: https://bitbucket.org/kien/ctrlp.vim
 ===============================================================================
 CHANGELOG
 
-    + New mappings: <c-y> create new file and its parent dirs.
-                    <c-n>, <c-p> next/prev string in the input history.
+    + New features: Open multiple files.
+                    Pass Vim’s ++opt and +cmd to the opening file (section 5.c)
+    + New mappings: <c-z> mark/unmark a file to be opened with <c-o>.
+                    <c-o> open all marked files.
+    + New option: |g:ctrlp_open_multi|
+
+Before 2011/09/29
+
+    + New mappings: <c-n>, <c-p> next/prev string in the input history.
+                    <c-y> create new file and its parent dirs.
     + New options: |g:ctrlp_open_new_file|,
                    |g:ctrlp_max_history|
     + Added a new open-in-horizontal-split mapping: <c-x>
@@ -468,6 +498,7 @@ Before 2011/09/19
     + New options: |g:ctrlp_max_files|,
                    |g:ctrlp_max_depth|,
                    |g:ctrlp_live_update|
+    + New mapping: <c-^>
 
 Before 2011/09/12
 
@@ -484,7 +515,7 @@ Before 2011/09/12
                     |:CtrlPCurFile|,
                     |:CtrlPRoot|
 
-    + New feature: search in most recently used (MRU) files
+    + New feature: Search in most recently used (MRU) files
     + New mapping: <c-b>.
     + Extended the behavior of <c-f>.
     + New options: |g:ctrlp_mru_files|,
@@ -492,9 +523,6 @@ Before 2011/09/12
                    |g:ctrlp_mruf_exclude|,
                    |g:ctrlp_mruf_include|
     + New command: |:CtrlPMRUFiles|
-
-The updates are shown in reverse chronological order, from newest (top) to
-oldest (bottom).
 
 ===============================================================================
 vim:et:ts=2:sw=2:sts=2

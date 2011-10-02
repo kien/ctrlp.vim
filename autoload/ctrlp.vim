@@ -3,161 +3,58 @@
 " Description:   Full path fuzzy file, buffer and MRU file finder for Vim.
 " Author:        Kien Nguyen <github.com/kien>
 " License:       MIT
+" Version:       1.5
 " =============================================================================
 
 if v:version < '700' "{{{
-	func! ctrlp#init(...)
-		echoh Error | ec 'CtrlP requires Vim 7.0+' | echoh None
-	endfunc
 	fini
 endif "}}}
 
 " Option variables {{{
 func! s:opts()
-	if !exists('g:ctrlp_match_window_reversed')
-		let s:mwreverse = 1
-	else
-		let s:mwreverse = g:ctrlp_match_window_reversed
-		unl g:ctrlp_match_window_reversed
-	endif
-
-	if !exists('g:ctrlp_persistent_input')
-		let s:pinput = 0
-	else
-		let s:pinput = g:ctrlp_persistent_input
-		unl g:ctrlp_persistent_input
-	endif
-
-	if !exists('g:ctrlp_split_window')
-		let s:splitwin = 0
-	else
-		let s:splitwin = g:ctrlp_split_window
-		unl g:ctrlp_split_window
-	endif
-
-	if !exists('g:ctrlp_ignore_space')
-		let s:igspace = 0
-	else
-		let s:igspace = g:ctrlp_ignore_space
-		unl g:ctrlp_ignore_space
-	endif
-
-	if !exists('g:ctrlp_working_path_mode')
-		let s:pathmode = 1
-	else
-		let s:pathmode = g:ctrlp_working_path_mode
-		unl g:ctrlp_working_path_mode
-	endif
-
-	if !exists('g:ctrlp_root_markers')
-		let s:rmarkers = []
-	else
-		let s:rmarkers = g:ctrlp_root_markers
-		unl g:ctrlp_root_markers
-	endif
-
-	if !exists('g:ctrlp_max_height')
-		let s:mxheight = 10
-	else
-		let s:mxheight = g:ctrlp_max_height
-		unl g:ctrlp_max_height
-	endif
-
-	if !exists('g:ctrlp_regexp_search')
-		let s:regexp = 0
-	else
-		let s:regexp = g:ctrlp_regexp_search
-		unl g:ctrlp_regexp_search
-	endif
-
-	if !exists('g:ctrlp_use_caching')
-		let s:caching = 1
-	else
-		let s:caching = g:ctrlp_use_caching
-		unl g:ctrlp_use_caching
-	endif
-
-	if !exists('g:ctrlp_clear_cache_on_exit')
-		let s:cconex = 1
-	else
-		let s:cconex = g:ctrlp_clear_cache_on_exit
-		unl g:ctrlp_clear_cache_on_exit
-	endif
-
+	let opts = {
+				\ 'g:ctrlp_match_window_reversed' : ['s:mwreverse', 1],
+				\ 'g:ctrlp_persistent_input'      : ['s:pinput', 0],
+				\ 'g:ctrlp_split_window'          : ['s:splitwin', 0],
+				\ 'g:ctrlp_working_path_mode'     : ['s:pathmode', 1],
+				\ 'g:ctrlp_root_markers'          : ['s:rmarkers', []],
+				\ 'g:ctrlp_max_height'            : ['s:mxheight', 10],
+				\ 'g:ctrlp_regexp_search'         : ['s:regexp', 0],
+				\ 'g:ctrlp_use_caching'           : ['s:caching', 1],
+				\ 'g:ctrlp_clear_cache_on_exit'   : ['s:cconex', 1],
+				\ 'g:ctrlp_by_filename'           : ['s:byfname', 0],
+				\ 'g:ctrlp_prompt_mappings'       : ['s:urprtmaps', 0],
+				\ 'g:ctrlp_dotfiles'              : ['s:dotfiles', 1],
+				\ 'g:ctrlp_highlight_match'       : ['s:mathi', [1, 'Function']],
+				\ 'g:ctrlp_max_files'             : ['s:maxfiles', 20000],
+				\ 'g:ctrlp_max_depth'             : ['s:maxdepth', 40],
+				\ 'g:ctrlp_live_update'           : ['s:liup', 1],
+				\ 'g:ctrlp_open_new_file'         : ['s:newfop', 3],
+				\ 'g:ctrlp_open_multi'            : ['s:opmul', 1],
+				\ }
+	for key in keys(opts)
+		if call('exists', [key])
+			let def = type(eval(key)) != 1 ? string(eval(key)) : eval(key)
+			exe 'unl' key
+		else
+			let def = type(opts[key][1]) != 1 ? string(opts[key][1]) : opts[key][1]
+		endif
+		exe 'let' opts[key][0] '=' def
+	endfor
 	if !exists('g:ctrlp_cache_dir')
 		let s:cache_dir = $HOME
 	else
 		let s:cache_dir = g:ctrlp_cache_dir
 	endif
-
 	if !exists('g:ctrlp_newcache')
 		let g:ctrlp_newcache = 0
 	endif
-
-	if !exists('g:ctrlp_by_filename')
-		let s:byfname = 0
-	else
-		let s:byfname = g:ctrlp_by_filename
-		unl g:ctrlp_by_filename
-	endif
-
-	if !exists('g:ctrlp_prompt_mappings')
-		let s:urprtmaps = 0
-	else
-		let s:urprtmaps = g:ctrlp_prompt_mappings
-		unl g:ctrlp_prompt_mappings
-	endif
-
-	if !exists('g:ctrlp_dotfiles')
-		let s:dotfiles = 1
-	else
-		let s:dotfiles = g:ctrlp_dotfiles
-		unl g:ctrlp_dotfiles
-	endif
-
-	if !exists('g:ctrlp_highlight_match')
-		let s:mathi = [1, 'Function']
-	else
-		let s:mathi = g:ctrlp_highlight_match
-		unl g:ctrlp_highlight_match
-	endif
-
-	if !exists('g:ctrlp_max_files')
-		let s:maxfiles = 20000
-	else
-		let s:maxfiles = g:ctrlp_max_files
-		unl g:ctrlp_max_files
-	endif
-
-	if !exists('g:ctrlp_max_depth')
-		let s:maxdepth = 40
-	else
-		let s:maxdepth = g:ctrlp_max_depth
-		unl g:ctrlp_max_depth
-	endif
-
 	if s:maxdepth > 200
 		let s:maxdepth = 200
 	endif
-
-	if !exists('g:ctrlp_live_update')
-		let s:liup = 1
-	else
-		let s:liup = g:ctrlp_live_update
-		unl g:ctrlp_live_update
-	endif
-
 	if !exists('g:ctrlp_user_command')
 		let g:ctrlp_user_command = ''
 	endif
-
-	if !exists('g:ctrlp_open_new_file')
-		let s:newfop = 3
-	else
-		let s:newfop = g:ctrlp_open_new_file
-		unl g:ctrlp_open_new_file
-	endif
-
 	if !exists('g:ctrlp_max_history')
 		let s:maxhst = exists('+hi') ? &hi : 20
 	else
@@ -166,6 +63,8 @@ func! s:opts()
 	endif
 endfunc
 cal s:opts()
+
+let s:lash = ctrlp#utils#lash()
 
 " Limiters
 let s:compare_lim = 3000
@@ -273,18 +172,19 @@ func! s:ListAllBuffers() "{{{
 endfunc "}}}
 
 func! s:SplitPattern(str,...) "{{{
-	" Ignore spaces
-	let str = s:igspace ? substitute(a:str, ' ', '', 'g') : a:str
-	" Clear the jumptoline var
-	unl! s:jmpln
-	" If pattern contains :\d (e.g. abc:25)
-	if match(str, ':\d*$') >= 0
-		" Get the line to jump to
-		let s:jmpln = matchstr(str, ':\zs\d*$')
-		" Remove the line number
-		let str = substitute(str, ':\d*$', '', 'g')
-	endif
+	let str = a:str
+	" Restore the number of backslashes
 	let str = substitute(str, '\\\\', '\', 'g')
+	" Clear the tail var
+	unl! s:optail
+	" If pattern contains :str$
+	" e.g. abc:25, abc:/myclass or abc:++[opt] +[cmd]
+	if match(str, ':\([^:]\|\\:\)*$') >= 0
+		" Set the tail var
+		let s:optail = matchstr(str, ':\zs\([^:]\|\\:\)*$')
+		" Remove the tail
+		let str = substitute(str, ':\([^:]\|\\:\)*$', '', 'g')
+	endif
 	if s:regexp || match(str, '[*|]') >= 0
 				\ || match(str, '\\\(zs\|ze\|<\|>\)') >= 0
 		let array = [str]
@@ -395,6 +295,9 @@ func! s:BufOpen(...) "{{{
 		let &gcr    = s:CtrlP_gcr
 		let &mfd    = s:CtrlP_mfd
 		" Cleaning up
+		cal s:unmarksigns()
+		let g:ctrlp_lines = []
+		let g:ctrlp_allfiles = []
 		if s:pinput != 2
 			unl! g:CtrlP_cline
 		endif
@@ -402,18 +305,14 @@ func! s:BufOpen(...) "{{{
 			exe 'chd!' s:cwd
 			unl s:cwd
 		endif
-		unl! s:focus
-		unl! s:firstinit
-		unl! s:hisidx
-		unl! s:hstgot
-		let g:ctrlp_lines = []
-		let g:ctrlp_allfiles = []
+		unl! s:focus s:firstinit s:hisidx s:hstgot s:marked s:bufnr
 		ec
 	else
 		let s:currwin = winnr()
 		" Open new buffer
 		exe 'sil! bo 1new' buf
 		let s:winnr = bufwinnr('%')
+		let s:bufnr = bufnr('%')
 		" Store global options
 		let s:CtrlP_magic  = &magic
 		let s:CtrlP_to     = &to
@@ -430,9 +329,9 @@ func! s:BufOpen(...) "{{{
 		if !s:pinput
 			let g:CtrlP_prompt = ['', '', '']
 		endif
-		if !exists('s:ctrlp_history')
-			let s:ctrlp_history = filereadable(s:gethistloc()[1]) ? s:gethistdata() : ['']
-			let s:ctrlp_history = empty(s:ctrlp_history) || !s:maxhst ? [''] : s:ctrlp_history
+		if !exists('s:hstry')
+			let hst = filereadable(s:gethistloc()[1]) ? s:gethistdata() : ['']
+			let s:hstry = empty(hst) || !s:maxhst ? [''] : hst
 		endif
 		se magic
 		se to
@@ -446,10 +345,14 @@ func! s:BufOpen(...) "{{{
 		se siso=0
 		se mfd=200
 		se gcr=a:block-PmenuSel-blinkon0
+		if s:opmul && has('signs')
+			sign define ctrlpmark text=+> texthl=Search
+		endif
 	endif
 endfunc "}}}
 
 func! s:Renderer(lines, pat) "{{{
+	cal s:unmarksigns()
 	let nls = []
 	for i in range(0, len(a:lines) - 1)
 		cal add(nls, '> '.a:lines[i])
@@ -478,6 +381,7 @@ func! s:Renderer(lines, pat) "{{{
 		endif
 		keepj norm! 1|
 		let s:matched = nls
+		cal s:remarksigns(nls)
 	else
 		setl nocul
 		cal setline('1', ' == NO MATCHES ==')
@@ -548,6 +452,7 @@ endfunc "}}}
 func! s:CreateNewFile() "{{{
 	let prt = g:CtrlP_prompt
 	let str = prt[0] . prt[1] . prt[2]
+	if empty(str) | retu | endif
 	let arr = split(str, '[\/]')
 	cal map(arr, 'escape(v:val, "%#")')
 	let fname = remove(arr, -1)
@@ -572,6 +477,79 @@ func! s:CreateNewFile() "{{{
 	endif
 	cal s:insertcache(str)
 endfunc "}}}
+
+" * OpenMulti {{{
+func! s:MarkToOpen()
+	if s:bufnr <= 0 || !s:opmul | retu | endif
+	let matchstr = matchstr(getline('.'), '^> \zs.\+\ze\t*$')
+	if empty(matchstr) | retu | endif
+	let filpath = s:itemtype ? matchstr : getcwd().s:lash.matchstr
+	if exists('s:marked') && s:dictindex(s:marked, filpath) > 0
+		" Unmark, remove the file from s:marked
+		let key = s:dictindex(s:marked, filpath)
+		cal remove(s:marked, key)
+		if has('signs')
+			exe 'sign unplace' key 'buffer='.s:bufnr
+		endif
+		if empty(s:marked) | unl! s:marked | endif
+	else
+		" Add to s:marked and place a new sign
+		if exists('s:marked')
+			let vac = s:vacantdict(s:marked)
+			let key = empty(vac) ? len(s:marked) + 1 : vac[0]
+			let s:marked = extend(s:marked, { key : filpath })
+		else
+			let key = 1
+			let s:marked = { 1: filpath }
+		endif
+		if has('signs')
+			exe 'sign place' key 'line='.line('.').' name=ctrlpmark buffer='.s:bufnr
+		endif
+	endif
+	cal s:statusline()
+endfunc
+
+func! s:OpenMulti()
+	if !exists('s:marked') || !s:opmul | retu | endif
+	let marked = deepcopy(s:marked)
+	let prt = g:CtrlP_prompt
+	let str = prt[0] . prt[1] . prt[2]
+	if !empty(str) | cal s:recordhist(str) | endif
+	if !has('autocmd') | cal s:BufOpen('ControlP', 'del') | endif
+	" Try not to open in new tab
+	let bufs = []
+	for winnr in range(1, winnr('$'))
+		cal add(bufs, winbufnr(winnr))
+	endfor
+	let ntab = 1
+	" Check if the other window only has a blank buffer
+	if len(bufs) == 2
+		for each in bufs
+			if getbufvar(each, '&bl') && empty(bufname(each))
+						\ && empty(getbufvar(each, '&bt')) && empty(getbufvar(each, '&ft'))
+						\ && getbufvar(each, '&ma') && bufname(each) != 'ControlP'
+				" If it does, don't open new tab
+				let ntab = 0
+			endif
+		endfor
+	endif
+	if ntab | tabnew | endif
+	let ic = 1
+	for key in keys(marked)
+		let filpath = marked[key]
+		exe 'bo vne' filpath
+		if s:opmul > 1 && s:opmul < ic
+			winc c
+		else
+			let ic += 1
+		endif
+	endfor
+	if ntab
+		1winc w | winc c
+	endif
+	ec
+endfunc
+"}}}
 
 " * Prt Actions {{{
 func! s:PrtClear()
@@ -699,10 +677,12 @@ func! s:PrtHistory(...)
 	if !s:maxhst | retu | endif
 	let prt = g:CtrlP_prompt
 	let str = prt[0] . prt[1] . prt[2]
-	let hst = s:ctrlp_history
+	let hst = s:hstry
+	" Save to history if not saved before
 	let hst[0] = exists('s:hstgot') ? hst[0] : str
 	let hslen = len(hst)
 	let idx = exists('s:hisidx') ? s:hisidx + a:1 : a:1
+	" Limit idx within 0 and hslen
 	let idx = idx < 0 ? 0 : idx >= hslen ? hslen > 1 ? hslen - 1 : 0 : idx
 	let g:CtrlP_prompt = [hst[idx], '', '']
 	let s:hisidx = idx
@@ -739,21 +719,23 @@ func! s:MapSpecs(...)
 				\ 'PrtHistory(-1)':             ['<c-n>'],
 				\ 'PrtHistory(1)':              ['<c-p>'],
 				\ 'AcceptSelection("e")':       ['<cr>'],
-				\ 'AcceptSelection("h")':       ['<c-cr>', '<c-s>', '<c-x>'],
+				\ 'AcceptSelection("h")':       ['<c-x>', '<c-cr>', '<c-s>'],
 				\ 'AcceptSelection("t")':       ['<c-t>'],
-				\ 'AcceptSelection("v")':       ['<c-v>'],
+				\ 'AcceptSelection("v")':       ['<c-v>', '<c-q>'],
 				\ 'ToggleFocus()':              ['<tab>'],
 				\ 'ToggleRegex()':              ['<c-r>'],
 				\ 'ToggleByFname()':            ['<c-d>'],
 				\ 'ToggleType(1)':              ['<c-f>', '<c-up'],
 				\ 'ToggleType(-1)':             ['<c-b>', '<c-down>'],
-				\ 'ForceUpdate()':              ['<c-o>'],
+				\ 'ForceUpdate()':              ['<c-^>'],
 				\ 'PrtCurStart()':              ['<c-a>'],
 				\ 'PrtCurEnd()':                ['<c-e>'],
 				\ 'PrtCurLeft()':               ['<c-h>', '<left>'],
 				\ 'PrtCurRight()':              ['<c-l>', '<right>'],
 				\ 'PrtClearCache()':            ['<F5>'],
 				\ 'CreateNewFile()':            ['<c-y>'],
+				\ 'MarkToOpen()':               ['<c-z>'],
+				\ 'OpenMulti()':                ['<c-o>'],
 				\ 'BufOpen("ControlP", "del")': ['<esc>', '<c-c>', '<c-g>'],
 				\ }
 	if type(s:urprtmaps) == 4
@@ -891,7 +873,7 @@ func! s:AcceptSelection(mode,...) "{{{
 	" Get the full path
 	let matchstr = matchstr(getline('.'), '^> \zs.\+\ze\t*$')
 	if empty(matchstr) | retu | endif
-	let filpath = s:itemtype ? matchstr : getcwd().ctrlp#utils#lash().matchstr
+	let filpath = s:itemtype ? matchstr : getcwd().s:lash.matchstr
 	" If only need the full path
 	if exists('a:1') && a:1 | retu filpath | endif
 	" Manually remove the prompt and match window
@@ -903,9 +885,8 @@ func! s:AcceptSelection(mode,...) "{{{
 		let mds = split(md, '\zs')
 		let md = mds[0]
 	endif
-	" Do something with the selected entry
+	" Determine the command to use
 	if md == 't' || s:splitwin == 1 " In new tab
-		tabnew
 		let cmd = 'e'
 	elseif md == 'h' || s:splitwin == 2 " In new hor split
 		let cmd = 'new'
@@ -918,7 +899,7 @@ func! s:AcceptSelection(mode,...) "{{{
 	let bufwinnr = bufwinnr(bufnum)
 	let norbuf = s:normbuf()
 	exe s:currwin.'winc w'
-	" Check if the buffer's already opened in a tab
+	" Check if the file's already opened in a tab
 	for nr in range(1, tabpagenr('$'))
 		" Get a list of the buffers in the nr tab
 		let buflist = tabpagebuflist(nr)
@@ -935,6 +916,12 @@ func! s:AcceptSelection(mode,...) "{{{
 			endfor
 		endif
 	endfor
+	" Get the tail
+	let tail = ''
+	if exists('s:optail') && !empty('s:optail')
+		let tailpref = match(s:optail, '^\s*+') < 0 ? ' +' : ' '
+		let tail = tailpref.s:optail
+	endif
 	" Switch to existing buffer or open new one
 	let filpath = escape(filpath, '%#')
 	" If the file's already loaded
@@ -950,27 +937,27 @@ func! s:AcceptSelection(mode,...) "{{{
 			if norbuf
 				" But not the current one
 				if !&l:bl || !empty(&l:bt) || !&l:ma
-					" Go to the first one
+					" Go to the first normal one
 					exe norbuf.'winc w'
 				endif
 			else
 				" No normal buffers
 				let cmd = 'vne'
 			endif
+		elseif md == 't'
+			tabnew
 		endif
 		" Open new window/buffer
-		exe 'bo '.cmd.' '.filpath
+		sil! exe 'bo '.cmd.tail.' '.filpath
 	endif
-	" Jump to line
-	if exists('s:jmpln') && !empty('s:jmpln')
-		exe s:jmpln
-		norm! 0zz
+	if !empty('tail')
+		sil! norm! zOzz
 	endif
 	ec
 endfunc "}}}
 
-" * Helper functions {{{
-" Comparing and sorting {{{
+" ** Helper functions {{{
+" Sorting {{{
 func! s:complen(s1, s2)
 	" By length
 	let len1 = strlen(a:s1)
@@ -1033,12 +1020,12 @@ func! s:mixedsort(s1, s2)
 endfunc
 "}}}
 
-" Dealing with statusline {{{
+" Statusline {{{
 func! s:statusline(...)
 	let itemtypes = [
 				\ ['files', 'fil'],
 				\ ['buffers', 'buf'],
-				\ ['recent files', 'mru'],
+				\ ['mru files', 'mru'],
 				\ ]
 	if !g:ctrlp_mru_files
 		cal remove(itemtypes, 2)
@@ -1055,7 +1042,8 @@ func! s:statusline(...)
 	let item    = '%#Character# '.item.' %*'
 	let slider  = ' <'.prev.'>={'.item.'}=<'.next.'>'
 	let dir     = ' %=%<%#LineNr# '.getcwd().' %*'
-	let &l:stl  = focus.byfname.regex.slider.dir
+	let marked  = s:opmul ? exists('s:marked') ? ' <+'.len(s:marked).'>' : ' <+>' : ''
+	let &l:stl  = focus.byfname.regex.slider.marked.dir
 endfunc
 
 func! s:progress(len)
@@ -1066,7 +1054,7 @@ func! s:progress(len)
 endfunc
 "}}}
 
-" Working with paths {{{
+" Paths {{{
 func! s:dirfilter(val)
 	retu isdirectory(a:val) && match(a:val, '[\/]\.\{,2}$') < 0 ? 1 : 0
 endfunc
@@ -1081,14 +1069,14 @@ endfunc
 func! s:createparentdirs(arr)
 	let curr = ''
 	for each in a:arr
-		let curr = empty(curr) ? each : curr.ctrlp#utils#lash().each
+		let curr = empty(curr) ? each : curr.s:lash.each
 		cal ctrlp#utils#mkdir(curr)
 	endfor
 	retu curr
 endfunc
 "}}}
 
-" Syntax and coloring {{{
+" Highlighting {{{
 func! s:syntax()
 	syn match CtrlPNoEntries '^ == NO MATCHES ==$'
 	syn match CtrlPLineMarker '^>'
@@ -1114,8 +1102,8 @@ endfunc
 
 " Prompt history {{{
 func! s:gethistloc()
-	let cache_dir = ctrlp#utils#cachedir().ctrlp#utils#lash().'hist'
-	let cache_file = cache_dir.ctrlp#utils#lash().'cache.txt'
+	let cache_dir = ctrlp#utils#cachedir().s:lash.'hist'
+	let cache_file = cache_dir.s:lash.'cache.txt'
 	retu [cache_dir, cache_file]
 endfunc
 
@@ -1125,11 +1113,40 @@ endfunc
 
 func! s:recordhist(str)
 	if empty(a:str) || !s:maxhst | retu | endif
-	let hst = s:ctrlp_history
+	let hst = s:hstry
+	if len(hst) > 1 && hst[1] == a:str | retu | endif
 	cal extend(hst, [a:str], 1)
 	if len(hst) > s:maxhst
 		cal remove(hst, s:maxhst, -1)
 	endif
+endfunc
+"}}}
+
+" Signs {{{
+func! s:unmarksigns()
+	if !s:dosigns() | retu | endif
+	for key in keys(s:marked)
+		exe 'sign unplace' key 'buffer='.s:bufnr
+	endfor
+endfunc
+
+func! s:remarksigns(nls)
+	if !s:dosigns() | retu | endif
+	let nls = deepcopy(a:nls)
+	cal map(nls, 'substitute(v:val, "^> ", "", "g")')
+	let ic = 1
+	while ic <= len(nls)
+		let filpath = s:itemtype ? nls[ic - 1] : getcwd().s:lash.nls[ic - 1]
+		let key = s:dictindex(s:marked, filpath)
+		if key > 0
+			exe 'sign place' key 'line='.ic.' name=ctrlpmark buffer='.s:bufnr
+		endif
+		let ic+= 1
+	endwhile
+endfunc
+
+func! s:dosigns()
+	retu exists('s:marked') && s:bufnr > 0 && s:opmul && has('signs')
 endfunc
 "}}}
 
@@ -1155,6 +1172,26 @@ func! s:maxfiles(len)
 	retu s:maxfiles && a:len > s:maxfiles ? 1 : 0
 endfunc
 
+func! s:dictindex(dict, expr)
+	for key in keys(a:dict)
+		let val = a:dict[key]
+		if val == a:expr
+			retu key
+		endif
+	endfor
+	retu -1
+endfunc
+
+func! s:vacantdict(dict)
+	let vac = []
+	for ic in range(1, max(keys(a:dict)))
+		if !has_key(a:dict, ic)
+			cal add(vac, ic)
+		endif
+	endfor
+	retu vac
+endfunc
+
 func! s:normbuf()
 	if &l:bl && empty(&l:bt) && &l:ma | retu winnr() | endif
 	for each in range(1, winnr('$'))
@@ -1166,7 +1203,7 @@ endfunc
 
 func! s:leavepre()
 	if s:cconex | cal ctrlp#clearallcaches() | endif
-	cal ctrlp#utils#writecache(s:ctrlp_history, s:gethistloc()[0], s:gethistloc()[1])
+	cal ctrlp#utils#writecache(s:hstry, s:gethistloc()[0], s:gethistloc()[1])
 endfunc
 
 func! s:insertcache(str)
@@ -1178,12 +1215,15 @@ func! s:insertcache(str)
 		elseif strlen(a:str) >= strlen(data[-1])
 			let pos = len(data) - 1
 		else
+			" Boost the value
 			let strlen = abs((strlen(a:str) - strlen(data[0])) * 100000)
 			let fullen = abs(strlen(data[-1]) - strlen(data[0]))
 			let posi = string(len(data) * strlen / fullen)
+			" Find and move the floating point back
 			let floatpos = stridx(posi, '.')
 			let posi = substitute(posi, '\.', '', 'g')
 			let posi = join(insert(split(posi, '\zs'), '.', floatpos - 5), '')
+			" Get the approximate integer
 			let pos = float2nr(round(str2float(posi)))
 		endif
 		cal insert(data, a:str, pos)
