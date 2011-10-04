@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>ctrlp.vim &divide; home</title>
+		<meta charset="utf-8">
+		<meta name="description" content="Full path fuzzy file, buffer and MRU file finder for Vim.">
+		<link href="css/screen.css" rel="stylesheet" media="all">
+	</head>
+
+	<body>
+		<div id="page">
+			<div class="article">
+				<h1>ctrlp.vim</h1>
+				<div class="entry-content">
+					<h2>Full path fuzzy file, buffer and MRU file finder for Vim.</h2>
+					<ul class="special">
+						<li>&raquo; Written in pure Vimscript for MacVim and Vim 7.0+.</li>
+						<li>&raquo; Full support for Vim’s regexp as search pattern.</li>
+						<li>&raquo; Built-in Most Recently Used (MRU) files monitoring and search.</li>
+						<li>&raquo; Built-in root directory finder.</li>
+					</ul>
+					<p class="note">
+						Screenshot: CtrlP in regex and full path mode with 3 files selected to open.<br>
+						<img src="images/ctrlp.png" alt="screenshot">
+					</p>
+					<h2>Basic Usage:</h2>
+					<ul>
+						<li>Press <code>&lt;c-p&gt;</code> or run <code>:CtrlP</code> or <code>:CtrlP [starting-directory]</code> to invoke CtrlP.</li>
+					</ul>
+					<h6>Once CtrlP is open:</h6>
+					<ul>
+						<li>Press <code>&lt;c-f&gt;</code> and <code>&lt;c-b&gt;</code> to switch between find file, buffer, and MRU file modes.</li>
+						<li>Press <code>&lt;c-d&gt;</code> to switch to filename only search instead of full path.</li>
+						<li>Use <code>*</code> or <code>|</code> in the prompt to submit the string as a Vim’s regexp pattern.</li>
+						<li>Or press <code>&lt;c-r&gt;</code> to switch to full regexp search mode.</li>
+						<li>End the input string with a colon <code>:</code> followed by a command to execute after opening the file.<br>
+							<code>abc:45</code> will open the selected file and jump to line 45.<br>
+							<code>abc:/my\:function</code> will open the selected file and jump to the first instance of 'my:function'.<br>
+							<code>abc:+setf\ myfiletype|50</code> will open the selected file and set its filetype to 'myfiletype' then jump to line 50.
+						<li>Submit two dots <code>..</code> as the input string to go backward the directory tree by 1 level.</li>
+						<li>Use <code>&lt;c-n&gt;</code>, <code>&lt;c-p&gt;</code> to go to the next/prev string in the prompt’s history.</li>
+						<li>Use <code>&lt;c-y&gt;</code> to create a new file and its parent dirs.</li>
+						<li>Use <code>&lt;c-z&gt;</code> to mark/unmark files and <code>&lt;c-o&gt;</code> to open marked files.</li>
+					</ul>
+					<h2>Basic Options:</h2>
+					<ul>
+						<li>
+							Change the mapping to invoke CtrlP:
+							<pre><code>let g:ctrlp_map = '&lt;c-p&gt;'</code></pre>
+						</li>
+						<li>
+							When CtrlP is invoked, it automatically sets the working directory according to this variable:
+							<pre><code>let g:ctrlp_working_path_mode = 1</code></pre>
+							0 - don’t manage working directory.<br>
+							1 - the parent directory of the current file.<br>
+							2 - the nearest ancestor that contains one of these directories or files:
+							<pre><code>.git/
+.hg/
+.bzr/
+_darcs/
+root.dir
+.vimprojects</code></pre>
+						</li>
+						<li>
+							You can also use the set-working-directory functionality outside of CtrlP by adding the following line to your vimrc.
+							The parameter is the same (0, 1 or 2):
+							<pre><code>au BufEnter * cal ctrlp#SetWorkingPath(2)</code></pre>
+						</li>
+						<li>
+							If you want to exclude directories or files from the search, you can use the Vim’s option 'wildignore'.
+							e.g. Just have something like this in your vimrc:
+							<pre><code>set wildignore+=*/.git/*,*/.hg/*,*/.svn/*,*.so     " Linux/MacOSX
+set wildignore+=.git\*,.hg\*,.svn\*,*.dll,*.exe    " Windows</code></pre>
+						</li>
+						<li>
+							Specify an external tool to use for indexing files instead of Vim’s globpath().
+							Use %s in place of the target directory:
+							<pre><code>let g:ctrlp_user_command = 'find %s -type f'       " MacOSX/Linux
+let g:ctrlp_user_command = 'dir %s /-n /b /s /a-d' " Windows</code></pre>
+						</li>
+					</ul>
+					<a class="download" href="//github.com/kien/ctrlp.vim/zipball/master"><span class="icon"></span>Download</a>
+					<h2>Repositories:</h2>
+					<ul>
+						<li><code>git clone https://github.com/kien/ctrlp.vim.git</code></li>
+						<li><code>hg clone https://bitbucket.org/kien/ctrlp.vim</code></li>
+						<li><a href="//www.vim.org/scripts/script.php?script_id=3736">Script page on Vim.org</a></li>
+					</ul>
+				</div><!-- /.entry-content -->
+				<a href="//github.com/kien/ctrlp.vim" class="forkme">Fork me on Github</a>
+			</div><!-- /.article -->
+
+			<div id="footer">
+				<p>by <a href="//github.com/kien">kien</a></p>
+			</div>
+		</div><!-- /#page -->
+	</body>
+</html>
