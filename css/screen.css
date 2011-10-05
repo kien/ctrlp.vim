@@ -140,6 +140,7 @@ a.external:after {
 	letter-spacing:1px;
 	background:#151515;
 	overflow:hidden;
+	height:1%;
 	padding:1em 15px 0;
 }
 .article h2 {
@@ -148,7 +149,17 @@ a.external:after {
 }
 .article h3 {
 	font-size:1.15em;
-	margin:0 0 .25em;
+	line-height:2;
+	margin:0 -15px .5em;
+	padding:0 15px;
+	width:100%;
+	position:relative;
+	border-bottom:1px solid #333;
+	background:#1a1a1a;
+}
+.article h3 span {
+	color:#a7b8ff;
+	text-shadow:0 1px 0 #444,0 2px 0 #666;
 }
 .article h6 {
 	font-size:1em;
@@ -200,9 +211,12 @@ a.external:after {
 	border-radius:0;
 	padding:0;
 }
+.article p.note {
+	font-size:13px;
+}
 .article img {
 	display:block;
-	margin:.5em auto;
+	margin:.5em auto 0;
 }
 .forkme {
 	position:absolute;
@@ -210,7 +224,7 @@ a.external:after {
 	right:0;
 	width:149px;
 	height:149px;
-	background:url(../images/forkmeongithub.png);
+	background:url(../images/forkmeongithub.png) no-repeat;
 	text-indent:-999em;
 	overflow:hidden;
 	-webkit-transition:opacity .5s;
@@ -223,6 +237,10 @@ a.external:after {
 .forkme:hover {
 	background-position:0 -149px;
 	opacity:.8;
+}
+* html .forkme {
+	width:148px;
+	height:148px;
 }
 #footer {
 	border-top:1px solid #8bad3e;
@@ -318,6 +336,12 @@ a.download .icon {
 	line-height:15px;
 	margin:0 4px 0 0;
 	padding:0 0 0 20px;
+}
+* html a.download .icon {
+	display:inline-block;
+}
+*:first-child+html a.download .icon {
+	display:inline-block;
 }
 a.download:hover .icon,
 a.download:active .icon {

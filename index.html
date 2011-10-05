@@ -5,6 +5,12 @@
 		<meta charset="utf-8">
 		<meta name="description" content="Full path fuzzy file, buffer and MRU file finder for Vim.">
 		<link href="css/screen.css" rel="stylesheet" media="all">
+		<!--[if lte IE 6.0]>
+		<script src="js/DD_belatedPNG_0.0.8a-min.js"></script>
+		<script>
+			DD_belatedPNG.fix('.note img, .forkme, a.download .icon');
+		</script>
+		<![endif]-->
 	</head>
 
 	<body>
@@ -23,7 +29,7 @@
 						Screenshot: CtrlP in regex and full path mode with 3 files selected to open.<br>
 						<img src="images/ctrlp.png" alt="screenshot">
 					</p>
-					<h2>Basic Usage:</h2>
+					<h3>Basic Usage:</h3>
 					<ul>
 						<li>Press <code>&lt;c-p&gt;</code> or run <code>:CtrlP</code> or <code>:CtrlP [starting-directory]</code> to invoke CtrlP.</li>
 					</ul>
@@ -42,7 +48,7 @@
 						<li>Use <code>&lt;c-y&gt;</code> to create a new file and its parent dirs.</li>
 						<li>Use <code>&lt;c-z&gt;</code> to mark/unmark files and <code>&lt;c-o&gt;</code> to open marked files.</li>
 					</ul>
-					<h2>Basic Options:</h2>
+					<h3>Basic Options:</h3>
 					<ul>
 						<li>
 							Change the mapping to invoke CtrlP:
@@ -79,8 +85,10 @@ set wildignore+=.git\*,.hg\*,.svn\*,*.dll,*.exe    " Windows</code></pre>
 let g:ctrlp_user_command = 'dir %s /-n /b /s /a-d' " Windows</code></pre>
 						</li>
 					</ul>
+					<p class="note">Run <code>:help ctrlp</code> for more commands, mappings and options.</p>
+					<h3>Get <span>ctrlp.vim</span>:</h3>
 					<a class="download" href="//github.com/kien/ctrlp.vim/zipball/master"><span class="icon"></span>Download</a>
-					<h2>Repositories:</h2>
+					<h6>Repositories:</h6>
 					<ul>
 						<li><code>git clone https://github.com/kien/ctrlp.vim.git</code></li>
 						<li><code>hg clone https://bitbucket.org/kien/ctrlp.vim</code></li>
