@@ -12,7 +12,7 @@ endif "}}}
 " Option variables {{{
 func! ctrlp#mrufiles#opts()
 	if !exists('g:ctrlp_mruf_max')
-		let s:max = 50
+		let s:max = 150
 	else
 		let s:max = g:ctrlp_mruf_max
 		unl g:ctrlp_mruf_max
