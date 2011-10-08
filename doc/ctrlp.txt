@@ -221,6 +221,11 @@ Use %s in place of the target directory: >
 Examples: >
   let g:ctrlp_user_command = 'find %s -type f'       " MacOSX/Linux
   let g:ctrlp_user_command = 'dir %s /-n /b /s /a-d' " Windows
+
+  " Use version control commands. Remember to set |g:ctrlp_working_path_mode|
+  " to 2 and |g:ctrlp_root_markers| to ['.git/'] or ['.hg/']
+  let g:ctrlp_user_command = 'cd %s && git ls-files'
+  let g:ctrlp_user_command = 'hg --cwd %s locate -I .'
 <
 You can also use 'grep', 'findstr' or something else to filter the results.
 Examples: >
@@ -440,6 +445,8 @@ d)  Type exactly two dots (..) at the start of the line and press enter to go
 e)  Type the name of a non-existed file and press <c-y> to create it.
     e.g. 'parentdir/file.txt' will create a directory named 'parentdir' as well
     as 'file.txt'. Use '\' in place of '/' on Windows (if |'ssl'| is not set).
+
+f)  Submit ? to open this help file.
 
 ===============================================================================
 6. Credits                                                      *ctrlp-credits*

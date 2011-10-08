@@ -255,11 +255,7 @@ endfunc
 func! s:BufOpen(...) "{{{
 	if exists('a:2')
 		" Closing
-		try
-			bun!
-		catch
-			winc c
-		endtry
+		try | bun! | catch | clo! | endtry
 		exe s:currwin.'winc w'
 		" Restore the changed global options
 		let &magic  = s:CtrlP_magic
@@ -427,7 +423,7 @@ func! s:CreateNewFile() "{{{
 	let arr = split(str, '[\/]')
 	cal map(arr, 'escape(v:val, "%#")')
 	let fname = remove(arr, -1)
-	winc c
+	clo!
 	if s:newfop == 1 " In new tab
 		tabnew
 		let cmd = 'e'
@@ -490,34 +486,36 @@ func! s:OpenMulti()
 	if !has('autocmd') | cal s:BufOpen('ControlP', 'del') | endif
 	exe s:currwin.'winc w'
 	" Try not to open in new tab
-	let bufs = []
-	for winnr in range(1, winnr('$'))
-		cal add(bufs, winbufnr(winnr))
-	endfor
-	let ntab = 1
-	" Check if the other window only has a blank buffer
-	if len(bufs) == 1
-		for each in bufs
-			if getbufvar(each, '&bl') && empty(bufname(each))
-						\ && empty(getbufvar(each, '&bt')) && empty(getbufvar(each, '&ft'))
-						\ && getbufvar(each, '&ma') && bufname(each) != 'ControlP'
-				" If it does, don't open new tab
-				let ntab = 0
+	let ntab = 0
+	let norbufs = s:normbuf()
+	if empty(norbufs)
+		let ntab = 1
+	else
+		for each in norbufs
+			let bufnr = winbufnr(each)
+			if !empty(bufname(bufnr)) && !empty(getbufvar(bufnr, '&ft'))
+						\ && bufname(bufnr) != 'ControlP'
+				let ntab = 1
 			endif
 		endfor
+		if !ntab
+			let wnr = min(norbufs)
+		endif
 	endif
 	if ntab | tabnew | endif
 	let ic = 1
+	let wnr = exists('wnr') ? wnr : 1
+	exe wnr.'winc w'
 	for key in keys(marked)
 		let filpath = marked[key]
-		sil! exe 'bo vne' filpath
+		let cmd = ic == 1 ? 'e ' : 'vne '
+		sil! exe cmd.filpath
 		if s:opmul > 1 && s:opmul < ic
-			winc c
+			clo!
 		else
 			let ic += 1
 		endif
 	endfor
-	1winc w | winc c
 	ec
 endfunc
 "}}}
@@ -844,12 +842,20 @@ func! s:AcceptSelection(mode,...) "{{{
 	let md = a:mode
 	let prt = g:CtrlP_prompt
 	let str = prt[0] . prt[1] . prt[2]
-	" Walk backward the dir tree
-	if md == 'e' && !s:itemtype && str == '..'
-		cal s:parentdir(getcwd())
-		cal s:SetLines(s:itemtype)
-		cal s:PrtClear()
-		retu
+	if md == 'e' && !s:itemtype
+		" Walk backward the dir tree
+		if str == '..'
+			cal s:parentdir(getcwd())
+			cal s:SetLines(s:itemtype)
+			cal s:PrtClear()
+			retu
+		elseif str == '?'
+			" Use ? for help
+			exe s:currwin.'winc w'
+			let hlpwin = &columns > 159 ? '| vert res 80' : ''
+			exe 'bo vert h ctrlp-mappings' hlpwin '| norm! 0'
+			retu
+		endif
 	endif
 	" Get the full path
 	let matchstr = matchstr(getline('.'), '^> \zs.\+\ze\t*$')
@@ -859,9 +865,10 @@ func! s:AcceptSelection(mode,...) "{{{
 	if exists('a:1') && a:1 | retu filpath | endif
 	" Manually remove the prompt and match window
 	if !has('autocmd') | cal s:BufOpen('ControlP', 'del') | endif
-	let bufnum = bufnr(filpath)
+	let bufnum   = bufnr(filpath)
 	let bufwinnr = bufwinnr(bufnum)
-	let norbuf = s:normbuf()
+	let norbufs  = s:normbuf()
+	let norbuf   = empty(norbufs) ? 0 : norbufs[0]
 	exe s:currwin.'winc w'
 	" Check if the file's already opened in a tab
 	for nr in range(1, tabpagenr('$'))
@@ -949,6 +956,13 @@ func! s:compword(s1, s2)
 	retu wrd1 == wrd2 ? 0 : wrd1 > wrd2 ? 1 : -1
 endfunc
 
+func! s:comptime(s1, s2)
+	" By last modified time
+	let time1 = getftime(a:s1)
+	let time2 = getftime(a:s2)
+	retu time1 == time2 ? 0 : time1 < time2 ? 1 : -1
+endfunc
+
 func! s:matchlens(str, pat, ...)
 	if empty(a:pat) || index(['^','$'], a:pat) >= 0
 		retu {}
@@ -986,7 +1000,11 @@ func! s:wordonly(lens)
 endfunc
 
 func! s:mixedsort(s1, s2)
-	retu 3 * s:compmatlen(a:s1, a:s2) + 2 * s:complen(a:s1, a:s2) + s:compword(a:s1, a:s2)
+	let cmatlen = s:compmatlen(a:s1, a:s2)
+	let ctime   = s:comptime(a:s1, a:s2)
+	let clen    = s:complen(a:s1, a:s2)
+	let cword   = s:compword(a:s1, a:s2)
+	retu 3 * cmatlen + 3 * ctime + 2 * clen + cword
 endfunc
 "}}}
 
@@ -1173,15 +1191,15 @@ endfunc
 
 " Buffers {{{
 func! s:normbuf()
-	if &l:bl && empty(&l:bt) && &l:ma | retu winnr() | endif
+	let bufs = []
 	for each in range(1, winnr('$'))
 		let bufnr = winbufnr(each)
 		if getbufvar(bufnr, '&bl') && empty(getbufvar(bufnr, '&bt'))
 					\ && getbufvar(bufnr, '&ma')
-			retu each
+			cal add(bufs, each)
 		endif
 	endfor
-	retu 0
+	retu bufs
 endfunc
 
 func! s:setupblank()
