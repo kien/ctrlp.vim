@@ -21,7 +21,7 @@ Once CtrlP is open:
 e.g. `abc:45` will open the file matched the pattern and jump to line 45.
 * Submit two dots `..` as the input string to go backward the directory tree by 1 level.
 * Use `<c-y>` to create a new file and its parent dirs.
-* Use <c-z> to mark multiple files and <c-o> to open them.
+* Use `<c-z>` to mark multiple files and `<c-o>` to open them.
 
 ## Basic Options
 * Change the mapping to invoke CtrlP:
