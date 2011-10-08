@@ -29,6 +29,7 @@ func! s:opts()
 				\ 'g:ctrlp_max_depth'             : ['s:maxdepth', 40],
 				\ 'g:ctrlp_open_new_file'         : ['s:newfop', 3],
 				\ 'g:ctrlp_open_multi'            : ['s:opmul', 1],
+				\ 'g:ctrlp_use_vcs_ls'            : ['s:usevcsls', 0],
 				\ }
 	for key in keys(opts)
 		let def = call('exists', [key]) ? string(eval(key)) : string(opts[key][1])
@@ -48,6 +49,8 @@ func! s:opts()
 	endif
 	if !exists('g:ctrlp_user_command')
 		let g:ctrlp_user_command = ''
+	else
+		let s:usevcsls = 0	" Disable use_vcs_ls
 	endif
 	if !exists('g:ctrlp_max_history')
 		let s:maxhst = exists('+hi') ? &hi : 20
@@ -115,6 +118,7 @@ func! s:ListAllFiles(path)
 	let cache_file = ctrlp#utils#cachefile()
 	if g:ctrlp_newcache || !filereadable(cache_file) || !s:caching
 		" Get the list of files
+		cal s:SetUserCommand()
 		if empty(g:ctrlp_user_command)
 			cal s:List(a:path, [], 0)
 		else
@@ -128,6 +132,10 @@ func! s:ListAllFiles(path)
 				if exists('+ssl') && exists('ssl')
 					let &ssl = ssl
 					cal map(g:ctrlp_allfiles, 'substitute(v:val, "\\", "/", "g")')
+				endif
+				" Remove directories (svn)
+				if g:ctrlp_user_command =~ '^svn'
+					cal filter(g:ctrlp_allfiles, 'v:val[-1:] != "/"')
 				endif
 			catch
 				retu []
@@ -790,6 +798,52 @@ endfunc
 func! s:PrtSwitcher()
 	let s:matches = 1
 	cal s:BuildPrompt(1,s:Focus())
+endfunc
+"}}}
+
+" * UseVCSls {{{
+func! s:FindRepoType(curr, markers, depth)
+	let depth = a:depth + 1
+
+	if a:depth == 0 && !empty(globpath(a:curr, '.svn/')) 
+		retu '.svn/'
+	endif
+
+	for marker in a:markers
+		if !empty(globpath(a:curr, marker)) 
+			retu marker
+		endif
+	endfor
+
+	if depth > s:maxdepth
+		retu ''
+	endif
+
+	let parent = substitute(a:curr, '[\/]\zs[^\/]\+[\/]\?$', '', '')
+	if parent != a:curr | retu s:FindRepoType(parent, a:markers, depth) | endif
+endfunc
+
+func! s:SetUserCommand()
+	if !s:usevcsls
+		retu
+	endif
+
+	let markers = [
+				\ '.git/',
+				\ '.hg/',
+				\ ]
+
+	let type = s:FindRepoType(getcwd(), markers, 0)
+
+	if empty(type)
+		let g:ctrlp_user_command = ''
+	elseif type == '.git/' && executable('git')
+		let g:ctrlp_user_command = 'cd %s && git ls-files'  
+	elseif type == '.hg/' && executable('hg')
+		let g:ctrlp_user_command = 'hg --cwd %s locate --fullpath -I .'
+	elseif type == '.svn/' && executable('svn')
+		let g:ctrlp_user_command = 'svn list -R %s'
+	endif
 endfunc
 "}}}
 
