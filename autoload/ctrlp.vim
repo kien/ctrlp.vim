@@ -92,7 +92,7 @@ endfunc
 "}}}
 
 " * ListAllFiles {{{
-func! s:List(dirs, allfiles, depth)
+func! s:GlobPath(dirs, allfiles, depth)
 	" Note: wildignore is ignored when using **
 	let glob     = s:dotfiles ? '.*\|*' : '*'
 	let entries  = split(globpath(a:dirs, glob), '\n')
@@ -107,28 +107,36 @@ func! s:List(dirs, allfiles, depth)
 	else
 		let dirs = join(alldirs, ',')
 		sil! cal s:progress(len(g:ctrlp_allfiles))
-		cal s:List(dirs, g:ctrlp_allfiles, depth)
+		cal s:GlobPath(dirs, g:ctrlp_allfiles, depth)
+	endif
+endfunc
+
+func! s:UserCommand(path, lscmd)
+	if exists('+ssl') && &ssl
+		let ssl = &ssl
+		let &ssl = 0
+	endif
+	let g:ctrlp_allfiles = split(system(printf(a:lscmd, shellescape(a:path))), '\n')
+	if exists('+ssl') && exists('ssl')
+		let &ssl = ssl
+		cal map(g:ctrlp_allfiles, 'substitute(v:val, "\\", "/", "g")')
+	endif
+	if exists('s:vcscmd') && s:vcscmd
+		cal map(g:ctrlp_allfiles, 'substitute(v:val, "/", "\\", "g")')
 	endif
 endfunc
 
 func! s:ListAllFiles(path)
 	let cache_file = ctrlp#utils#cachefile()
 	if g:ctrlp_newcache || !filereadable(cache_file) || !s:caching
+		let lscmd = s:lscommand()
 		" Get the list of files
-		if empty(g:ctrlp_user_command)
-			cal s:List(a:path, [], 0)
+		if empty(lscmd)
+			cal s:GlobPath(a:path, [], 0)
 		else
 			sil! cal s:progress(escape('Waiting...', ' '))
 			try
-				if exists('+ssl') && &ssl
-					let ssl = &ssl
-					let &ssl = 0
-				endif
-				let g:ctrlp_allfiles = split(system(printf(g:ctrlp_user_command, shellescape(a:path))), '\n')
-				if exists('+ssl') && exists('ssl')
-					let &ssl = ssl
-					cal map(g:ctrlp_allfiles, 'substitute(v:val, "\\", "/", "g")')
-				endif
+				cal s:UserCommand(a:path, lscmd)
 			catch
 				retu []
 			endtry
@@ -792,13 +800,19 @@ endfunc
 "}}}
 
 " * SetWorkingPath {{{
-func! s:FindRoot(curr, mark, depth)
+func! s:FindRoot(curr, mark, depth, ...)
 	let depth = a:depth + 1
 	if !empty(globpath(a:curr, a:mark)) || depth > s:maxdepth
-		sil! exe 'chd!' a:curr
+		if exists('a:1') && !empty(a:1)
+			let s:vcsroot = depth <= s:maxdepth ? a:curr : ''
+		else
+			sil! exe 'chd!' a:curr
+		endif
 	else
 		let parent = substitute(a:curr, '[\/]\zs[^\/]\+[\/]\?$', '', '')
-		if parent != a:curr | cal s:FindRoot(parent, a:mark, depth) | endif
+		if parent != a:curr
+			cal s:FindRoot(parent, a:mark, depth, a:1)
+		endif
 	endif
 endfunc
 
@@ -1267,6 +1281,25 @@ func! s:insertcache(str)
 		endif
 		cal insert(data, a:str, pos)
 		cal ctrlp#utils#writecache(data)
+	endif
+endfunc
+
+func! s:lscommand()
+	let usercmd = g:ctrlp_user_command
+	if type(usercmd) == 1
+		retu usercmd
+	elseif type(usercmd) == 3 && len(usercmd) >= 2
+				\ && !empty(usercmd[0]) && !empty(usercmd[1])
+		let rmarker = usercmd[0]
+		" Find a repo root if existed
+		cal s:FindRoot(getcwd(), rmarker, 0, 1)
+		if !exists('s:vcsroot') || ( exists('s:vcsroot') && empty(s:vcsroot) )
+			" Try the secondary_command if defined
+			retu len(usercmd) == 3 && !empty(usercmd[2]) ? usercmd[2] : ''
+		else
+			let s:vcscmd = s:lash == '\' ? 1 : 0
+			retu usercmd[1]
+		endif
 	endif
 endfunc
 "}}}

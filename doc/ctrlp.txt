@@ -221,16 +221,19 @@ Use %s in place of the target directory: >
 Examples: >
   let g:ctrlp_user_command = 'find %s -type f'       " MacOSX/Linux
   let g:ctrlp_user_command = 'dir %s /-n /b /s /a-d' " Windows
-
-  " Use version control commands. Remember to set |g:ctrlp_working_path_mode|
-  " to 2 and |g:ctrlp_root_markers| to ['.git/'] or ['.hg/']
-  let g:ctrlp_user_command = 'cd %s && git ls-files'
-  let g:ctrlp_user_command = 'hg --cwd %s locate -I .'
 <
 You can also use 'grep', 'findstr' or something else to filter the results.
 Examples: >
   let g:ctrlp_user_command = 'find %s -type f | grep (?!tmp/.*)'
   let g:ctrlp_user_command = 'dir %s /-n /b /s /a-d | findstr .*\.py$'
+<
+Use version control listing commands: >
+  let g:ctrlp_user_command = [marker, command, secondary_command]
+<
+If the secondary_command is empty or not defined, globpath() will be used.
+Examples: >
+  let g:ctrlp_user_command = ['.git/', 'cd %s && git ls-files']
+  let g:ctrlp_user_command = ['.hg/', 'hg --cwd %s locate --fullpath -I .']
 <
 
                                                       *'g:ctrlp_open_new_file'*
