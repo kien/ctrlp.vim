@@ -1,4 +1,4 @@
-*ctrlp.txt*       Full path fuzzy file, buffer and MRU file finder. v1.5
+*ctrlp.txt*       Full path fuzzy file, buffer and MRU file finder. v1.5.1
 *CtrlP* *ControlP* *'ctrlp'* *'ctrl-p'*
 ===============================================================================
 #                                                                             #
@@ -25,7 +25,8 @@ CONTENTS                                                       *ctrlp-contents*
 
 Full path fuzzy file, buffer and MRU file finder with an intuitive interface.
 Written in pure Vimscript for MacVim and Vim version 7.0+. Has full support for
-Vim’s |regexp| as search pattern, and more.
+Vim’s |regexp| as search pattern, built-in MRU monitoring, project’s root
+finder, and more.
 
 See also |ctrlp-input-formats| and |ctrlp-fullregexp|.
 
@@ -52,15 +53,6 @@ Set this to 1 to set search by filename (not full path) as the default: >
                                                       *'g:ctrlp_regexp_search'*
 Set this to 1 to set full |regexp| search as the default mode: >
   let g:ctrlp_regexp_search = 0
-<
-
-                                                   *'g:ctrlp_persistent_input'*
-Remember the last input string:
-  1 - Remember the last input string.
-  2 - Also remember the position of the selection in the match window.
-  0 - Clear the input field each time CtrlP starts.
->
-  let g:ctrlp_persistent_input = 0
 <
 
                                               *'g:ctrlp_match_window_reversed'*
@@ -133,33 +125,32 @@ Set the parent directory for the '.ctrlp_cache' directory: >
 Use this to customize the mappings inside |CtrlP|’s prompt to your liking. You
 only need to keep the lines that you’ve changed the values (inside []): >
   let g:ctrlp_prompt_mappings = {
-    \ 'PrtBS()':                    ['<bs>'],
-    \ 'PrtDelete()':                ['<del>'],
-    \ 'PrtDeleteWord()':            ['<c-w>'],
-    \ 'PrtClear()':                 ['<c-u>'],
-    \ 'PrtSelectMove("j")':         ['<c-j>', '<down>'],
-    \ 'PrtSelectMove("k")':         ['<c-k>', '<up>'],
-    \ 'PrtHistory(-1)':             ['<c-n>'],
-    \ 'PrtHistory(1)':              ['<c-p>'],
-    \ 'AcceptSelection("e")':       ['<cr>'],
-    \ 'AcceptSelection("h")':       ['<c-x>', '<c-cr>', '<c-s>'],
-    \ 'AcceptSelection("t")':       ['<c-t>'],
-    \ 'AcceptSelection("v")':       ['<c-v>'],
-    \ 'ToggleFocus()':              ['<tab>'],
-    \ 'ToggleRegex()':              ['<c-r>'],
-    \ 'ToggleByFname()':            ['<c-d>'],
-    \ 'ToggleType(1)':              ['<c-f>', '<c-up'],
-    \ 'ToggleType(-1)':             ['<c-b>', '<c-down>'],
-    \ 'ForceUpdate()':              ['<c-^>'],
-    \ 'PrtCurStart()':              ['<c-a>'],
-    \ 'PrtCurEnd()':                ['<c-e>'],
-    \ 'PrtCurLeft()':               ['<c-h>', '<left>'],
-    \ 'PrtCurRight()':              ['<c-l>', '<right>'],
-    \ 'PrtClearCache()':            ['<F5>'],
-    \ 'CreateNewFile()':            ['<c-y>'],
-    \ 'MarkToOpen()':               ['<c-z>'],
-    \ 'OpenMulti()':                ['<c-o>'],
-    \ 'BufOpen("ControlP", "del")': ['<esc>', '<c-c>', '<c-g>'],
+    \ 'PrtBS()':              ['<bs>'],
+    \ 'PrtDelete()':          ['<del>'],
+    \ 'PrtDeleteWord()':      ['<c-w>'],
+    \ 'PrtClear()':           ['<c-u>'],
+    \ 'PrtSelectMove("j")':   ['<c-j>', '<down>'],
+    \ 'PrtSelectMove("k")':   ['<c-k>', '<up>'],
+    \ 'PrtHistory(-1)':       ['<c-n>'],
+    \ 'PrtHistory(1)':        ['<c-p>'],
+    \ 'AcceptSelection("e")': ['<cr>'],
+    \ 'AcceptSelection("h")': ['<c-x>', '<c-cr>', '<c-s>'],
+    \ 'AcceptSelection("t")': ['<c-t>'],
+    \ 'AcceptSelection("v")': ['<c-v>', '<c-q>'],
+    \ 'ToggleFocus()':        ['<tab>'],
+    \ 'ToggleRegex()':        ['<c-r>'],
+    \ 'ToggleByFname()':      ['<c-d>'],
+    \ 'ToggleType(1)':        ['<c-f>', '<c-up'],
+    \ 'ToggleType(-1)':       ['<c-b>', '<c-down>'],
+    \ 'PrtCurStart()':        ['<c-a>'],
+    \ 'PrtCurEnd()':          ['<c-e>'],
+    \ 'PrtCurLeft()':         ['<c-h>', '<left>'],
+    \ 'PrtCurRight()':        ['<c-l>', '<right>'],
+    \ 'PrtClearCache()':      ['<F5>'],
+    \ 'CreateNewFile()':      ['<c-y>'],
+    \ 'MarkToOpen()':         ['<c-z>'],
+    \ 'OpenMulti()':          ['<c-o>'],
+    \ 'PrtExit()':            ['<esc>', '<c-c>', '<c-g>'],
     \ }
 <
 
@@ -170,7 +161,7 @@ Set this to 0 to completely disable the Most Recently Used files feature: >
 
                                                            *'g:ctrlp_mruf_max'*
 Specify the number of recently opened files you want |CtrlP| to remember: >
-  let g:ctrlp_mruf_max = 50
+  let g:ctrlp_mruf_max = 150
 <
 
                                                        *'g:ctrlp_mruf_exclude'*
@@ -208,7 +199,7 @@ this.
                                                     *'g:ctrlp_highlight_match'*
 Use this to enable/disable highlighting of the matched patterns and to specify
 the highlight group that’ll be used: >
-  let g:ctrlp_highlight_match = [1, 'Function']
+  let g:ctrlp_highlight_match = [1, 'Identifier']
 <
 
                                                           *'g:ctrlp_max_files'*
@@ -221,12 +212,6 @@ The maximum depth of a directory tree to recurse into: >
   let g:ctrlp_max_depth = 40
 <
 Note: the larger the value, the more memory Vim uses.
-
-                                                        *'g:ctrlp_live_update'*
-Set to 0 to disable the update-as-you-type functionality; press <c-^> to force
-an update: >
-  let g:ctrlp_live_update = 1
-<
 
                                                        *'g:ctrlp_user_command'*
 Specify an external tool to use for indexing files instead of Vim’s globpath().
@@ -277,6 +262,7 @@ files, each in a vertical split.
    Open the |CtrlP| prompt in find files mode.
    If no argument is given, the value of |g:ctrlp_working_path_mode| will be
    used to determine the starting directory.
+   You can use <tab> to auto-complete the path when typing it.
 
                                                                  *:CtrlPBuffer*
 :CtrlPBuffer
@@ -407,10 +393,6 @@ Once inside the prompt:
   <F5>
     Refresh the match window and purge the cache for the current directory.
 
-  <c-^>
-    Force update the match window.
-    You only need to use this if |g:ctrlp_live_update| has been set to 0.
-
   <esc>,
   <c-c>,
   <c-g>
@@ -472,6 +454,8 @@ liked the way Command-T and LustyExplorer deal with user’s input, so I wrote a
 pure Vimscript version of their prompt window, intended to use it for the
 aforementioned plugin.
 
+Homepage:             http://kien.github.com/ctrlp.vim
+
 Git repository:       https://github.com/kien/ctrlp.vim
 Mercurial repository: https://bitbucket.org/kien/ctrlp.vim
 
@@ -480,9 +464,11 @@ CHANGELOG
 
     + New features: Open multiple files.
                     Pass Vim’s ++opt and +cmd to the opening file (section 5.c)
+                    Auto-complete each dir for |:CtrlP| [starting-directory]
     + New mappings: <c-z> mark/unmark a file to be opened with <c-o>.
                     <c-o> open all marked files.
     + New option: |g:ctrlp_open_multi|
+    + Remove |g:ctrlp_persistent_input|, |g:ctrlp_live_update| and <c-^>.
 
 Before 2011/09/29
 
@@ -523,6 +509,8 @@ Before 2011/09/12
                    |g:ctrlp_mruf_exclude|,
                    |g:ctrlp_mruf_include|
     + New command: |:CtrlPMRUFiles|
+
+First public release: 2011/09/06
 
 ===============================================================================
 vim:et:ts=2:sw=2:sts=2

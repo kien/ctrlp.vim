@@ -2,8 +2,9 @@
 Full path fuzzy __file__, __buffer__ and __MRU__ file finder for Vim.
 
 * Written in pure Vimscript for MacVim and Vim 7.0+.
-* Has full support for Vim’s regexp as search pattern.
-* Can also find file in most recently used files.
+* Full support for Vim’s regexp as search pattern.
+* Built-in Most Recently Used (MRU) files monitoring.
+* Built-in project’s root finder.
 
 ![ctrlp][1]
 
