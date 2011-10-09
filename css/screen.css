@@ -142,6 +142,7 @@ a.external:after {
 	overflow:hidden;
 	height:1%;
 	padding:1em 15px 0;
+	position:relative;
 }
 .article h2 {
 	font-size:1.25em;
@@ -265,6 +266,9 @@ a.external:after {
 	.article,#footer {
 		width:90%;
 	}
+	.article .entry-content {
+		position:static;
+	}
 	.article img {
 		width:95%;
 		height:auto;
@@ -280,6 +284,7 @@ a.external:after {
 		font-size:.83em;
 	}
 	.article h1 {
+		font-size:48px;
 		line-height:1.25;
 		padding-bottom:.5em;
 	}
@@ -293,9 +298,18 @@ a.external:after {
 /* ==========================================================={
 	Github download button:
 }=========================================================== */
+ul.getit {
+	list-style:none outside;
+	margin:0;
+	padding:0;
+}
+ul.getit li {
+	width:49%;
+	float:left;
+}
 a.download {
 	display:block;
-	width:108px;
+	width:180px;
 	margin:30px auto;
 	background:#fff;
 	background-image:-webkit-gradient(linear, left top, left bottom, from(#ECECEC), to(#F4F4F4));
@@ -311,8 +325,11 @@ a.download {
 	font-size:15px;
 	font-weight:bold;
 	line-height:15px;
-	padding:10px 15px 10px 16px;
+	padding:12px 0 10px 16px;
 	text-shadow:1px 1px 0 rgba(255, 255, 255, 0.7);
+}
+a.noicon {
+	width:160px;
 }
 a.download:hover,
 a.download:active {

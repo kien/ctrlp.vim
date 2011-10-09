@@ -5,12 +5,8 @@
 		<meta charset="utf-8">
 		<meta name="description" content="Full path fuzzy file, buffer and MRU file finder for Vim.">
 		<link href="css/screen.css" rel="stylesheet" media="all">
-		<!--[if lte IE 6.0]>
-		<script src="js/DD_belatedPNG_0.0.8a-min.js"></script>
-		<script>
-			DD_belatedPNG.fix('.note img, .forkme, a.download .icon');
-		</script>
-		<![endif]-->
+		<!--[if lte IE 6.0]> <script src="js/DD_belatedPNG_0.0.8a-min.js"></script>
+		<script> DD_belatedPNG.fix('.note img, .forkme, a.download .icon'); </script> <![endif]-->
 	</head>
 
 	<body>
@@ -24,11 +20,11 @@
 						<li>&raquo; Full support for Vim’s regexp as search pattern.</li>
 						<li>&raquo; Built-in Most Recently Used (MRU) files monitoring and search.</li>
 						<li>&raquo; Built-in root directory finder.</li>
-						<li>&raquo; Execute Ex-commands on an opening file.</li>
-						<li>&raquo; Multiple files opening.</li>
-						<li>&raquo; Automatically create non-existed file and directories.</li>
-						<li>&raquo; Cross-sessions caching and history allow for lightning fast start-up.</li>
-						<li>&raquo; Strictly conform to Vim’s methods and conventions.</li>
+						<li>&raquo; Execute Ex-commands when opening a file (jump to a line, string or do anything).</li>
+						<li>&raquo; Open multiple files at once.</li>
+						<li>&raquo; Create new files and directories.</li>
+						<li>&raquo; Optional cross-sessions caching and history allow for lightning fast initialization.</li>
+						<li>&raquo; Mappings and usage strictly conform to Vim’s conventions.</li>
 					</ul>
 					<p class="note">
 						Screenshot: CtrlP in regex and full path mode with 3 files selected to open.<br>
@@ -94,15 +90,15 @@ let g:ctrlp_user_command = ['.hg/', 'hg --cwd %s locate --fullpath -I .']</code>
 					</ul>
 					<p class="note">Run <code>:help ctrlp</code> or submit <code>?</code> in <span>ctrlp</span> for more mappings, commands and options.</p>
 					<h3>Get <span>ctrlp.vim</span>:</h3>
-					<a class="download" href="//github.com/kien/ctrlp.vim/zipball/master"><span class="icon"></span>Download</a>
-					<h6>From elsewhere:</h6>
+					<a class="download" href="//github.com/kien/ctrlp.vim/zipball/master"><span class="icon"></span>Download Latest</a>
+					<h6>Elsewhere:</h6>
 					<ul>
 						<li><code>$ git clone https://github.com/kien/ctrlp.vim.git</code></li>
 						<li><code>$ hg clone https://bitbucket.org/kien/ctrlp.vim</code></li>
 						<li><a href="//www.vim.org/scripts/script.php?script_id=3736">ctrlp.vim on vim.org</a></li>
 					</ul>
+					<a href="//github.com/kien/ctrlp.vim" class="forkme">Fork me on Github</a>
 				</div><!-- /.entry-content -->
-				<a href="//github.com/kien/ctrlp.vim" class="forkme">Fork me on Github</a>
 			</div><!-- /.article -->
 
 			<div id="footer">
