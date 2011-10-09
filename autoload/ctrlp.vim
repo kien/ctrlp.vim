@@ -334,7 +334,6 @@ func! s:BufOpen(...) "{{{
 endfunc "}}}
 
 func! s:Renderer(lines, pat) "{{{
-	cal s:unmarksigns()
 	let nls = deepcopy(a:lines)
 	" Determine/set max height
 	let height = s:mxheight
@@ -361,10 +360,12 @@ func! s:Renderer(lines, pat) "{{{
 			keepj norm! gg
 		endif
 		keepj norm! 1|
+		cal s:unmarksigns()
 		cal s:remarksigns(s:matched)
 	else
 		setl nocul
 		cal setline('1', ' == NO MATCHES ==')
+		cal s:unmarksigns()
 	endif
 	" Remember selected line
 	if exists('g:CtrlP_cline')
