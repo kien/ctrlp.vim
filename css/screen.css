@@ -84,7 +84,7 @@ dd {
 body {
 	background:#1e1615 url(../images/black_scales.png) fixed;
 	color:#ddd;
-	font:75%/1.75 georgia,serif;
+	font:75%/2 georgia,serif;
 	text-align:center;
 }
 abbr {
@@ -214,6 +214,9 @@ a.external:after {
 .article p.note {
 	font-size:13px;
 }
+.article p.note span {
+	color:#a7b8ff;
+}
 .article img {
 	display:block;
 	margin:.5em auto 0;
@@ -249,8 +252,11 @@ a.external:after {
 	margin:0 auto;
 	overflow:hidden;
 }
-#footer p {
+#footer small {
 	float:right;
+}
+#footer p {
+	float:left;
 }
 /* ============================================================{
 	Media queries:

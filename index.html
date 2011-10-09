@@ -24,6 +24,11 @@
 						<li>&raquo; Full support for Vim’s regexp as search pattern.</li>
 						<li>&raquo; Built-in Most Recently Used (MRU) files monitoring and search.</li>
 						<li>&raquo; Built-in root directory finder.</li>
+						<li>&raquo; Execute Ex-commands on an opening file.</li>
+						<li>&raquo; Multiple files opening.</li>
+						<li>&raquo; Automatically create non-existed file and directories.</li>
+						<li>&raquo; Cross-sessions caching and history allow for lightning fast start-up.</li>
+						<li>&raquo; Strictly conform to Vim’s methods and conventions.</li>
 					</ul>
 					<p class="note">
 						Screenshot: CtrlP in regex and full path mode with 3 files selected to open.<br>
@@ -39,7 +44,7 @@
 						<li>Press <code>&lt;c-d&gt;</code> to switch to filename only search instead of full path.</li>
 						<li>Use <code>*</code> or <code>|</code> in the prompt to submit the string as a Vim’s regexp pattern.</li>
 						<li>Or press <code>&lt;c-r&gt;</code> to switch to full regexp search mode.</li>
-						<li>End the input string with a colon <code>:</code> followed by a command to execute after opening the file.<br>
+						<li>End the input string with a colon <code>:</code> followed by a command to execute after opening the file:<br>
 							<code>abc:45</code> will open the selected file and jump to line 45.<br>
 							<code>abc:/my\:function</code> will open the selected file and jump to the first instance of 'my:function'.<br>
 							<code>abc:+setf\ myfiletype|50</code> will open the selected file and set its filetype to 'myfiletype' then jump to line 50.
@@ -79,27 +84,30 @@ root.dir
 set wildignore+=.git\*,.hg\*,.svn\*,*.dll,*.exe    " Windows</code></pre>
 						</li>
 						<li>
-							Specify an external tool to use for indexing files instead of Vim’s globpath().
+							Specify an external tool to use for listing files instead of using Vim’s globpath().
 							Use %s in place of the target directory:
 							<pre><code>let g:ctrlp_user_command = 'find %s -type f'       " MacOSX/Linux
 let g:ctrlp_user_command = 'dir %s /-n /b /s /a-d' " Windows</code></pre>
+<pre><code>let g:ctrlp_user_command = ['.git/', 'cd %s &amp;&amp; git ls-files']
+let g:ctrlp_user_command = ['.hg/', 'hg --cwd %s locate --fullpath -I .']</code></pre>
 						</li>
 					</ul>
-					<p class="note">Run <code>:help ctrlp</code> for more commands, mappings and options.</p>
+					<p class="note">Run <code>:help ctrlp</code> or submit <code>?</code> in <span>ctrlp</span> for more mappings, commands and options.</p>
 					<h3>Get <span>ctrlp.vim</span>:</h3>
 					<a class="download" href="//github.com/kien/ctrlp.vim/zipball/master"><span class="icon"></span>Download</a>
-					<h6>Repositories:</h6>
+					<h6>From elsewhere:</h6>
 					<ul>
-						<li><code>git clone https://github.com/kien/ctrlp.vim.git</code></li>
-						<li><code>hg clone https://bitbucket.org/kien/ctrlp.vim</code></li>
-						<li><a href="//www.vim.org/scripts/script.php?script_id=3736">Script page on Vim.org</a></li>
+						<li><code>$ git clone https://github.com/kien/ctrlp.vim.git</code></li>
+						<li><code>$ hg clone https://bitbucket.org/kien/ctrlp.vim</code></li>
+						<li><a href="//www.vim.org/scripts/script.php?script_id=3736">ctrlp.vim on vim.org</a></li>
 					</ul>
 				</div><!-- /.entry-content -->
 				<a href="//github.com/kien/ctrlp.vim" class="forkme">Fork me on Github</a>
 			</div><!-- /.article -->
 
 			<div id="footer">
-				<p>by <a href="//github.com/kien">kien</a></p>
+				<small>by <a href="//github.com/kien">kien</a></small>
+				<p>First public release: Sept. 6th, 2011.</p>
 			</div>
 		</div><!-- /#page -->
 	</body>
