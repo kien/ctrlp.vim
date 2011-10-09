@@ -21,7 +21,7 @@ Once CtrlP is open:
 e.g. `abc:45` will open the file matched the pattern and jump to line 45.
 * Submit two dots `..` as the input string to go backward the directory tree by 1 level.
 * Use `<c-y>` to create a new file and its parent dirs.
-* Use `<c-z>` to mark multiple files and `<c-o>` to open them.
+* Use `<c-z>` to mark/unmark files and `<c-o>` to open them.
 
 ## Basic Options
 * Change the mapping to invoke CtrlP:
@@ -67,6 +67,13 @@ e.g. Just have something like this in your vimrc:
     ```vim
     set wildignore+=*/.git/*,*/.hg/*,*/.svn/*   " for Linux/MacOSX
     set wildignore+=.git\*,.hg\*,.svn\*         " for Windows
+    ```
+
+* Use a custom file listing command with:
+
+    ```vim
+    let g:ctrlp_user_command = 'find %s -type f'       " MacOSX/Linux
+    let g:ctrlp_user_command = 'dir %s /-n /b /s /a-d' " Windows
     ```
 
 _Check [the docs][2] for more mappings, commands and options._
