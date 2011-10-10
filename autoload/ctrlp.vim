@@ -117,7 +117,8 @@ func! s:UserCommand(path, lscmd)
 		let &ssl = 0
 		let path = substitute(path, '/', '\', 'g')
 	endif
-	let g:ctrlp_allfiles = split(system(printf(a:lscmd, shellescape(path))), '\n')
+	let path = exists('*shellescape') ? shellescape(path) : path
+	let g:ctrlp_allfiles = split(system(printf(a:lscmd, path)), '\n')
 	if exists('+ssl') && exists('ssl')
 		let &ssl = ssl
 		cal map(g:ctrlp_allfiles, 'substitute(v:val, "\\", "/", "g")')
@@ -578,18 +579,14 @@ endfunc
 func! s:PrtCurStart()
 	let prt = g:CtrlP_prompt
 	let str = prt[0] . prt[1] . prt[2]
-	let prt[2] = strpart(str, 1)
-	let prt[1] = strpart(str, 0, 1)
-	let prt[0] = ''
+	let [prt[0], prt[1], prt[2]] = ['', strpart(str, 0, 1), strpart(str, 1)]
 	cal s:BuildPrompt(0)
 endfunc
 
 func! s:PrtCurEnd()
 	let prt = g:CtrlP_prompt
 	let str = prt[0] . prt[1] . prt[2]
-	let prt[2] = ''
-	let prt[1] = ''
-	let prt[0] = str
+	let [prt[0], prt[1], prt[2]] = [str, '', '']
 	cal s:BuildPrompt(0)
 endfunc
 
@@ -797,17 +794,17 @@ endfunc
 "}}}
 
 " * SetWorkingPath {{{
-func! s:FindRoot(curr, mark, depth, ...)
+func! s:FindRoot(curr, mark, depth, type)
 	let depth = a:depth + 1
 	if !empty(globpath(a:curr, a:mark)) || depth > s:maxdepth
-		if exists('a:1') && !empty(a:1)
+		if a:type
 			let s:vcsroot = depth <= s:maxdepth ? a:curr : ''
 		else
 			sil! exe 'chd!' a:curr
 		endif
 	else
 		let parent = substitute(a:curr, '[\/]\zs[^\/]\+[\/]\?$', '', '')
-		if parent != a:curr | cal s:FindRoot(parent, a:mark, depth, a:1) | endif
+		if parent != a:curr | cal s:FindRoot(parent, a:mark, depth, a:type) | endif
 	endif
 endfunc
 
@@ -841,7 +838,7 @@ func! ctrlp#SetWorkingPath(...)
 		cal extend(markers, s:rmarkers, 0)
 	endif
 	for marker in markers
-		cal s:FindRoot(getcwd(), marker, 0)
+		cal s:FindRoot(getcwd(), marker, 0, 0)
 		if getcwd() != expand('%:p:h') | break | endif
 	endfor
 endfunc
