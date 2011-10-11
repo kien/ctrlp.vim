@@ -1,4 +1,4 @@
-*ctrlp.txt*       Full path fuzzy file, buffer and MRU file finder. v1.5.2
+*ctrlp.txt*       Full path fuzzy file, buffer and MRU file finder. v1.5.3
 *CtrlP* *ControlP* *'ctrlp'* *'ctrl-p'*
 ===============================================================================
 #                                                                             #

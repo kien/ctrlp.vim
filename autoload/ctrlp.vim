@@ -3,7 +3,7 @@
 " Description:   Full path fuzzy file, buffer and MRU file finder for Vim.
 " Author:        Kien Nguyen <github.com/kien>
 " License:       MIT
-" Version:       1.5.2
+" Version:       1.5.3
 " =============================================================================
 
 if v:version < '700' "{{{
@@ -115,16 +115,16 @@ func! s:UserCommand(path, lscmd)
 	if exists('+ssl') && &ssl
 		let ssl = &ssl
 		let &ssl = 0
-		let path = substitute(path, '/', '\', 'g')
+		let path = tr(path, '/', '\')
 	endif
 	let path = exists('*shellescape') ? shellescape(path) : path
 	let g:ctrlp_allfiles = split(system(printf(a:lscmd, path)), '\n')
 	if exists('+ssl') && exists('ssl')
 		let &ssl = ssl
-		cal map(g:ctrlp_allfiles, 'substitute(v:val, "\\", "/", "g")')
+		cal map(g:ctrlp_allfiles, 'tr(v:val, "\\", "/")')
 	endif
 	if exists('s:vcscmd') && s:vcscmd
-		cal map(g:ctrlp_allfiles, 'substitute(v:val, "/", "\\", "g")')
+		cal map(g:ctrlp_allfiles, 'tr(v:val, "/", "\\")')
 	endif
 endfunc
 
@@ -189,6 +189,7 @@ func! s:SplitPattern(str,...) "{{{
 		" Remove the tail
 		let str = substitute(str, ':\([^:]\|\\:\)*$', '', 'g')
 	endif
+	let s:savestr = str
 	if s:regexp || match(str, '[*|]') >= 0
 				\ || match(str, '\\\(zs\|ze\|<\|>\)') >= 0
 		let array = [str]
@@ -285,7 +286,7 @@ func! s:BufOpen(...) "{{{
 			exe 'chd!' s:cwd
 			unl s:cwd
 		endif
-		unl! s:focus s:hisidx s:hstgot s:marked s:winnr s:init
+		unl! s:focus s:hisidx s:hstgot s:marked s:winnr s:init s:savestr
 		" Record the input string
 		let prt = g:CtrlP_prompt
 		cal s:recordhist(prt[0] . prt[1] . prt[2])
@@ -375,11 +376,18 @@ func! s:Renderer(lines, pat) "{{{
 endfunc "}}}
 
 func! s:UpdateMatches(pat) "{{{
-	" Delete the buffer's content
-	sil! %d _
-	let pats  = s:SplitPattern(a:pat)
+	let pat = a:pat
+	" Get the previous string if existed
+	let oldstr = exists('s:savestr') ? s:savestr : ''
+	let pats  = s:SplitPattern(pat)
+	" Get the new string sans tail
+	let notail = substitute(pat, ':\([^:]\|\\:\)*$', '', 'g')
+	" Stop if the string's unchanged
+	if notail == oldstr && !empty(notail) | retu | endif
 	let lines = s:GetMatchedItems(g:ctrlp_lines, pats, s:mxheight)
 	let pat   = pats[-1]
+	" Delete the buffer's content
+	sil! %d _
 	cal s:Renderer(lines, pat)
 	" Highlighting
 	if type(s:mathi) == 3 && len(s:mathi) == 2 && s:mathi[0] && exists('*clearmatches')
@@ -396,8 +404,8 @@ func! s:BuildPrompt(upd,...) "{{{
 	let estr  = '"\'
 	let prt   = deepcopy(g:CtrlP_prompt)
 	cal map(prt, 'escape(v:val, estr)')
-	let str   = prt[0] . prt[1] . prt[2]
-	if ( s:matches || s:regexp || match(str, '[*|]') >= 0 ) && a:upd
+	let str    = prt[0] . prt[1] . prt[2]
+	if a:upd && ( s:matches || s:regexp || match(str, '[*|]') >= 0 )
 		sil! cal s:UpdateMatches(str)
 	endif
 	sil! cal s:statusline()
@@ -408,7 +416,7 @@ func! s:BuildPrompt(upd,...) "{{{
 	elseif exists('a:1') || ( exists('a:1') && !a:1 )
 		let hiactive = 'Comment'
 		let hicursor = 'Comment'
-		let base = substitute(base, '>', '-', 'g')
+		let base = tr(base, '>', '-')
 	endif
 	let hibase = 'Comment'
 	" Build it
@@ -796,7 +804,9 @@ endfunc
 " * SetWorkingPath {{{
 func! s:FindRoot(curr, mark, depth, type)
 	let depth = a:depth + 1
-	if !empty(globpath(a:curr, a:mark)) || depth > s:maxdepth
+	let notfound = empty(globpath(a:curr, a:mark))
+	if !notfound || depth > s:maxdepth
+		if notfound | retu | endif
 		if a:type
 			let s:vcsroot = depth <= s:maxdepth ? a:curr : ''
 		else
