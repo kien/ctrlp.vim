@@ -215,9 +215,6 @@ a.external:after {
 .article p.note {
 	font-size:13px;
 }
-.article p.note span {
-	color:#a7b8ff;
-}
 .article img {
 	display:block;
 	margin:.5em auto 0;
@@ -298,15 +295,6 @@ a.external:after {
 /* ==========================================================={
 	Github download button:
 }=========================================================== */
-ul.getit {
-	list-style:none outside;
-	margin:0;
-	padding:0;
-}
-ul.getit li {
-	width:49%;
-	float:left;
-}
 a.download {
 	display:block;
 	width:180px;
