@@ -375,15 +375,15 @@ func! s:Renderer(lines, pat) "{{{
 	endif
 endfunc "}}}
 
-func! s:UpdateMatches(pat) "{{{
+func! s:UpdateMatches(pat,...) "{{{
 	let pat = a:pat
 	" Get the previous string if existed
 	let oldstr = exists('s:savestr') ? s:savestr : ''
-	let pats  = s:SplitPattern(pat)
+	let pats   = s:SplitPattern(pat)
 	" Get the new string sans tail
 	let notail = substitute(pat, ':\([^:]\|\\:\)*$', '', 'g')
 	" Stop if the string's unchanged
-	if notail == oldstr && !empty(notail) | retu | endif
+	if notail == oldstr && !empty(notail) && !exists('a:1') | retu | endif
 	let lines = s:GetMatchedItems(g:ctrlp_lines, pats, s:mxheight)
 	let pat   = pats[-1]
 	" Delete the buffer's content
@@ -404,9 +404,13 @@ func! s:BuildPrompt(upd,...) "{{{
 	let estr  = '"\'
 	let prt   = deepcopy(g:CtrlP_prompt)
 	cal map(prt, 'escape(v:val, estr)')
-	let str    = prt[0] . prt[1] . prt[2]
+	let str   = prt[0] . prt[1] . prt[2]
 	if a:upd && ( s:matches || s:regexp || match(str, '[*|]') >= 0 )
-		sil! cal s:UpdateMatches(str)
+		if exists('a:2')
+			sil! cal s:UpdateMatches(str,a:2)
+		else
+			sil! cal s:UpdateMatches(str)
+		endif
 	endif
 	sil! cal s:statusline()
 	" Toggling
@@ -797,7 +801,7 @@ endfunc
 
 func! s:PrtSwitcher()
 	let s:matches = 1
-	cal s:BuildPrompt(1,s:Focus())
+	cal s:BuildPrompt(1,s:Focus(),1)
 endfunc
 "}}}
 
