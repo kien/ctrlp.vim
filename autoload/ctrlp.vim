@@ -391,7 +391,7 @@ func! s:UpdateMatches(pat,...) "{{{
 	cal s:Renderer(lines, pat)
 	" Highlighting
 	if type(s:mathi) == 3 && len(s:mathi) == 2 && s:mathi[0] && exists('*clearmatches')
-		let grp = empty(s:mathi[1]) ? 'Function' : s:mathi[1]
+		let grp = empty(s:mathi[1]) ? 'Identifier' : s:mathi[1]
 		cal s:highlight(pat, grp)
 	endif
 endfunc "}}}
@@ -407,7 +407,7 @@ func! s:BuildPrompt(upd,...) "{{{
 	let str   = prt[0] . prt[1] . prt[2]
 	if a:upd && ( s:matches || s:regexp || match(str, '[*|]') >= 0 )
 		if exists('a:2')
-			sil! cal s:UpdateMatches(str,a:2)
+			sil! cal s:UpdateMatches(str, a:2)
 		else
 			sil! cal s:UpdateMatches(str)
 		endif
@@ -415,11 +415,9 @@ func! s:BuildPrompt(upd,...) "{{{
 	sil! cal s:statusline()
 	" Toggling
 	if !exists('a:1') || ( exists('a:1') && a:1 )
-		let hiactive = 'Normal'
-		let hicursor = 'Constant'
+		let [hiactive, hicursor] = ['Normal', 'Constant']
 	elseif exists('a:1') || ( exists('a:1') && !a:1 )
-		let hiactive = 'Comment'
-		let hicursor = 'Comment'
+		let [hiactive, hicursor] = ['Comment', 'Comment']
 		let base = tr(base, '>', '-')
 	endif
 	let hibase = 'Comment'
@@ -772,7 +770,7 @@ endfunc
 func! s:ToggleFocus()
 	let s:focus = !exists('s:focus') || s:focus ? 0 : 1
 	cal s:MapKeys(s:focus)
-	cal s:BuildPrompt(0,s:focus)
+	cal s:BuildPrompt(0, s:focus)
 endfunc
 
 func! s:ToggleRegex()
@@ -801,7 +799,7 @@ endfunc
 
 func! s:PrtSwitcher()
 	let s:matches = 1
-	cal s:BuildPrompt(1,s:Focus(),1)
+	cal s:BuildPrompt(1, s:Focus(), 1)
 endfunc
 "}}}
 

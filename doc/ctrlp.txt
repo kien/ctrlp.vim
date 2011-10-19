@@ -477,6 +477,8 @@ Mercurial repository: https://bitbucket.org/kien/ctrlp.vim
 ===============================================================================
 CHANGELOG
 
+Before 2011/10/12
+
     + New features: Open multiple files.
                     Pass Vim’s ++opt and +cmd to the opening file (section 5.c)
                     Auto-complete each dir for |:CtrlP| [starting-directory]
