@@ -201,6 +201,11 @@ search feature to work correctly along side with |wildignore|. If you’ve
 disabled dotfiles search (set |g:ctrlp_dotfiles| to 0), then you can ignore
 this.
 
+Other note: |wildignore| influences the result of |expand()|, |globpath()| and
+|glob()|, which many plugins use to find stuff on the system (e.g. fugitive.vim
+looks for .git/, some other plugins looks for external .exe tools on Windows).
+So be a little careful with what you put in your |wildignore|.
+
                                                     *'g:ctrlp_highlight_match'*
 Use this to enable/disable highlighting of the matched patterns and to specify
 the highlight group that’ll be used: >
