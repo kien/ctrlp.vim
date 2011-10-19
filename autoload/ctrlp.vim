@@ -1218,7 +1218,7 @@ func! s:normbuf()
 endfunc
 
 func! s:setupblank()
-	setl noswf nobl nonu nowrap nolist nospell cul nocuc wfh tw=0 bt=nofile bh=unload
+	setl noswf nobl nonu nowrap nolist nospell cul nocuc wfh fdc=0 tw=0 bt=nofile bh=unload
 	if v:version >= '703'
 		setl nornu noudf cc=0
 	endif
