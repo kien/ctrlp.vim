@@ -439,27 +439,31 @@ func! s:CreateNewFile() "{{{
 	let str = prt[0] . prt[1] . prt[2]
 	if empty(str) | retu | endif
 	let arr = split(str, '[\/]')
-	cal map(arr, 'escape(v:val, "%#")')
 	let fname = remove(arr, -1)
-	exe s:currwin.'winc w'
-	if s:newfop == 1 " In new tab
-		tabnew
+	if s:newfop <= 1 " In new tab or current window
 		let cmd = 'e'
 	elseif s:newfop == 2 " In new hor split
 		let cmd = 'new'
 	elseif s:newfop == 3 " In new ver split
 		let cmd = 'vne'
-	elseif !s:newfop " In current window
-		let cmd = 'e'
 	endif
 	if len(arr)
 		if isdirectory(s:createparentdirs(arr))
-			sil! exe 'bo '.cmd.' '.str
+			let filpath = escape(getcwd().s:lash.str, '%#')
+			let opcmd = 'bo '.cmd.' '.filpath
 		endif
 	else
-		sil! exe 'bo '.cmd.' '.fname
+		let filpath = escape(getcwd().s:lash.fname, '%#')
+		let opcmd = 'bo '.cmd.' '.filpath
 	endif
-	cal s:insertcache(str)
+	if exists('opcmd') && !empty(opcmd)
+		cal s:insertcache(str)
+		exe s:currwin.'winc w'
+		if s:newfop == 1
+			tabnew
+		endif
+		cal s:openfile(opcmd)
+	endif
 endfunc "}}}
 
 " * OpenMulti {{{
@@ -523,7 +527,7 @@ func! s:OpenMulti()
 	let wnr = exists('wnr') ? wnr : 1
 	exe wnr.'winc w'
 	for key in keys(marked)
-		let filpath = marked[key]
+		let filpath = escape(marked[key], '%#')
 		let cmd = ic == 1 ? 'e ' : 'vne '
 		sil! exe cmd.filpath
 		if s:opmul > 1 && s:opmul < ic
@@ -806,13 +810,14 @@ endfunc
 " * SetWorkingPath {{{
 func! s:FindRoot(curr, mark, depth, type)
 	let depth = a:depth + 1
-	let notfound = empty(globpath(a:curr, a:mark))
+	let notfound = empty(globpath(a:curr, a:mark, 1))
 	if !notfound || depth > s:maxdepth
-		if notfound | retu | endif
+		if notfound | retu 0 | endif
 		if a:type
 			let s:vcsroot = depth <= s:maxdepth ? a:curr : ''
 		else
 			sil! exe 'chd!' a:curr
+			retu 1
 		endif
 	else
 		let parent = substitute(a:curr, '[\/]\zs[^\/]\+[\/]\?$', '', '')
@@ -850,8 +855,8 @@ func! ctrlp#SetWorkingPath(...)
 		cal extend(markers, s:rmarkers, 0)
 	endif
 	for marker in markers
-		cal s:FindRoot(getcwd(), marker, 0, 0)
-		if getcwd() != expand('%:p:h') | break | endif
+		let found = s:FindRoot(getcwd(), marker, 0, 0)
+		if getcwd() != expand('%:p:h') || found | break | endif
 	endfor
 endfunc
 "}}}
@@ -943,7 +948,8 @@ func! s:AcceptSelection(mode,...) "{{{
 			endif
 		endif
 		" Open new window/buffer
-		sil! exe 'bo '.cmd.tail.' '.filpath
+		let opcmd = 'bo '.cmd.tail.' '.filpath
+		cal s:openfile(opcmd)
 	endif
 	if !empty('tail')
 		sil! norm! zOzz
@@ -1239,6 +1245,18 @@ endfunc
 "}}}
 
 " Misc {{{
+func! s:openfile(cmd)
+	try
+		exe a:cmd
+		retu 1
+	catch
+		echoh Error
+		echon 'Operation can''t be completed. Make sure filename is valid.'
+		echoh None
+		retu 0
+	endtry
+endfunc
+
 func! s:walker(max, pos, dir, ...)
 	if a:dir == 1
 		let pos = a:pos < a:max ? a:pos + 1 : 0
@@ -1264,6 +1282,7 @@ func! s:insertcache(str)
 	let cache_file = ctrlp#utils#cachefile()
 	if filereadable(cache_file)
 		let data = readfile(cache_file)
+		if index(data, a:str) >= 0 | retu | endif
 		if strlen(a:str) <= strlen(data[0])
 			let pos = 0
 		elseif strlen(a:str) >= strlen(data[-1])

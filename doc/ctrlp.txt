@@ -266,7 +266,7 @@ Set to 0 to disable prompt’s history.
 
                                                          *'g:ctrlp_open_multi'*
 If non-zero this will enable opening multiple files with <c-z> and <c-o>: >
-  let g:ctrlp_open_multi = 0
+  let g:ctrlp_open_multi = 1
 <
 If bigger than 1, it’ll be used as the maximum number of windows to create when
 opening the files (the rest will be hidden buffers). If is 1, it’ll open all
