@@ -1,4 +1,4 @@
-*ctrlp.txt*       Full path fuzzy file, buffer and MRU file finder. v1.5.3
+*ctrlp.txt*       Full path fuzzy file, buffer and MRU file finder. v1.5.4
 *CtrlP* *ControlP* *'ctrlp'* *'ctrl-p'*
 ===============================================================================
 #                                                                             #
@@ -204,7 +204,7 @@ this.
 Other note: |wildignore| influences the result of |expand()|, |globpath()| and
 |glob()| which many plugins use to find stuff on the system (e.g. fugitive.vim
 looks for .git/, some other plugins look for external .exe tools on Windows).
-So be a little careful with what you put in your |wildignore|.
+So be a little mindful with what you put in your |wildignore|.
 
                                                     *'g:ctrlp_highlight_match'*
 Use this to enable/disable highlighting of the matched patterns and to specify

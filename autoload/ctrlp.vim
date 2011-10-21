@@ -3,7 +3,7 @@
 " Description:   Full path fuzzy file, buffer and MRU file finder for Vim.
 " Author:        Kien Nguyen <github.com/kien>
 " License:       MIT
-" Version:       1.5.3
+" Version:       1.5.4
 " =============================================================================
 
 if v:version < '700' "{{{
@@ -136,7 +136,7 @@ func! s:ListAllFiles(path)
 		if empty(lscmd)
 			cal s:GlobPath(a:path, [], 0)
 		else
-			sil! cal s:progress(escape('Waiting...', ' '))
+			sil! cal s:progress('Waiting...')
 			try
 				cal s:UserCommand(a:path, lscmd)
 			catch
@@ -259,81 +259,81 @@ func! s:GetMatchedItems(items, pats, limit)
 endfunc
 "}}}
 
-func! s:BufOpen(...) "{{{
-	if exists('a:2')
-		" Closing
-		try | bun! | catch | clo! | endtry
-		exe s:currwin.'winc w'
-		" Restore the changed global options
-		let &magic  = s:CtrlP_magic
-		let &to     = s:CtrlP_to
-		let &tm     = s:CtrlP_tm
-		let &sb     = s:CtrlP_sb
-		let &hls    = s:CtrlP_hls
-		let &im     = s:CtrlP_im
-		let &report = s:CtrlP_report
-		let &sc     = s:CtrlP_sc
-		let &ss     = s:CtrlP_ss
-		let &siso   = s:CtrlP_siso
-		let &gcr    = s:CtrlP_gcr
-		let &mfd    = s:CtrlP_mfd
-		" Cleaning up
-		cal s:unmarksigns()
-		let g:ctrlp_lines = []
-		let g:ctrlp_allfiles = []
-		unl! g:CtrlP_cline
-		if exists('s:cwd')
-			exe 'chd!' s:cwd
-			unl s:cwd
-		endif
-		unl! s:focus s:hisidx s:hstgot s:marked s:winnr s:init s:savestr
-		" Record the input string
-		let prt = g:CtrlP_prompt
-		cal s:recordhist(prt[0] . prt[1] . prt[2])
-		ec
-	else
-		" Open new buffer
-		let pos = s:mwbottom ? 'bo' : 'to'
-		sil! exe pos '1new' a:1
-		let s:currwin = s:mwbottom ? winnr('#') : winnr('#') + 1
-		abc <buffer>
-		let s:winnr = bufwinnr('%')
-		let s:bufnr = bufnr('%')
-		" Store global options
-		let s:CtrlP_magic  = &magic
-		let s:CtrlP_to     = &to
-		let s:CtrlP_tm     = &tm
-		let s:CtrlP_sb     = &sb
-		let s:CtrlP_hls    = &hls
-		let s:CtrlP_im     = &im
-		let s:CtrlP_report = &report
-		let s:CtrlP_sc     = &sc
-		let s:CtrlP_ss     = &ss
-		let s:CtrlP_siso   = &siso
-		let s:CtrlP_gcr    = &gcr
-		let s:CtrlP_mfd    = &mfd
-		let g:CtrlP_prompt = ['', '', '']
-		if !exists('s:hstry')
-			let hst = filereadable(s:gethistloc()[1]) ? s:gethistdata() : ['']
-			let s:hstry = empty(hst) || !s:maxhst ? [''] : hst
-		endif
-		se magic
-		se to
-		se tm=0
-		se sb
-		se nohls
-		se noim
-		se report=9999
-		se nosc
-		se ss=0
-		se siso=0
-		se mfd=200
-		se gcr=a:block-PmenuSel-blinkon0
-		if s:opmul && has('signs')
-			sign define ctrlpmark text=+> texthl=Search
-		endif
+" * Open & Close {{{
+func! s:Open(name)
+	let pos = s:mwbottom ? 'bo' : 'to'
+	sil! exe pos '1new' a:name
+	let s:currwin = s:mwbottom ? winnr('#') : winnr('#') + 1
+	abc <buffer>
+	let s:winnr = bufwinnr('%')
+	let s:bufnr = bufnr('%')
+	" Store global options
+	let s:CtrlP_magic  = &magic
+	let s:CtrlP_to     = &to
+	let s:CtrlP_tm     = &tm
+	let s:CtrlP_sb     = &sb
+	let s:CtrlP_hls    = &hls
+	let s:CtrlP_im     = &im
+	let s:CtrlP_report = &report
+	let s:CtrlP_sc     = &sc
+	let s:CtrlP_ss     = &ss
+	let s:CtrlP_siso   = &siso
+	let s:CtrlP_mfd    = &mfd
+	let s:CtrlP_gcr    = &gcr
+	let g:CtrlP_prompt = ['', '', '']
+	if !exists('s:hstry')
+		let hst = filereadable(s:gethistloc()[1]) ? s:gethistdata() : ['']
+		let s:hstry = empty(hst) || !s:maxhst ? [''] : hst
 	endif
-endfunc "}}}
+	" Set global options
+	se magic
+	se to
+	se tm=0
+	se sb
+	se nohls
+	se noim
+	se report=9999
+	se nosc
+	se ss=0
+	se siso=0
+	se mfd=200
+	se gcr=a:block-PmenuSel-blinkon0
+	if s:opmul && has('signs')
+		sign define ctrlpmark text=+> texthl=Search
+	endif
+endfunc
+
+func! s:Close()
+	try | bun! | catch | clo! | endtry
+	" Restore global options
+	let &magic  = s:CtrlP_magic
+	let &to     = s:CtrlP_to
+	let &tm     = s:CtrlP_tm
+	let &sb     = s:CtrlP_sb
+	let &hls    = s:CtrlP_hls
+	let &im     = s:CtrlP_im
+	let &report = s:CtrlP_report
+	let &sc     = s:CtrlP_sc
+	let &ss     = s:CtrlP_ss
+	let &siso   = s:CtrlP_siso
+	let &mfd    = s:CtrlP_mfd
+	let &gcr    = s:CtrlP_gcr
+	" Cleaning up
+	cal s:unmarksigns()
+	let g:ctrlp_lines = []
+	let g:ctrlp_allfiles = []
+	unl! g:CtrlP_cline
+	if exists('s:cwd')
+		exe 'chd!' s:cwd
+		unl s:cwd
+	endif
+	unl! s:focus s:hisidx s:hstgot s:marked s:winnr s:init s:savestr
+	" Record the input string
+	let prt = g:CtrlP_prompt
+	cal s:recordhist(prt[0] . prt[1] . prt[2])
+	ec
+endfunc
+"}}}
 
 func! s:Renderer(lines, pat) "{{{
 	let nls = deepcopy(a:lines)
@@ -503,8 +503,7 @@ func! s:OpenMulti()
 		retu
 	endif
 	let marked = deepcopy(s:marked)
-	if !has('autocmd') | cal s:BufOpen('ControlP', 'del') | endif
-	exe s:currwin.'winc w'
+	cal s:PrtExit()
 	" Try not to open in new tab
 	let ntab = 0
 	let norwins = s:normbuf()
@@ -607,8 +606,7 @@ endfunc
 func! s:PrtDeleteWord()
 	let s:matches = 1
 	unl! s:hstgot
-	let prt = g:CtrlP_prompt
-	let str = prt[0]
+	let str = g:CtrlP_prompt[0]
 	if match(str, '\W\w\+$') >= 0
 		let str = matchstr(str, '^.\+\W\ze\w\+$')
 	elseif match(str, '\w\W\+$') >= 0
@@ -618,7 +616,7 @@ func! s:PrtDeleteWord()
 	elseif match(str, ' ') <= 0
 		let str = ''
 	endif
-	let prt[0] = str
+	let g:CtrlP_prompt[0] = str
 	cal s:BuildPrompt(1)
 endfunc
 
@@ -661,11 +659,9 @@ func! s:PrtClearCache()
 endfunc
 
 func! s:PrtExit()
-	if has('autocmd')
-		exe s:currwin.'winc w'
-	else
-		cal s:BufOpen('ControlP', 'del')
-	endif
+	" Manually remove the prompt and match window
+	if !has('autocmd') | cal s:Close() | endif
+	exe s:currwin.'winc w'
 endfunc
 
 func! s:PrtHistory(...)
@@ -886,9 +882,7 @@ func! s:AcceptSelection(mode,...) "{{{
 	let filpath = s:itemtype ? matchstr : getcwd().s:lash.matchstr
 	" If only need the full path
 	if exists('a:1') && a:1 | retu filpath | endif
-	" Manually remove the prompt and match window
-	if !has('autocmd') | cal s:BufOpen('ControlP', 'del') | endif
-	exe s:currwin.'winc w'
+	cal s:PrtExit()
 	let bufnum   = bufnr(filpath)
 	let bufwinnr = bufwinnr(bufnum)
 	let norwins  = s:normbuf()
@@ -1329,7 +1323,7 @@ if has('autocmd') "{{{
 	aug CtrlPAug
 		au!
 		au BufEnter ControlP cal s:checkbuf()
-		au BufLeave ControlP cal s:BufOpen('ControlP', 'del')
+		au BufLeave ControlP cal s:Close()
 		au VimLeavePre * cal s:leavepre()
 	aug END
 endif "}}}
@@ -1350,7 +1344,7 @@ func! ctrlp#init(type, ...)
 	let [s:matches, s:init] = [1, 1]
 	let a1 = exists('a:1') ? a:1 : ''
 	cal ctrlp#SetWorkingPath(a1)
-	cal s:BufOpen('ControlP')
+	cal s:Open('ControlP')
 	cal s:setupblank()
 	cal s:MapKeys()
 	cal s:SetLines(a:type)
