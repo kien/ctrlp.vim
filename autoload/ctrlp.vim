@@ -30,6 +30,7 @@ func! s:opts()
 				\ 'g:ctrlp_max_depth'             : ['s:maxdepth', 40],
 				\ 'g:ctrlp_open_new_file'         : ['s:newfop', 3],
 				\ 'g:ctrlp_open_multi'            : ['s:opmul', 1],
+				\ 'g:ctrlp_jump_to_buffer'        : ['s:jmptobuf', 0],
 				\ }
 	for key in keys(opts)
 		let def = call('exists', [key]) ? string(eval(key)) : string(opts[key][1])
@@ -883,27 +884,14 @@ func! s:AcceptSelection(mode,...) "{{{
 	" If only need the full path
 	if exists('a:1') && a:1 | retu filpath | endif
 	cal s:PrtExit()
-	let bufnum   = bufnr(filpath)
-	let bufwinnr = bufwinnr(bufnum)
-	let norwins  = s:normbuf()
-	let norwin   = empty(norwins) ? 0 : norwins[0]
+	let bufnum  = bufnr(filpath)
+	let norwins = s:normbuf()
+	let norwin  = empty(norwins) ? 0 : norwins[0]
 	" Check if the file's already opened in a tab
-	for nr in range(1, tabpagenr('$'))
-		" Get a list of the buffers in the nr tab
-		let buflist = tabpagebuflist(nr)
-		" If it has the buffer we're looking for
-		if match(buflist, bufnum) >= 0
-			let buftabnr = nr
-			" Get the number of windows
-			let tabwinnrs = tabpagewinnr(nr, '$')
-			" Find the buffer that we know is in this tab
-			for ewin in range(1, tabwinnrs)
-				if buflist[ewin - 1] == bufnum
-					let buftabwinnr = ewin
-				endif
-			endfor
-		endif
-	endfor
+	if bufnum > 0 && s:jmptobuf
+		let bufwinnr = bufwinnr(bufnum)
+		let buftab   = s:buftab(bufnum)
+	endif
 	" Get the tail
 	let tail = ''
 	if exists('s:optail') && !empty('s:optail')
@@ -912,12 +900,14 @@ func! s:AcceptSelection(mode,...) "{{{
 	endif
 	" Switch to existing buffer or open new one
 	let filpath = escape(filpath, '%#')
-	" If the file's already loaded
-	if bufnum > 0 && exists('buftabwinnr') " In a tab
-		exe 'norm!' buftabnr.'gt'
-		exe buftabwinnr.'winc w'
-	elseif bufnum > 0 && bufwinnr > 0 " In a window
-		exe bufwinnr.'winc w'
+	if bufnum > 0 && s:jmptobuf
+		" If the file's already opened
+		if buftab[0] " In a tab
+			exe 'norm!' buftab[1].'gt'
+			exe buftab[0].'winc w'
+		elseif bufwinnr > 0 " In a window
+			exe bufwinnr.'winc w'
+		endif
 	else
 		" Determine the command to use
 		if md == 't' || s:splitwin == 1 " In new tab
@@ -1205,6 +1195,26 @@ endfunc
 "}}}
 
 " Buffers {{{
+func! s:buftab(bufnum)
+	for nr in range(1, tabpagenr('$'))
+		" Get a list of the buffers in the nr tab
+		let buflist = tabpagebuflist(nr)
+		" If it has the buffer we're looking for
+		if match(buflist, a:bufnum) >= 0
+			let buftabnr = nr
+			" Get the number of windows
+			let tabwinnrs = tabpagewinnr(nr, '$')
+			" Find the buffer that we know is in this tab
+			for ewin in range(1, tabwinnrs)
+				if buflist[ewin - 1] == a:bufnum
+					retu [ewin, buftabnr]
+				endif
+			endfor
+		endif
+	endfor
+	retu [0, 0]
+endfunc
+
 func! s:normbuf()
 	let winnrs = []
 	for each in range(1, winnr('$'))

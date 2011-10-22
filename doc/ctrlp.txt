@@ -81,6 +81,12 @@ Use this option to specify how the file is to be opened when pressing <cr>:
   let g:ctrlp_split_window = 0
 <
 
+                                                     *'g:ctrlp_jump_to_buffer'*
+Set this to 1 to enable the jump-to-open-buffer feature (and prevent opening
+the same file multiple times): >
+  let g:ctrlp_jump_to_buffer = 0
+<
+
                                                   *'g:ctrlp_working_path_mode'*
                                                              *SetWorkingPath()*
 When starting up the prompt, automatically set the working directory (i.e. the
