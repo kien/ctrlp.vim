@@ -3,7 +3,7 @@
 " Description:   Full path fuzzy file, buffer and MRU file finder for Vim.
 " Author:        Kien Nguyen <github.com/kien>
 " License:       MIT
-" Version:       1.5.4
+" Version:       1.5.5
 " =============================================================================
 
 if v:version < '700' "{{{
@@ -13,24 +13,24 @@ endif "}}}
 " Option variables {{{
 func! s:opts()
 	let opts = {
-				\ 'g:ctrlp_match_window_reversed' : ['s:mwreverse', 1],
-				\ 'g:ctrlp_match_window_bottom'   : ['s:mwbottom', 1],
-				\ 'g:ctrlp_split_window'          : ['s:splitwin', 0],
-				\ 'g:ctrlp_working_path_mode'     : ['s:pathmode', 1],
-				\ 'g:ctrlp_root_markers'          : ['s:rmarkers', []],
-				\ 'g:ctrlp_max_height'            : ['s:mxheight', 10],
-				\ 'g:ctrlp_regexp_search'         : ['s:regexp', 0],
-				\ 'g:ctrlp_use_caching'           : ['s:caching', 1],
-				\ 'g:ctrlp_clear_cache_on_exit'   : ['s:cconex', 1],
 				\ 'g:ctrlp_by_filename'           : ['s:byfname', 0],
-				\ 'g:ctrlp_prompt_mappings'       : ['s:urprtmaps', 0],
+				\ 'g:ctrlp_clear_cache_on_exit'   : ['s:cconex', 1],
 				\ 'g:ctrlp_dotfiles'              : ['s:dotfiles', 1],
 				\ 'g:ctrlp_highlight_match'       : ['s:mathi', [1, 'Identifier']],
-				\ 'g:ctrlp_max_files'             : ['s:maxfiles', 20000],
+				\ 'g:ctrlp_jump_to_buffer'        : ['s:jmptobuf', 1],
+				\ 'g:ctrlp_match_window_bottom'   : ['s:mwbottom', 1],
+				\ 'g:ctrlp_match_window_reversed' : ['s:mwreverse', 1],
 				\ 'g:ctrlp_max_depth'             : ['s:maxdepth', 40],
-				\ 'g:ctrlp_open_new_file'         : ['s:newfop', 3],
+				\ 'g:ctrlp_max_files'             : ['s:maxfiles', 20000],
+				\ 'g:ctrlp_max_height'            : ['s:mxheight', 10],
 				\ 'g:ctrlp_open_multi'            : ['s:opmul', 1],
-				\ 'g:ctrlp_jump_to_buffer'        : ['s:jmptobuf', 0],
+				\ 'g:ctrlp_open_new_file'         : ['s:newfop', 3],
+				\ 'g:ctrlp_prompt_mappings'       : ['s:urprtmaps', 0],
+				\ 'g:ctrlp_regexp_search'         : ['s:regexp', 0],
+				\ 'g:ctrlp_root_markers'          : ['s:rmarkers', []],
+				\ 'g:ctrlp_split_window'          : ['s:splitwin', 0],
+				\ 'g:ctrlp_use_caching'           : ['s:caching', 1],
+				\ 'g:ctrlp_working_path_mode'     : ['s:pathmode', 1],
 				\ }
 	for key in keys(opts)
 		let def = call('exists', [key]) ? string(eval(key)) : string(opts[key][1])
@@ -86,8 +86,8 @@ func! ctrlp#reset()
 	cal ctrlp#utils#opts()
 	if g:ctrlp_mru_files | cal ctrlp#mrufiles#opts() | endif
 	" Clear user input
-	let g:CtrlP_prompt = ['','','']
-	unl! g:CtrlP_cline
+	let s:prompt = ['','','']
+	unl! s:cline
 endfunc
 "}}}
 
@@ -281,7 +281,7 @@ func! s:Open(name)
 	let s:CtrlP_siso   = &siso
 	let s:CtrlP_mfd    = &mfd
 	let s:CtrlP_gcr    = &gcr
-	let g:CtrlP_prompt = ['', '', '']
+	let s:prompt = ['', '', '']
 	if !exists('s:hstry')
 		let hst = filereadable(s:gethistloc()[1]) ? s:gethistdata() : ['']
 		let s:hstry = empty(hst) || !s:maxhst ? [''] : hst
@@ -323,14 +323,13 @@ func! s:Close()
 	cal s:unmarksigns()
 	let g:ctrlp_lines = []
 	let g:ctrlp_allfiles = []
-	unl! g:CtrlP_cline
 	if exists('s:cwd')
 		exe 'chd!' s:cwd
 		unl s:cwd
 	endif
-	unl! s:focus s:hisidx s:hstgot s:marked s:winnr s:init s:savestr
+	unl! s:focus s:hisidx s:hstgot s:marked s:winnr s:init s:savestr s:cline
 	" Record the input string
-	let prt = g:CtrlP_prompt
+	let prt = s:prompt
 	cal s:recordhist(prt[0] . prt[1] . prt[2])
 	ec
 endfunc
@@ -357,11 +356,8 @@ func! s:Renderer(lines, pat) "{{{
 		let s:matched = deepcopy(nls)
 		cal map(nls, 'substitute(v:val, "^", "> ", "")')
 		cal setline('1', nls)
-		if s:mwreverse
-			keepj norm! G
-		else
-			keepj norm! gg
-		endif
+		let cmd = s:mwreverse ? 'G' : 'gg'
+		exe 'keepj norm!' cmd
 		keepj norm! 1|
 		cal s:unmarksigns()
 		cal s:remarksigns(s:matched)
@@ -371,8 +367,8 @@ func! s:Renderer(lines, pat) "{{{
 		cal s:unmarksigns()
 	endif
 	" Remember selected line
-	if exists('g:CtrlP_cline')
-		cal setpos('.', [0, g:CtrlP_cline, 1, 0])
+	if exists('s:cline')
+		cal cursor(s:cline, 1)
 	endif
 endfunc "}}}
 
@@ -403,7 +399,7 @@ func! s:BuildPrompt(upd,...) "{{{
 	let base  = base1.base2.'> '
 	let cur   = '_'
 	let estr  = '"\'
-	let prt   = deepcopy(g:CtrlP_prompt)
+	let prt   = deepcopy(s:prompt)
 	cal map(prt, 'escape(v:val, estr)')
 	let str   = prt[0] . prt[1] . prt[2]
 	if a:upd && ( s:matches || s:regexp || match(str, '[*|]') >= 0 )
@@ -436,7 +432,7 @@ func! s:BuildPrompt(upd,...) "{{{
 endfunc "}}}
 
 func! s:CreateNewFile() "{{{
-	let prt = g:CtrlP_prompt
+	let prt = s:prompt
 	let str = prt[0] . prt[1] . prt[2]
 	if empty(str) | retu | endif
 	let arr = split(str, '[\/]')
@@ -459,7 +455,7 @@ func! s:CreateNewFile() "{{{
 	endif
 	if exists('opcmd') && !empty(opcmd)
 		cal s:insertcache(str)
-		exe s:currwin.'winc w'
+		cal s:PrtExit()
 		if s:newfop == 1
 			tabnew
 		endif
@@ -544,13 +540,13 @@ endfunc
 func! s:PrtClear()
 	let s:matches = 1
 	unl! s:hstgot
-	let g:CtrlP_prompt = ['','','']
+	let s:prompt = ['','','']
 	cal s:BuildPrompt(1)
 endfunc
 
 func! s:PrtAdd(char)
 	unl! s:hstgot
-	let prt = g:CtrlP_prompt
+	let prt = s:prompt
 	let prt[0] = prt[0] . a:char
 	cal s:BuildPrompt(1)
 endfunc
@@ -558,7 +554,7 @@ endfunc
 func! s:PrtBS()
 	let s:matches = 1
 	unl! s:hstgot
-	let prt = g:CtrlP_prompt
+	let prt = s:prompt
 	let prt[0] = strpart(prt[0], -1, strlen(prt[0]))
 	cal s:BuildPrompt(1)
 endfunc
@@ -566,15 +562,15 @@ endfunc
 func! s:PrtDelete()
 	let s:matches = 1
 	unl! s:hstgot
-	let prt = g:CtrlP_prompt
+	let prt = s:prompt
 	let prt[1] = strpart(prt[2], 0, 1)
 	let prt[2] = strpart(prt[2], 1)
 	cal s:BuildPrompt(1)
 endfunc
 
 func! s:PrtCurLeft()
-	if !empty(g:CtrlP_prompt[0])
-		let prt = g:CtrlP_prompt
+	if !empty(s:prompt[0])
+		let prt = s:prompt
 		let prt[2] = prt[1] . prt[2]
 		let prt[1] = strpart(prt[0], strlen(prt[0]) - 1)
 		let prt[0] = strpart(prt[0], -1, strlen(prt[0]))
@@ -583,7 +579,7 @@ func! s:PrtCurLeft()
 endfunc
 
 func! s:PrtCurRight()
-	let prt = g:CtrlP_prompt
+	let prt = s:prompt
 	let prt[0] = prt[0] . prt[1]
 	let prt[1] = strpart(prt[2], 0, 1)
 	let prt[2] = strpart(prt[2], 1)
@@ -591,14 +587,14 @@ func! s:PrtCurRight()
 endfunc
 
 func! s:PrtCurStart()
-	let prt = g:CtrlP_prompt
+	let prt = s:prompt
 	let str = prt[0] . prt[1] . prt[2]
 	let [prt[0], prt[1], prt[2]] = ['', strpart(str, 0, 1), strpart(str, 1)]
 	cal s:BuildPrompt(0)
 endfunc
 
 func! s:PrtCurEnd()
-	let prt = g:CtrlP_prompt
+	let prt = s:prompt
 	let str = prt[0] . prt[1] . prt[2]
 	let [prt[0], prt[1], prt[2]] = [str, '', '']
 	cal s:BuildPrompt(0)
@@ -607,7 +603,7 @@ endfunc
 func! s:PrtDeleteWord()
 	let s:matches = 1
 	unl! s:hstgot
-	let str = g:CtrlP_prompt[0]
+	let str = s:prompt[0]
 	if match(str, '\W\w\+$') >= 0
 		let str = matchstr(str, '^.\+\W\ze\w\+$')
 	elseif match(str, '\w\W\+$') >= 0
@@ -617,13 +613,13 @@ func! s:PrtDeleteWord()
 	elseif match(str, ' ') <= 0
 		let str = ''
 	endif
-	let g:CtrlP_prompt[0] = str
+	let s:prompt[0] = str
 	cal s:BuildPrompt(1)
 endfunc
 
 func! s:PrtSelectMove(dir)
 	exe 'norm!' a:dir
-	let g:CtrlP_cline = line('.')
+	let s:cline = line('.')
 endfunc
 
 func! s:PrtSelectJump(char,...)
@@ -649,7 +645,7 @@ func! s:PrtSelectJump(char,...)
 			let s:jmpchr = [chr, npos]
 		endif
 		keepj exe jmpln + 1
-		let g:CtrlP_cline = line('.')
+		let s:cline = line('.')
 	endif
 endfunc
 
@@ -668,7 +664,7 @@ endfunc
 func! s:PrtHistory(...)
 	if !s:maxhst | retu | endif
 	let s:matches = 1
-	let prt = g:CtrlP_prompt
+	let prt = s:prompt
 	let str = prt[0] . prt[1] . prt[2]
 	let hst = s:hstry
 	" Save to history if not saved before
@@ -677,7 +673,7 @@ func! s:PrtHistory(...)
 	let idx = exists('s:hisidx') ? s:hisidx + a:1 : a:1
 	" Limit idx within 0 and hslen
 	let idx = idx < 0 ? 0 : idx >= hslen ? hslen > 1 ? hslen - 1 : 0 : idx
-	let g:CtrlP_prompt = [hst[idx], '', '']
+	let s:prompt = [hst[idx], '', '']
 	let s:hisidx = idx
 	let s:hstgot = 1
 	cal s:BuildPrompt(1)
@@ -793,9 +789,9 @@ endfunc
 
 func! s:Type(type)
 	let s:itemtype = a:type
-	cal s:syntax()
 	cal s:SetLines(s:itemtype)
 	cal s:PrtSwitcher()
+	cal s:syntax()
 endfunc
 
 func! s:PrtSwitcher()
@@ -859,8 +855,7 @@ endfunc
 "}}}
 
 func! s:AcceptSelection(mode,...) "{{{
-	let md = a:mode
-	let prt = g:CtrlP_prompt
+	let [md, prt] = [a:mode, s:prompt]
 	let str = prt[0] . prt[1] . prt[2]
 	if md == 'e' && !s:itemtype
 		if str == '..'
@@ -871,7 +866,7 @@ func! s:AcceptSelection(mode,...) "{{{
 			retu
 		elseif str == '?'
 			" Use ? for help
-			exe s:currwin.'winc w'
+			cal s:PrtExit()
 			let hlpwin = &columns > 159 ? '| vert res 80' : ''
 			exe 'bo vert h ctrlp-mappings' hlpwin '| norm! 0'
 			retu
@@ -887,10 +882,9 @@ func! s:AcceptSelection(mode,...) "{{{
 	let bufnum  = bufnr(filpath)
 	let norwins = s:normbuf()
 	let norwin  = empty(norwins) ? 0 : norwins[0]
-	" Check if the file's already opened in a tab
-	if bufnum > 0 && s:jmptobuf
-		let bufwinnr = bufwinnr(bufnum)
-		let buftab   = s:buftab(bufnum)
+	if s:jmptobuf && bufnum > 0 && md == 'e'
+		let [jmpb, bufwinnr] = [1, bufwinnr(bufnum)]
+		let buftab = s:jmptobuf > 1 ? s:buftab(bufnum) : [0, 0]
 	endif
 	" Get the tail
 	let tail = ''
@@ -900,14 +894,12 @@ func! s:AcceptSelection(mode,...) "{{{
 	endif
 	" Switch to existing buffer or open new one
 	let filpath = escape(filpath, '%#')
-	if bufnum > 0 && s:jmptobuf
-		" If the file's already opened
-		if buftab[0] " In a tab
-			exe 'norm!' buftab[1].'gt'
-			exe buftab[0].'winc w'
-		elseif bufwinnr > 0 " In a window
-			exe bufwinnr.'winc w'
-		endif
+	" If the file's already opened
+	if exists('jmpb') && buftab[0] " In a tab
+		exe 'norm!' buftab[1].'gt'
+		exe buftab[0].'winc w'
+	elseif exists('jmpb') && bufwinnr > 0 " In a window
+		exe bufwinnr.'winc w'
 	else
 		" Determine the command to use
 		if md == 't' || s:splitwin == 1 " In new tab
@@ -917,7 +909,7 @@ func! s:AcceptSelection(mode,...) "{{{
 			let cmd = 'new'
 		elseif md == 'v' || s:splitwin == 3 " In new ver split
 			let cmd = 'vne'
-		elseif md == 'e' || !s:splitwin " In current window
+		elseif md == 'e'
 			let cmd = 'e'
 			" If there's at least 1 normal buffer
 			if norwin
@@ -1101,8 +1093,8 @@ endfunc
 
 " Highlighting {{{
 func! s:syntax()
-	syn match CtrlPNoEntries '^ == NO MATCHES ==$'
-	syn match CtrlPLineMarker '^>'
+	sy match CtrlPNoEntries '^ == NO MATCHES ==$'
+	sy match CtrlPLineMarker '^>'
 	hi link CtrlPNoEntries Error
 	hi CtrlPLineMarker guifg=bg
 endfunc
@@ -1196,14 +1188,14 @@ endfunc
 
 " Buffers {{{
 func! s:buftab(bufnum)
+	" Check if the file's already opened in a tab
 	for nr in range(1, tabpagenr('$'))
 		" Get a list of the buffers in the nr tab
 		let buflist = tabpagebuflist(nr)
 		" If it has the buffer we're looking for
 		if match(buflist, a:bufnum) >= 0
-			let buftabnr = nr
 			" Get the number of windows
-			let tabwinnrs = tabpagewinnr(nr, '$')
+			let [buftabnr, tabwinnrs] = [nr, tabpagewinnr(nr, '$')]
 			" Find the buffer that we know is in this tab
 			for ewin in range(1, tabwinnrs)
 				if buflist[ewin - 1] == a:bufnum
@@ -1252,12 +1244,10 @@ endfunc
 func! s:openfile(cmd)
 	try
 		exe a:cmd
-		retu 1
 	catch
 		echoh Error
 		echon 'Operation can''t be completed. Make sure filename is valid.'
 		echoh None
-		retu 0
 	endtry
 endfunc
 
@@ -1319,7 +1309,7 @@ func! s:lscommand()
 		cal s:FindRoot(getcwd(), rmarker, 0, 1)
 		if !exists('s:vcsroot') || ( exists('s:vcsroot') && empty(s:vcsroot) )
 			" Try the secondary_command if defined
-			retu len(usercmd) == 3 && !empty(usercmd[2]) ? usercmd[2] : ''
+			retu len(usercmd) == 3 ? usercmd[2] : ''
 		else
 			let s:vcscmd = s:lash == '\' ? 1 : 0
 			retu usercmd[1]
