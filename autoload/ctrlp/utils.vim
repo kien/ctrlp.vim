@@ -20,7 +20,7 @@ endfunc
 cal ctrlp#utils#opts()
 "}}}
 
-" Files and Directories functions {{{
+" Files and Directories {{{
 func! ctrlp#utils#cachedir()
 	retu exists('*mkdir') ? s:cache_dir.ctrlp#utils#lash().'.ctrlp_cache' : s:cache_dir
 endfunc
@@ -63,9 +63,7 @@ func! ctrlp#utils#writecache(lines,...)
 		endif
 	endif
 endfunc
-"}}}
 
-" Generic functions {{{
 func! ctrlp#utils#lash()
 	retu &ssl || !exists('+ssl') ? '/' : '\'
 endfunc

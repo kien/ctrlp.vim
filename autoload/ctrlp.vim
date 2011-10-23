@@ -3,7 +3,7 @@
 " Description:   Full path fuzzy file, buffer and MRU file finder for Vim.
 " Author:        Kien Nguyen <github.com/kien>
 " License:       MIT
-" Version:       1.5.5
+" Version:       1.5.6
 " =============================================================================
 
 if v:version < '700' "{{{
@@ -16,6 +16,7 @@ func! s:opts()
 				\ 'g:ctrlp_by_filename'           : ['s:byfname', 0],
 				\ 'g:ctrlp_clear_cache_on_exit'   : ['s:cconex', 1],
 				\ 'g:ctrlp_dotfiles'              : ['s:dotfiles', 1],
+				\ 'g:ctrlp_extensions'            : ['s:extensions', []],
 				\ 'g:ctrlp_highlight_match'       : ['s:mathi', [1, 'Identifier']],
 				\ 'g:ctrlp_jump_to_buffer'        : ['s:jmptobuf', 1],
 				\ 'g:ctrlp_match_window_bottom'   : ['s:mwbottom', 1],
@@ -57,6 +58,12 @@ func! s:opts()
 		let s:maxhst = g:ctrlp_max_history
 		unl g:ctrlp_max_history
 	endif
+	let s:mru = g:ctrlp_mru_files
+	if !empty(s:extensions)
+		for each in s:extensions
+			exe 'ru autoload/ctrlp/'.each.'.vim'
+		endfor
+	endif
 endfunc
 cal s:opts()
 
@@ -74,7 +81,7 @@ endfunc
 func! ctrlp#clearallcaches()
 	let cache_dir = ctrlp#utils#cachedir()
 	if isdirectory(cache_dir) && match(cache_dir, '.ctrlp_cache') >= 0
-		let cache_files = split(globpath(cache_dir, '*.txt'), '\n')
+		let cache_files = split(globpath(cache_dir, '*.txt', 1), '\n')
 		cal filter(cache_files, '!isdirectory(v:val)')
 		for each in cache_files | sil! cal delete(each) | endfor
 	endif
@@ -84,7 +91,7 @@ endfunc
 func! ctrlp#reset()
 	cal s:opts()
 	cal ctrlp#utils#opts()
-	if g:ctrlp_mru_files | cal ctrlp#mrufiles#opts() | endif
+	if s:mru | cal ctrlp#mrufiles#opts() | endif
 	" Clear user input
 	let s:prompt = ['','','']
 	unl! s:cline
@@ -269,18 +276,18 @@ func! s:Open(name)
 	let s:winnr = bufwinnr('%')
 	let s:bufnr = bufnr('%')
 	" Store global options
-	let s:CtrlP_magic  = &magic
-	let s:CtrlP_to     = &to
-	let s:CtrlP_tm     = &tm
-	let s:CtrlP_sb     = &sb
-	let s:CtrlP_hls    = &hls
-	let s:CtrlP_im     = &im
-	let s:CtrlP_report = &report
-	let s:CtrlP_sc     = &sc
-	let s:CtrlP_ss     = &ss
-	let s:CtrlP_siso   = &siso
-	let s:CtrlP_mfd    = &mfd
-	let s:CtrlP_gcr    = &gcr
+	let s:glb_magic  = &magic
+	let s:glb_to     = &to
+	let s:glb_tm     = &tm
+	let s:glb_sb     = &sb
+	let s:glb_hls    = &hls
+	let s:glb_im     = &im
+	let s:glb_report = &report
+	let s:glb_sc     = &sc
+	let s:glb_ss     = &ss
+	let s:glb_siso   = &siso
+	let s:glb_mfd    = &mfd
+	let s:glb_gcr    = &gcr
 	let s:prompt = ['', '', '']
 	if !exists('s:hstry')
 		let hst = filereadable(s:gethistloc()[1]) ? s:gethistdata() : ['']
@@ -307,18 +314,18 @@ endfunc
 func! s:Close()
 	try | bun! | catch | clo! | endtry
 	" Restore global options
-	let &magic  = s:CtrlP_magic
-	let &to     = s:CtrlP_to
-	let &tm     = s:CtrlP_tm
-	let &sb     = s:CtrlP_sb
-	let &hls    = s:CtrlP_hls
-	let &im     = s:CtrlP_im
-	let &report = s:CtrlP_report
-	let &sc     = s:CtrlP_sc
-	let &ss     = s:CtrlP_ss
-	let &siso   = s:CtrlP_siso
-	let &mfd    = s:CtrlP_mfd
-	let &gcr    = s:CtrlP_gcr
+	let &magic  = s:glb_magic
+	let &to     = s:glb_to
+	let &tm     = s:glb_tm
+	let &sb     = s:glb_sb
+	let &hls    = s:glb_hls
+	let &im     = s:glb_im
+	let &report = s:glb_report
+	let &sc     = s:glb_sc
+	let &ss     = s:glb_ss
+	let &siso   = s:glb_siso
+	let &mfd    = s:glb_mfd
+	let &gcr    = s:glb_gcr
 	" Cleaning up
 	cal s:unmarksigns()
 	let g:ctrlp_lines = []
@@ -344,8 +351,8 @@ func! s:Renderer(lines, pat) "{{{
 	" Output to buffer
 	if !empty(nls)
 		setl cul
-		" Sort if not type 2 (MRU)
-		if index([2], s:itemtype) < 0
+		" Sort if not MRU
+		if ( s:mru && s:itemtype != 2 ) || !s:mru
 			let s:compat = a:pat
 			cal sort(nls, 's:mixedsort')
 			unl s:compat
@@ -650,9 +657,14 @@ func! s:PrtSelectJump(char,...)
 endfunc
 
 func! s:PrtClearCache()
-	cal ctrlp#clearcache()
-	cal s:SetLines(s:itemtype)
-	cal s:BuildPrompt(1)
+	if s:itemtype == 0
+		cal ctrlp#clearcache()
+		cal s:SetLines(s:itemtype)
+		cal s:BuildPrompt(1)
+	elseif s:mru && s:itemtype == 2
+		let g:ctrlp_lines = ctrlp#mrufiles#list(-1, 1)
+		cal s:BuildPrompt(1)
+	endif
 endfunc
 
 func! s:PrtExit()
@@ -782,8 +794,9 @@ func! s:ToggleByFname()
 endfunc
 
 func! s:ToggleType(dir)
-	let len = 1 + g:ctrlp_mru_files
-	let s:itemtype = s:walker(len, s:itemtype, a:dir)
+	let ext = exists('g:ctrlp_ext_vars') ? len(g:ctrlp_ext_vars) : 0
+	let max = 1 + s:mru + ext
+	let s:itemtype = s:walker(max, s:itemtype, a:dir)
 	cal s:Type(s:itemtype)
 endfunc
 
@@ -827,12 +840,12 @@ func! ctrlp#SetWorkingPath(...)
 		sil! exe 'chd!' a:1
 		retu
 	endif
-	if match(expand('%:p'), '^\<.\+\>://.*') >= 0
+	if match(expand('%:p', 1), '^\<.\+\>://.*') >= 0
 				\ || !s:pathmode || !l:pathmode
 		retu
 	endif
 	if exists('+acd') | let &acd = 0 | endif
-	let path = expand('%:p:h')
+	let path = expand('%:p:h', 1)
 	let path = exists('*fnameescape') ? fnameescape(path) : escape(path, '%#')
 	sil! exe 'chd!' path
 	if s:pathmode == 1 || l:pathmode == 1 | retu | endif
@@ -849,35 +862,16 @@ func! ctrlp#SetWorkingPath(...)
 	endif
 	for marker in markers
 		let found = s:FindRoot(getcwd(), marker, 0, 0)
-		if getcwd() != expand('%:p:h') || found | break | endif
+		if getcwd() != expand('%:p:h', 1) || found | break | endif
 	endfor
 endfunc
 "}}}
 
-func! s:AcceptSelection(mode,...) "{{{
-	let [md, prt] = [a:mode, s:prompt]
-	let str = prt[0] . prt[1] . prt[2]
-	if md == 'e' && !s:itemtype
-		if str == '..'
-			" Walk backward the dir tree
-			cal s:parentdir(getcwd())
-			cal s:SetLines(s:itemtype)
-			cal s:PrtClear()
-			retu
-		elseif str == '?'
-			" Use ? for help
-			cal s:PrtExit()
-			let hlpwin = &columns > 159 ? '| vert res 80' : ''
-			exe 'bo vert h ctrlp-mappings' hlpwin '| norm! 0'
-			retu
-		endif
-	endif
+" * AcceptSelection {{{
+func! ctrlp#acceptfile(mode, matchstr)
+	let [md, matchstr] = [a:mode, a:matchstr]
 	" Get the full path
-	let matchstr = matchstr(getline('.'), '^> \zs.\+\ze\t*$')
-	if empty(matchstr) | retu | endif
 	let filpath = s:itemtype ? matchstr : getcwd().s:lash.matchstr
-	" If only need the full path
-	if exists('a:1') && a:1 | retu filpath | endif
 	cal s:PrtExit()
 	let bufnum  = bufnr(filpath)
 	let norwins = s:normbuf()
@@ -894,7 +888,6 @@ func! s:AcceptSelection(mode,...) "{{{
 	endif
 	" Switch to existing buffer or open new one
 	let filpath = escape(filpath, '%#')
-	" If the file's already opened
 	if exists('jmpb') && buftab[0] " In a tab
 		exe 'norm!' buftab[1].'gt'
 		exe buftab[0].'winc w'
@@ -909,7 +902,7 @@ func! s:AcceptSelection(mode,...) "{{{
 			let cmd = 'new'
 		elseif md == 'v' || s:splitwin == 3 " In new ver split
 			let cmd = 'vne'
-		elseif md == 'e'
+		else
 			let cmd = 'e'
 			" If there's at least 1 normal buffer
 			if norwin
@@ -930,8 +923,41 @@ func! s:AcceptSelection(mode,...) "{{{
 	if !empty('tail')
 		sil! norm! zOzz
 	endif
+endfunc
+
+func! s:AcceptSelection(mode)
+	if a:mode == 'e'
+		let prt = s:prompt
+		let str = prt[0] . prt[1] . prt[2]
+		if str == '..' && !s:itemtype
+			" Walk backward the dir tree
+			cal s:parentdir(getcwd())
+			cal s:SetLines(s:itemtype)
+			cal s:PrtClear()
+			retu
+		elseif str == '?'
+			" Use ? for help
+			cal s:PrtExit()
+			let hlpwin = &columns > 159 ? '| vert res 80' : ''
+			sil! exe 'bo vert h ctrlp-mappings' hlpwin '| norm! 0'
+			retu
+		endif
+	endif
+	" Get the selected line
+	let matchstr = matchstr(getline('.'), '^> \zs.\+\ze\t*$')
+	if empty(matchstr) | retu | endif
+	" Branch it
+	let rhs = s:mru ? '0\|1\|2' : '0\|1'
+	if s:itemtype =~ rhs
+		cal ctrlp#acceptfile(a:mode, matchstr)
+	else
+		let id = s:itemtype - 2 - s:mru
+		let acpt_func = g:ctrlp_ext_vars[id][1]
+		cal call(acpt_func, [a:mode, matchstr])
+	endif
 	ec
-endfunc "}}}
+endfunc
+"}}}
 
 " ** Helper functions {{{
 " Sorting {{{
@@ -969,12 +995,11 @@ func! s:matchlens(str, pat, ...)
 	let lens = exists('a:2') ? a:2 : {}
 	let nr   = exists('a:3') ? a:3 : 0
 	if match(a:str, a:pat, st) != -1
-		let start = match(a:str, a:pat, st)
-		let str   = matchstr(a:str, a:pat, st)
-		let len   = len(str)
-		let end   = matchend(a:str, a:pat, st)
-		let lens  = extend(lens, { nr : [len, str] })
-		let lens  = s:matchlens(a:str, a:pat, end, lens, nr + 1)
+		let str = matchstr(a:str, a:pat, st)
+		let len = len(str)
+		let end = matchend(a:str, a:pat, st)
+		let lens = extend(lens, { nr : [len, str] })
+		let lens = s:matchlens(a:str, a:pat, end, lens, nr + 1)
 	endif
 	retu lens
 endfunc
@@ -988,7 +1013,7 @@ func! s:shortest(lens)
 endfunc
 
 func! s:wordonly(lens)
-	let lens  = a:lens
+	let lens = a:lens
 	let minln = s:shortest(lens)
 	cal filter(lens, 'minln == v:val[0]')
 	for nr in keys(lens)
@@ -999,27 +1024,38 @@ endfunc
 
 func! s:mixedsort(s1, s2)
 	let cmatlen = s:compmatlen(a:s1, a:s2)
-	let ctime   = s:comptime(a:s1, a:s2)
-	let clen    = s:complen(a:s1, a:s2)
-	let cword   = s:compword(a:s1, a:s2)
-	retu 3 * cmatlen + 3 * ctime + 2 * clen + cword
+	let clen = s:complen(a:s1, a:s2)
+	let rhs = s:mru ? '0\|1\|2' : '0\|1'
+	if s:itemtype =~ rhs
+		let ctime = s:comptime(a:s1, a:s2)
+		let cword = s:compword(a:s1, a:s2)
+		let mxsrt = 6 * cmatlen + 3 * ctime + 2 * clen + cword
+	else
+		let mxsrt = 2 * cmatlen + clen
+	endif
+	retu mxsrt
 endfunc
 "}}}
 
 " Statusline {{{
 func! s:statusline(...)
-	let itemtypes = [
+	let types = [
 				\ ['files', 'fil'],
 				\ ['buffers', 'buf'],
 				\ ['mru files', 'mru'],
 				\ ]
-	if !g:ctrlp_mru_files
-		cal remove(itemtypes, 2)
+	if !s:mru
+		cal remove(types, 2)
 	endif
-	let max     = len(itemtypes) - 1
-	let next    = itemtypes[s:walker(max, s:itemtype,  1, 1)][1]
-	let prev    = itemtypes[s:walker(max, s:itemtype, -1, 1)][1]
-	let item    = itemtypes[s:itemtype][0]
+	if exists('g:ctrlp_ext_vars')
+		for each in g:ctrlp_ext_vars
+			cal add(types, [ each[2], each[3] ])
+		endfor
+	endif
+	let max     = len(types) - 1
+	let next    = types[s:walker(max, s:itemtype,  1)][1]
+	let prev    = types[s:walker(max, s:itemtype, -1)][1]
+	let item    = types[s:itemtype][0]
 	let focus   = s:Focus() ? 'prt'  : 'win'
 	let byfname = s:byfname ? 'file' : 'path'
 	let regex   = s:regexp  ? '%#LineNr# regex %*' : ''
@@ -1077,7 +1113,7 @@ endfunc
 
 func! s:listdirs(path,parent)
 	let str = ''
-	for entry in filter(split(globpath(a:path, '*'), '\n'), 'isdirectory(v:val)')
+	for entry in filter(split(globpath(a:path, '*', 1), '\n'), 'isdirectory(v:val)')
 		let str .= a:parent.split(entry, '[\/]')[-1] . "\n"
 	endfor
 	retu str
@@ -1241,6 +1277,10 @@ endfunc
 "}}}
 
 " Misc {{{
+func! ctrlp#exit()
+	cal s:PrtExit()
+endfunc
+
 func! s:openfile(cmd)
 	try
 		exe a:cmd
@@ -1251,15 +1291,11 @@ func! s:openfile(cmd)
 	endtry
 endfunc
 
-func! s:walker(max, pos, dir, ...)
-	if a:dir == 1
+func! s:walker(max, pos, dir)
+	if a:dir > 0
 		let pos = a:pos < a:max ? a:pos + 1 : 0
-	elseif a:dir == -1
+	else
 		let pos = a:pos > 0 ? a:pos - 1 : a:max
-	endif
-	if !g:ctrlp_mru_files && pos == 2 && !exists('a:1')
-		let jmp = pos == a:max ? 0 : 3
-		let pos = a:pos == 1 ? jmp : 1
 	endif
 	retu pos
 endfunc
@@ -1336,6 +1372,14 @@ func! s:SetLines(type)
 				\ 's:ListAllBuffers()',
 				\ 'ctrlp#mrufiles#list(-1)',
 				\ ]
+	if !s:mru
+		cal remove(types, 2)
+	endif
+	if exists('g:ctrlp_ext_vars')
+		for each in g:ctrlp_ext_vars
+			cal add(types, each[0])
+		endfor
+	endif
 	let g:ctrlp_lines = eval(types[a:type])
 endfunc
 

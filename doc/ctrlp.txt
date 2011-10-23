@@ -1,4 +1,4 @@
-*ctrlp.txt*       Full path fuzzy file, buffer and MRU file finder. v1.5.5
+*ctrlp.txt*       Full path fuzzy file, buffer and MRU file finder. v1.5.6
 *CtrlP* *ControlP* *'ctrlp'* *'ctrl-p'*
 ===============================================================================
 #                                                                             #
@@ -119,7 +119,7 @@ Set this to 0 to disable per-session caching. When disabled, caching will still
 be enabled for directories that have more than 4000 files: >
   let g:ctrlp_use_caching = 1
 <
-Note: you can quickly purge the cache by pressing <F5>.
+Note: you can quickly purge the cache by pressing <F5> while inside |CtrlP|.
 
                                                 *'g:ctrlp_clear_cache_on_exit'*
 Set this to 0 to enable cross-sessions caching by not deleting the caches upon
@@ -258,7 +258,7 @@ pressing <c-y>:
   1 - in a new tab
   2 - in a new horizontal split
   3 - in a new vertical split
-  0 - in the current window/split
+  0 - in the current window
 >
   let g:ctrlp_open_new_file = 3
 <
@@ -461,7 +461,7 @@ d)  Type exactly two dots (..) at the start of the line and press enter to go
     backward in the directory tree by 1 level. If the parent directory is
     large, this might be slow.
 
-e)  Type the name of a non-existed file and press <c-y> to create it.
+e)  Type the name of a non-existent file and press <c-y> to create it.
     e.g. 'parentdir/file.txt' will create a directory named 'parentdir' as well
     as 'file.txt'. Use '\' in place of '/' on Windows (if |'ssl'| is not set).
 
@@ -486,8 +486,16 @@ Git repository:       https://github.com/kien/ctrlp.vim
 Mercurial repository: https://bitbucket.org/kien/ctrlp.vim
 
 ===============================================================================
+THANKS
+
+Thanks to everyone that has submitted ideas, bug reports, helped debugging or
+coming up with solutions on gibhub, bitbucket, and through email.
+
+===============================================================================
 CHANGELOG
 
+    + New feature: Add support for user-made extensions.
+                   <F5> now removes non-existent files from MRU list.
     + New option: |g:ctrlp_jump_to_buffer|
 
 Before 2011/10/12
@@ -503,7 +511,7 @@ Before 2011/10/12
 Before 2011/09/29
 
     + New mappings: <c-n>, <c-p> next/prev string in the input history.
-                    <c-y> create new file and its parent dirs.
+                    <c-y> create a new file and its parent dirs.
     + New options: |g:ctrlp_open_new_file|,
                    |g:ctrlp_max_history|
     + Added a new open-in-horizontal-split mapping: <c-x>

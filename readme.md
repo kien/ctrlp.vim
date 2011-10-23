@@ -5,6 +5,7 @@ Full path fuzzy __file__, __buffer__ and __MRU__ file finder for Vim.
 * Full support for Vim’s regexp as search pattern.
 * Built-in Most Recently Used (MRU) files monitoring.
 * Built-in project’s root finder.
+* CtrlP is [extensible][2].
 
 ![ctrlp][1]
 
@@ -80,3 +81,4 @@ _Check [the docs][2] for more mappings, commands and options._
 
 [1]: http://i.imgur.com/3rtLt.png
 [2]: https://github.com/kien/ctrlp.vim/blob/master/doc/ctrlp.txt
+[3]: https://github.com/kien/ctrlp.vim/tree/extensions
