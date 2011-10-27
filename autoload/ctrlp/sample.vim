@@ -4,14 +4,14 @@
 " =============================================================================
 
 " You can rename anything that has 'sample' in it.
-" ctrlp.vim only looks for g:ctrlp_ext_vars
+" ctrlp only looks for g:ctrlp_ext_vars
 "
 "
-" To load this extension into CtrlP, add this to your vimrc:
+" To load this extension into ctrlp, add this to your vimrc:
 "
 "     let g:ctrlp_extensions = ['sample']
 "
-" Where 'sample' is the name of the file 'sample.vim'
+" 'sample' is the name of the file 'sample.vim'
 "
 " For multiple extensions:
 "
@@ -67,7 +67,6 @@ endfunc
 
 
 " The action to perform on the selected string.
-" Do anything you can like.
 "
 " Arguments:
 "  a:mode   the mode that has been chosen by pressing <cr> <c-v> <c-t> or <c-x>
@@ -81,6 +80,7 @@ endfunc
 
 " This gives the extension an ID
 let s:id = g:ctrlp_mru_files + 1 + len(g:ctrlp_ext_vars)
+" And allows it to be accessed later
 func! ctrlp#sample#id()
 	retu s:id
 endfunc
