@@ -24,7 +24,7 @@
 
 " Change the name of the g:loaded_ variable to make it unique
 if ( exists('g:loaded_ctrlp_sample_extension') && g:loaded_ctrlp_sample_extension )
-			\ || v:version < '700' || &cp
+			\ || v:version < 700 || &cp
 	fini
 endif
 let g:loaded_ctrlp_sample_extension = 1
@@ -41,7 +41,7 @@ let s:sample_var = [
 			\ ]
 
 
-" This append the s:sample_var to the global g:ctrlp_ext_vars which will be
+" This appends the s:sample_var to the global g:ctrlp_ext_vars which will be
 " used by other extensions
 if exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)
 	let g:ctrlp_ext_vars = add(g:ctrlp_ext_vars, s:sample_var)
@@ -79,7 +79,7 @@ endfunc
 
 
 " This gives the extension an ID
-let s:id = g:ctrlp_mru_files + 1 + len(g:ctrlp_ext_vars)
+let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 " And allows it to be accessed later
 func! ctrlp#sample#id()
 	retu s:id
