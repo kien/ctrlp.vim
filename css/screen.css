@@ -109,7 +109,8 @@ a.external:after {
 	position:relative;
 	overflow:hidden;
 }
-#page:after {
+#page:after,
+.menu:after {
 	content:"\0020";
 	display:block;
 	height:0;
@@ -121,6 +122,45 @@ a.external:after {
 	clear:both;
 	margin:0 0 3em;
 	text-align:right;
+}
+.menu {
+	font-size:1.1em;
+	width:760px;
+	margin:0 auto;
+	border-bottom:1px solid #8bad3e;
+}
+.menu li {
+	float:left;
+}
+.menu .tags {
+	float:right;
+}
+.menu li a {
+	float:left;
+	padding:0 10px;
+	margin:0 0 -1px;
+	position:relative;
+	border-bottom:1px solid #8bad3e;
+	background:#151515;
+	-webkit-transition:.5s;
+	-moz-transition:.5s;
+	-o-transition:.5s;
+	-ms-transition:.5s;
+	transition:.5s;
+}
+.menu li a:hover,
+.menu li a:focus {
+	background:#333;
+	border-bottom:1px solid #eee;
+	padding-top:3px;
+	padding-bottom:3px;
+	margin:0 0 -7px;
+	-webkit-border-radius:0 0 10px 10px;
+	-moz-border-radius:0 0 10px 10px;
+	border-radius:0 0 10px 10px;
+}
+.menu li a:active {
+	color:#fff;
 }
 .article {
 	border-bottom:1px solid #8bad3e;
@@ -139,10 +179,10 @@ a.external:after {
 	font-size:1.2em;
 	letter-spacing:1px;
 	background:#151515;
-	overflow:hidden;
 	height:1%;
 	padding:1em 15px 0;
 	position:relative;
+	overflow:hidden;
 }
 .article h2 {
 	font-size:1.25em;
@@ -260,18 +300,43 @@ a.external:after {
 	Media queries:
 }============================================================ */
 @media all and (max-width:780px) {
-	.article,#footer {
+	.menu,.article,#footer {
 		width:90%;
-	}
-	.article .entry-content {
-		position:static;
 	}
 	.article img {
 		width:95%;
 		height:auto;
 	}
+	.forkme {
+		display:none;
+	}
 }
 @media all and (max-width:600px) {
+	.menu {
+		border:none;
+	}
+	.menu .tags {
+		float:left;
+	}
+	.menu li a {
+		padding:0 5px;
+		border:none;
+		-webkit-transition:none;
+		-moz-transition:none;
+		-o-transition:none;
+		-ms-transition:none;
+		transition:none;
+	}
+	.menu li a:hover,
+	.menu li a:focus {
+		padding-top:0;
+		padding-bottom:0;
+		margin:0 0 -1px;
+		border:none;
+		-webkit-border-radius:0;
+		-moz-border-radius:0;
+		border-radius:0;
+	}
 	.article img {
 		width:94%;
 	}
