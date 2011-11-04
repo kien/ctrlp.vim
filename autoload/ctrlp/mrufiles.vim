@@ -2,87 +2,70 @@
 " File:          autoload/ctrlp/mrufiles.vim
 " Description:   Most Recently Used Files extension
 " Author:        Kien Nguyen <github.com/kien>
-" License:       MIT
 " =============================================================================
 
-if v:version < '700' "{{{
-	fini
-endif "}}}
-
-" Option variables {{{
-func! ctrlp#mrufiles#opts()
-	if !exists('g:ctrlp_mruf_max')
-		let s:max = 150
-	else
-		let s:max = g:ctrlp_mruf_max
-		unl g:ctrlp_mruf_max
-	endif
-	if !exists('g:ctrlp_mruf_include')
-		let s:include = ''
-	else
-		let s:include = g:ctrlp_mruf_include
-		unl g:ctrlp_mruf_include
-	endif
-	if !exists('g:ctrlp_mruf_exclude')
-		let s:exclude = ''
-	else
-		let s:exclude = g:ctrlp_mruf_exclude
-		unl g:ctrlp_mruf_exclude
-	endif
-endfunc
+" Static variables {{{
+fu! ctrlp#mrufiles#opts()
+	let opts = {
+		\ 'g:ctrlp_mruf_max':     ['s:max', 150],
+		\ 'g:ctrlp_mruf_include': ['s:include', ''],
+		\ 'g:ctrlp_mruf_exclude': ['s:exclude', ''],
+		\ }
+	for key in keys(opts)
+		let def = string(exists(key) ? eval(key) : opts[key][1])
+		exe 'let' opts[key][0] '=' def '|' 'unl!' key
+	endfo
+endf
 cal ctrlp#mrufiles#opts()
 "}}}
-
-func! ctrlp#mrufiles#list(bufnr,...) "{{{
-	if s:locked | retu | endif
-	" get the list
+fu! ctrlp#mrufiles#list(bufnr,...) "{{{
+	if s:locked | retu | en
+	" Get the list
 	let cadir  = ctrlp#utils#cachedir().ctrlp#utils#lash().'mru'
 	let cafile = cadir.ctrlp#utils#lash().'cache.txt'
 	let mrufs  = ctrlp#utils#readfile(cafile)
-	" remove non-existent files
+	" Remove non-existent files
 	if exists('a:1')
-		let mrufs = s:clearnonexists(mrufs, cadir, cafile)
-	endif
-	" return the list
-	if a:bufnr == -1 | retu mrufs | endif
-	" filter it
+		let mrufs = s:rmdeleted(mrufs, cadir, cafile)
+	en
+	" Return the list
+	if a:bufnr == -1 | retu mrufs | en
+	" Filter it
 	let filename = fnamemodify(bufname(a:bufnr + 0), ':p')
 	if empty(filename) || !empty(&bt)
-				\ || ( !empty(s:include) && filename !~# s:include )
-				\ || ( !empty(s:exclude) && filename =~# s:exclude )
-				\ || ( index(mrufs, filename) == -1 && !filereadable(filename) )
+		\ || ( !empty(s:include) && filename !~# s:include )
+		\ || ( !empty(s:exclude) && filename =~# s:exclude )
+		\ || ( index(mrufs, filename) == -1 && !filereadable(filename) )
 		retu
-	endif
-	" remove old matched entry
+	en
+	" Remove old matched entry
 	cal filter(mrufs, 'v:val !=# filename')
-	" insert new one
+	" Insert new one
 	cal insert(mrufs, filename)
-	" remove oldest entry
+	" Remove oldest entry
 	if len(mrufs) > s:max
 		cal remove(mrufs, s:max, -1)
-	endif
+	en
 	cal ctrlp#utils#writecache(mrufs, cadir, cafile)
-endfunc "}}}
-
-func! s:clearnonexists(mrufs, cadir, cafile) "{{{
-	let mrufs = a:mrufs
-	for each in range(len(mrufs) - 1, 0, -1)
-		if empty(glob(mrufs[each], 1))
-			cal remove(mrufs, each)
-		endif
-	endfor
-	cal ctrlp#utils#writecache(mrufs, a:cadir, a:cafile)
-	retu mrufs
-endfunc "}}}
-
-func! ctrlp#mrufiles#init() "{{{
+endf "}}}
+fu! s:rmdeleted(mrufs, cadir, cafile) "{{{
+	for each in range(len(a:mrufs) - 1, 0, -1)
+		if empty(glob(a:mrufs[each], 1))
+			cal remove(a:mrufs, each)
+		en
+	endfo
+	cal ctrlp#utils#writecache(a:mrufs, a:cadir, a:cafile)
+	retu a:mrufs
+endf "}}}
+fu! ctrlp#mrufiles#init() "{{{
 	let s:locked = 0
 	aug CtrlPMRUF
 		au!
-		au BufReadPost,BufNewFile,BufWritePost * cal ctrlp#mrufiles#list(expand('<abuf>', 1))
-		au QuickFixCmdPre *vimgrep* let s:locked = 1
+		au BufReadPost,BufNewFile,BufWritePost *
+			\ cal ctrlp#mrufiles#list(expand('<abuf>', 1))
+		au QuickFixCmdPre  *vimgrep* let s:locked = 1
 		au QuickFixCmdPost *vimgrep* let s:locked = 0
 	aug END
-endfunc "}}}
+endf "}}}
 
-" vim:fen:fdl=0:ts=2:sw=2:sts=2
+" vim:fen:fdl=0:fdc=1:ts=2:sw=2:sts=2
