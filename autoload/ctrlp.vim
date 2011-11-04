@@ -674,7 +674,7 @@ fu! ctrlp#acceptfile(mode, matchstr)
 			en
 		en
 		" Open new window/buffer
-		cal s:openfile('bo '.cmd.tail.' '.filpath)
+		cal s:openfile(cmd.tail.' '.filpath)
 	en
 	if !empty('tail')
 		sil! norm! zOzz
@@ -728,7 +728,7 @@ fu! s:CreateNewFile() "{{{
 		cal s:insertcache(str)
 		cal s:PrtExit()
 		if s:newfop == 1 | tabnew | en
-		let opcmd = 'bo '.cmd.' '.escape(getcwd().s:lash.optyp, '%#')
+		let opcmd = cmd.' '.escape(getcwd().s:lash.optyp, '%#')
 		cal s:openfile(opcmd)
 	en
 endf "}}}
