@@ -50,7 +50,7 @@ fu! ctrlp#mrufiles#list(bufnr,...) "{{{
 endf "}}}
 fu! s:rmdeleted(mrufs, cadir, cafile) "{{{
 	for each in range(len(a:mrufs) - 1, 0, -1)
-		if empty(glob(a:mrufs[each], 1))
+		if empty(glob(a:mrufs[each]))
 			cal remove(a:mrufs, each)
 		en
 	endfo

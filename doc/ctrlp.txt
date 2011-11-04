@@ -1,4 +1,4 @@
-*ctrlp.txt*       Full path fuzzy file, buffer and MRU file finder. v1.5.7
+*ctrlp.txt*       Full path fuzzy file, buffer and MRU file finder. v1.5.8
 *CtrlP* *ControlP* *'ctrlp'* *'ctrl-p'*
 ===============================================================================
 #                                                                             #
@@ -19,18 +19,13 @@ CONTENTS                                                       *ctrlp-contents*
     4. Mappings.....................................|ctrlp-mappings|
     5. Input Formats................................|ctrlp-input-formats|
 
-    6. Credits......................................|ctrlp-credits|
-    7. Thanks.......................................|ctrlp-thanks|
-    8. Extending ctrlp..............................|ctrlp-extensions|
-    9. Changelog....................................|ctrlp-changelog|
-
 ===============================================================================
 1. Intro                                                          *ctrlp-intro*
 
 Full path fuzzy file, buffer and MRU file finder with an intuitive interface.
 Written in pure Vimscript for MacVim and Vim version 7.0+. Has full support for
 Vim’s |regexp| as search pattern, built-in MRU monitoring, project’s root
-finder, custom extensions, and more.
+finder, and more.
 
 ===============================================================================
 2. Options                                                      *ctrlp-options*
@@ -73,16 +68,6 @@ Set the maximum height of the match window: >
   let g:ctrlp_max_height = 10
 <
 
-                                                       *'g:ctrlp_split_window'*
-Use this option to specify how the file is to be opened when pressing <cr>:
-  1 - in a new tab
-  2 - in a new horizontal split
-  3 - in a new vertical split
-  0 - in the current window
->
-  let g:ctrlp_split_window = 0
-<
-
                                                      *'g:ctrlp_jump_to_buffer'*
 Set this to 0 to disable the jump-to-open-buffer feature; set to 2 to also jump
 tab if the selected buffer’s opened in another tab: >
@@ -91,7 +76,7 @@ tab if the selected buffer’s opened in another tab: >
 
                                                   *'g:ctrlp_working_path_mode'*
                                                              *SetWorkingPath()*
-When starting up the prompt, automatically set the working directory (i.e. the
+When starting up the prompt, temporarily set the working directory (i.e. the
 |current-directory|) to:
   1 - the parent directory of the current file.
   2 - the nearest ancestor that contains one of these directories/files:
@@ -103,7 +88,7 @@ When starting up the prompt, automatically set the working directory (i.e. the
       .vimprojects
   0 - don’t manage working directory.
 >
-  let g:ctrlp_working_path_mode = 1
+  let g:ctrlp_working_path_mode = 2
 <
 You can use this functionality outside of |CtrlP| by adding the following line
 to your |.vimrc|; the parameter is the same (1, 2 or 0): >
@@ -124,8 +109,7 @@ be enabled for directories that have more than 4000 files: >
 Note: you can quickly purge the cache by pressing <F5> while inside |CtrlP|.
 
                                                 *'g:ctrlp_clear_cache_on_exit'*
-Set this to 0 to enable cross-sessions caching (not deleting the caches upon
-exiting Vim): >
+Set this to 0 to enable cross-sessions caching: >
   let g:ctrlp_clear_cache_on_exit = 1
 <
 
@@ -277,8 +261,8 @@ If non-zero this will enable opening multiple files with <c-z> and <c-o>: >
   let g:ctrlp_open_multi = 1
 <
 If bigger than 1, it’ll be used as the maximum number of windows to create when
-opening the files (the rest will be hidden buffers). If is 1, it’ll open all
-files, each in a vertical split.
+opening the files (the rest will be hidden buffers). If is 1, <c-o> will open
+all files, each in a vertical split.
 
 ===============================================================================
 3. Commands                                                    *ctrlp-commands*
@@ -315,17 +299,20 @@ The following commands ignore the value of |g:ctrlp_working_path_mode|:
 
                                                                   *:CtrlPCurWD*
 :CtrlPCurWD
-   Find files in the |current-directory| (without changing it).
+   This acts like |:CtrlP| with |path_mode| = 0
+   Find files in the |current-directory|.
 
                                                                 *:CtrlPCurFile*
 :CtrlPCurFile
-   Find files in the same directory as the current file, regardless of what the
-   |current-directory| is.
+   This acts like |:CtrlP| with |path_mode| = 1
+   Find files in the same directory as the active buffer, regardless of what
+   the |current-directory| is.
 
                                                                    *:CtrlPRoot*
 :CtrlPRoot
-   Same as |:CtrlPCurFile| but start from the project’s root.
-   Check |g:ctrlp_working_path_mode| to see how |CtrlP| finds a root.
+   This acts like |:CtrlP| with |path_mode| = 2
+   Find files in the project’s root directory.
+   Check |working_path_mode| to see how |CtrlP| finds a root.
 
 ===============================================================================
 4. Mappings                                                    *ctrlp-mappings*
@@ -348,14 +335,12 @@ Once inside the prompt:
 
   <c-f>, 'forward'
   <c-up>
-    Toggle between searching files and searching buffers. Or switch to the
-    'next' search type in the sequence; currently files, buffers and most
-    recently used files (MRU Files) are available.
+    Scroll to the 'next' search type in the sequence. Currently file, buffer
+    and most recently used file (MRU) are available.
 
   <c-b>, 'backward'
   <c-down>
-    Toggle between searching files and searching buffers. Or switch to the
-    'previous' search type in the sequence.
+    Scroll to the 'previous' search type in the sequence.
 
   <tab>
     Toggle the focus between the match window and the prompt.
@@ -449,7 +434,7 @@ b)  Vim |regexp|. If the input string contains '*' or '|', it’ll be treated as
     a Vim’s |regexp| |pattern| without any modification.
     e.g. 'abc\d*efg' will be read as 'abc\d*efg'.
 
-    See also |ctrlp-fullregexp| and |g:ctrlp_regexp_search|.
+    See also |ctrlp-fullregexp| (key map) and |g:ctrlp_regexp_search| (option).
 
 c)  End the string with a colon ':' followed by a Vim command to execute that
     command after opening the file. If you need to use ':' in the command,
@@ -473,35 +458,11 @@ e)  Type the name of a non-existent file and press <c-y> to create it.
 f)  Submit ? to open this help file.
 
 ===============================================================================
-6. Credits                                                      *ctrlp-credits*
+EXTENDING                                                     *ctrlp-extending*
 
-Developed by Kien Nguyen (github.com/kien), primarily based on the Command-T
-and the LustyExplorer plugins. No code was taken from these plugins, but I did
-clone the majority of their (awesome) interfaces and the way they work, added
-on top are a few additions of my own.
-
-The basic part of this was originally written as a module for a would-be larger
-plugin called AutoDoc.vim which I’ve stopped developing because of lost of
-interest. I really liked the way Command-T and LustyExplorer deal with user’s
-input, so I wrote a pure Vimscript version of their prompt window, intended to
-use it for the aforementioned plugin.
-
-Homepage:             http://kien.github.com/ctrlp.vim
-Git repository:       https://github.com/kien/ctrlp.vim
-Mercurial repository: https://bitbucket.org/kien/ctrlp.vim
-
-===============================================================================
-7. Thanks                                                        *ctrlp-thanks*
-
-Thanks to everyone that has submitted ideas, bug reports, helped debugging or
-came up with solutions on gibhub, bitbucket, and through email.
-
-===============================================================================
-8. Extending ctrlp                                           *ctrlp-extensions*
-
-Extending |CtrlP| is incredibly simple. Just create a .vim file following a
-guidelines, place it in the right spot, add a line to your .vimrc, and you have
-an extension.
+Extending |CtrlP| is made to be incredibly simple. Just create a .vim file
+following a short guidelines, place the file in the right spot and add a line
+to your .vimrc.
 
 To see how it all works, get the sample.vim from the 'extensions' branch on the
 git repository (https://github.com/kien/ctrlp.vim/tree/extensions), and place
@@ -514,7 +475,30 @@ A 4th search type will show up the next time you open |CtrlP|.
 For more details, check out the comments inside sample.vim.
 
 ===============================================================================
-9. Changelog                                                  *ctrlp-changelog*
+CREDITS                                                         *ctrlp-credits*
+
+Developed by Kien Nguyen (github.com/kien), primarily based on the Command-T
+and the LustyExplorer plugins. No code was taken from these plugins, but I did
+clone the majority of their (awesome) interfaces and the way they work.
+
+The was originally written as a module for a would-be larger plugin called
+AutoDoc.vim which I’ve stopped developing because of lost of interest. I really
+liked the way Command-T and LustyExplorer deal with user’s input, so I wrote a
+pure Vimscript version of their prompt window, intended to use it for the
+aforementioned plugin.
+
+Homepage:             http://kien.github.com/ctrlp.vim
+Git repository:       https://github.com/kien/ctrlp.vim
+Mercurial repository: https://bitbucket.org/kien/ctrlp.vim
+
+===============================================================================
+THANKS                                                           *ctrlp-thanks*
+
+Thanks to everyone that has submitted ideas, bug reports, helped debugging or
+came up with solutions on gibhub, bitbucket, and through email.
+
+===============================================================================
+CHANGELOG                                                     *ctrlp-changelog*
 
 Before 2011/10/30
 

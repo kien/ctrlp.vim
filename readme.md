@@ -10,7 +10,8 @@ Full path fuzzy __file__, __buffer__ and __MRU__ file finder for Vim.
 ![ctrlp][1]
 
 ## Basic Usage
-* Press `<c-p>` or run `:CtrlP` to invoke CtrlP.
+* Press `<c-p>` or run `:CtrlP` to invoke CtrlP in find file mode.
+* Use `:CtrlPBuffer` and `:CtrlPMRU` for buffer and MRU mode.
 
 Once CtrlP is open:
 
@@ -34,7 +35,7 @@ e.g. `abc:45` will open the file matched the pattern and jump to line 45.
 * When CtrlP is invoked, it automatically sets the working directory according to this variable:
 
     ```vim
-    let g:ctrlp_working_path_mode = 1
+    let g:ctrlp_working_path_mode = 2
     ```
 
     0 - don’t manage working directory.  
@@ -63,7 +64,7 @@ The parameter is the same (0, 1 or 2):
     ```
 
 * If you want to exclude directories or files from the search, you can use the Vim’s option `wildignore`.  
-e.g. Just have something like this in your vimrc:
+Examples:
 
     ```vim
     set wildignore+=*/.git/*,*/.hg/*,*/.svn/*   " for Linux/MacOSX
