@@ -96,6 +96,10 @@ fu! s:Close()
 endf
 "}}}
 " * Clear caches {{{
+fu! ctrlp#clearcache()
+	let g:ctrlp_newcache = 1
+endf
+
 fu! ctrlp#clearallcaches()
 	let cache_dir = ctrlp#utils#cachedir()
 	if isdirectory(cache_dir) && match(cache_dir, '.ctrlp_cache') >= 0
@@ -103,7 +107,7 @@ fu! ctrlp#clearallcaches()
 		cal filter(cache_files, '!isdirectory(v:val)')
 		for each in cache_files | sil! cal delete(each) | endfo
 	en
-	let g:ctrlp_newcache = 1
+	cal ctrlp#clearcache()
 endf
 
 fu! ctrlp#reset()
@@ -120,7 +124,7 @@ fu! s:GlobPath(dirs, allfiles, depth)
 	let entries = filter(entries, 'getftype(v:val) != "link"')
 	let g:ctrlp_allfiles = filter(copy(entries), '!isdirectory(v:val)')
 	let ftrfunc = s:dotfiles ? 's:dirfilter(v:val)' : 'isdirectory(v:val)'
-	let alldirs = call('filter', [entries, ftrfunc])
+	let alldirs = filter(entries, ftrfunc)
 	cal extend(g:ctrlp_allfiles, a:allfiles, 0)
 	let depth = a:depth + 1
 	if !empty(alldirs) && !s:maxfiles(len(g:ctrlp_allfiles)) && depth <= s:maxdepth
@@ -449,7 +453,7 @@ endf
 fu! s:PrtClearCache()
 	let s:force = 1
 	if s:itemtype == 0
-		let g:ctrlp_newcache = 1
+		cal ctrlp#clearcache()
 		cal s:SetLines(s:itemtype)
 		cal s:BuildPrompt(1)
 	elsei s:mru && s:itemtype == 2
