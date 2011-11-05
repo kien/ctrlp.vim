@@ -142,6 +142,9 @@ a.external:after {
 	position:relative;
 	border-bottom:1px solid #8bad3e;
 	background:#151515;
+}
+.menu li a,
+.article h1 {
 	-webkit-transition:.5s;
 	-moz-transition:.5s;
 	-o-transition:.5s;
@@ -170,9 +173,13 @@ a.external:after {
 }
 .article h1 {
 	border-bottom:2px solid #8bad3e;
-	color:#a7b8ff;
 	font:700 64px/1.5 'Palatino Linotype',Palatino,serif;
-	padding:0 0 .25em;
+	padding:0 0 .3em;
+	color:#2099af;
+	text-shadow:0 1px 0 #222,0 2px 0 #444,0 3px 0 #444,0 4px 0 #444,0 5px 0 #444;
+}
+.article h1:hover {
+	color:#a7b8ff;
 	text-shadow:0 1px 0 #444,0 2px 0 #666,0 3px 0 #666,0 4px 0 #666,0 5px 0 #666;
 }
 .article .entry-content {
