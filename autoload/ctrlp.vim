@@ -785,7 +785,7 @@ fu! s:comptime(s1, s2)
 endf
 
 fu! s:matchlens(str, pat, ...)
-	if empty(a:pat) || a:pat =~ '^\|$' | retu {} | en
+	if empty(a:pat) || index(['^','$'], a:pat) >= 0 | retu {} | en
 	let st   = exists('a:1') ? a:1 : 0
 	let lens = exists('a:2') ? a:2 : {}
 	let nr   = exists('a:3') ? a:3 : 0
