@@ -1,4 +1,4 @@
-*ctrlp.txt*       Full path fuzzy file, buffer and MRU file finder. v1.5.8
+*ctrlp.txt*       Full path fuzzy file, buffer and MRU file finder. v1.5.9
 *CtrlP* *ControlP* *'ctrlp'* *'ctrl-p'*
 ===============================================================================
 #                                                                             #
@@ -494,8 +494,13 @@ Mercurial repository: https://bitbucket.org/kien/ctrlp.vim
 ===============================================================================
 THANKS                                                           *ctrlp-thanks*
 
-Thanks to everyone that has submitted ideas, bug reports, helped debugging or
-came up with solutions on gibhub, bitbucket, and through email.
+Thanks to everyone that has submitted ideas, bug reports or helped debugging on
+gibhub, bitbucket, and through email.
+
+Special thanks:
+
+    * Woojong Koh <github.com/wjkoh>
+        Forked and suggested the support for VCS listing commands.
 
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*

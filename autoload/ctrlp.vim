@@ -2,7 +2,7 @@
 " File:          autoload/ctrlp.vim
 " Description:   Full path fuzzy file, buffer and MRU file finder for Vim
 " Author:        Kien Nguyen <github.com/kien>
-" Version:       1.5.8
+" Version:       1.5.9
 " =============================================================================
 
 " Static variables {{{
@@ -61,6 +61,7 @@ let [s:compare_lim, s:nocache_lim, s:mltipats_lim] = [3000, 4000, 2000]
 "}}}
 " * Open & Close {{{
 fu! s:Open()
+	let s:winres = winrestcmd()
 	sil! exe s:mwbottom ? 'bo' : 'to' '1new ControlP'
 	let s:currwin = s:mwbottom ? winnr('#') : winnr('#') + 1
 	let [s:winnr, s:bufnr, s:prompt] = [bufwinnr('%'), bufnr('%'), ['', '', '']]
@@ -86,11 +87,10 @@ fu! s:Close()
 	endfo
 	if exists('s:glb_acd') | let &acd = s:glb_acd | en
 	let [g:ctrlp_lines, g:ctrlp_allfiles] = [[], []]
-	if exists('s:cwd')
-		exe 'chd!' s:cwd
-		unl s:cwd
-	en
-	unl! s:focus s:hisidx s:hstgot s:marked s:winnr s:init s:savestr s:cline s:statypes
+	sil! exe 'chd!' s:cwd
+	exe s:winres
+	unl! s:focus s:hisidx s:hstgot s:marked s:winnr s:statypes s:cline s:cwd
+		\ s:init s:savestr s:winres
 	cal s:recordhist(join(s:prompt, ''))
 	ec
 endf
@@ -223,17 +223,7 @@ fu! s:MatchedItems(items, pats, limit)
 endf
 "}}}
 fu! s:SplitPattern(str,...) "{{{
-	" Restore the number of backslashes
-	let str = substitute(a:str, '\\\\', '\', 'g')
-	" Clear the tail var
-	unl! s:optail
-	" If pattern contains :str$
-	if match(str, ':\([^:]\|\\:\)*$') >= 0
-		" Set the tail var
-		let s:optail = matchstr(str, ':\zs\([^:]\|\\:\)*$')
-		" Remove the tail
-		let str = substitute(str, ':\([^:]\|\\:\)*$', '', 'g')
-	en
+	let str = s:sanstail(a:str)
 	let s:savestr = str
 	if s:regexp || match(str, '\\\(zs\|ze\|<\|>\)\|[*|]') >= 0
 		let array = [s:regexfilter(str)]
@@ -624,19 +614,11 @@ fu! ctrlp#acceptfile(mode, matchstr)
 	" Get the full path
 	let filpath = s:itemtype ? matchstr : getcwd().s:lash.matchstr
 	cal s:PrtExit()
-	let [bufnum, norwins] = [bufnr(filpath), s:normbuf()]
-	let norwin = empty(norwins) ? 0 : norwins[0]
+	let bufnum = bufnr(filpath)
 	if s:jmptobuf && bufnum > 0 && md == 'e'
 		let [jmpb, bufwinnr] = [1, bufwinnr(bufnum)]
 		let buftab = s:jmptobuf > 1 ? s:buftab(bufnum) : [0, 0]
 	en
-	" Get the tail
-	let tail = ''
-	if exists('s:optail') && !empty('s:optail')
-		let tailpref = match(s:optail, '^\s*+') < 0 ? ' +' : ' '
-		let tail = tailpref.s:optail
-	en
-	let filpath = escape(filpath, '%#')
 	" Switch to existing buffer or open new one
 	if exists('jmpb') && buftab[0]
 		exe 'norm!' buftab[1].'gt'
@@ -653,24 +635,10 @@ fu! ctrlp#acceptfile(mode, matchstr)
 		elsei md == 'v' || s:splitwin == 3
 			let cmd = 'vne'
 		el
-			let cmd = 'e'
-			" If there's at least 1 normal buffer
-			if norwin
-				" But not the current one
-				if !&l:bl || !empty(&l:bt) || !&l:ma
-					" Go to the first normal one
-					exe norwin.'winc w'
-				en
-			el
-				" No normal buffers
-				let cmd = 'vne'
-			en
+			let cmd = s:normcmd('e')
 		en
 		" Open new window/buffer
-		cal s:openfile(cmd.tail.' '.filpath)
-	en
-	if !empty('tail')
-		sil! norm! zOzz
+		cal s:openfile(cmd, filpath)
 	en
 endf
 
@@ -703,15 +671,9 @@ endf
 fu! s:CreateNewFile() "{{{
 	let str = join(s:prompt, '')
 	if empty(str) | retu | en
+	let str = s:sanstail(str)
 	let arr = split(str, '[\/]')
 	let fname = remove(arr, -1)
-	if s:newfop <= 1
-		let cmd = 'e'
-	elsei s:newfop == 2
-		let cmd = 'new'
-	elsei s:newfop == 3
-		let cmd = 'vne'
-	en
 	if len(arr) | if isdirectory(s:createparentdirs(arr))
 		let optyp = str
 	en | el
@@ -720,8 +682,17 @@ fu! s:CreateNewFile() "{{{
 	if exists('optyp')
 		cal s:insertcache(str)
 		cal s:PrtExit()
-		if s:newfop == 1 | tabnew | en
-		cal s:openfile(cmd.' '.escape(getcwd().s:lash.optyp, '%#'))
+		if s:newfop == 1
+			tabnew
+			let cmd = 'e'
+		elsei s:newfop == 2
+			let cmd = 'new'
+		elsei s:newfop == 3
+			let cmd = 'vne'
+		el
+			let cmd = s:normcmd('e')
+		en
+		cal s:openfile(cmd, getcwd().s:lash.optyp)
 	en
 endf "}}}
 " * OpenMulti() {{{
@@ -761,7 +732,7 @@ fu! s:OpenMulti()
 	en
 	let mkd = s:marked
 	cal s:PrtExit()
-	" Try not to open in new tab
+	" Try not to open a new tab
 	let [ntab, norwins] = [0, s:normbuf()]
 	if empty(norwins) | let ntab = 1 | el
 		for each in norwins
@@ -777,9 +748,8 @@ fu! s:OpenMulti()
 	let [ic, wnr] = [1, exists('wnr') ? wnr : 1]
 	exe wnr.'winc w'
 	for key in keys(mkd)
-		let filpath = escape(mkd[key], '%#')
-		let cmd = ic == 1 ? 'e ' : 'vne '
-		sil! exe cmd.filpath
+		let cmd = ic == 1 ? 'e' : 'vne'
+		cal s:openfile(cmd, mkd[key])
 		if s:opmul > 1 && s:opmul < ic | clo!
 		el | let ic += 1 | en
 	endfo
@@ -815,7 +785,7 @@ fu! s:comptime(s1, s2)
 endf
 
 fu! s:matchlens(str, pat, ...)
-	if empty(a:pat) || index(['^','$'], a:pat) >= 0 | retu {} | en
+	if empty(a:pat) || a:pat =~ '^\|$' | retu {} | en
 	let st   = exists('a:1') ? a:1 : 0
 	let lens = exists('a:2') ? a:2 : {}
 	let nr   = exists('a:3') ? a:3 : 0
@@ -1059,6 +1029,21 @@ fu! s:normbuf()
 	retu winnrs
 endf
 
+fu! s:normcmd(cmd)
+	let norwins = s:normbuf()
+	let norwin = empty(norwins) ? 0 : norwins[0]
+	" If there's at least 1 normal buffer
+	if norwin
+		" But not the current one
+		if index(norwins, winnr()) < 0
+			exe norwin.'winc w'
+		en
+		retu a:cmd
+	el
+		retu 'bo vne'
+	en
+endf
+
 fu! s:setupblank()
 	setl noswf nobl nonu nowrap nolist nospell cul nocuc wfh fdc=0 tw=0 bt=nofile bh=unload
 	if v:version >= 703
@@ -1078,7 +1063,43 @@ fu! s:checkbuf()
 	en
 endf
 "}}}
+" Arguments {{{
+fu! s:tail()
+	if exists('s:optail') && !empty('s:optail')
+		let tailpref = match(s:optail, '^\s*+') < 0 ? ' +' : ' '
+		retu tailpref.s:optail
+	en
+	retu ''
+endf
+
+fu! s:sanstail(str)
+	" Restore the number of backslashes
+	let str = substitute(a:str, '\\\\', '\', 'g')
+	unl! s:optail
+	if match(str, ':\([^:]\|\\:\)*$') >= 0
+		let s:optail = matchstr(str, ':\zs\([^:]\|\\:\)*$')
+		retu substitute(str, ':\([^:]\|\\:\)*$', '', 'g')
+	el
+		retu str
+	en
+endf
+"}}}
 " Misc {{{
+fu! s:openfile(cmd, filpath)
+	let cmd = a:cmd == 'e' && &modified ? 'new' : a:cmd
+	try
+		exe cmd.s:tail().' '.escape(a:filpath, '%# ')
+	cat
+		echoh Identifier
+		echon "CtrlP: Operation can't be completed. Make sure filename is valid."
+		echoh None
+	fina
+		if !empty(s:tail())
+			sil! norm! zOzz
+		en
+	endt
+endf
+
 fu! s:writecache(read_cache, cache_file)
 	if !a:read_cache && ( ( g:ctrlp_newcache || !filereadable(a:cache_file) )
 		\ && s:caching || len(g:ctrlp_allfiles) > s:nocache_lim )
@@ -1103,18 +1124,6 @@ endf
 
 fu! ctrlp#exit()
 	cal s:PrtExit()
-endf
-
-fu! s:openfile(cmd)
-	try
-		exe a:cmd
-	cat /^Vim\%((\a\+)\)\=:E37/
-		exe substitute(a:cmd, '^e ', 'new ', '')
-	cat
-		echoh Identifier
-		echon "CtrlP: Operation can't be completed. Make sure filename is valid."
-		echoh None
-	endt
 endf
 
 fu! s:walker(max, pos, dir)
