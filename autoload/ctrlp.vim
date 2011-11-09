@@ -1031,7 +1031,9 @@ fu! s:normbuf()
 endf
 
 fu! s:normcmd(cmd)
-	if match([bufname('%'), &l:ft], s:nosplit) >=0 | retu a:cmd | en
+	if !empty(s:nosplit) && match([bufname('%'), &l:ft], s:nosplit) >=0
+		retu a:cmd
+	en
 	" Find a regular buffer
 	let norwins = s:normbuf()
 	let norwin = empty(norwins) ? 0 : norwins[0]
