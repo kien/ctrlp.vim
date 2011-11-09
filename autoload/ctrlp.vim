@@ -10,7 +10,7 @@ fu! s:opts()
 	let opts = {
 		\ 'g:ctrlp_by_filename':           ['s:byfname', 0],
 		\ 'g:ctrlp_clear_cache_on_exit':   ['s:cconex', 1],
-		\ 'g:ctrlp_dont_split':            ['s:nosplit', []],
+		\ 'g:ctrlp_dont_split':            ['s:nosplit', ''],
 		\ 'g:ctrlp_dotfiles':              ['s:dotfiles', 1],
 		\ 'g:ctrlp_extensions':            ['s:extensions', []],
 		\ 'g:ctrlp_highlight_match':       ['s:mathi', [1, 'Identifier']],
@@ -1031,15 +1031,13 @@ fu! s:normbuf()
 endf
 
 fu! s:normcmd(cmd)
+	if match([bufname('%'), &l:ft], s:nosplit) >=0 | retu a:cmd | en
+	" Find a regular buffer
 	let norwins = s:normbuf()
 	let norwin = empty(norwins) ? 0 : norwins[0]
-	" Don't split these
-	for each in s:nosplit | if match(bufname('%'), each) >= 0
-		retu a:cmd
-	en | endfo
-	" If there's at least 1 normal buffer
+	" If there's at least 1
 	if norwin
-		" But not the current one
+		" But not the current
 		if index(norwins, winnr()) < 0
 			exe norwin.'winc w'
 		en

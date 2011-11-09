@@ -266,12 +266,13 @@ all files, each in a vertical split.
 
                                                          *'g:ctrlp_dont_split'*
 When opening a file with <cr>, |CtrlP| avoids opening it in windows created by
-plugins, help or quickfix. Use this to setup some exceptions: >
-  let g:ctrlp_dont_split = []
+plugins. Use this to setup some exceptions: >
+  let g:ctrlp_dont_split = ''
 <
-Accepted values are partial names of the special buffers.
-Examples: >
-  let g:ctrlp_dont_split = ['Netrw']
+Acceptable values are partial names or filetypes of the special buffers.
+Use |regexp| to specify the pattern.
+Example: >
+  let g:ctrlp_dont_split = 'netrw\|myplugin'
 <
 
 
