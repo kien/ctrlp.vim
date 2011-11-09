@@ -264,6 +264,17 @@ If bigger than 1, it’ll be used as the maximum number of windows to create whe
 opening the files (the rest will be hidden buffers). If is 1, <c-o> will open
 all files, each in a vertical split.
 
+                                                         *'g:ctrlp_dont_split'*
+When opening a file with <cr>, |CtrlP| avoids opening it in windows created by
+plugins, help or quickfix. Use this to setup some exceptions: >
+  let g:ctrlp_dont_split = []
+<
+Accepted values are partial names of the special buffers.
+Examples: >
+  let g:ctrlp_dont_split = ['Netrw']
+<
+
+
 ===============================================================================
 3. Commands                                                    *ctrlp-commands*
 
@@ -504,6 +515,8 @@ Special thanks:
 
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
+
+    + New option: |g:ctrlp_dont_split|
 
 Before 2011/10/30
 

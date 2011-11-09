@@ -10,6 +10,7 @@ fu! s:opts()
 	let opts = {
 		\ 'g:ctrlp_by_filename':           ['s:byfname', 0],
 		\ 'g:ctrlp_clear_cache_on_exit':   ['s:cconex', 1],
+		\ 'g:ctrlp_dont_split':            ['s:nosplit', []],
 		\ 'g:ctrlp_dotfiles':              ['s:dotfiles', 1],
 		\ 'g:ctrlp_extensions':            ['s:extensions', []],
 		\ 'g:ctrlp_highlight_match':       ['s:mathi', [1, 'Identifier']],
@@ -1032,6 +1033,10 @@ endf
 fu! s:normcmd(cmd)
 	let norwins = s:normbuf()
 	let norwin = empty(norwins) ? 0 : norwins[0]
+	" Don't split these
+	for each in s:nosplit | if match(bufname('%'), each) >= 0
+		retu a:cmd
+	en | endfo
 	" If there's at least 1 normal buffer
 	if norwin
 		" But not the current one
