@@ -1,6 +1,6 @@
 # Use ctrlp.vim to search for anything you like
 Add something else other than files, buffers and MRU files for CtrlP to search for
-and perform any actions on.
+and perform any action on.
 
 There are 2 points of entry:
 ### Input
@@ -20,6 +20,6 @@ let g:ctrlp_extensions = ['sample']
 
 A 4th search type will show up when you open CtrlP.
 
-_Checkout [sample.vim][1] for more details_
+_Check out [sample.vim][1] for more details_
 
 [1]: https://github.com/kien/ctrlp.vim/blob/extensions/autoload/ctrlp/sample.vim

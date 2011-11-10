@@ -23,26 +23,28 @@
 
 
 " Change the name of the g:loaded_ variable to make it unique
-if ( exists('g:loaded_ctrlp_sample_extension') && g:loaded_ctrlp_sample_extension )
-			\ || v:version < 700 || &cp
+if ( exists('g:loaded_ctrlp_sample') && g:loaded_ctrlp_sample )
+	\ || v:version < 700 || &cp
 	fini
 endif
-let g:loaded_ctrlp_sample_extension = 1
+let g:loaded_ctrlp_sample = 1
 
 
-" This is the main variable for this extension, the values are: the name of the
-" input function (with the '()'), the name of the action function, and the
-" long/short names to use for the statusline
+" The main variable for this extension.
+"
+" The values are:
+" + the name of the input function (including the brackets and any argument)
+" + the name of the action function (only the name)
+" + the long and short names to use for the statusline
 let s:sample_var = [
-			\ 'ctrlp#sample#init()',
-			\ 'ctrlp#sample#accept',
-			\ 'long statusline name',
-			\ 'shortname',
-			\ ]
+	\ 'ctrlp#sample#init()',
+	\ 'ctrlp#sample#accept',
+	\ 'long statusline name',
+	\ 'shortname',
+	\ ]
 
 
-" This appends the s:sample_var to the global g:ctrlp_ext_vars which will be
-" used by other extensions
+" Append s:sample_var to g:ctrlp_ext_vars
 if exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)
 	let g:ctrlp_ext_vars = add(g:ctrlp_ext_vars, s:sample_var)
 else
@@ -55,13 +57,13 @@ endif
 " Return: a Vim's List
 func! ctrlp#sample#init()
 	let input = [
-				\ 'Sed sodales fringilla magna, non egestas ante consequat nec.',
-				\ 'Aenean vel enim quam, mattis ultricies erat.',
-				\ 'Donec vel ipsum eget mauris euismod feugiat in ut augue.',
-				\ 'Aenean porttitor tempus quam, id pellentesque diam adipiscing ut.',
-				\ 'Maecenas luctus mollis ipsum, vitae accumsan magna adipiscing sit amet.',
-				\ 'Nulla placerat varius ante, feugiat egestas ligula fringilla vel.',
-				\ ]
+		\ 'Sed sodales fri magna, non egestas ante consequat nec.',
+		\ 'Aenean vel enim mattis ultricies erat.',
+		\ 'Donec vel ipsummauris euismod feugiat in ut augue.',
+		\ 'Aenean porttitous quam, id pellentesque diam adipiscing ut.',
+		\ 'Maecenas luctuss ipsum, vitae accumsan magna adipiscing sit amet.',
+		\ 'Nulla placerat  ante, feugiat egestas ligula fringilla vel.',
+		\ ]
 	retu input
 endfunc
 
@@ -70,17 +72,18 @@ endfunc
 "
 " Arguments:
 "  a:mode   the mode that has been chosen by pressing <cr> <c-v> <c-t> or <c-x>
+"           the values are 'e', 'v', 't' and 'h', respectively
 "  a:str    the selected string
 func! ctrlp#sample#accept(mode, str)
 	" For this example, just exit ctrlp and run help
 	cal ctrlp#exit()
-	help ctrlp
+	help ctrlp-extending
 endfunc
 
 
-" This gives the extension an ID
+" Give the extension an ID
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
-" And allows it to be accessed later
+" Allow it to be called later
 func! ctrlp#sample#id()
 	retu s:id
 endfunc
@@ -88,7 +91,7 @@ endfunc
 
 " Create a command to directly call the new search type.
 "
-" Use something like this for your vimrc or plugin/sample.vim
+" Put something like this in vimrc or plugin/sample.vim
 " com! CtrlPSample cal ctrlp#init(ctrlp#sample#id())
 
 
