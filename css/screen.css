@@ -128,6 +128,7 @@ a.external:after {
 	width:760px;
 	margin:0 auto;
 	border-bottom:1px solid #8bad3e;
+	background:#1d1d1d;
 }
 .menu li {
 	float:left;
@@ -141,7 +142,7 @@ a.external:after {
 	margin:0 0 -1px;
 	position:relative;
 	border-bottom:1px solid #8bad3e;
-	background:#151515;
+	background:#1d1d1d;
 }
 .menu li a,
 .article h1 {
@@ -153,7 +154,7 @@ a.external:after {
 }
 .menu li a:hover,
 .menu li a:focus {
-	background:#333;
+	background:#444;
 	border-bottom:1px solid #eee;
 	padding-top:3px;
 	padding-bottom:3px;
@@ -185,7 +186,7 @@ a.external:after {
 .article .entry-content {
 	font-size:1.2em;
 	letter-spacing:1px;
-	background:#151515;
+	background:#1d1d1d;
 	height:1%;
 	padding:1em 15px 0;
 	position:relative;
@@ -203,7 +204,7 @@ a.external:after {
 	width:100%;
 	position:relative;
 	border-bottom:1px solid #333;
-	background:#1a1a1a;
+	background:#252525;
 }
 .article h3 span {
 	color:#a7b8ff;
