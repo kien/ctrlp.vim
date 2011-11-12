@@ -27,9 +27,8 @@ fu! ctrlp#utils#readfile(file)
 			unl data | let data = []
 		en
 		retu data
-	el
-		retu []
 	en
+	retu []
 endf
 
 fu! ctrlp#utils#mkdir(dir)
@@ -38,7 +37,7 @@ fu! ctrlp#utils#mkdir(dir)
 	en
 endf
 
-fu! ctrlp#utils#writecache(lines,...)
+fu! ctrlp#utils#writecache(lines, ...)
 	let cache_dir = exists('a:1') ? a:1 : ctrlp#utils#cachedir()
 	cal ctrlp#utils#mkdir(cache_dir)
 	" write cache
@@ -52,6 +51,10 @@ endf
 
 fu! ctrlp#utils#lash()
 	retu &ssl || !exists('+ssl') ? '/' : '\'
+endf
+
+fu! ctrlp#utils#glob(...)
+	retu call('glob',  v:version > 701 ? [a:1, a:2] : [a:1])
 endf
 "}}}
 
