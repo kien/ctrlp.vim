@@ -787,6 +787,7 @@ fu! s:comparent(s1, s2)
 		let [loc1, loc2] = [s:getparent(as1), s:getparent(as2)]
 		if loc1 == s:crfpath && loc2 != s:crfpath | retu -1 | en
 		if loc2 == s:crfpath && loc1 != s:crfpath | retu 1  | en
+		retu 0
 	en
 	retu 0
 endf
@@ -1180,7 +1181,7 @@ fu! s:walker(max, pos, dir)
 endf
 
 fu! s:matchsubstr(item, pat)
-	retu match(split(a:item, '[\/]\ze[^\/:]\+$')[-1], a:pat)
+	retu match(split(a:item, '[\/]\ze[^\/]\+$')[-1], a:pat)
 endf
 
 fu! s:maxfiles(len)
