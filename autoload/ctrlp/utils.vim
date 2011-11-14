@@ -11,11 +11,13 @@ endf
 let s:lash = ctrlp#utils#lash()
 
 fu! ctrlp#utils#opts()
-	let cache_dir = exists('g:ctrlp_cache_dir') ?
-		\ isdirectory(g:ctrlp_cache_dir.s:lash.'.ctrlp_cache')
-		\ ? g:ctrlp_cache_dir.s:lash.'.ctrlp_cache'
-		\ : g:ctrlp_cache_dir : $HOME.s:lash.'.ctrlp_cache'
-	let s:cache_dir = expand(cache_dir, 1)
+	let s:cache_dir = $HOME.s:lash.'.ctrlp_cache'
+	if exists('g:ctrlp_cache_dir')
+		let s:cache_dir = expand(g:ctrlp_cache_dir, 1)
+		if isdirectory(s:cache_dir.s:lash.'.ctrlp_cache')
+			let s:cache_dir = s:cache_dir.s:lash.'.ctrlp_cache'
+		en
+	en
 endf
 cal ctrlp#utils#opts()
 "}}}
