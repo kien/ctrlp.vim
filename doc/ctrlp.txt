@@ -111,8 +111,8 @@ Set this to 0 to enable cross-sessions caching: >
 <
 
                                                           *'g:ctrlp_cache_dir'*
-Set the parent directory for the '.ctrlp_cache' directory: >
-  let g:ctrlp_cache_dir = $HOME
+Set the directory to store the cache files: >
+  let g:ctrlp_cache_dir = $HOME.'/.ctrlp_cache'
 <
 
                                                     *'g:ctrlp_prompt_mappings'*
