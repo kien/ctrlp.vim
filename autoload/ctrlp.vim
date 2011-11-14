@@ -675,6 +675,7 @@ fu! s:CreateNewFile() "{{{
 		let optyp = fname
 	en
 	if exists('optyp')
+		let filpath = getcwd().s:lash.optyp
 		cal s:insertcache(str)
 		cal s:PrtExit()
 		if s:newfop == 1
@@ -687,7 +688,7 @@ fu! s:CreateNewFile() "{{{
 		el
 			let cmd = s:normcmd('e')
 		en
-		cal s:openfile(cmd, getcwd().s:lash.optyp)
+		cal s:openfile(cmd, filpath)
 	en
 endf "}}}
 " * OpenMulti() {{{
@@ -742,13 +743,13 @@ fu! s:OpenMulti()
 	if ntab | tabnew | en
 	let [ic, wnr] = [1, exists('wnr') ? wnr : 1]
 	let cmds = { 'v': 'vne', 'h': 'new', 't': 'tabe' }
-	let spt = len(s:opmul) > 1 ? cmds[s:opmul[1]] : 'vne'
+	let spt = len(s:opmul) > 1 ? cmds[matchstr(s:opmul, '\w$')] : 'vne'
+	let nr = matchstr(s:opmul, '^\d\+')
 	exe wnr.'winc w'
 	for key in keys(mkd)
 		let cmd = ic == 1 ? 'e' : spt
 		cal s:openfile(cmd, mkd[key])
-		if s:opmul[0] > 1 && s:opmul[0] < ic | clo!
-		el | let ic += 1 | en
+		if nr > 1 && nr < ic | clo! | el | let ic += 1 | en
 	endfo
 endf
 "}}}
