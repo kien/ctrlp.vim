@@ -184,7 +184,7 @@ endf
 fu! s:Buffers() "{{{
 	let allbufs = []
 	for each in range(1, bufnr('$'))
-		if getbufvar(each, '&bl')
+		if getbufvar(each, '&bl') && each != bufnr('#')
 			let bufname = bufname(each)
 			if strlen(bufname) && getbufvar(each, '&ma') && bufname != 'ControlP'
 				cal add(allbufs, fnamemodify(bufname, ':p'))
@@ -768,13 +768,6 @@ fu! s:compmatlen(s1, s2)
 	retu mln1 == mln2 ? 0 : mln1 > mln2 ? 1 : -1
 endf
 
-fu! s:compword(s1, s2)
-	" By word-only (no non-word in match)
-	let wrd1 = s:wordonly(s:matchlens(a:s1, s:compat))
-	let wrd2 = s:wordonly(s:matchlens(a:s2, s:compat))
-	retu wrd1 == wrd2 ? 0 : wrd1 > wrd2 ? 1 : -1
-endf
-
 fu! s:comptime(s1, s2)
 	" By last modified time
 	let [time1, time2] = [getftime(a:s1), getftime(a:s2)]
@@ -810,22 +803,12 @@ fu! s:shortest(lens)
 	retu min(map(values(a:lens), 'v:val[0]'))
 endf
 
-fu! s:wordonly(lens)
-	let [lens, minln] = [a:lens, s:shortest(lens)]
-	cal filter(lens, 'minln == v:val[0]')
-	for nr in keys(lens)
-		if match(lens[nr][1], '\W') >= 0 | retu 1 | en
-	endfo
-	retu 0
-endf
-
 fu! s:mixedsort(s1, s2)
 	let [cml, cln] = [s:compmatlen(a:s1, a:s2), s:complen(a:s1, a:s2)]
 	if s:itemtype < 3 && s:height < 51
 		let par = s:comparent(a:s1, a:s2)
 		if s:height < 21
-			let [ctm, wrd] = [s:comptime(a:s1, a:s2), s:compword(a:s1, a:s2)]
-			retu 12 * cml + 6 * par + 3 * ctm + 2 * cln + wrd
+			retu 6 * cml + 3 * par + 2 * s:comptime(a:s1, a:s2) + 1 * cln
 		en
 		retu 3 * cml + 2 * par + cln
 	en
