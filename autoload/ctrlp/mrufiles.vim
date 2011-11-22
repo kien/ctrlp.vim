@@ -12,9 +12,8 @@ fu! ctrlp#mrufiles#opts()
 		\ 'g:ctrlp_mruf_exclude': ['s:exclude', ''],
 		\ 'g:ctrlp_mruf_case_sensitive': ['s:csen', 1],
 		\ }
-	for key in keys(opts)
-		let def = string(exists(key) ? eval(key) : opts[key][1])
-		exe 'let' opts[key][0] '=' def '|' 'unl!' key
+	for [ke, va] in items(opts)
+		exe 'let' va[0] '=' string(exists(ke) ? eval(ke) : va[1]) '| unl!' ke
 	endfo
 endf
 cal ctrlp#mrufiles#opts()
@@ -51,11 +50,7 @@ fu! ctrlp#mrufiles#list(bufnr, ...) "{{{
 	cal ctrlp#utils#writecache(mrufs, cadir, cafile)
 endf "}}}
 fu! s:rmdeleted(mrufs, cadir, cafile) "{{{
-	for each in range(len(a:mrufs) - 1, 0, -1)
-		if empty(ctrlp#utils#glob(a:mrufs[each], 1))
-			cal remove(a:mrufs, each)
-		en
-	endfo
+	cal filter(a:mrufs, '!empty(ctrlp#utils#glob(v:val, 1))')
 	cal ctrlp#utils#writecache(a:mrufs, a:cadir, a:cafile)
 	retu a:mrufs
 endf "}}}

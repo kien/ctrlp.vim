@@ -2,7 +2,7 @@
 " File:          autoload/ctrlp.vim
 " Description:   Fuzzy file, buffer and MRU file finder.
 " Author:        Kien Nguyen <github.com/kien>
-" Version:       1.6.0
+" Version:       1.6.1
 " =============================================================================
 
 " Static variables {{{
@@ -13,6 +13,7 @@ fu! s:opts()
 		\ 'g:ctrlp_dont_split':            ['s:nosplit', ''],
 		\ 'g:ctrlp_dotfiles':              ['s:dotfiles', 1],
 		\ 'g:ctrlp_extensions':            ['s:extensions', []],
+		\ 'g:ctrlp_follow_symlinks':       ['s:folsym', 0],
 		\ 'g:ctrlp_highlight_match':       ['s:mathi', [1, 'Identifier']],
 		\ 'g:ctrlp_jump_to_buffer':        ['s:jmptobuf', 1],
 		\ 'g:ctrlp_match_window_bottom':   ['s:mwbottom', 1],
@@ -29,9 +30,8 @@ fu! s:opts()
 		\ 'g:ctrlp_use_caching':           ['s:caching', 1],
 		\ 'g:ctrlp_working_path_mode':     ['s:pathmode', 2],
 		\ }
-	for key in keys(opts)
-		let def = string(exists(key) ? eval(key) : opts[key][1])
-		exe 'let' opts[key][0] '=' def '|' 'unl!' key
+	for [ke, va] in items(opts)
+		exe 'let' va[0] '=' string(exists(ke) ? eval(ke) : va[1]) '| unl!' ke
 	endfo
 	if !exists('g:ctrlp_newcache')     | let g:ctrlp_newcache = 0      | en
 	if !exists('g:ctrlp_user_command') | let g:ctrlp_user_command = '' | en
@@ -70,8 +70,8 @@ fu! s:Open()
 		let hst = filereadable(s:gethistloc()[1]) ? s:gethistdata() : ['']
 		let s:hstry = empty(hst) || !s:maxhst ? [''] : hst
 	en
-	for key in keys(s:glbs)
-		sil! exe 'let s:glb_'.key.' = &'.key.' | let &'.key.' = '.string(s:glbs[key])
+	for [ke, va] in items(s:glbs)
+		sil! exe 'let s:glb_'.ke.' = &'.ke.' | let &'.ke.' = '.string(va)
 	endfo
 	if s:opmul && has('signs')
 		sign define ctrlpmark text=+> texthl=Search
@@ -124,7 +124,9 @@ endf
 " * Files() {{{
 fu! s:GlobPath(dirs, allfiles, depth)
 	let entries = split(globpath(a:dirs, s:glob), "\n")
-	let entries = filter(entries, 'getftype(v:val) != "link"')
+	if !s:folsym
+		let entries = filter(entries, 'getftype(v:val) != "link"')
+	en
 	let g:ctrlp_allfiles = filter(copy(entries), '!isdirectory(v:val)')
 	let ftrfunc = s:dotfiles ? 's:dirfilter(v:val)' : 'isdirectory(v:val)'
 	let alldirs = filter(entries, ftrfunc)
@@ -545,12 +547,12 @@ fu! s:MapSpecs(...)
 			\ 'PrtHistory(-1)',
 			\ 'PrtHistory(1)',
 			\ ]
-		for each in prtunmaps | for kp in prtmaps[each]
+		for ke in prtunmaps | for kp in prtmaps[ke]
 			exe lcmap kp '<Nop>'
 		endfo | endfo
 	el
-		for each in keys(prtmaps) | for kp in prtmaps[each]
-			exe lcmap kp ':<c-u>cal <SID>'.each.'<cr>'
+		for [ke, va] in items(prtmaps) | for kp in va
+			exe lcmap kp ':<c-u>cal <SID>'.ke.'<cr>'
 		endfo | endfo
 	en
 endf
@@ -631,15 +633,14 @@ fu! ctrlp#acceptfile(mode, matchstr)
 	en
 	" Switch to existing buffer or open new one
 	if exists('jmpb') && buftab[0]
-		exe 'norm!' buftab[1].'gt'
+		exe 'tabn' buftab[1]
 		exe buftab[0].'winc w'
 	elsei exists('jmpb') && bufwinnr > 0
 		exe bufwinnr.'winc w'
 	el
 		" Determine the command to use
 		if md == 't' || s:splitwin == 1
-			tabnew
-			let cmd = 'e'
+			let cmd = 'tabe'
 		elsei md == 'h' || s:splitwin == 2
 			let cmd = 'new'
 		elsei md == 'v' || s:splitwin == 3
@@ -679,8 +680,7 @@ fu! s:CreateNewFile() "{{{
 		cal s:insertcache(str)
 		cal s:PrtExit()
 		if s:newfop == 1
-			tabnew
-			let cmd = 'e'
+			let cmd = 'tabe'
 		elsei s:newfop == 2
 			let cmd = 'new'
 		elsei s:newfop == 3
@@ -746,9 +746,9 @@ fu! s:OpenMulti()
 	let spt = len(s:opmul) > 1 ? cmds[matchstr(s:opmul, '\w$')] : 'vne'
 	let nr = matchstr(s:opmul, '^\d\+')
 	exe wnr.'winc w'
-	for key in keys(mkd)
+	for [ke, va] in items(mkd)
 		let cmd = ic == 1 ? 'e' : spt
-		cal s:openfile(cmd, mkd[key])
+		cal s:openfile(cmd, va)
 		if nr > 1 && nr < ic | clo! | el | let ic += 1 | en
 	endfo
 endf
@@ -807,9 +807,7 @@ fu! s:matchlens(str, pat, ...)
 endf
 
 fu! s:shortest(lens)
-	let lns = []
-	for nr in keys(a:lens) | cal add(lns, a:lens[nr][0]) | endfo
-	retu min(lns)
+	retu min(map(values(a:lens), 'v:val[0]'))
 endf
 
 fu! s:wordonly(lens)
@@ -842,9 +840,9 @@ fu! s:statusline(...)
 			\ ['buffers', 'buf'],
 			\ ['mru files', 'mru'],
 			\ ]
-		if exists('g:ctrlp_ext_vars') | for each in g:ctrlp_ext_vars
-			cal add(s:statypes, [ each[2], each[3] ])
-		endfo | en
+		if exists('g:ctrlp_ext_vars')
+			cal map(copy(g:ctrlp_ext_vars), 'add(s:statypes, [ v:val[2], v:val[3] ])')
+		en
 	en
 	let tps = s:statypes
 	let max = len(tps) - 1
@@ -1021,11 +1019,7 @@ fu! s:dictindex(dict, expr)
 endf
 
 fu! s:vacantdict(dict)
-	let vac = []
-	for ic in range(1, max(keys(a:dict)))
-		if !has_key(a:dict, ic) | cal add(vac, ic) | en
-	endfo
-	retu vac
+	retu filter(range(1, max(keys(a:dict))), '!has_key(a:dict, v:val)')
 endf
 "}}}
 " Buffers {{{
@@ -1232,22 +1226,21 @@ fu! s:SetLines(type)
 		\ 's:Buffers()',
 		\ 'ctrlp#mrufiles#list(-1)',
 		\ ]
-	if exists('g:ctrlp_ext_vars') | for each in g:ctrlp_ext_vars
-		cal add(types, each[0])
-	endfo | en
+	if exists('g:ctrlp_ext_vars')
+		cal map(copy(g:ctrlp_ext_vars), 'add(types, v:val[0])')
+	en
 	let g:ctrlp_lines = eval(types[a:type])
 endf
 
 fu! ctrlp#init(type, ...)
 	if exists('s:init') | retu | en
 	let [s:matches, s:init] = [1, 1]
-	let input = exists('a:1') ? a:1 : ''
 	cal s:Open()
-	cal s:SetWD(input)
+	cal s:SetWD(exists('a:1') ? a:1 : '')
 	cal s:MapKeys()
 	cal s:SetLines(a:type)
 	cal s:BuildPrompt(1)
-	cal s:syntax()
+	if has('syntax') && exists('g:syntax_on') | cal s:syntax() | en
 endf
 "}}}
 if has('autocmd') "{{{

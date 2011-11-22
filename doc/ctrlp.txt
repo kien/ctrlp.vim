@@ -1,4 +1,4 @@
-*ctrlp.txt*       Fuzzy file, buffer and MRU file finder. v1.6.0
+*ctrlp.txt*       Fuzzy file, buffer and MRU file finder. v1.6.1
 *CtrlP* *ControlP* *'ctrlp'* *'ctrl-p'*
 ===============================================================================
 #                                                                             #
@@ -69,7 +69,7 @@ Set the maximum height of the match window: >
 <
 
                                                      *'g:ctrlp_jump_to_buffer'*
-Set this to 0 to disable the jump-to-open-buffer feature; set to 2 to also jump
+Set this to 0 to disable the jump-to-open-buffer feature. Set to 2 to also jump
 tab if the selected buffer’s opened in another tab: >
   let g:ctrlp_jump_to_buffer = 1
 <
@@ -95,8 +95,8 @@ Use this to set your own root markers in addition to the default ones. Your
 markers will take precedence: >
   let g:ctrlp_root_markers = ['']
 <
-These markers (builtins and yours) will serve as identifier for the '/' and '\'
-special inputs (section 5.e)
+These markers (builtins and yours) will serve as identifiers for the '/' and
+'\' special inputs (section 5.e)
 
                                                         *'g:ctrlp_use_caching'*
 Set this to 0 to disable per-session caching. When disabled, caching will still
@@ -233,7 +233,8 @@ faster when working with large projects: >
   let g:ctrlp_user_command = [repo_marker, vcs_ls_command, fallback_command]
 <
 If the fallback_command is empty or not defined, globpath() will then be used
-when outside a repo. Examples: >
+when outside a repo.
+Examples: >
   let g:ctrlp_user_command = ['.git/', 'cd %s && git ls-files']
   let g:ctrlp_user_command = ['.hg/', 'hg --cwd %s locate --fullpath -I .']
 <
@@ -277,6 +278,11 @@ plugins, help and quickfix. Use this to setup some exceptions: >
 Acceptable values are partial names or filetypes of the special buffers. Use
 |regexp| to specify the pattern. Example: >
   let g:ctrlp_dont_split = 'netrw\|help'
+<
+
+                                                    *'g:ctrlp_follow_symlinks'*
+Set this to 1 to follow symbolic links when listing files: >
+  let g:ctrlp_follow_symlinks = 0
 <
 
 ===============================================================================
@@ -518,6 +524,8 @@ Special thanks:~
 
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
+
+    + New option: |g:ctrlp_follow_symlinks|
 
 Before 2011/11/13~
 
