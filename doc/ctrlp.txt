@@ -210,7 +210,7 @@ The maximum number of files to scan, set to 0 for no limit: >
 
                                                           *'g:ctrlp_max_results'*
 The maximum number of files to report as results, set to 0 for no limit: >
-  let g:ctrlp_max_results = 200
+  let g:ctrlp_max_results =10 
 <
 
                                                           *'g:ctrlp_max_depth'*

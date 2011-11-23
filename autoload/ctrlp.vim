@@ -20,7 +20,7 @@ fu! s:opts()
 		\ 'g:ctrlp_match_window_reversed': ['s:mwreverse', 1],
 		\ 'g:ctrlp_max_depth':             ['s:maxdepth', 40],
 		\ 'g:ctrlp_max_files':             ['s:maxfiles', 20000],
-		\ 'g:ctrlp_max_results':           ['s:maxresults', 200],
+		\ 'g:ctrlp_max_results':           ['s:maxresults', 10],
 		\ 'g:ctrlp_max_height':            ['s:mxheight', 10],
 		\ 'g:ctrlp_open_multi':            ['s:opmul', '1v'],
 		\ 'g:ctrlp_open_new_file':         ['s:newfop', 3],
