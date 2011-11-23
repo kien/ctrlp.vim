@@ -302,7 +302,7 @@ fu! s:Update(pat, ...)
 	if notail == oldstr && !empty(notail) && !exists('a:1') && !exists('s:force')
 		retu
 	en
-	let lines = s:MatchedItems(g:ctrlp_lines, pats, s:mxheight)
+	let lines = s:MatchedItems(g:ctrlp_lines, pats, s:maxfiles)
 	cal s:Render(lines, pats[-1])
 endf
 
