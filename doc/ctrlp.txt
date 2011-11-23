@@ -208,6 +208,12 @@ The maximum number of files to scan, set to 0 for no limit: >
   let g:ctrlp_max_files = 20000
 <
 
+                                                          *'g:ctrlp_max_results'*
+The maximum number of files to report as results, set to 0 for no limit. The 
+default is the value of g:ctrlp_max_height: >
+  let g:ctrlp_max_results = g:ctrlp_max_height
+<
+
                                                           *'g:ctrlp_max_depth'*
 The maximum depth of a directory tree to recurse into: >
   let g:ctrlp_max_depth = 40
@@ -525,6 +531,7 @@ Special thanks:~
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
 
+    + New option: |g:ctrlp_max_results|
     + New option: |g:ctrlp_follow_symlinks|
 
 Before 2011/11/13~

@@ -35,6 +35,8 @@ fu! s:opts()
 	endfo
 	if !exists('g:ctrlp_newcache')     | let g:ctrlp_newcache = 0      | en
 	if !exists('g:ctrlp_user_command') | let g:ctrlp_user_command = '' | en
+	let s:maxresults = exists('g:ctrlp_max_results') ? g:ctrlp_max_results
+		\ : s:mxheight
 	let s:maxhst = exists('g:ctrlp_max_history') ? g:ctrlp_max_history
 		\ : exists('+hi') ? &hi : 20
 	unl! g:ctrlp_max_history
@@ -302,7 +304,7 @@ fu! s:Update(pat, ...)
 	if notail == oldstr && !empty(notail) && !exists('a:1') && !exists('s:force')
 		retu
 	en
-	let lines = s:MatchedItems(g:ctrlp_lines, pats, s:mxheight)
+	let lines = s:MatchedItems(g:ctrlp_lines, pats, s:maxresults)
 	cal s:Render(lines, pats[-1])
 endf
 
