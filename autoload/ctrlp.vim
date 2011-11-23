@@ -20,7 +20,6 @@ fu! s:opts()
 		\ 'g:ctrlp_match_window_reversed': ['s:mwreverse', 1],
 		\ 'g:ctrlp_max_depth':             ['s:maxdepth', 40],
 		\ 'g:ctrlp_max_files':             ['s:maxfiles', 20000],
-		\ 'g:ctrlp_max_results':           ['s:maxresults', 10],
 		\ 'g:ctrlp_max_height':            ['s:mxheight', 10],
 		\ 'g:ctrlp_open_multi':            ['s:opmul', '1v'],
 		\ 'g:ctrlp_open_new_file':         ['s:newfop', 3],
@@ -36,6 +35,8 @@ fu! s:opts()
 	endfo
 	if !exists('g:ctrlp_newcache')     | let g:ctrlp_newcache = 0      | en
 	if !exists('g:ctrlp_user_command') | let g:ctrlp_user_command = '' | en
+	let s:maxresults = exists('g:ctrlp_max_results') ? g:ctrlp_max_results
+		\ : s:maxheight
 	let s:maxhst = exists('g:ctrlp_max_history') ? g:ctrlp_max_history
 		\ : exists('+hi') ? &hi : 20
 	unl! g:ctrlp_max_history
