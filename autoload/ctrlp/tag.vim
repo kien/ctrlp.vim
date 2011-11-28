@@ -16,23 +16,33 @@ let g:ctrlp_ext_vars = exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)
 	\ ? add(g:ctrlp_ext_vars, s:tag_var) : [s:tag_var]
 
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
+
+fu! s:tagfiles()
+	retu filter(map(tagfiles(), 'fnamemodify(v:val, '':p'')'), 'filereadable(v:val)')
+endf
 "}}}
 " Public {{{
 fu! ctrlp#tag#init()
-	if exists('s:cwd') && s:cwd == getcwd()
+	let &l:tags = join(sort(s:tagfiles()), ',')
+	if empty(&l:tags) | retu [] | en
+	if exists('s:ltags') && s:ltags == &l:tags
 		let newtags = 0
 	el
-		let s:cwd = getcwd()
+		let s:ltags = &l:tags
 		let newtags = 1
 	en
-	if ( newtags && !exists('g:ctrlp_alltags['''.s:cwd.''']') ) || g:ctrlp_newtag
-		let alltags = map(taglist('.*'), 'v:val["name"]."	".v:val["filename"]')
-		cal extend(g:ctrlp_alltags, { s:cwd : alltags })
+	let s:cwd = getcwd()
+	if ( newtags && !exists('g:ctrlp_alltags['''.s:ltags.''']') )
+		\ || g:ctrlp_newtag
+		let tags = taglist('^.*$')
+		let alltags = empty(tags) ? []
+			\ : map(tags, 'v:val["name"]."	".v:val["filename"]')
+		cal extend(g:ctrlp_alltags, { s:ltags : alltags })
 		let g:ctrlp_newtag = 0
 	en
 	sy match CtrlPTagFilename '\zs\t.*\ze$'
 	hi link CtrlPTagFilename Comment
-	retu g:ctrlp_alltags[s:cwd]
+	retu g:ctrlp_alltags[s:ltags]
 endf
 
 fu! ctrlp#tag#accept(mode, str)
