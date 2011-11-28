@@ -7,13 +7,13 @@
 " Static variables {{{
 fu! ctrlp#mrufiles#opts()
 	let opts = {
-		\ 'g:ctrlp_mruf_max': ['s:max', 150],
+		\ 'g:ctrlp_mruf_max': ['s:max', 250],
 		\ 'g:ctrlp_mruf_include': ['s:include', ''],
 		\ 'g:ctrlp_mruf_exclude': ['s:exclude', ''],
 		\ 'g:ctrlp_mruf_case_sensitive': ['s:csen', 1],
 		\ }
 	for [ke, va] in items(opts)
-		exe 'let' va[0] '=' string(exists(ke) ? eval(ke) : va[1]) '| unl!' ke
+		exe 'let' va[0] '=' string(exists(ke) ? eval(ke) : va[1])
 	endfo
 endf
 cal ctrlp#mrufiles#opts()

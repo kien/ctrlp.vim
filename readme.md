@@ -12,7 +12,7 @@ Full path fuzzy __file__, __buffer__ and __MRU__ file finder for Vim.
 
 ## Basic Usage
 * Press `<c-p>` or run `:CtrlP` to invoke CtrlP in find file mode.
-* Or use `:CtrlPBuffer` and `:CtrlPMRU` for buffer and MRU mode.
+* Or run `:CtrlPBuffer` or `:CtrlPMRU` to invoke CtrlP in buffer or MRU mode.
 
 Once CtrlP is open:
 

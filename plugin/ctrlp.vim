@@ -8,7 +8,7 @@
 if ( exists('g:loaded_ctrlp') && g:loaded_ctrlp ) || v:version < 700 || &cp
 	fini
 en
-let g:loaded_ctrlp = 1
+let [g:loaded_ctrlp, g:ctrlp_lines, g:ctrlp_allfiles] = [1, [], []]
 
 if !exists('g:ctrlp_map') | let g:ctrlp_map = '<c-p>' | en
 
@@ -29,4 +29,12 @@ exe 'nn <silent>' g:ctrlp_map ':<c-u>CtrlP<cr>'
 
 cal ctrlp#mrufiles#init()
 
-let [g:ctrlp_lines, g:ctrlp_allfiles] = [[], []]
+if !exists('g:ctrlp_extensions') | fini | en
+
+if index(g:ctrlp_extensions, 'tag') >= 0
+	let g:ctrlp_alltags = {} | com! CtrlPTag cal ctrlp#init(ctrlp#tag#id())
+en
+
+if index(g:ctrlp_extensions, 'quickfix') >= 0
+	com! CtrlPQuickfix cal ctrlp#init(ctrlp#quickfix#id())
+en

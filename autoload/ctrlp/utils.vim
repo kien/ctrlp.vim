@@ -26,9 +26,10 @@ fu! ctrlp#utils#cachedir()
 	retu s:cache_dir
 endf
 
-fu! ctrlp#utils#cachefile()
-	let cache_file = substitute(getcwd(), '\([\/]\|^\a\zs:\)', '%', 'g').'.txt'
-	retu s:cache_dir.s:lash.cache_file
+fu! ctrlp#utils#cachefile(...)
+	let tail = exists('a:1') ? '.'.a:1 : ''
+	let cache_file = substitute(getcwd(), '\([\/]\|^\a\zs:\)', '%', 'g').tail.'.txt'
+	retu exists('a:1') ? cache_file : s:cache_dir.s:lash.cache_file
 endf
 
 fu! ctrlp#utils#readfile(file)
