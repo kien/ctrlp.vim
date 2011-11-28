@@ -53,7 +53,11 @@ let s:lash = ctrlp#utils#lash()
 " Global options
 let s:glbs = { 'magic': 1, 'to': 1, 'tm': 0, 'sb': 1, 'hls': 0, 'im': 0,
 	\ 'report': 9999, 'sc': 0, 'ss': 0, 'siso': 0, 'mfd': 200, 'mouse': 'n',
-	\ 'gcr': 'a:block-PmenuSel-blinkon0', 'ut': ( s:lazy > 1 ? s:lazy : 250 ) }
+	\ 'gcr': 'a:block-PmenuSel-blinkon0' }
+
+if s:lazy
+	cal extend(s:glbs, { 'ut': ( s:lazy > 1 ? s:lazy : 250 ) })
+en
 
 " Limiters
 let [s:compare_lim, s:nocache_lim, s:mltipats_lim] = [3000, 4000, 2000]
