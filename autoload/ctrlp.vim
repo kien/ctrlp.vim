@@ -67,6 +67,7 @@ fu! s:Open()
 	let [s:cwd, s:winres] = [getcwd(), winrestcmd()]
 	let [s:crfile, s:crfpath] = [expand('%:p', 1), expand('%:p:h', 1)]
 	let [s:crword, s:crvisual] = [expand('<cword>'), s:lastvisual()]
+	let s:tagfiles = s:tagfiles()
 	sil! exe s:mwbottom ? 'bo' : 'to' '1new ControlP'
 	let s:currwin = s:mwbottom ? winnr('#') : winnr('#') + 1
 	let [s:bufnr, s:prompt] = [bufnr('%'), ['', '', '']]
@@ -94,7 +95,7 @@ fu! s:Close()
 	let [g:ctrlp_lines, g:ctrlp_allfiles] = [[], []]
 	exe s:winres
 	unl! s:focus s:hisidx s:hstgot s:marked s:statypes s:cline s:init s:savestr
-		\ s:crfile s:crfpath s:crword s:crvisual g:ctrlp_nolimit
+		\ s:crfile s:crfpath s:crword s:crvisual s:tagfiles g:ctrlp_nolimit
 	cal s:recordhist(join(s:prompt, ''))
 	ec
 endf
@@ -1241,6 +1242,11 @@ fu! s:lscommand()
 		let s:vcscmd = s:lash == '\' ? 1 : 0
 		retu cmd[1]
 	en
+endf
+"}}}
+" Extensions {{{
+fu! s:tagfiles()
+	retu filter(map(tagfiles(), 'fnamemodify(v:val, ":p")'), 'filereadable(v:val)')
 endf
 "}}}
 "}}}

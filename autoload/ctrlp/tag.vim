@@ -10,20 +10,17 @@ if exists('g:loaded_ctrlp_tag') && g:loaded_ctrlp_tag
 en
 let [g:loaded_ctrlp_tag, g:ctrlp_newtag] = [1, 0]
 
-let s:tag_var = ['ctrlp#tag#init()', 'ctrlp#tag#accept', 'tags', 'tag']
+let s:tag_var = ['ctrlp#tag#init(s:tagfiles, s:crfpath)', 'ctrlp#tag#accept',
+	\ 'tags', 'tag']
 
 let g:ctrlp_ext_vars = exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)
 	\ ? add(g:ctrlp_ext_vars, s:tag_var) : [s:tag_var]
 
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
-
-fu! s:tagfiles()
-	retu filter(map(tagfiles(), 'fnamemodify(v:val, '':p'')'), 'filereadable(v:val)')
-endf
 "}}}
 " Public {{{
-fu! ctrlp#tag#init()
-	let &l:tags = join(sort(s:tagfiles()), ',')
+fu! ctrlp#tag#init(tagfiles, crfpath)
+	let &l:tags = join(sort(a:tagfiles), ',')
 	if empty(&l:tags) | retu [] | en
 	if exists('s:ltags') && s:ltags == &l:tags
 		let newtags = 0
@@ -31,7 +28,7 @@ fu! ctrlp#tag#init()
 		let s:ltags = &l:tags
 		let newtags = 1
 	en
-	let s:cwd = getcwd()
+	let s:cwd = a:crfpath
 	if ( newtags && !exists('g:ctrlp_alltags['''.s:ltags.''']') )
 		\ || g:ctrlp_newtag
 		let tags = taglist('^.*$')
