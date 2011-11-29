@@ -66,8 +66,9 @@ let [s:compare_lim, s:nocache_lim, s:mltipats_lim] = [3000, 4000, 2000]
 fu! s:Open()
 	let [s:cwd, s:winres] = [getcwd(), winrestcmd()]
 	let [s:crfile, s:crfpath] = [expand('%:p', 1), expand('%:p:h', 1)]
-	let [s:crword, s:crvisual] = [expand('<cword>'), s:lastvisual()]
-	let s:tagfiles = s:tagfiles()
+	let [s:crword, s:crline] = [expand('<cword>'), getline('.')]
+	let [s:tagfiles, s:crcursor] = [s:tagfiles(), getpos('.')]
+	let s:crvisual = s:lastvisual()
 	sil! exe s:mwbottom ? 'bo' : 'to' '1new ControlP'
 	let s:currwin = s:mwbottom ? winnr('#') : winnr('#') + 1
 	let [s:bufnr, s:prompt] = [bufnr('%'), ['', '', '']]
@@ -95,7 +96,8 @@ fu! s:Close()
 	let [g:ctrlp_lines, g:ctrlp_allfiles] = [[], []]
 	exe s:winres
 	unl! s:focus s:hisidx s:hstgot s:marked s:statypes s:cline s:init s:savestr
-		\ s:crfile s:crfpath s:crword s:crvisual s:tagfiles g:ctrlp_nolimit
+		\ s:crfile s:crfpath s:crword s:crvisual s:tagfiles s:crline s:crcursor
+		\ g:ctrlp_nolimit
 	cal s:recordhist(join(s:prompt, ''))
 	ec
 endf
