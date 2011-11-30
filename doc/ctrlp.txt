@@ -296,6 +296,11 @@ after typing’s been stopped for a certain amount of time: >
 If is 1, update after 250ms. If bigger than 1, the number will be used as the
 delay time in milliseconds.
 
+                                                         *'g:ctrlp_use_migemo'*
+Set this to 1 to use Migemo for Japanese filenames: >
+  let g:ctrlp_use_migemo = 0
+<
+
 ===============================================================================
 3. Commands                                                    *ctrlp-commands*
 
@@ -562,7 +567,8 @@ Special thanks:~
 CHANGELOG                                                     *ctrlp-changelog*
 
     + New features: Tag and Quickfix extensions.
-    + New options: |g:ctrlp_lazy_update|,
+    + New options: |g:ctrlp_use_migemo|,
+                   |g:ctrlp_lazy_update|,
                    |g:ctrlp_follow_symlinks|
 
 Before 2011/11/13~

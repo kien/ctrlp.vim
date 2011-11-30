@@ -24,7 +24,6 @@ fu! s:opts()
 		\ 'g:ctrlp_max_files':             ['s:maxfiles', 20000],
 		\ 'g:ctrlp_max_height':            ['s:mxheight', 10],
 		\ 'g:ctrlp_max_history':           ['s:maxhst', hst],
-		\ 'g:ctrlp_use_migemo':            ['s:migemo', 0],
 		\ 'g:ctrlp_open_multi':            ['s:opmul', '1v'],
 		\ 'g:ctrlp_open_new_file':         ['s:newfop', 3],
 		\ 'g:ctrlp_prompt_mappings':       ['s:urprtmaps', 0],
@@ -32,6 +31,7 @@ fu! s:opts()
 		\ 'g:ctrlp_root_markers':          ['s:rmarkers', []],
 		\ 'g:ctrlp_split_window':          ['s:splitwin', 0],
 		\ 'g:ctrlp_use_caching':           ['s:caching', 1],
+		\ 'g:ctrlp_use_migemo':            ['s:migemo', 0],
 		\ 'g:ctrlp_user_command':          ['s:usrcmd', ''],
 		\ 'g:ctrlp_working_path_mode':     ['s:pathmode', 2],
 		\ }
