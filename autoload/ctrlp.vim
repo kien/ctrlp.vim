@@ -237,6 +237,18 @@ endf
 "}}}
 fu! s:SplitPattern(str, ...) "{{{
 	let str = s:sanstail(a:str)
+	if len(str) > 0 && exists('g:ctrlp_use_migemo') && executable('cmigemo')
+		let dict = globpath(&rtp, printf("dict/%s/migemo-dict", &encoding))
+		if len(dict) == 0
+			let dict = globpath(&rtp, "dict/migemo-dict")
+		en
+		if len(dict)
+			let ret = system(printf('cmigemo -v -w %s -d %s', shellescape(str), shellescape(dict)))
+			if v:shell_error == 0 && len(ret) > 0
+				let str = ret
+			en
+		en
+	en
 	let s:savestr = str
 	if s:regexp || match(str, '\\\(zs\|ze\|<\|>\)\|[*|]') >= 0
 		let array = [s:regexfilter(str)]
@@ -1145,7 +1157,7 @@ endf
 
 fu! s:lastvisual()
 	let [cview, oreg, oreg_type] = [winsaveview(), getreg('v'), getregtype('v')]
-	norm! gv"vy
+	sil! norm! gv"vy
 	let selected = substitute(getreg('v'), '\n', '\\n', 'g')
 	cal setreg('v', oreg, oreg_type)
 	cal winrestview(cview)
