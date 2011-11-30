@@ -238,7 +238,7 @@ endf
 "}}}
 fu! s:SplitPattern(str, ...) "{{{
 	let str = s:sanstail(a:str)
-	if s:migemo && len(str) > 0 && executable('cmigemo')
+	if s:regexp && s:migemo && len(str) > 0 && executable('cmigemo')
 		let dict = s:glbpath(&rtp, printf("dict/%s/migemo-dict", &encoding), 1)
 		if !len(dict)
 			let dict = s:glbpath(&rtp, "dict/migemo-dict", 1)
