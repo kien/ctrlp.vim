@@ -555,6 +555,9 @@ Special thanks:~
     * Woojong Koh <github.com/wjkoh>
         Forked and suggested the support for VCS listing commands.
 
+    * Yasuhiro Matsumoto <github.com/mattn>
+        Added option to use Migemo for Japanese language.
+
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
 

@@ -24,6 +24,7 @@ fu! s:opts()
 		\ 'g:ctrlp_max_files':             ['s:maxfiles', 20000],
 		\ 'g:ctrlp_max_height':            ['s:mxheight', 10],
 		\ 'g:ctrlp_max_history':           ['s:maxhst', hst],
+		\ 'g:ctrlp_use_migemo':            ['s:migemo', 0],
 		\ 'g:ctrlp_open_multi':            ['s:opmul', '1v'],
 		\ 'g:ctrlp_open_new_file':         ['s:newfop', 3],
 		\ 'g:ctrlp_prompt_mappings':       ['s:urprtmaps', 0],
@@ -237,16 +238,15 @@ endf
 "}}}
 fu! s:SplitPattern(str, ...) "{{{
 	let str = s:sanstail(a:str)
-	if len(str) > 0 && exists('g:ctrlp_use_migemo') && executable('cmigemo')
-		let dict = globpath(&rtp, printf("dict/%s/migemo-dict", &encoding))
-		if len(dict) == 0
-			let dict = globpath(&rtp, "dict/migemo-dict")
+	if s:migemo && len(str) > 0 && executable('cmigemo')
+		let dict = s:glbpath(&rtp, printf("dict/%s/migemo-dict", &encoding), 1)
+		if !len(dict)
+			let dict = s:glbpath(&rtp, "dict/migemo-dict", 1)
 		en
 		if len(dict)
-			let ret = system(printf('cmigemo -v -w %s -d %s', shellescape(str), shellescape(dict)))
-			if v:shell_error == 0 && len(ret) > 0
-				let str = ret
-			en
+			let cmd = 'cmigemo -v -w %s -d %s'
+			let rtn = system(printf(cmd, shellescape(str), shellescape(dict)))
+			let str = !v:shell_error && len(retn) > 0 ? rtn : str
 		en
 	en
 	let s:savestr = str
