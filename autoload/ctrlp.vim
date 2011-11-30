@@ -1143,7 +1143,7 @@ endf
 
 fu! s:lastvisual()
 	let [cview, oreg, oreg_type] = [winsaveview(), getreg('v'), getregtype('v')]
-	norm! gv"vy
+	sil! norm! gv"vy
 	let selected = substitute(getreg('v'), '\n', '\\n', 'g')
 	cal setreg('v', oreg, oreg_type)
 	cal winrestview(cview)
