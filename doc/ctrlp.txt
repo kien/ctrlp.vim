@@ -28,7 +28,7 @@ Written in pure Vimscript for MacVim and Vim version 7.0+. Has full support for
 Vim’s |regexp| as search pattern, built-in MRU monitoring, project’s root
 finder, and more.
 
-To enable optional extensions (tag, quickfix ...), see |ctrlp-extensions|.
+To enable optional extensions (tag, quickfix, dir...), see |ctrlp-extensions|.
 
 ===============================================================================
 2. Options                                                      *ctrlp-options*
@@ -515,7 +515,12 @@ Available extensions:~
   * Quickfix mode:~
     - Shortname: 'qfx'
     - Command: ':CtrlPQuickfix'
-    - Search for an entry in the current quickfix errors and jump to it. If the
+    - Search for an entry in the current quickfix errors and jump to it.
+
+  * Directory mode:~
+    - Shortname: 'dir'
+    - Command: ':CtrlPDir'
+    - Search for a directory and change the local working directory to it.
 
 ===============================================================================
 EXTENDING                                                     *ctrlp-extending*
@@ -567,7 +572,7 @@ Special thanks:~
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
 
-    + New features: Tag and Quickfix extensions.
+    + New features: Tag, Quickfix and Directory extensions.
     + New options: |g:ctrlp_use_migemo|,
                    |g:ctrlp_lazy_update|,
                    |g:ctrlp_follow_symlinks|

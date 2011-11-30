@@ -39,6 +39,17 @@ fu! s:hash224(str)
 	endfo
 	retu join(map(hashes, 'printf("%08x", v:val)'), '')
 endf
+
+fu! s:expand(path, fname)
+	let fname = expand(a:fname, 1)
+	retu fname == a:fname ? a:path.ctrlp#utils#lash().fname : fname
+endf
+
+fu! s:append(path, atag)
+	let parts = split(a:atag, '\t\+')
+	let fname = s:expand(a:path, parts[1])
+	retu parts[0].'	'.fname
+endf
 "}}}
 " Public {{{
 fu! ctrlp#tag#init(tagfiles)
@@ -56,7 +67,10 @@ fu! ctrlp#tag#init(tagfiles)
 		let g:ctrlp_alltags = { key : [] }
 		let eval = 'matchstr(v:val, ''^[^!\t][^\t]*\t\+[^\t]\+\ze\t\+'')'
 		for each in tagfiles
-			let alltags = filter(map(readfile(each), eval), 'v:val =~# ''\S''')
+			"let path = substitute(each, '[\/][^\/]\+$', '', '')
+			let alltags = map(ctrlp#utils#readfile(each), eval)
+			let alltags = filter(alltags, 'v:val =~# ''\S''')
+			"let alltags = map(alltags, 's:append(path, v:val)')
 			cal extend(g:ctrlp_alltags[key], alltags)
 		endfo
 		let read_cache = 0

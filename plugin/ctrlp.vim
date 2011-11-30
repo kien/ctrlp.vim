@@ -38,3 +38,7 @@ en
 if index(g:ctrlp_extensions, 'quickfix') >= 0
 	com! CtrlPQuickfix cal ctrlp#init(ctrlp#quickfix#id())
 en
+
+if index(g:ctrlp_extensions, 'dir') >= 0
+	let g:ctrlp_alldirs = [] | com! CtrlPDir cal ctrlp#init(ctrlp#dir#id())
+en
