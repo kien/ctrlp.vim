@@ -20,58 +20,63 @@ let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 "}}}
 " Utilities {{{
 fu! s:times(tagfiles)
-	retu sort(map(copy(a:tagfiles), 'getftime(v:val)'), 's:compval')
-endf
-
-fu! s:compval(...)
-	retu a:1 - a:2
-endf
-
-fu! s:concat(lst)
-	let result = ''
-	for each in a:lst
-		let result .= each
-	endfo
-	retu result
+	retu map(copy(a:tagfiles), 'getftime(v:val)')
 endf
 
 fu! s:nodup(lst)
 	let dict = {}
-	for each in a:lst
-		cal extend(dict, { each : 0 })
-	endfo
+	for each in a:lst | cal extend(dict, { each : 0 }) | endfo
 	retu keys(dict)
+endf
+
+fu! s:hash224(str)
+	let [a, b, nHash] = [0x00000800, 0x001fffff, 7]
+	let hashes = repeat([0], nHash)
+	for i in range(len(a:str))
+		let iHash = i % nHash
+		let hashes[iHash] = hashes[iHash] * a + hashes[iHash] / b
+		let hashes[iHash] += char2nr(a:str[i])
+	endfo
+	retu join(map(hashes, 'printf("%08x", v:val)'), '')
 endf
 "}}}
 " Public {{{
 fu! ctrlp#tag#init(tagfiles)
 	if empty(a:tagfiles) | retu [] | en
 	let tagfiles = sort(s:nodup(a:tagfiles))
-	let &l:tags = join(tagfiles, ',')
-	let [tkey, s:ltags] = [s:concat(s:times(tagfiles)), &l:tags]
-	let newtags = exists('g:ctrlp_alltags['''.s:ltags.''']')
-		\ && keys(g:ctrlp_alltags[s:ltags]) == [tkey] ? 0 : 1
-	if newtags
-		let tags = taglist('^.*$')
-		let alltags = empty(tags) ? []
-			\ : map(tags, 'v:val["name"]."	".v:val["filename"]')
-		cal extend(g:ctrlp_alltags, { s:ltags : { tkey : alltags } })
+	let key      = s:hash224(join(tagfiles, ','))
+	let cadir    = ctrlp#utils#cachedir().ctrlp#utils#lash().s:tag_var[3]
+	let cafile   = cadir.ctrlp#utils#lash().'cache.'.key.'.txt'
+	if filereadable(cafile) && max(s:times(tagfiles)) < getftime(cafile)
+		if !has_key(g:ctrlp_alltags, key)
+			let g:ctrlp_alltags = { key : ctrlp#utils#readfile(cafile) }
+		en
+		let read_cache = 1
+	el
+		let g:ctrlp_alltags = { key : [] }
+		let eval = 'matchstr(v:val, ''^[^!\t][^\t]*\t\+[^\t]\+\ze\t\+'')'
+		for each in tagfiles
+			let alltags = filter(map(readfile(each), eval), 'v:val =~# ''\S''')
+			cal extend(g:ctrlp_alltags[key], alltags)
+		endfo
+		let read_cache = 0
+	en
+	if !read_cache
+		cal ctrlp#utils#writecache(g:ctrlp_alltags[key], cadir, cafile)
 	en
 	sy match CtrlPTagFilename '\zs\t.*\ze$'
 	hi link CtrlPTagFilename Comment
-	retu g:ctrlp_alltags[s:ltags][tkey]
+	retu g:ctrlp_alltags[key]
 endf
 
 fu! ctrlp#tag#accept(mode, str)
 	cal ctrlp#exit()
-	let md = a:mode
-	let cmd = md == 't' ? 'tabnew' : md == 'h' ? 'new' : md == 'v' ? 'vne'
-		\ : ctrlp#normcmd('ene')
-	let cmd = cmd == 'ene' && &modified ? 'hid ene' : cmd
+	let [md, tg] = [a:mode, split(a:str, '\t[^\t]\+$')[0]]
+	let cmd = md == 't' ? 'tab stj' : md == 'h' ? 'stj'
+		\ : md == 'v' ? 'vert stj' : 'tj'
+	let cmd = cmd == 'tj' && &modified ? 'hid tj' : cmd
 	try
-		exe cmd
-		let &l:tags = s:ltags
-		exe 'ta' split(a:str, '\t[^\t]\+$')[0]
+		exe cmd.' '.tg
 	cat
 		cal ctrlp#msg("Tag not found.")
 	endt

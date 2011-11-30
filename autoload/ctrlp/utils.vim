@@ -50,7 +50,7 @@ fu! ctrlp#utils#writecache(lines, ...)
 	cal ctrlp#utils#mkdir(cache_dir)
 	if isdirectory(cache_dir)
 		sil! cal writefile(a:lines, exists('a:2') ? a:2 : ctrlp#utils#cachefile())
-		if !exists('a:1') || !exists('a:2') | let g:ctrlp_newcache = 0 | en
+		if !exists('a:1') | let g:ctrlp_newcache = 0 | en
 	en
 endf
 
