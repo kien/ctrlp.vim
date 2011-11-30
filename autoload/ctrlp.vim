@@ -245,7 +245,7 @@ fu! s:SplitPattern(str, ...) "{{{
 		en
 		if len(dict)
 			let tokens = split(str, '\s')
-			let [str, cmd] = ['cmigemo -v -w %s -d %s', '']
+			let [str, cmd] = ['', 'cmigemo -v -w %s -d %s']
 			for token in tokens
 				let rtn = system(printf(cmd, shellescape(token), shellescape(dict)))
 				let str .= !v:shell_error && len(rtn) > 0 ? '.*'.rtn : token
