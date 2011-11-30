@@ -297,7 +297,8 @@ If is 1, update after 250ms. If bigger than 1, the number will be used as the
 delay time in milliseconds.
 
                                                          *'g:ctrlp_use_migemo'*
-Set this to 1 to use Migemo for Japanese filenames: >
+Set this to 1 to use Migemo Pattern for Japanese filenames. Migemo Search
+works in |regexp| mode. To split the pattern, separate words with space: >
   let g:ctrlp_use_migemo = 0
 <
 

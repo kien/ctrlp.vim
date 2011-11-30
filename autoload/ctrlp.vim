@@ -238,15 +238,23 @@ endf
 "}}}
 fu! s:SplitPattern(str, ...) "{{{
 	let str = s:sanstail(a:str)
-	if s:migemo && len(str) > 0 && executable('cmigemo')
+	if s:regexp && s:migemo && len(str) > 0 && executable('cmigemo')
 		let dict = s:glbpath(&rtp, printf("dict/%s/migemo-dict", &encoding), 1)
 		if !len(dict)
 			let dict = s:glbpath(&rtp, "dict/migemo-dict", 1)
 		en
 		if len(dict)
+			let tokens = split(str, '\s')
+			let str = ''
 			let cmd = 'cmigemo -v -w %s -d %s'
-			let rtn = system(printf(cmd, shellescape(str), shellescape(dict)))
-			let str = !v:shell_error && len(retn) > 0 ? rtn : str
+			for token in tokens
+				let rtn = system(printf(cmd, shellescape(token), shellescape(dict)))
+				if !v:shell_error && len(rtn) > 0
+					let str .= len(str) > 0 ? '.*'.rtn : rtn
+				else
+					let str .= token
+				en
+			endfo
 		en
 	en
 	let s:savestr = str
