@@ -78,15 +78,11 @@ fu! ctrlp#dir#init(...)
 endf
 
 fu! ctrlp#dir#accept(mode, str)
-	try
-		cal ctrlp#setdir(s:cwd.ctrlp#utils#lash().a:str)
-		sil! cal ctrlp#statusline()
-		cal ctrlp#setlines(s:id)
-		cal ctrlp#recordhist()
-		cal ctrlp#prtclear()
-	cat
-		cal ctrlp#msg("Directory not exists.")
-	endt
+	cal ctrlp#setdir(s:cwd.ctrlp#utils#lash().a:str)
+	sil! cal ctrlp#statusline()
+	cal ctrlp#setlines(s:id)
+	cal ctrlp#recordhist()
+	cal ctrlp#prtclear()
 endf
 
 fu! ctrlp#dir#id()
