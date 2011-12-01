@@ -32,7 +32,7 @@ cal ctrlp#mrufiles#init()
 if !exists('g:ctrlp_extensions') | fini | en
 
 if index(g:ctrlp_extensions, 'tag') >= 0
-	let g:ctrlp_alltags = {} | com! CtrlPTag cal ctrlp#init(ctrlp#tag#id())
+	let g:ctrlp_alltags = [] | com! CtrlPTag cal ctrlp#init(ctrlp#tag#id())
 en
 
 if index(g:ctrlp_extensions, 'quickfix') >= 0

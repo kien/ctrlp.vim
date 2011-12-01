@@ -202,10 +202,11 @@ fu! s:Buffers() "{{{
 	retu allbufs
 endf "}}}
 " * MatchedItems() {{{
-fu! s:MatchIt(items, pat, limit)
+fu! s:MatchIt(items, pat, limit, ispathitem)
 	let [items, pat, limit, newitems] = [a:items, a:pat, a:limit, []]
-	let mfunc = s:byfname ? 's:matchfname'
-		\ : s:itemtype > 2 ? 's:matchtab' : 'match'
+	let mfunc = s:byfname && a:ispathitem ? 's:matchfname'
+		\ : s:itemtype > 2 && len(items) < 30000 && !a:ispathitem ? 's:matchtab'
+		\ : 'match'
 	for item in items
 		if call(mfunc, [item, pat]) >= 0 | cal add(newitems, item) | en
 		if limit > 0 && len(newitems) >= limit | brea | en
@@ -214,7 +215,7 @@ fu! s:MatchIt(items, pat, limit)
 endf
 
 fu! s:MatchedItems(items, pats, limit)
-	let [items, pats, limit] = [a:items, a:pats, a:limit]
+	let [items, pats, limit, ipt] = [a:items, a:pats, a:limit, s:ispathitem()]
 	" If items is longer than s:mltipats_lim, use only the last pattern
 	if len(items) >= s:mltipats_lim | let pats = [pats[-1]] | en
 	cal map(pats, 'substitute(v:val, "\\\~", "\\\\\\~", "g")')
@@ -229,7 +230,7 @@ fu! s:MatchedItems(items, pats, limit)
 			retu exists('newitems') ? newitems : []
 		el " Start here, go back up if have 2 or more in pats
 			" Loop through the items
-			let newitems = s:MatchIt(items, each, limit)
+			let newitems = s:MatchIt(items, each, limit, ipt)
 		en
 	endfo
 	let s:matches = len(newitems)
@@ -238,14 +239,13 @@ endf
 "}}}
 fu! s:SplitPattern(str, ...) "{{{
 	let str = s:sanstail(a:str)
-	if s:regexp && s:migemo && len(str) > 0 && executable('cmigemo')
+	if s:migemo && s:regexp && len(str) > 0 && executable('cmigemo')
 		let dict = s:glbpath(&rtp, printf("dict/%s/migemo-dict", &encoding), 1)
 		if !len(dict)
 			let dict = s:glbpath(&rtp, "dict/migemo-dict", 1)
 		en
 		if len(dict)
-			let tokens = split(str, '\s')
-			let [str, cmd] = ['', 'cmigemo -v -w %s -d %s']
+			let [tokens, str, cmd] = [split(str, '\s'), '', 'cmigemo -v -w %s -d %s']
 			for token in tokens
 				let rtn = system(printf(cmd, shellescape(token), shellescape(dict)))
 				let str .= !v:shell_error && len(rtn) > 0 ? '.*'.rtn : token
@@ -287,7 +287,7 @@ fu! s:Render(lines, pat)
 	" Print the new items
 	if empty(lines)
 		setl nocul
-		cal setline(1, ' == NO MATCHES ==')
+		cal setline(1, ' == NO ENTRIES ==')
 		cal s:unmarksigns()
 		if s:dohighlight() | cal clearmatches() | en
 		retu
@@ -624,9 +624,11 @@ fu! s:ToggleRegex()
 endf
 
 fu! s:ToggleByFname()
-	let s:byfname = s:byfname ? 0 : 1
-	cal s:MapKeys(s:Focus(), 1)
-	cal s:PrtSwitcher()
+	if s:ispathitem()
+		let s:byfname = s:byfname ? 0 : 1
+		cal s:MapKeys(s:Focus(), 1)
+		cal s:PrtSwitcher()
+	en
 endf
 
 fu! s:ToggleType(dir)
@@ -902,6 +904,14 @@ fu! ctrlp#dirfilter(val)
 	retu isdirectory(a:val) && match(a:val, '[\/]\.\{,2}$') < 0 ? 1 : 0
 endf
 
+fu! s:ispathitem()
+	let ext = s:itemtype - ( g:ctrlp_builtins + 1 )
+	if s:itemtype < 3 || ( s:itemtype > 2 && g:ctrlp_ext_vars[ext][3] == 'dir' )
+		retu 1
+	en
+	retu 0
+endf
+
 fu! s:parentdir(curr)
 	let parent = s:getparent(a:curr)
 	if parent != a:curr | cal ctrlp#setdir(parent) | en
@@ -972,7 +982,7 @@ endf
 "}}}
 " Highlighting {{{
 fu! s:syntax()
-	sy match CtrlPNoEntries '^ == NO MATCHES ==$'
+	sy match CtrlPNoEntries '^ == NO ENTRIES ==$'
 	sy match CtrlPLineMarker '^>'
 	hi link CtrlPNoEntries Error
 	hi CtrlPLineMarker guifg=bg
@@ -1219,7 +1229,7 @@ fu! s:matchfname(item, pat)
 endf
 
 fu! s:matchtab(item, pat)
-	retu match(split(a:item, '\t[^\t]\+$')[0], a:pat)
+	retu match(split(a:item, '\t\+[^\t]\+$')[0], a:pat)
 endf
 
 fu! s:maxfiles(len)
