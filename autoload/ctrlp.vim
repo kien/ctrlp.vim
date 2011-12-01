@@ -2,7 +2,7 @@
 " File:          autoload/ctrlp.vim
 " Description:   Fuzzy file, buffer and MRU file finder.
 " Author:        Kien Nguyen <github.com/kien>
-" Version:       1.6.2
+" Version:       1.6.3
 " =============================================================================
 
 " Static variables {{{
@@ -174,9 +174,7 @@ fu! s:Files()
 			try | cal s:UserCommand(cwd, lscmd) | cat | retu [] | endt
 		en
 		" Remove base directory
-		let path = &ssl || !exists('+ssl') ? getcwd().'/' :
-			\ substitute(getcwd(), '\\', '\\\\', 'g').'\\'
-		cal map(g:ctrlp_allfiles, 'substitute(v:val, path, "", "g")')
+		cal ctrlp#rmbasedir(g:ctrlp_allfiles)
 		let read_cache = 0
 	el
 		let g:ctrlp_allfiles = ctrlp#utils#readfile(cache_file)
@@ -912,6 +910,12 @@ fu! s:ispathitem()
 	retu 0
 endf
 
+fu! ctrlp#rmbasedir(items)
+	let path = &ssl || !exists('+ssl') ? getcwd().'/' :
+		\ substitute(getcwd(), '\\', '\\\\', 'g').'\\'
+	retu map(a:items, 'substitute(v:val, path, "", "g")')
+endf
+
 fu! s:parentdir(curr)
 	let parent = s:getparent(a:curr)
 	if parent != a:curr | cal ctrlp#setdir(parent) | en
@@ -972,9 +976,10 @@ fu! ctrlp#fnesc(path)
 	retu exists('*fnameescape') ? fnameescape(a:path) : escape(a:path, " %#*?|<\"\n")
 endf
 
-fu! ctrlp#setdir(path)
+fu! ctrlp#setdir(path, ...)
+	let cmd = exists('a:1') ? a:1 : 'lc!'
 	try
-		exe 'lc!' ctrlp#fnesc(a:path)
+		exe cmd.' '.ctrlp#fnesc(a:path)
 	cat
 		cal ctrlp#msg("Can't change working dir. Directory not exists.")
 	endt
@@ -1269,6 +1274,11 @@ fu! s:lscommand()
 		retu cmd[1]
 	en
 endf
+"}}}
+" Extensions {{{
+fu! s:tagfiles()
+	retu filter(map(tagfiles(), 'fnamemodify(v:val, ":p")'), 'filereadable(v:val)')
+endf
 
 fu! ctrlp#exit()
 	cal s:PrtExit()
@@ -1280,11 +1290,6 @@ endf
 
 fu! ctrlp#setlines(type)
 	cal s:SetLines(a:type)
-endf
-"}}}
-" Extensions {{{
-fu! s:tagfiles()
-	retu filter(map(tagfiles(), 'fnamemodify(v:val, ":p")'), 'filereadable(v:val)')
 endf
 "}}}
 "}}}

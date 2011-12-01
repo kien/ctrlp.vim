@@ -35,14 +35,19 @@ endf
 fu! ctrlp#utils#readfile(file)
 	if filereadable(a:file)
 		let data = readfile(a:file)
-		if empty(data) || type(data) != 3 | unl data | let data = [] | en
+		if empty(data) || type(data) != 3
+			unl data
+			let data = []
+		en
 		retu data
 	en
 	retu []
 endf
 
 fu! ctrlp#utils#mkdir(dir)
-	if exists('*mkdir') && !isdirectory(a:dir) | sil! cal mkdir(a:dir) | en
+	if exists('*mkdir') && !isdirectory(a:dir)
+		sil! cal mkdir(a:dir)
+	en
 endf
 
 fu! ctrlp#utils#writecache(lines, ...)
@@ -50,7 +55,9 @@ fu! ctrlp#utils#writecache(lines, ...)
 	cal ctrlp#utils#mkdir(cache_dir)
 	if isdirectory(cache_dir)
 		sil! cal writefile(a:lines, exists('a:2') ? a:2 : ctrlp#utils#cachefile())
-		if !exists('a:1') | let g:ctrlp_newcache = 0 | en
+		if !exists('a:1')
+			let g:ctrlp_newcache = 0
+		en
 	en
 endf
 

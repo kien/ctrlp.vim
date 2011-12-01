@@ -1,4 +1,4 @@
-*ctrlp.txt*       Fuzzy file, buffer and MRU file finder. v1.6.2
+*ctrlp.txt*       Fuzzy file, buffer and MRU file finder. v1.6.3
 *CtrlP* *ControlP* *'ctrlp'* *'ctrl-p'*
 ===============================================================================
 #                                                                             #
@@ -297,7 +297,7 @@ If is 1, update after 250ms. If bigger than 1, the number will be used as the
 delay time in milliseconds.
 
                                                          *'g:ctrlp_use_migemo'*
-Set this to 1 to use Migemo Pattern for Japanese filenames. Migemo Search
+Set this to 1 to use Migemo Pattern for Japanese filenames. Migemo Search only
 works in |regexp| mode. To split the pattern, separate words with space: >
   let g:ctrlp_use_migemo = 0
 <
@@ -500,27 +500,36 @@ g)  Submit ? to open this help file.
 
 Extensions are optional. To enable an extension, add its name to the variable
 g:ctrlp_extensions: >
-  let g:ctrlp_extensions = ['tag', 'qfx']
+  let g:ctrlp_extensions = ['tag', 'quickfix', 'dir']
 <
 
 Available extensions:~
 
+                                                               *ctrlp-tag-mode*
   * Tag mode:~
-    - Shortname: 'tag'
+    - Name: 'tag'
     - Command: ':CtrlPTag'
     - Search for a tag within a generated central tags file, and jump to the
       definition. Use the Vim’s option |'tags'| to specify the names and the
       locations of the tags file(s). Example: `set tags+=tags/help,doc/tags`
 
+                                                          *ctrlp-quickfix-mode*
   * Quickfix mode:~
-    - Shortname: 'qfx'
+    - Name: 'quickfix'
     - Command: ':CtrlPQuickfix'
     - Search for an entry in the current quickfix errors and jump to it.
 
+                                                               *ctrlp-dir-mode*
   * Directory mode:~
-    - Shortname: 'dir'
+    - Name: 'dir'
     - Command: ':CtrlPDir'
-    - Search for a directory and change the local working directory to it.
+    - Search for a directory and change the working directory to it.
+    - Mappings:
+      + <cr> change the local working directory for |CtrlP| and keep it open.
+      + <c-t> change the global working directory (exit).
+      + <c-v> change the local working directory for the current window (exit).
+      + <c-x> change the global working directory to |CtrlP|’s current local
+        working directory (exit).
 
 ===============================================================================
 EXTENDING                                                     *ctrlp-extending*

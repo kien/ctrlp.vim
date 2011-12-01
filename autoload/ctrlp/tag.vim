@@ -19,24 +19,12 @@ let g:ctrlp_ext_vars = exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 "}}}
 " Utilities {{{
-fu! s:times(tagfiles)
-	retu map(copy(a:tagfiles), 'getftime(v:val)')
-endf
-
 fu! s:nodup(items)
 	let dict = {}
 	for each in a:items
 		cal extend(dict, { each : 0 })
 	endfo
 	retu keys(dict)
-endf
-
-fu! s:concat(lists)
-	let lists = []
-	for each in a:lists
-		cal extend(lists, each)
-	endfo
-	retu lists
 endf
 
 fu! s:findcount(str)

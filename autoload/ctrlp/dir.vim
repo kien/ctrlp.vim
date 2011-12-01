@@ -59,9 +59,7 @@ fu! ctrlp#dir#init(...)
 	if g:ctrlp_newdir || !filereadable(cafile)
 		let g:ctrlp_alldirs = []
 		cal s:globdirs(s:cwd, 0)
-		let path = &ssl || !exists('+ssl') ? getcwd().'/' :
-			\ substitute(getcwd(), '\\', '\\\\', 'g').'\\'
-		cal map(g:ctrlp_alldirs, 'substitute(v:val, path, "", "g")')
+		cal ctrlp#rmbasedir(g:ctrlp_alldirs)
 		let read_cache = 0
 	el
 		let g:ctrlp_alldirs = ctrlp#utils#readfile(cafile)
@@ -78,11 +76,17 @@ fu! ctrlp#dir#init(...)
 endf
 
 fu! ctrlp#dir#accept(mode, str)
-	cal ctrlp#setdir(s:cwd.ctrlp#utils#lash().a:str)
-	sil! cal ctrlp#statusline()
-	cal ctrlp#setlines(s:id)
-	cal ctrlp#recordhist()
-	cal ctrlp#prtclear()
+	let path = a:mode == 'h' ? getcwd() : s:cwd.ctrlp#utils#lash().a:str
+	if a:mode =~ 't\|v\|h'
+		cal ctrlp#exit()
+	en
+	cal ctrlp#setdir(path, a:mode =~ 't\|h' ? 'chd!' : 'lc!')
+	if a:mode == 'e'
+		sil! cal ctrlp#statusline()
+		cal ctrlp#setlines(s:id)
+		cal ctrlp#recordhist()
+		cal ctrlp#prtclear()
+	en
 endf
 
 fu! ctrlp#dir#id()
