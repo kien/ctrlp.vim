@@ -4,7 +4,7 @@
 " Author:        Kien Nguyen <github.com/kien>
 " =============================================================================
 
-" Init {{{
+" Init {{{1
 if exists('g:loaded_ctrlp_dir') && g:loaded_ctrlp_dir
 	fini
 en
@@ -26,8 +26,7 @@ let g:ctrlp_ext_vars = exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)
 	\ ? add(g:ctrlp_ext_vars, s:dir_var) : [s:dir_var]
 
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
-"}}}
-" Utilities {{{
+" Utilities {{{1
 fu! s:globdirs(dirs, depth)
 	let entries = split(globpath(a:dirs, s:glob), "\n")
 	if !s:folsym
@@ -47,8 +46,7 @@ endf
 fu! s:max(len, max)
 	retu a:max && a:len > a:max ? 1 : 0
 endf
-"}}}
-" Public {{{
+" Public {{{1
 fu! ctrlp#dir#init(...)
 	let s:cwd = getcwd()
 	for each in range(len(s:ars))
@@ -94,4 +92,4 @@ fu! ctrlp#dir#id()
 endf
 "}}}
 
-" vim:fen:fdl=0:ts=2:sw=2:sts=2
+" vim:fen:fdm=marker:fmr={{{,}}}:fdl=0:fdc=1:ts=2:sw=2:sts=2

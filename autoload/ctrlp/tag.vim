@@ -4,7 +4,7 @@
 " Author:        Kien Nguyen <github.com/kien>
 " =============================================================================
 
-" Init {{{
+" Init {{{1
 if exists('g:loaded_ctrlp_tag') && g:loaded_ctrlp_tag
 	fini
 en
@@ -17,8 +17,7 @@ let g:ctrlp_ext_vars = exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)
 	\ ? add(g:ctrlp_ext_vars, s:tag_var) : [s:tag_var]
 
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
-"}}}
-" Utilities {{{
+" Utilities {{{1
 fu! s:nodup(items)
 	let dict = {}
 	for each in a:items
@@ -31,7 +30,7 @@ fu! s:findcount(str)
 	let [tg, fname] = split(a:str, '\t\+\ze[^\t]\+$')
 	let [&l:tags, fname] = [s:ltags, expand(fname, 1)]
 	let tgs = taglist('^'.tg.'$')
-	if empty(tgs) | retu [0, 0] | en
+	if empty(tgs) | retu [1, 1] | en
 	let [fnd, ct, pos] = [0, 0, 0]
 	for each in tgs
 		let ct += 1
@@ -45,8 +44,7 @@ fu! s:findcount(str)
 	endfo
 	retu [fnd, pos]
 endf
-"}}}
-" Public {{{
+" Public {{{1
 fu! ctrlp#tag#init(tagfiles)
 	if empty(a:tagfiles) | retu [] | en
 	let tagfiles = sort(s:nodup(a:tagfiles))
@@ -78,7 +76,6 @@ fu! ctrlp#tag#accept(mode, str)
 		if fnd[0] == 1
 			exe cmd
 			let &l:tags = s:ltags
-			let tg = tg =~ '^!' ? substitute(tg, '!\(.*\)$', '/^!\1$', '') : tg
 			exe fnd[1].'ta' tg
 		el
 			exe cmd.' '.tg
@@ -93,4 +90,4 @@ fu! ctrlp#tag#id()
 endf
 "}}}
 
-" vim:fen:fdl=0:ts=2:sw=2:sts=2
+" vim:fen:fdm=marker:fmr={{{,}}}:fdl=0:fdc=1:ts=2:sw=2:sts=2

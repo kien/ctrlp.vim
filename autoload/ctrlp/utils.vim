@@ -4,7 +4,7 @@
 " Author:        Kien Nguyen <github.com/kien>
 " =============================================================================
 
-" Static variables {{{
+" Static variables {{{1
 fu! ctrlp#utils#lash()
 	retu &ssl || !exists('+ssl') ? '/' : '\'
 endf
@@ -20,8 +20,7 @@ fu! ctrlp#utils#opts()
 	en
 endf
 cal ctrlp#utils#opts()
-"}}}
-" Files and Directories {{{
+" Files and Directories {{{1
 fu! ctrlp#utils#cachedir()
 	retu s:cache_dir
 endf
@@ -62,8 +61,8 @@ fu! ctrlp#utils#writecache(lines, ...)
 endf
 
 fu! ctrlp#utils#glob(...)
-	retu call('glob',  v:version > 701 ? [a:1, a:2] : [a:1])
+	retu call('glob',  v:version > 701 ? a:000 : a:1)
 endf
 "}}}
 
-" vim:fen:fdl=0:fdc=1:ts=2:sw=2:sts=2
+" vim:fen:fdm=marker:fmr={{{,}}}:fdl=0:fdc=1:ts=2:sw=2:sts=2

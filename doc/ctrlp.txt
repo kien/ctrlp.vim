@@ -496,16 +496,18 @@ f)  Type the name of a non-existent file and press <c-y> to create it.
 g)  Submit ? to open this help file.
 
 ===============================================================================
-6. Extensions                                                *ctrlp-extensions*
+6. Extensions                                              *g:ctrlp-extensions*
 
 Extensions are optional. To enable an extension, add its name to the variable
 g:ctrlp_extensions: >
-  let g:ctrlp_extensions = ['tag', 'quickfix', 'dir']
+  let g:ctrlp_extensions = ['tag', 'quickfix', 'buffertag', 'dir']
 <
+The order of the items will be the order they appear on the statusline and when
+using <c-f>, <c-b>.
 
 Available extensions:~
 
-                                                               *ctrlp-tag-mode*
+                                                                    *:CtrlPTag*
   * Tag mode:~
     - Name: 'tag'
     - Command: ':CtrlPTag'
@@ -513,13 +515,13 @@ Available extensions:~
       definition. Use the Vim’s option |'tags'| to specify the names and the
       locations of the tags file(s). Example: `set tags+=tags/help,doc/tags`
 
-                                                          *ctrlp-quickfix-mode*
+                                                               *:CtrlPQuickfix*
   * Quickfix mode:~
     - Name: 'quickfix'
     - Command: ':CtrlPQuickfix'
     - Search for an entry in the current quickfix errors and jump to it.
 
-                                                               *ctrlp-dir-mode*
+                                                                    *:CtrlPDir*
   * Directory mode:~
     - Name: 'dir'
     - Command: ':CtrlPDir'
@@ -581,7 +583,10 @@ Special thanks:~
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
 
+Before 2011/11/30~
+
     + New features: Tag, Quickfix and Directory extensions.
+    + New commands: |:CtrlPTag|, |:CtrlPQuickfix|, |:CtrlPDir|.
     + New options: |g:ctrlp_use_migemo|,
                    |g:ctrlp_lazy_update|,
                    |g:ctrlp_follow_symlinks|
