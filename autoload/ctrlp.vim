@@ -68,9 +68,9 @@ fu! s:Open()
 	let [s:crfile, s:crfpath] = [expand('%:p', 1), expand('%:p:h', 1)]
 	let [s:crword, s:crline] = [expand('<cword>'), getline('.')]
 	let [s:tagfiles, s:crcursor] = [s:tagfiles(), getpos('.')]
-	let s:crvisual = s:lastvisual()
+	let [s:crbufnr, s:crvisual] = [bufnr('%'), s:lastvisual()]
+	let s:currwin = s:mwbottom ? winnr() : winnr() + has('autocmd')
 	sil! exe s:mwbottom ? 'bo' : 'to' '1new ControlP'
-	let s:currwin = s:mwbottom ? winnr('#') : winnr('#') + 1
 	let [s:bufnr, s:prompt] = [bufnr('%'), ['', '', '']]
 	abc <buffer>
 	if !exists('s:hstry')
@@ -97,7 +97,7 @@ fu! s:Close()
 	exe s:winres
 	unl! s:focus s:hisidx s:hstgot s:marked s:statypes s:cline s:init s:savestr
 		\ s:crfile s:crfpath s:crword s:crvisual s:tagfiles s:crline s:crcursor
-		\ g:ctrlp_nolimit
+		\ g:ctrlp_nolimit s:crbufnr
 	cal ctrlp#recordhist()
 	ec
 endf

@@ -500,7 +500,7 @@ g)  Submit ? to open this help file.
 
 Extensions are optional. To enable an extension, add its name to the variable
 g:ctrlp_extensions: >
-  let g:ctrlp_extensions = ['tag', 'quickfix', 'buffertag', 'dir']
+  let g:ctrlp_extensions = ['tag', 'quickfix', 'dir']
 <
 The order of the items will be the order they appear on the statusline and when
 using <c-f>, <c-b>.
