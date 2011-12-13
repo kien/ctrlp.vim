@@ -1,4 +1,4 @@
-*ctrlp.txt*       Fuzzy file, buffer and MRU file finder. v1.6.3
+*ctrlp.txt*       Fuzzy file, buffer, mru and tag finder. v1.6.4
 *CtrlP* *ControlP* *'ctrlp'* *'ctrl-p'*
 ===============================================================================
 #                                                                             #
@@ -150,6 +150,13 @@ only need to keep the lines that you’ve changed the values (inside []): >
     \ 'OpenMulti()':          ['<c-o>'],
     \ 'PrtExit()':            ['<esc>', '<c-c>', '<c-g>'],
     \ }
+<
+If you have problem with <bs> moving left instead of deleting a char, add this
+to your |vimrc|: >
+ let g:ctrlp_prompt_mappings = {
+   \ 'PrtBS()':      ['<c-h>'],
+   \ 'PrtCurLeft()': ['<left>'],
+   \ }
 <
 
                                                            *'g:ctrlp_mruf_max'*
@@ -445,7 +452,7 @@ Once inside the prompt:~
   <c-g>
     Exit |CtrlP|. <c-c> can also be used to stop the file scan.
 
-Chose your own mappings with |g:ctrlp_prompt_mappings|.
+Choose your own mappings with |g:ctrlp_prompt_mappings|.
 
 When inside the match window (press <tab> to switch):~
 

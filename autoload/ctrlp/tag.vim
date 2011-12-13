@@ -54,8 +54,8 @@ fu! ctrlp#tag#init(tagfiles)
 		let alltags = ctrlp#utils#readfile(each)
 		cal extend(g:ctrlp_alltags, alltags)
 	endfo
-	sy match CtrlPTagFilename '\zs\t.*\ze$'
-	hi link CtrlPTagFilename Comment
+	sy match CtrlPTabExtra '\zs\t.*\ze$'
+	hi link CtrlPTabExtra Comment
 	retu g:ctrlp_alltags
 endf
 
@@ -64,13 +64,13 @@ fu! ctrlp#tag#accept(mode, str)
 	let str = matchstr(a:str, '^[^\t]\+\t\+[^\t]\+\ze\t')
 	let [md, tg] = [a:mode, split(str, '^[^\t]\+\zs\t')[0]]
 	let fnd = s:findcount(str)
-	if fnd[0] == 1
-		let cmd = md == 't' ? 'tabe' : md == 'h' ? 'new'
-			\ : md == 'v' ? 'vne' : 'ene'
-	el
-		let cmd = md == 't' ? 'tab stj' : md == 'h' ? 'stj'
-			\ : md == 'v' ? 'vert stj' : 'tj'
-	en
+	let cmds = {
+		\ 't': ['tabe', 'tab stj'],
+		\ 'h': ['new', 'stj'],
+		\ 'v': ['vne', 'vert stj'],
+		\ 'e': ['ene', 'tj'],
+		\ }
+	let cmd = fnd[0] == 1 ? cmds[md][0] : cmds[md][1]
 	let cmd = cmd =~ 'tj\|ene' && &modified ? 'hid '.cmd : cmd
 	try
 		if fnd[0] == 1

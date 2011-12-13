@@ -1,8 +1,8 @@
 " =============================================================================
 " File:          autoload/ctrlp.vim
-" Description:   Fuzzy file, buffer and MRU file finder.
+" Description:   Fuzzy file, buffer, mru and tag finder.
 " Author:        Kien Nguyen <github.com/kien>
-" Version:       1.6.3
+" Version:       1.6.4
 " =============================================================================
 
 " Static variables {{{1
@@ -39,7 +39,6 @@ fu! s:opts()
 		exe 'let' va[0] '=' string(exists(ke) ? eval(ke) : va[1])
 	endfo
 	if !exists('g:ctrlp_newcache') | let g:ctrlp_newcache = 0 | en
-	" Note: wildignore is ignored when using **
 	let s:glob = s:dotfiles ? '.*\|*' : '*'
 	let s:maxdepth = min([s:maxdepth, 100])
 	let g:ctrlp_builtins = 2
@@ -642,11 +641,11 @@ fu! s:PrtSwitcher()
 endf
 fu! s:SetWD(...) "{{{1
 	let pathmode = s:pathmode
-	if exists('a:1') && len(a:1) == 1 && !type(a:1)
-		let pathmode = a:1
-	elsei exists('a:1') && len(a:1) >= 1 && type(a:1)
+	if exists('a:1') && len(a:1) | if type(a:1)
 		cal ctrlp#setdir(a:1) | retu
-	en
+	el
+		let pathmode = a:1
+	en | en
 	if !exists('a:2')
 		if match(s:crfile, '^\<.\+\>://.*') >= 0 || !pathmode | retu | en
 		if exists('+acd') | let [s:glb_acd, &acd] = [&acd, 0] | en
@@ -664,7 +663,7 @@ fu! s:SetWD(...) "{{{1
 	unl! s:foundroot
 endf
 " * AcceptSelection() {{{1
-fu! ctrlp#acceptfile(mode, matchstr)
+fu! ctrlp#acceptfile(mode, matchstr, ...)
 	let [md, matchstr] = [a:mode, a:matchstr]
 	" Get the full path
 	let filpath = s:itemtype ? matchstr : getcwd().s:lash.matchstr
@@ -673,20 +672,23 @@ fu! ctrlp#acceptfile(mode, matchstr)
 	if s:jmptobuf && bufnum > 0 && md == 'e'
 		let [jmpb, bufwinnr] = [1, bufwinnr(bufnum)]
 		let buftab = s:jmptobuf > 1 ? s:buftab(bufnum) : [0, 0]
+		let j2l = a:0 ? a:1 : str2nr(matchstr(s:tail(), '^ +\zs\d\+$'))
 	en
 	" Switch to existing buffer or open new one
 	if exists('jmpb') && buftab[0]
 		exe 'tabn' buftab[1]
 		exe buftab[0].'winc w'
+		if j2l | cal s:j2l(j2l) | en
 	elsei exists('jmpb') && bufwinnr > 0
 		exe bufwinnr.'winc w'
+		if j2l | cal s:j2l(j2l) | en
 	el
 		" Determine the command to use
 		let cmd = md == 't' || s:splitwin == 1 ? 'tabe'
 			\ : md == 'h' || s:splitwin == 2 ? 'new'
 			\ : md == 'v' || s:splitwin == 3 ? 'vne' : ctrlp#normcmd('e')
 		" Open new window/buffer
-		cal s:openfile(cmd, filpath)
+		cal call('s:openfile', a:0 ? [cmd, filpath, ' +'.a:1] : [cmd, filpath])
 	en
 endf
 
@@ -1173,9 +1175,9 @@ fu! ctrlp#msg(msg)
 	echoh Identifier | echon "CtrlP: ".a:msg | echoh None
 endf
 
-fu! s:openfile(cmd, filpath)
+fu! s:openfile(cmd, filpath, ...)
 	let cmd = a:cmd == 'e' && &modified ? 'hid e' : a:cmd
-	let tail = s:tail()
+	let tail = a:0 ? a:1 : s:tail()
 	try
 		exe cmd.tail.' '.ctrlp#fnesc(a:filpath)
 	cat
@@ -1193,6 +1195,11 @@ fu! s:writecache(read_cache, cache_file)
 		if len(g:ctrlp_allfiles) > s:nocache_lim | let s:caching = 1 | en
 		cal ctrlp#utils#writecache(g:ctrlp_allfiles)
 	en
+endf
+
+fu! s:j2l(nr)
+	exe a:nr
+	sil! norm! zOzz
 endf
 
 fu! s:regexfilter(str)

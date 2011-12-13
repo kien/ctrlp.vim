@@ -1,6 +1,6 @@
 " =============================================================================
 " File:          autoload/ctrlp/dir.vim
-" Description:   Directory switcher extension
+" Description:   Directory extension
 " Author:        Kien Nguyen <github.com/kien>
 " =============================================================================
 
