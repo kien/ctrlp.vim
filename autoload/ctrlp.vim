@@ -644,7 +644,7 @@ fu! s:SetWD(...) "{{{1
 	let pathmode = s:pathmode
 	if exists('a:1') && len(a:1) == 1 && !type(a:1)
 		let pathmode = a:1
-	elsei exists('a:1') && len(a:1) > 1 && type(a:1)
+	elsei exists('a:1') && len(a:1) >= 1 && type(a:1)
 		cal ctrlp#setdir(a:1) | retu
 	en
 	if !exists('a:2')
