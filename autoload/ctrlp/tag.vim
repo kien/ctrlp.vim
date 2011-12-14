@@ -44,6 +44,22 @@ fu! s:findcount(str)
 	endfo
 	retu [fnd, pos]
 endf
+
+fu! s:filter(tags)
+	let [nr, alltags] = [0, a:tags]
+	wh 0 < 1
+		if alltags[nr] =~ '^!' && alltags[nr] !~ '^!_TAG_'
+			let nr += 1
+			con
+		en
+		if alltags[nr] =~ '^!_TAG_' && len(alltags) > nr
+			cal remove(alltags, nr)
+		el
+			brea
+		en
+	endw
+	retu alltags
+endf
 " Public {{{1
 fu! ctrlp#tag#init(tagfiles)
 	if empty(a:tagfiles) | retu [] | en
@@ -51,7 +67,7 @@ fu! ctrlp#tag#init(tagfiles)
 	let s:ltags  = join(tagfiles, ',')
 	let g:ctrlp_alltags = []
 	for each in tagfiles
-		let alltags = ctrlp#utils#readfile(each)
+		let alltags = s:filter(ctrlp#utils#readfile(each))
 		cal extend(g:ctrlp_alltags, alltags)
 	endfo
 	sy match CtrlPTabExtra '\zs\t.*\ze$'
