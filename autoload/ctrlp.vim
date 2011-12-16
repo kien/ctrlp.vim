@@ -669,7 +669,7 @@ fu! ctrlp#acceptfile(mode, matchstr, ...)
 	let filpath = s:itemtype ? matchstr : getcwd().s:lash.matchstr
 	cal s:PrtExit()
 	let bufnum = bufnr(filpath)
-	if s:jmptobuf && bufnum > 0 && md == 'e'
+	if s:jmptobuf && bufnum > 0 && (md == 'e' || md == 't')
 		let [jmpb, bufwinnr] = [1, bufwinnr(bufnum)]
 		let buftab = s:jmptobuf > 1 ? s:buftab(bufnum) : [0, 0]
 		let j2l = a:0 ? a:1 : str2nr(matchstr(s:tail(), '^ +\zs\d\+$'))
