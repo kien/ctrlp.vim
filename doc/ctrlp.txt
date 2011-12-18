@@ -143,7 +143,7 @@ only need to keep the lines that you’ve changed the values (inside []): >
     \ 'ToggleFocus()':        ['<tab>'],
     \ 'ToggleRegex()':        ['<c-r>'],
     \ 'ToggleByFname()':      ['<c-d>'],
-    \ 'ToggleType(1)':        ['<c-f>', '<c-up'],
+    \ 'ToggleType(1)':        ['<c-f>', '<c-up>'],
     \ 'ToggleType(-1)':       ['<c-b>', '<c-down>'],
     \ 'PrtCurStart()':        ['<c-a>'],
     \ 'PrtCurEnd()':          ['<c-e>'],
