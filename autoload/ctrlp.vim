@@ -578,7 +578,7 @@ fu! s:MapSpecs(...)
 		\ 'ToggleFocus()':        ['<tab>'],
 		\ 'ToggleRegex()':        ['<c-r>'],
 		\ 'ToggleByFname()':      ['<c-d>'],
-		\ 'ToggleType(1)':        ['<c-f>', '<c-up'],
+		\ 'ToggleType(1)':        ['<c-f>', '<c-up>'],
 		\ 'ToggleType(-1)':       ['<c-b>', '<c-down>'],
 		\ 'PrtInsert("w")':       ['<F2>'],
 		\ 'PrtInsert("s")':       ['<F3>'],
