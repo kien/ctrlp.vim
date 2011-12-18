@@ -11,13 +11,14 @@ fu! s:opts()
 	let opts = {
 		\ 'g:ctrlp_by_filename':           ['s:byfname', 0],
 		\ 'g:ctrlp_clear_cache_on_exit':   ['s:clrex', 1],
+		\ 'g:ctrlp_custom_ignore':         ['s:usrign', ''],
 		\ 'g:ctrlp_dont_split':            ['s:nosplit', ''],
 		\ 'g:ctrlp_dotfiles':              ['s:dotfiles', 1],
 		\ 'g:ctrlp_extensions':            ['s:extensions', []],
 		\ 'g:ctrlp_follow_symlinks':       ['s:folsym', 0],
 		\ 'g:ctrlp_highlight_match':       ['s:mathi', [1, 'Identifier']],
 		\ 'g:ctrlp_lazy_update':           ['s:lazy', 0],
-		\ 'g:ctrlp_jump_to_buffer':        ['s:jmptobuf', 1],
+		\ 'g:ctrlp_jump_to_buffer':        ['s:jmptobuf', 2],
 		\ 'g:ctrlp_match_window_bottom':   ['s:mwbottom', 1],
 		\ 'g:ctrlp_match_window_reversed': ['s:mwreverse', 1],
 		\ 'g:ctrlp_max_depth':             ['s:maxdepth', 40],
@@ -126,23 +127,67 @@ fu! ctrlp#reset()
 	unl! s:cline
 endf
 " * Files() {{{1
+fu! s:Files()
+	let [cwd, cache_file] = [getcwd(), ctrlp#utils#cachefile()]
+	if g:ctrlp_newcache || !filereadable(cache_file) || !s:caching
+		let lscmd = s:lsCmd()
+		" Get the list of files
+		if empty(lscmd)
+			cal s:GlobPath(cwd, [], 0)
+		el
+			sil! cal ctrlp#progress('Indexing...')
+			try | cal s:UserCmd(cwd, lscmd) | cat | retu [] | endt
+		en
+		" Remove base directory
+		cal ctrlp#rmbasedir(g:ctrlp_allfiles)
+		let read_cache = 0
+	el
+		let g:ctrlp_allfiles = ctrlp#utils#readfile(cache_file)
+		let read_cache = 1
+	en
+	if len(g:ctrlp_allfiles) <= s:compare_lim
+		cal sort(g:ctrlp_allfiles, 'ctrlp#complen')
+	en
+	cal s:writecache(read_cache, cache_file)
+	retu g:ctrlp_allfiles
+endf
+
 fu! s:GlobPath(dirs, allfiles, depth)
 	let entries = split(globpath(a:dirs, s:glob), "\n")
-	if !s:folsym
-		let entries = filter(entries, 'getftype(v:val) != "link"')
+	if s:usrign != ''
+		cal filter(entries, 'v:val !~ s:usrign')
 	en
-	let g:ctrlp_allfiles = filter(copy(entries), '!isdirectory(v:val)')
-	let ftrfunc = s:dotfiles ? 'ctrlp#dirfilter(v:val)' : 'isdirectory(v:val)'
-	let alldirs = filter(entries, ftrfunc)
+	let [dirs, g:ctrlp_allfiles] = s:DirAndFile(copy(entries))
 	cal extend(g:ctrlp_allfiles, a:allfiles, 0)
 	let depth = a:depth + 1
-	if !empty(alldirs) && !s:maxfiles(len(g:ctrlp_allfiles)) && depth <= s:maxdepth
+	if !empty(dirs) && !s:maxf(len(g:ctrlp_allfiles)) && depth <= s:maxdepth
 		sil! cal ctrlp#progress(len(g:ctrlp_allfiles))
-		cal s:GlobPath(join(alldirs, ','), g:ctrlp_allfiles, depth)
+		cal s:GlobPath(join(dirs, ','), g:ctrlp_allfiles, depth)
 	en
 endf
 
-fu! s:UserCommand(path, lscmd)
+fu! s:DirAndFile(entries)
+	let items = [[], []]
+	for each in a:entries
+		let etype = getftype(each)
+		if etype == 'dir'
+			if s:dotfiles | if match(each, '[\/]\.\{,2}$') < 0
+				cal add(items[0], each)
+			en | el
+				cal add(items[0], each)
+			en
+		el
+			if s:folsym
+				cal add(items[1], each)
+			el | if etype != 'link'
+				cal add(items[1], each)
+			en | en
+		en
+	endfo
+	retu items
+endf
+
+fu! s:UserCmd(path, lscmd)
 	let path = a:path
 	if exists('+ssl') && &ssl
 		let [ssl, &ssl, path] = [&ssl, 0, tr(path, '/', '\')]
@@ -158,29 +203,21 @@ fu! s:UserCommand(path, lscmd)
 	en
 endf
 
-fu! s:Files()
-	let [cwd, cache_file] = [getcwd(), ctrlp#utils#cachefile()]
-	if g:ctrlp_newcache || !filereadable(cache_file) || !s:caching
-		let lscmd = s:lscommand()
-		" Get the list of files
-		if empty(lscmd)
-			cal s:GlobPath(cwd, [], 0)
-		el
-			sil! cal ctrlp#progress('Waiting...')
-			try | cal s:UserCommand(cwd, lscmd) | cat | retu [] | endt
+fu! s:lsCmd()
+	let cmd = s:usrcmd
+	if type(cmd) == 1
+		retu cmd
+	elsei type(cmd) == 3 && len(cmd) >= 2 && !empty(cmd[0]) && !empty(cmd[1])
+		let rmarker = cmd[0]
+		" Find a repo root
+		cal s:findroot(getcwd(), rmarker, 0, 1)
+		if !exists('s:vcsroot') || ( exists('s:vcsroot') && empty(s:vcsroot) )
+			" Try the secondary_command
+			retu len(cmd) == 3 ? cmd[2] : ''
 		en
-		" Remove base directory
-		cal ctrlp#rmbasedir(g:ctrlp_allfiles)
-		let read_cache = 0
-	el
-		let g:ctrlp_allfiles = ctrlp#utils#readfile(cache_file)
-		let read_cache = 1
+		let s:vcscmd = s:lash == '\' ? 1 : 0
+		retu cmd[1]
 	en
-	if len(g:ctrlp_allfiles) <= s:compare_lim
-		cal sort(g:ctrlp_allfiles, 'ctrlp#complen')
-	en
-	cal s:writecache(read_cache, cache_file)
-	retu g:ctrlp_allfiles
 endf
 fu! s:Buffers() "{{{1
 	let allbufs = []
@@ -669,18 +706,18 @@ fu! ctrlp#acceptfile(mode, matchstr, ...)
 	let filpath = s:itemtype ? matchstr : getcwd().s:lash.matchstr
 	cal s:PrtExit()
 	let bufnum = bufnr(filpath)
-	if s:jmptobuf && bufnum > 0 && (md == 'e' || md == 't')
+	if s:jmptobuf && bufnum > 0 && md =~ 'e\|t'
 		let [jmpb, bufwinnr] = [1, bufwinnr(bufnum)]
-		let buftab = s:jmptobuf > 1 ? s:buftab(bufnum) : [0, 0]
+		let buftab = s:jmptobuf > 1 ? s:buftab(bufnum, md) : [0, 0]
 		let j2l = a:0 ? a:1 : str2nr(matchstr(s:tail(), '^ +\zs\d\+$'))
 	en
 	" Switch to existing buffer or open new one
-	if exists('jmpb') && buftab[0]
-		exe 'tabn' buftab[1]
-		exe buftab[0].'winc w'
-		if j2l | cal s:j2l(j2l) | en
-	elsei exists('jmpb') && bufwinnr > 0
+	if exists('jmpb') && bufwinnr > 0 && md != 't'
 		exe bufwinnr.'winc w'
+		if j2l | cal s:j2l(j2l) | en
+	elsei exists('jmpb') && buftab[0]
+		exe 'tabn' buftab[0]
+		exe buftab[1].'winc w'
 		if j2l | cal s:j2l(j2l) | en
 	el
 		" Determine the command to use
@@ -692,8 +729,31 @@ fu! ctrlp#acceptfile(mode, matchstr, ...)
 	en
 endf
 
+fu! s:SpecInputs()
+	let str = join(s:prompt, '')
+	let type = s:itemtype > 2 ?
+		\ g:ctrlp_ext_vars[s:itemtype - ( g:ctrlp_builtins + 1 )][3] : s:itemtype
+	if str == '..' && type =~ '0\|dir'
+		cal s:parentdir(getcwd())
+		cal s:SetLines(s:itemtype)
+		cal s:PrtClear()
+		retu 1
+	elsei ( str == '/' || str == '\' ) && type =~ '0\|dir'
+		cal s:SetWD(2, 0)
+		cal s:SetLines(s:itemtype)
+		cal s:PrtClear()
+		retu 1
+	elsei str == '?'
+		cal s:PrtExit()
+		let hlpwin = &columns > 159 ? '| vert res 80' : ''
+		sil! exe 'bo vert h ctrlp-mappings' hlpwin '| norm! 0'
+		retu 1
+	en
+	retu 0
+endf
+
 fu! s:AcceptSelection(mode)
-	if a:mode == 'e' | if s:specinputs() | retu | en | en
+	if a:mode == 'e' | if s:SpecInputs() | retu | en | en
 	" Get the selected line
 	let matchstr = matchstr(getline('.'), '^> \zs.\+\ze\t*$')
 	if empty(matchstr) | retu | en
@@ -885,10 +945,6 @@ fu! ctrlp#progress(len)
 	redr
 endf
 " Paths {{{2
-fu! ctrlp#dirfilter(val)
-	retu isdirectory(a:val) && match(a:val, '[\/]\.\{,2}$') < 0 ? 1 : 0
-endf
-
 fu! s:ispathitem()
 	let ext = s:itemtype - ( g:ctrlp_builtins + 1 )
 	if s:itemtype < 3 || ( s:itemtype > 2 && g:ctrlp_ext_vars[ext][3] == 'dir' )
@@ -1051,14 +1107,14 @@ fu! s:vacantdict(dict)
 	retu filter(range(1, max(keys(a:dict))), '!has_key(a:dict, v:val)')
 endf
 " Buffers {{{2
-fu! s:buftab(bufnum)
-	for nr in range(1, tabpagenr('$'))
-		let buflist = tabpagebuflist(nr)
-		if match(buflist, a:bufnum) >= 0
-			let [buftabnr, tabwinnrs] = [nr, tabpagewinnr(nr, '$')]
-			for ewin in range(1, tabwinnrs)
-				if buflist[ewin - 1] == a:bufnum
-					retu [ewin, buftabnr]
+fu! s:buftab(bufnum, md)
+	for tabnr in range(1, tabpagenr('$'))
+		if tabpagenr() == tabnr && a:md == 't' | con | en
+		let buflist = tabpagebuflist(tabnr)
+		if index(buflist, a:bufnum) >= 0
+			for winnr in range(1, tabpagewinnr(tabnr, '$'))
+				if buflist[winnr - 1] == a:bufnum
+					retu [tabnr, winnr]
 				en
 			endfo
 		en
@@ -1136,29 +1192,6 @@ fu! s:sanstail(str)
 	retu str
 endf
 " Misc {{{2
-fu! s:specinputs()
-	let str = join(s:prompt, '')
-	let type = s:itemtype > 2 ?
-		\ g:ctrlp_ext_vars[s:itemtype - ( g:ctrlp_builtins + 1 )][3] : s:itemtype
-	if str == '..' && type =~ '0\|dir'
-		cal s:parentdir(getcwd())
-		cal s:SetLines(s:itemtype)
-		cal s:PrtClear()
-		retu 1
-	elsei ( str == '/' || str == '\' ) && type =~ '0\|dir'
-		cal s:SetWD(2, 0)
-		cal s:SetLines(s:itemtype)
-		cal s:PrtClear()
-		retu 1
-	elsei str == '?'
-		cal s:PrtExit()
-		let hlpwin = &columns > 159 ? '| vert res 80' : ''
-		sil! exe 'bo vert h ctrlp-mappings' hlpwin '| norm! 0'
-		retu 1
-	en
-	retu 0
-endf
-
 fu! s:lastvisual()
 	let cview = winsaveview()
 	let [ovreg, ovtype] = [getreg('v'), getregtype('v')]
@@ -1228,7 +1261,7 @@ fu! s:matchtab(item, pat)
 	retu match(split(a:item, '\t\+[^\t]\+$')[0], a:pat)
 endf
 
-fu! s:maxfiles(len)
+fu! s:maxf(len)
 	retu s:maxfiles && a:len > s:maxfiles ? 1 : 0
 endf
 
@@ -1247,23 +1280,6 @@ fu! s:insertcache(str)
 	en
 	cal insert(data, str, pos)
 	cal s:writecache(0, ctrlp#utils#cachefile())
-endf
-
-fu! s:lscommand()
-	let cmd = s:usrcmd
-	if type(cmd) == 1
-		retu cmd
-	elsei type(cmd) == 3 && len(cmd) >= 2 && !empty(cmd[0]) && !empty(cmd[1])
-		let rmarker = cmd[0]
-		" Find a repo root
-		cal s:findroot(getcwd(), rmarker, 0, 1)
-		if !exists('s:vcsroot') || ( exists('s:vcsroot') && empty(s:vcsroot) )
-			" Try the secondary_command
-			retu len(cmd) == 3 ? cmd[2] : ''
-		en
-		let s:vcscmd = s:lash == '\' ? 1 : 0
-		retu cmd[1]
-	en
 endf
 " Extensions {{{2
 fu! s:tagfiles()

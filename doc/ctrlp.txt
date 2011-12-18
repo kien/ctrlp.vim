@@ -23,9 +23,9 @@ CONTENTS                                                       *ctrlp-contents*
 ===============================================================================
 1. Intro                                                          *ctrlp-intro*
 
-Full path fuzzy file, buffer and MRU file finder with an intuitive interface.
+Full path fuzzy file, buffer, mru and tag finder with an intuitive interface.
 Written in pure Vimscript for MacVim and Vim version 7.0+. Has full support for
-Vim’s |regexp| as search pattern, built-in MRU monitoring, project’s root
+Vim’s |regexp| as search pattern, built-in MRU files monitoring, project’s root
 finder, and more.
 
 To enable optional extensions (tag, quickfix, dir...), see |ctrlp-extensions|.
@@ -40,8 +40,13 @@ Use this option to change the mapping to invoke |CtrlP| in |Normal| mode: >
   let g:ctrlp_map = '<c-p>'
 <
 
+                                                                *'g:ctrlp_cmd'*
+Set the default opening command to use when pressing the above mapping: >
+  let g:ctrlp_cmd = 'CtrlP'
+<
+
                                                              *'g:loaded_ctrlp'*
-Use this option to disable the plugin completely: >
+Use this to disable the plugin completely: >
   let g:loaded_ctrlp = 1
 <
 
@@ -72,9 +77,10 @@ Set the maximum height of the match window: >
 <
 
                                                      *'g:ctrlp_jump_to_buffer'*
-Set this to 0 to disable the jump-to-open-buffer feature. Set to 2 to also jump
-tab if the selected buffer’s opened in another tab: >
-  let g:ctrlp_jump_to_buffer = 1
+Set this to 0 to disable the jump-to-open-buffer feature.
+Set to 2 to also jump tab if the selected buffer’s opened in another tab.
+Set to 1 to only jump to it if it’s opened in the current tab: >
+  let g:ctrlp_jump_to_buffer = 2
 <
 
                                                   *'g:ctrlp_working_path_mode'*
@@ -192,20 +198,23 @@ MRU entries: >
 Set this to 0 if you don’t want |CtrlP| to search for dotfiles and dotdirs: >
   let g:ctrlp_dotfiles = 1
 <
-You can also use |'wildignore'| to exclude anything from the search.
-e.g. exclude version control directories from the results: >
+You can use |'wildignore'| to exclude anything from the search.
+e.g. exclude version control directories: >
   set wildignore+=*/.git/*,*/.hg/*,*/.svn/*  " Linux/MacOSX
   set wildignore+=.git\*,.hg\*,.svn\*        " Windows
 <
-Note: the `*/` in front of each dotfile glob is required for the dotfiles
-search feature to work correctly along side with |wildignore|. If you’ve
-disabled dotfiles search (set |g:ctrlp_dotfiles| to 0), then you can ignore
-this.
+Note: the `*/` in front of each glob is required.
 
 Other note: |wildignore| influences the result of |expand()|, |globpath()| and
 |glob()| which many plugins use to find stuff on the system (e.g. fugitive.vim
 looks for .git/, some other plugins look for external exe tools on Windows).
 So be a little mindful of what you put in your |wildignore|.
+
+                                                      *'g:ctrlp_custom_ignore'*
+In addition to |'wildignore'|, use this for files and directories you want only
+|CtrlP| to not show. Use |regexp| to specify the pattern: >
+  let g:ctrlp_custom_ignore = ''
+<
 
                                                     *'g:ctrlp_highlight_match'*
 Use this to enable/disable highlighting of the matched patterns and to specify
@@ -491,7 +500,7 @@ d)  Type exactly two dots '..' at the start of the prompt and press enter to go
     backward in the directory tree by 1 level. If the parent directory is
     large, this might be slow.
 
-e)  Similarly submit '/' or '\' to find and go to the project’s root. If the
+e)  Similarly, submit '/' or '\' to find and go to the project’s root. If the
     project is large, using a VCS listing command to look for files might help
     speeding up the intial scan (see |g:ctrlp_user_command| for more details).
 
@@ -589,6 +598,9 @@ Special thanks:~
 
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
+
+    + New options: |g:ctrlp_cmd|,
+                   |g:ctrlp_custom_ignore|
 
 Before 2011/11/30~
 

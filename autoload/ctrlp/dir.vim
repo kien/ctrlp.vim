@@ -17,6 +17,7 @@ let s:ars = [
 	\ 's:maxfiles',
 	\ 's:compare_lim',
 	\ 's:glob',
+	\ 's:usrign',
 	\ ]
 
 let s:dir_var = ['ctrlp#dir#init('.join(s:ars, ', ').')', 'ctrlp#dir#accept',
@@ -30,9 +31,12 @@ let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 fu! s:globdirs(dirs, depth)
 	let entries = split(globpath(a:dirs, s:glob), "\n")
 	if !s:folsym
-		let entries = filter(entries, 'getftype(v:val) != "link"')
+		cal filter(entries, 'getftype(v:val) != "link"')
 	en
-	let ftrfunc = s:dotfiles ? 'ctrlp#dirfilter(v:val)' : 'isdirectory(v:val)'
+	if s:usrign != ''
+		cal filter(entries, 'v:val !~ s:usrign')
+	en
+	let ftrfunc = s:dotfiles ? 's:dirfilter(v:val)' : 'isdirectory(v:val)'
 	let alldirs = filter(entries, ftrfunc)
 	cal extend(g:ctrlp_alldirs, alldirs)
 	let depth = a:depth + 1
@@ -41,6 +45,10 @@ fu! s:globdirs(dirs, depth)
 		sil! cal ctrlp#progress(len(g:ctrlp_alldirs))
 		cal s:globdirs(join(alldirs, ','), depth)
 	en
+endf
+
+fu! s:dirfilter(val)
+	retu isdirectory(a:val) && match(a:val, '[\/]\.\{,2}$') < 0 ? 1 : 0
 endf
 
 fu! s:max(len, max)
