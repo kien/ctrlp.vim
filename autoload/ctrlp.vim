@@ -600,7 +600,7 @@ fu! s:MapSpecs(...)
 	en
 	" Correct arrow keys in terminal
 	if ( has('termresponse') && !empty(v:termresponse) )
-		\ || &term =~? 'xterm\|\<k\?vt\|gnome\|screen'
+		\ || &term =~? 'xterm\|\<k\?vt\|gnome\|screen\|linux'
 		for each in ['\A <up>','\B <down>','\C <right>','\D <left>']
 			exe lcmap.' <esc>['.each
 		endfo
