@@ -157,33 +157,12 @@ fu! s:GlobPath(dirs, depth)
 	if s:usrign != ''
 		cal filter(entries, 'v:val !~ s:usrign')
 	en
-	let [dnf, depth] = [s:DirAndFile(entries), a:depth + 1]
+	let [dnf, depth] = [ctrlp#dirnfile(entries), a:depth + 1]
 	cal extend(g:ctrlp_allfiles, dnf[1])
 	if !empty(dnf[0]) && !s:maxf(len(g:ctrlp_allfiles)) && depth <= s:maxdepth
 		sil! cal ctrlp#progress(len(g:ctrlp_allfiles))
 		cal s:GlobPath(join(dnf[0], ','), depth)
 	en
-endf
-
-fu! s:DirAndFile(entries)
-	let items = [[], []]
-	for each in a:entries
-		let etype = getftype(each)
-		if etype == 'dir'
-			if s:dotfiles | if match(each, '[\/]\.\{,2}$') < 0
-				cal add(items[0], each)
-			en | el
-				cal add(items[0], each)
-			en
-		elsei etype == 'link'
-			if s:folsym
-				cal add(items[!isdirectory(each)], each)
-			en
-		el
-			cal add(items[1], each)
-		en
-	endfo
-	retu items
 endf
 
 fu! s:UserCmd(path, lscmd)
@@ -950,6 +929,40 @@ fu! s:ispathitem()
 		retu 1
 	en
 	retu 0
+endf
+
+fu! ctrlp#dirnfile(entries)
+	let items = [[], []]
+	for each in a:entries
+		let etype = getftype(each)
+		if etype == 'dir'
+			if s:dotfiles | if match(each, '[\/]\.\{,2}$') < 0
+				cal add(items[0], each)
+			en | el
+				cal add(items[0], each)
+			en
+		elsei etype == 'link'
+			if s:folsym
+				let isfile = !isdirectory(each)
+				if !s:samerootsyml(each, isfile)
+					cal add(items[isfile], each)
+				en
+			en
+		elsei etype == 'file'
+			cal add(items[1], each)
+		en
+	endfo
+	retu items
+endf
+
+fu! s:samerootsyml(each, isfile)
+	let resl = resolve(a:each).( a:isfile ? '' : s:lash )
+	let resl = a:isfile ? fnamemodify(resl, ':p:h').s:lash : resl
+	let cwd = getcwd().s:lash
+	if stridx(resl, cwd) && ( stridx(cwd, resl) || a:isfile )
+		retu 0
+	en
+	retu 1
 endf
 
 fu! ctrlp#rmbasedir(items)
