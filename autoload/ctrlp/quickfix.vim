@@ -43,7 +43,7 @@ fu! ctrlp#quickfix#accept(mode, str)
 	cat
 		cal ctrlp#msg("Invalid command or argument.")
 	fina
-		cal cursor(items[2], items[3]) | sil! norm! zOzz
+		cal cursor(items[2], items[3]) | sil! norm! zvzz
 	endt
 endf
 

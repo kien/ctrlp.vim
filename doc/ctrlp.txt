@@ -1,4 +1,4 @@
-*ctrlp.txt*       Fuzzy file, buffer, mru and tag finder. v1.6.4
+*ctrlp.txt*       Fuzzy file, buffer, mru and tag finder. v1.6.5
 *CtrlP* *ControlP* *'ctrlp'* *'ctrl-p'*
 ===============================================================================
 #                                                                             #
@@ -516,7 +516,7 @@ g)  Submit ? to open this help file.
 
 Extensions are optional. To enable an extension, add its name to the variable
 g:ctrlp_extensions: >
-  let g:ctrlp_extensions = ['tag', 'quickfix', 'dir']
+  let g:ctrlp_extensions = ['tag', 'buffertag', 'quickfix', 'dir']
 <
 The order of the items will be the order they appear on the statusline and when
 using <c-f>, <c-b>.
@@ -530,6 +530,13 @@ Available extensions:~
     - Search for a tag within a generated central tags file, and jump to the
       definition. Use the Vim’s option |'tags'| to specify the names and the
       locations of the tags file(s). Example: `set tags+=tags/help,doc/tags`
+
+                                                                 *:CtrlPBufTag*
+  * Buffer Tag mode:~
+    - Name: 'buffertag'
+    - Command: ':CtrlPBufTag'
+    - Search for a tag within the current buffer and jump to the definition.
+      Requires |exuberant_ctags|.
 
                                                                *:CtrlPQuickfix*
   * Quickfix mode:~
@@ -548,6 +555,34 @@ Available extensions:~
       + <c-v> change the local working directory for the current window (exit).
       + <c-x> change the global working directory to |CtrlP|’s current local
         working directory (exit).
+
+-------------------------------------------------------------------------------
+Buffer Tag mode options:~
+
+                                                   *'g:ctrlp_buftag_ctags_bin'*
+If ctags isn’t in your $PATH, use this to set its location: >
+  let g:ctrlp_buftag_ctags_bin = ''
+<
+
+                                                   *'g:ctrlp_buftag_systemenc'*
+Match this with your OS’s encoding (not Vim’s). The default value mirrors Vim’s
+global |'encoding'| option: >
+  let g:ctrlp_buftag_systemenc = &encoding
+<
+
+                                                       *'g:ctrlp_buftag_types'*
+Use this to set the arguments for ctags, jsctags... for a given filetype: >
+  let g:ctrlp_buftag_types = ''
+<
+Examples: >
+  let g:ctrlp_buftag_types = {
+    \ 'erlang'     : '--language-force=erlang --erlang-types=drmf',
+    \ 'javascript' : {
+      \ 'bin': 'jsctags',
+      \ 'args': '-f -',
+      \ },
+    \ }
+<
 
 ===============================================================================
 EXTENDING                                                     *ctrlp-extending*
@@ -599,6 +634,8 @@ Special thanks:~
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
 
+    + New feature: Buffer Tag extension.
+    + New command: |:CtrlPBufTag|.
     + New options: |g:ctrlp_cmd|,
                    |g:ctrlp_custom_ignore|
 

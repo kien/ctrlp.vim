@@ -43,3 +43,8 @@ en
 if index(g:ctrlp_extensions, 'dir') >= 0
 	let g:ctrlp_alldirs = [] | com! CtrlPDir cal ctrlp#init(ctrlp#dir#id())
 en
+
+if index(g:ctrlp_extensions, 'buffertag') >= 0
+	let g:ctrlp_buftags = {}
+	com! CtrlPBufTag cal ctrlp#init(ctrlp#buffertag#id())
+en

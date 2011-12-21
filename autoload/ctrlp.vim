@@ -2,7 +2,7 @@
 " File:          autoload/ctrlp.vim
 " Description:   Fuzzy file, buffer, mru and tag finder.
 " Author:        Kien Nguyen <github.com/kien>
-" Version:       1.6.4
+" Version:       1.6.5
 " =============================================================================
 
 " Static variables {{{1
@@ -327,7 +327,7 @@ fu! s:Update(str)
 	let oldstr = exists('s:savestr') ? s:savestr : ''
 	let pats = s:SplitPattern(a:str)
 	" Get the new string sans tail
-	let notail = substitute(a:str, ':\([^:]\|\\:\)*$', '', 'g')
+	let notail = substitute(a:str, '\\\@<!:\([^:]\|\\:\)*$', '', '')
 	" Stop if the string's unchanged
 	if notail == oldstr && !empty(notail) && !exists('s:force')
 		retu
@@ -349,7 +349,8 @@ fu! s:BuildPrompt(upd, ...)
 	cal map(prt, 'escape(v:val, estr)')
 	let str = join(prt, '')
 	let lazy = empty(str) || exists('s:force') || !has('autocmd') ? 0 : s:lazy
-	if a:upd && ( s:matches || s:regexp || match(str, '[*|]') >= 0 ) && !lazy
+	if a:upd && !lazy && ( s:matches || s:regexp
+		\ || match(str, '[*|]') >= 0 || match(str, '\\\:\([^:]\|\\:\)*$') >= 0 )
 		sil! cal s:Update(str)
 	en
 	sil! cal ctrlp#statusline()
@@ -692,11 +693,11 @@ fu! ctrlp#acceptfile(mode, matchstr, ...)
 	" Switch to existing buffer or open new one
 	if exists('jmpb') && bufwinnr > 0 && md != 't'
 		exe bufwinnr.'winc w'
-		if j2l | cal s:j2l(j2l) | en
+		if j2l | cal ctrlp#j2l(j2l) | en
 	elsei exists('jmpb') && buftab[0]
 		exe 'tabn' buftab[0]
 		exe buftab[1].'winc w'
-		if j2l | cal s:j2l(j2l) | en
+		if j2l | cal ctrlp#j2l(j2l) | en
 	el
 		" Determine the command to use
 		let cmd = md == 't' || s:splitwin == 1 ? 'tabe'
@@ -1195,11 +1196,14 @@ endf
 
 fu! s:sanstail(str)
 	" Restore the number of backslashes
-	let str = substitute(a:str, '\\\\', '\', 'g')
+	let [str, pat] = [substitute(a:str, '\\\\', '\', 'g'), '\([^:]\|\\:\)*$']
 	unl! s:optail
-	if match(str, ':\([^:]\|\\:\)*$') >= 0
-		let s:optail = matchstr(str, ':\zs\([^:]\|\\:\)*$')
-		retu substitute(str, ':\([^:]\|\\:\)*$', '', 'g')
+	if match(str, '\\\@<!:'.pat) >= 0
+		let s:optail = matchstr(str, ':\zs'.pat)
+		retu substitute(str, ':'.pat, '', '')
+	en
+	if match(str, '\\\=:'.pat) >= 0
+		let str = substitute(str, '\\\=\ze:'.pat, '', '')
 	en
 	retu str
 endf
@@ -1229,7 +1233,7 @@ fu! s:openfile(cmd, filpath, ...)
 		cal ctrlp#msg("Operation can't be completed. Make sure filename is valid.")
 	fina
 		if !empty(tail)
-			sil! norm! zOzz
+			sil! norm! zvzz
 		en
 	endt
 endf
@@ -1242,9 +1246,9 @@ fu! s:writecache(read_cache, cache_file)
 	en
 endf
 
-fu! s:j2l(nr)
+fu! ctrlp#j2l(nr)
 	exe a:nr
-	sil! norm! zOzz
+	sil! norm! zvzz
 endf
 
 fu! s:regexfilter(str)
