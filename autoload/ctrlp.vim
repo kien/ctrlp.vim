@@ -175,12 +175,12 @@ fu! s:DirAndFile(entries)
 			en | el
 				cal add(items[0], each)
 			en
-		el
+		elsei etype == 'link'
 			if s:folsym
-				cal add(items[1], each)
-			el | if etype != 'link'
-				cal add(items[1], each)
-			en | en
+				cal add(items[!isdirectory(each)], each)
+			en
+		el
+			cal add(items[1], each)
 		en
 	endfo
 	retu items
