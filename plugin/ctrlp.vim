@@ -13,7 +13,7 @@ let [g:loaded_ctrlp, g:ctrlp_lines, g:ctrlp_allfiles] = [1, [], []]
 if !exists('g:ctrlp_map') | let g:ctrlp_map = '<c-p>' | en
 if !exists('g:ctrlp_cmd') | let g:ctrlp_cmd = 'CtrlP' | en
 
-com! -na=? -comp=custom,ctrlp#cpl CtrlP cal ctrlp#init(0, <q-args>)
+com! -n=? -com=custom,ctrlp#cpl CtrlP cal ctrlp#init(0, <q-args>)
 
 com! CtrlPBuffer   cal ctrlp#init(1)
 com! CtrlPMRUFiles cal ctrlp#init(2)
@@ -41,7 +41,9 @@ if index(g:ctrlp_extensions, 'quickfix') >= 0
 en
 
 if index(g:ctrlp_extensions, 'dir') >= 0
-	let g:ctrlp_alldirs = [] | com! CtrlPDir cal ctrlp#init(ctrlp#dir#id())
+	let g:ctrlp_alldirs = []
+	com! -n=? -com=custom,ctrlp#cpl CtrlPDir
+		\ cal ctrlp#init(ctrlp#dir#id(), <q-args>)
 en
 
 if index(g:ctrlp_extensions, 'buffertag') >= 0

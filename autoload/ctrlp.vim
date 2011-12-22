@@ -1332,13 +1332,11 @@ fu! ctrlp#init(type, ...)
 	if exists('s:init') | retu | en
 	let [s:matches, s:init] = [1, 1]
 	cal s:Open()
-	cal s:SetWD(exists('a:1') ? a:1 : '')
+	cal s:SetWD(a:0 == 1 ? a:1 : '')
 	cal s:MapKeys()
 	cal s:SetLines(a:type)
 	cal s:BuildPrompt(1)
-	if has('syntax') && exists('g:syntax_on')
-		cal s:syntax()
-	en
+	if has('syntax') && exists('g:syntax_on') | cal s:syntax() | en
 endf
 if has('autocmd') "{{{1
 	aug CtrlPAug
