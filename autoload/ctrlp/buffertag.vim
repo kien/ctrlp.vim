@@ -42,58 +42,58 @@ fu! s:bins()
 		\ 'tags',
 		\ ]
 	if empty(s:bin)
-		for bin in bins
-			if executable(bin)
-				let s:bin = bin
-				brea
-			en
-		endfo
+		for bin in bins | if executable(bin)
+			let s:bin = bin
+			brea
+		en | endfo
 	el
 		let s:bin = expand(s:bin, 1)
 	en
 endf
 cal s:bins()
 
-" Arguments {{{2
+" s:types {{{2
 let s:types = {
-	\ 'asm'       : '--language-force=asm        --asm-types=dlmt',
-	\ 'aspperl'   : '--language-force=asp        --asp-types=fsv',
-	\ 'aspvbs'    : '--language-force=asp        --asp-types=fsv',
-	\ 'awk'       : '--language-force=awk        --awk-types=f',
-	\ 'beta'      : '--language-force=beta       --beta-types=fsv',
-	\ 'c'         : '--language-force=c          --c-types=dgsutvf',
-	\ 'cpp'       : '--language-force=c++        --c++-types=nvdtcgsuf',
-	\ 'cs'        : '--language-force=c#         --c#-types=dtncEgsipm',
-	\ 'cobol'     : '--language-force=cobol      --cobol-types=dfgpPs',
-	\ 'eiffel'    : '--language-force=eiffel     --eiffel-types=cf',
-	\ 'erlang'    : '--language-force=erlang     --erlang-types=drmf',
-	\ 'expect'    : '--language-force=tcl        --tcl-types=cfp',
-	\ 'fortran'   : '--language-force=fortran    --fortran-types=pbceiklmntvfs',
-	\ 'html'      : '--language-force=html       --html-types=af',
-	\ 'java'      : '--language-force=java       --java-types=pcifm',
-	\ 'javascript': '--language-force=javascript --javascript-types=f',
-	\ 'lisp'      : '--language-force=lisp       --lisp-types=f',
-	\ 'lua'       : '--language-force=lua        --lua-types=f',
-	\ 'make'      : '--language-force=make       --make-types=m',
-	\ 'pascal'    : '--language-force=pascal     --pascal-types=fp',
-	\ 'perl'      : '--language-force=perl       --perl-types=clps',
-	\ 'php'       : '--language-force=php        --php-types=cdvf',
-	\ 'python'    : '--language-force=python     --python-types=cmf',
-	\ 'rexx'      : '--language-force=rexx       --rexx-types=s',
-	\ 'ruby'      : '--language-force=ruby       --ruby-types=cfFm',
-	\ 'scheme'    : '--language-force=scheme     --scheme-types=sf',
-	\ 'sh'        : '--language-force=sh         --sh-types=f',
-	\ 'csh'       : '--language-force=sh         --sh-types=f',
-	\ 'zsh'       : '--language-force=sh         --sh-types=f',
-	\ 'slang'     : '--language-force=slang      --slang-types=nf',
-	\ 'sml'       : '--language-force=sml        --sml-types=ecsrtvf',
-	\ 'sql'       : '--language-force=sql        --sql-types=cFPrstTvfp',
-	\ 'tcl'       : '--language-force=tcl        --tcl-types=cfmp',
-	\ 'vera'      : '--language-force=vera       --vera-types=cdefgmpPtTvx',
-	\ 'verilog'   : '--language-force=verilog    --verilog-types=mcPertwpvf',
-	\ 'vim'       : '--language-force=vim        --vim-types=avf',
-	\ 'yacc'      : '--language-force=yacc       --yacc-types=l',
+	\ 'asm'    : '%sasm%sasm%sdlmt',
+	\ 'aspperl': '%sasp%sasp%sfsv',
+	\ 'aspvbs' : '%sasp%sasp%sfsv',
+	\ 'awk'    : '%sawk%sawk%sf',
+	\ 'beta'   : '%sbeta%sbeta%sfsv',
+	\ 'c'      : '%sc%sc%sdgsutvf',
+	\ 'cpp'    : '%sc++%sc++%snvdtcgsuf',
+	\ 'cs'     : '%sc#%sc#%sdtncEgsipm',
+	\ 'cobol'  : '%scobol%scobol%sdfgpPs',
+	\ 'eiffel' : '%seiffel%seiffel%scf',
+	\ 'erlang' : '%serlang%serlang%sdrmf',
+	\ 'expect' : '%stcl%stcl%scfp',
+	\ 'fortran': '%sfortran%sfortran%spbceiklmntvfs',
+	\ 'html'   : '%shtml%shtml%saf',
+	\ 'java'   : '%sjava%sjava%spcifm',
+	\ 'javascript': '%sjavascript%sjavascript%sf',
+	\ 'lisp'   : '%slisp%slisp%sf',
+	\ 'lua'    : '%slua%slua%sf',
+	\ 'make'   : '%smake%smake%sm',
+	\ 'pascal' : '%spascal%spascal%sfp',
+	\ 'perl'   : '%sperl%sperl%sclps',
+	\ 'php'    : '%sphp%sphp%scdvf',
+	\ 'python' : '%spython%spython%scmf',
+	\ 'rexx'   : '%srexx%srexx%ss',
+	\ 'ruby'   : '%sruby%sruby%scfFm',
+	\ 'scheme' : '%sscheme%sscheme%ssf',
+	\ 'sh'     : '%ssh%ssh%sf',
+	\ 'csh'    : '%ssh%ssh%sf',
+	\ 'zsh'    : '%ssh%ssh%sf',
+	\ 'slang'  : '%sslang%sslang%snf',
+	\ 'sml'    : '%ssml%ssml%secsrtvf',
+	\ 'sql'    : '%ssql%ssql%scFPrstTvfp',
+	\ 'tcl'    : '%stcl%stcl%scfmp',
+	\ 'vera'   : '%svera%svera%scdefgmpPtTvx',
+	\ 'verilog': '%sverilog%sverilog%smcPertwpvf',
+	\ 'vim'    : '%svim%svim%savf',
+	\ 'yacc'   : '%syacc%syacc%sl',
 	\ }
+
+cal map(s:types, 'printf(v:val, "--language-force=", " --", "-types=")')
 
 if executable('jsctags')
 	cal extend(s:types, { 'javascript': { 'args': '-f -', 'bin': 'jsctags' } })
@@ -127,16 +127,16 @@ fu! s:exectags(cmd)
 endf
 
 fu! s:exectagsonfile(fname, ftype)
-	let args = '-f - --sort=no --excmd=pattern --fields=nKs '
-	if type(s:types[a:ftype]) == 1
-		let args .= s:types[a:ftype]
+	let [ags, ft] = ['-f - --sort=no --excmd=pattern --fields=nKs ', a:ftype]
+	if type(s:types[ft]) == 1
+		let ags .= s:types[ft]
 		let bin = s:bin
-	elsei type(s:types[a:ftype]) == 4
-		let args = s:types[a:ftype]['args']
-		let bin = expand(s:types[a:ftype]['bin'], 1)
+	elsei type(s:types[ft]) == 4
+		let ags = s:types[ft]['args']
+		let bin = expand(s:types[ft]['bin'], 1)
 	en
 	if empty(bin) | retu '' | en
-	let cmd = s:esctagscmd(bin, args, a:fname)
+	let cmd = s:esctagscmd(bin, ags, a:fname)
 	if empty(cmd) | retu '' | en
 	let output = s:exectags(cmd)
 	if v:shell_error || output =~ 'Warning: cannot open' | retu '' | en
@@ -154,7 +154,7 @@ fu! s:esctagscmd(bin, args, ...)
 	en
 	if has('iconv')
 		let last = s:enc != &enc ? s:enc : !empty($LANG) ? $LANG : &enc
-		let cmd = call('iconv', [cmd, &encoding, last])
+		let cmd = iconv(cmd, &enc, last)
 	en
 	if empty(cmd)
 		cal ctrlp#msg('Encoding conversion failed!')
@@ -188,17 +188,15 @@ fu! s:parseline(line)
 endf
 " Public {{{1
 fu! ctrlp#buffertag#init(fname, bufnr)
-	let s:fname = a:fname
-	let ftype = get(split(getbufvar(a:bufnr, '&filetype'), '\.'), 0, '')
 	sy match CtrlPTabExtra '\zs\t.*\ze$'
 	hi link CtrlPTabExtra Comment
-	retu s:process(a:fname, ftype)
+	retu s:process(a:fname, get(split(getbufvar(a:bufnr, '&ft'), '\.'), 0, ''))
 endf
 
 fu! ctrlp#buffertag#accept(mode, str)
 	cal ctrlp#exit()
 	if a:mode == 't'
-		exe 'tabe' ctrlp#fnesc(s:fname)
+		tab sp
 	elsei a:mode == 'h'
 		sp
 	elsei a:mode == 'v'
