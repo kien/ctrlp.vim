@@ -157,7 +157,7 @@ fu! s:esctagscmd(bin, args, ...)
 		let cmd = iconv(cmd, &enc, last)
 	en
 	if empty(cmd)
-		cal ctrlp#msg('Encoding conversion failed!')
+		cal ctrlp#msg("Encoding conversion failed!")
 	en
 	retu cmd
 endf
@@ -202,7 +202,7 @@ fu! ctrlp#buffertag#accept(mode, str)
 	elsei a:mode == 'v'
 		vs
 	en
-	cal ctrlp#j2l(str2nr(matchstr(a:str, '^[^\t]\+\t\+[^\t|]\+|\zs\d\+\ze|')))
+	cal ctrlp#j2l(matchstr(a:str, '^[^\t]\+\t\+[^\t|]\+|\zs\d\+\ze|'))
 endf
 
 fu! ctrlp#buffertag#id()

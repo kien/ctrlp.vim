@@ -99,11 +99,10 @@ fu! s:Close()
 	let [g:ctrlp_lines, g:ctrlp_allfiles] = [[], []]
 	exe s:winres
 	unl! s:focus s:hisidx s:hstgot s:marked s:statypes s:cline s:init s:savestr
-		\ s:crfile s:crfpath s:crword s:crvisual s:tagfiles s:crline s:crcursor
-		\ g:ctrlp_nolimit s:crbufnr
+		\ g:ctrlp_nolimit
 	cal ctrlp#recordhist()
 	if exists('g:ctrlp_log') && g:ctrlp_log
-		redi END
+		sil! redi END
 	en
 	ec
 endf
@@ -206,7 +205,7 @@ endf
 fu! s:Buffers() "{{{1
 	let allbufs = []
 	for each in range(1, bufnr('$'))
-		if getbufvar(each, '&bl') && each != bufnr('#')
+		if getbufvar(each, '&bl') && each != s:crbufnr
 			let bufname = bufname(each)
 			if strlen(bufname) && getbufvar(each, '&ma') && bufname != 'ControlP'
 				cal add(allbufs, fnamemodify(bufname, ':p'))
@@ -284,7 +283,7 @@ fu! s:SplitPattern(str, ...) "{{{1
 	if len(array) > 1
 		for item in range(1, len(array) - 1)
 			" Separator
-			let sep = exists('a:1') ? a:1 : '[^'.array[item-1].']\{-}'
+			let sep = a:0 ? a:1 : '[^'.array[item-1].']\{-}'
 			let nitem .= sep.array[item]
 			cal add(newpats, nitem)
 		endfo
@@ -315,7 +314,7 @@ fu! s:Render(lines, pat)
 	en
 	if s:mwreverse | cal reverse(lines) | en
 	let s:matched = copy(lines)
-	cal map(lines, 'substitute(v:val, "^", "> ", "")')
+	cal map(lines, '"> ".v:val')
 	cal setline(1, lines)
 	exe 'keepj norm!' s:mwreverse ? 'G' : 'gg'
 	keepj norm! 1|
@@ -968,9 +967,8 @@ fu! s:samerootsyml(each, isfile, cwd)
 endf
 
 fu! ctrlp#rmbasedir(items)
-	let path = &ssl || !exists('+ssl') ? getcwd().'/' :
-		\ substitute(getcwd(), '\\', '\\\\', 'g').'\\'
-	retu map(a:items, 'substitute(v:val, path, "", "g")')
+	let idx = strlen(getcwd()) + 1
+	retu map(a:items, 'strpart(v:val, idx)')
 endf
 
 fu! s:parentdir(curr)
@@ -1065,7 +1063,7 @@ fu! s:highlight(pat, grp)
 endf
 
 fu! s:dohighlight()
-	retu type(s:mathi) == 3 && len(s:mathi) == 2 && s:mathi[0]
+	retu type(s:mathi) == 3 && len(s:mathi) > 1 && s:mathi[0]
 		\ && exists('*clearmatches')
 endf
 " Prompt history {{{2
@@ -1096,9 +1094,9 @@ endf
 
 fu! s:remarksigns()
 	if !s:dosigns() | retu | en
-	let nls = s:matched
+	let [nls, head] = [s:matched, s:itemtype ? '' : getcwd().s:lash]
 	for ic in range(1, len(nls))
-		let filpath = s:itemtype ? nls[ic - 1] : getcwd().s:lash.nls[ic - 1]
+		let filpath = head.nls[ic - 1]
 		let key = s:dictindex(s:marked, filpath)
 		if key > 0
 			exe 'sign place' key 'line='.ic.' name=ctrlpmark buffer='.s:bufnr
@@ -1218,7 +1216,7 @@ fu! s:lastvisual()
 endf
 
 fu! ctrlp#msg(msg)
-	echoh Identifier | echon "CtrlP: ".a:msg | echoh None
+	redr | echoh Identifier | echon "CtrlP: ".a:msg | echoh None
 endf
 
 fu! s:openfile(cmd, filpath, ...)
@@ -1227,7 +1225,6 @@ fu! s:openfile(cmd, filpath, ...)
 	try
 		exe cmd.tail.' '.ctrlp#fnesc(a:filpath)
 	cat
-		cal ctrlp#msg("Operation can't be completed. Make sure filename is valid.")
 	fina
 		if !empty(tail)
 			sil! norm! zvzz
@@ -1329,7 +1326,7 @@ fu! ctrlp#init(type, ...)
 	if exists('s:init') | retu | en
 	let [s:matches, s:init] = [1, 1]
 	cal s:Open()
-	cal s:SetWD(a:0 == 1 ? a:1 : '')
+	cal s:SetWD(a:0 ? a:1 : '')
 	cal s:MapKeys()
 	cal s:SetLines(a:type)
 	cal s:BuildPrompt(1)
