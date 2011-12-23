@@ -61,7 +61,7 @@ fu! ctrlp#utils#writecache(lines, ...)
 endf
 
 fu! ctrlp#utils#glob(...)
-	retu call('glob',  v:version > 701 ? a:000 : a:1)
+	retu call('glob',  v:version > 701 ? a:000 : [a:1])
 endf
 "}}}
 
