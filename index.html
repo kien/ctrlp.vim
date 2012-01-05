@@ -21,7 +21,7 @@
 			<div class="article">
 				<h1>ctrlp.vim</h1>
 				<div class="entry-content">
-					<h2>Full path fuzzy file, buffer and MRU file finder for Vim.</h2>
+					<h2>Full path fuzzy file, buffer, mru and tag finder for Vim.</h2>
 					<ul class="special">
 						<li>&raquo; Written in pure Vimscript for MacVim and Vim 7.0+.</li>
 						<li>&raquo; Full support for Vim’s regexp as search pattern.</li>
@@ -60,8 +60,10 @@
 					<h3>Basic Options:</h3>
 					<ul>
 						<li>
-							Change the mapping to invoke CtrlP:
-							<pre><code>let g:ctrlp_map = '&lt;c-p&gt;'</code></pre>
+							Change the mapping to invoke CtrlP and the default command:
+							<pre><code>let g:ctrlp_map = '&lt;c-p&gt;'
+let g:ctrlp_cmd = 'CtrlP'
+</code></pre>
 						</li>
 						<li>
 							When CtrlP is invoked, it automatically sets the working directory according to this variable:
@@ -77,10 +79,17 @@ root.dir
 .vimprojects</code></pre>
 						</li>
 						<li>
-							If you want to exclude directories or files from the search, you can use the Vim’s option 'wildignore'.
-							Examples:
+							If you want to exclude directories or files from the search, you can use the Vim’s option <code>wildignore</code>,
+							and/or the option <code>g:ctrlp_custom_ignore</code>:
 							<pre><code>set wildignore+=*/.git/*,*/.hg/*,*/.svn/*,*.so     " Linux/MacOSX
-set wildignore+=.git\*,.hg\*,.svn\*,*.dll,*.exe    " Windows</code></pre>
+set wildignore+=.git\*,.hg\*,.svn\*,*.dll,*.exe    " Windows
+let g:ctrlp_custom_ignore = '\.git$\|\.hg$\|\.svn$'    " Any platform
+let g:ctrlp_custom_ignore = {
+	\ 'dir':  '\.git$\|\.hg$\|\.svn$',
+	\ 'file': '\.exe$\|\.so$\|\.dll$',
+	\ 'link': 'some_bad_symbolic_link',
+	\ }
+</code></pre>
 						</li>
 						<li>
 							Specify an external tool to use for listing files instead of using Vim’s globpath().
@@ -88,7 +97,8 @@ set wildignore+=.git\*,.hg\*,.svn\*,*.dll,*.exe    " Windows</code></pre>
 							<pre><code>let g:ctrlp_user_command = 'find %s -type f'       " MacOSX/Linux
 let g:ctrlp_user_command = 'dir %s /-n /b /s /a-d' " Windows</code></pre>
 <pre><code>let g:ctrlp_user_command = ['.git/', 'cd %s &amp;&amp; git ls-files']
-let g:ctrlp_user_command = ['.hg/', 'hg --cwd %s locate --fullpath -I .']</code></pre>
+let g:ctrlp_user_command = ['.git/', 'cd %s &amp;&amp; git ls-files', 'find %s -type f']
+let g:ctrlp_user_command = ['.hg/', 'hg --cwd %s locate -I .']</code></pre>
 						</li>
 					</ul>
 					<p class="note">Run <code>:help ctrlp</code> or submit <code>?</code> in CtrlP for more mappings, commands and options.</p>
