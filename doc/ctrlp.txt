@@ -1,4 +1,4 @@
-*ctrlp.txt*       Fuzzy file, buffer, mru and tag finder. v1.6.5
+*ctrlp.txt*       Fuzzy file, buffer, mru and tag finder. v1.6.6
 *CtrlP* *ControlP* *'ctrlp'* *'ctrl-p'*
 ===============================================================================
 #                                                                             #
@@ -128,7 +128,7 @@ Set the directory to store the cache files: >
 Use this to customize the mappings inside |CtrlP|’s prompt to your liking. You
 only need to keep the lines that you’ve changed the values (inside []): >
   let g:ctrlp_prompt_mappings = {
-    \ 'PrtBS()':              ['<bs>'],
+    \ 'PrtBS()':              ['<bs>', '<c-]>'],
     \ 'PrtDelete()':          ['<del>'],
     \ 'PrtDeleteWord()':      ['<c-w>'],
     \ 'PrtClear()':           ['<c-u>'],
@@ -136,18 +136,22 @@ only need to keep the lines that you’ve changed the values (inside []): >
     \ 'PrtSelectMove("k")':   ['<c-k>', '<up>'],
     \ 'PrtHistory(-1)':       ['<c-n>'],
     \ 'PrtHistory(1)':        ['<c-p>'],
-    \ 'AcceptSelection("e")': ['<cr>', '<2-LeftMouse>'],
+    \ 'AcceptSelection("e")': ['<cr>', '<c-m>', '<2-LeftMouse>'],
     \ 'AcceptSelection("h")': ['<c-x>', '<c-cr>', '<c-s>'],
     \ 'AcceptSelection("t")': ['<c-t>', '<MiddleMouse>'],
-    \ 'AcceptSelection("v")': ['<c-v>', '<c-q>', '<RightMouse>'],
-    \ 'ToggleFocus()':        ['<tab>'],
+    \ 'AcceptSelection("v")': ['<c-v>', '<RightMouse>'],
+    \ 'ToggleFocus()':        ['<tab>', '<c-i>'],
     \ 'ToggleRegex()':        ['<c-r>'],
     \ 'ToggleByFname()':      ['<c-d>'],
     \ 'ToggleType(1)':        ['<c-f>', '<c-up>'],
     \ 'ToggleType(-1)':       ['<c-b>', '<c-down>'],
+    \ 'PrtInsert("w")':       ['<F2>'],
+    \ 'PrtInsert("s")':       ['<F3>'],
+    \ 'PrtInsert("v")':       ['<F4>'],
+    \ 'PrtInsert("+")':       ['<F6>'],
     \ 'PrtCurStart()':        ['<c-a>'],
     \ 'PrtCurEnd()':          ['<c-e>'],
-    \ 'PrtCurLeft()':         ['<c-h>', '<left>'],
+    \ 'PrtCurLeft()':         ['<c-h>', '<left>', '<c-^>'],
     \ 'PrtCurRight()':        ['<c-l>', '<right>'],
     \ 'PrtClearCache()':      ['<F5>'],
     \ 'PrtDeleteMRU()':       ['<F7>'],
@@ -157,12 +161,13 @@ only need to keep the lines that you’ve changed the values (inside []): >
     \ 'PrtExit()':            ['<esc>', '<c-c>', '<c-g>'],
     \ }
 <
-If you have problem with <bs> moving left instead of deleting a char, add this
-to your |vimrc|: >
- let g:ctrlp_prompt_mappings = {
-   \ 'PrtBS()':      ['<c-h>'],
-   \ 'PrtCurLeft()': ['<left>'],
-   \ }
+Note: In some terminals, it’s not possible to remap <c-h> without also changing
+<bs>. So if pressing <bs> moves the cursor to the left instead of deleting a
+char for you, add this to your |vimrc| to change the default <c-h> mapping: >
+  let g:ctrlp_prompt_mappings = {
+    \ 'PrtBS()':      ['<bs>', '<c-]>', '<c-h>'],
+    \ 'PrtCurLeft()': ['<left>', '<c-^>'],
+    \ }
 <
 
                                                            *'g:ctrlp_mruf_max'*
@@ -203,18 +208,26 @@ e.g. exclude version control directories: >
   set wildignore+=*/.git/*,*/.hg/*,*/.svn/*  " Linux/MacOSX
   set wildignore+=.git\*,.hg\*,.svn\*        " Windows
 <
-Note: the `*/` in front of each glob is required.
+Note #1: the `*/` in front of each glob is required.
 
-Other note: |wildignore| influences the result of |expand()|, |globpath()| and
+Note #2: |wildignore| influences the result of |expand()|, |globpath()| and
 |glob()| which many plugins use to find stuff on the system (e.g. fugitive.vim
 looks for .git/, some other plugins look for external exe tools on Windows).
 So be a little mindful of what you put in your |wildignore|.
 
                                                       *'g:ctrlp_custom_ignore'*
 In addition to |'wildignore'|, use this for files and directories you want only
-|CtrlP| to not show. Use |regexp| to specify the pattern: >
+|CtrlP| to not show. Use |regexp| to specify the patterns: >
   let g:ctrlp_custom_ignore = ''
 <
+Examples: >
+  let g:ctrlp_custom_ignore = '\.git$\|\.hg$\|\.svn$'
+  let g:ctrlp_custom_ignore = {
+    \ 'dir':  '\.git$\|\.hg$\|\.svn$',
+    \ 'file': '\.exe$\|\.so$\|\.dll$',
+    \ 'link': 'bad_symbolic_link',
+    \ }
+>
 
                                                     *'g:ctrlp_highlight_match'*
 Use this to enable/disable highlighting of the matched patterns and to specify
@@ -251,11 +264,11 @@ Use a version control listing command when inside a repository, this is a lot
 faster when working with large projects: >
   let g:ctrlp_user_command = [repo_marker, vcs_ls_command, fallback_command]
 <
-If the fallback_command is empty or not defined, globpath() will then be used
+If the fallback_command is empty or not defined, |globpath()| will then be used
 when searching outside a repo.
 Examples: >
   let g:ctrlp_user_command = ['.git/', 'cd %s && git ls-files']
-  let g:ctrlp_user_command = ['.hg/', 'hg --cwd %s locate --fullpath -I .']
+  let g:ctrlp_user_command = ['.hg/', 'hg --cwd %s locate -I .']
 <
 
                                                       *'g:ctrlp_open_new_file'*
@@ -407,12 +420,20 @@ Once inside the prompt:~
     Move the cursor to the 'end' of the prompt
 
   <c-h>,
-  <left>
+  <left>,
+  <c-^>
     Move the cursor one character to the 'left'
 
   <c-l>,
   <right>
     Move the cursor one character to the 'right'
+
+  <c-]>,
+  <bs>
+    Delete the preceding character
+
+  <del>
+    Delete the current character
 
   <c-w>
     Delete a preceding inner word
@@ -459,7 +480,7 @@ Once inside the prompt:~
   <esc>,
   <c-c>,
   <c-g>
-    Exit |CtrlP|. <c-c> can also be used to stop the file scan.
+    Exit |CtrlP|. <c-c> can also be used to stop the scan.
 
 Choose your own mappings with |g:ctrlp_prompt_mappings|.
 
@@ -483,16 +504,19 @@ b)  Vim |regexp|. If the input string contains '*' or '|', it’ll be treated as
     a Vim’s |regexp| |pattern| without any modification.
     e.g. 'abc\d*efg' will be read as 'abc\d*efg'.
 
-    See also |ctrlp-fullregexp| (key map) and |g:ctrlp_regexp_search| (option).
+    See also |ctrlp-fullregexp| (keymap) and |g:ctrlp_regexp_search| (option).
 
 c)  End the string with a colon ':' followed by a Vim command to execute that
-    command after opening the file. If you need to use ':' in the command,
-    escape it with a backslash: '\:'.
+    command after opening the file. If you need to use ':' literally, escape it
+    with a backslash: '\:'. When opening multiple files, the command will be
+    executed on each opening file.
     e.g. 'abc:45' will open the selected file and jump to line 45.
          'abc:/my\:function' will open the selected file and jump to the first
          instance of 'my:function'.
          'abc:+setf\ myfiletype|50' will open the selected file and set its
-         filetype to 'myfiletype' then jump to line 50.
+         filetype to 'myfiletype', then jump to line 50.
+         'abc:difft' will open the selected file and run |:diffthis| on the first
+         four files.
 
     See also Vim’s |++opt| and |+cmd|.
 
@@ -532,11 +556,13 @@ Available extensions:~
       locations of the tags file(s). Example: `set tags+=tags/help,doc/tags`
 
                                                                  *:CtrlPBufTag*
+                                                              *:CtrlPBufTagAll*
   * Buffer Tag mode:~
     - Name: 'buffertag'
-    - Command: ':CtrlPBufTag'
-    - Search for a tag within the current buffer and jump to the definition.
-      Requires |exuberant_ctags|.
+    - Commands: ':CtrlPBufTag [buffer-name]',
+                ':CtrlPBufTagAll'.
+    - Search for a tag within the current buffer or all buffers and jump to the
+      definition. Requires |exuberant_ctags| or compatible programs.
 
                                                                *:CtrlPQuickfix*
   * Quickfix mode:~
@@ -547,7 +573,7 @@ Available extensions:~
                                                                     *:CtrlPDir*
   * Directory mode:~
     - Name: 'dir'
-    - Command: ':CtrlPDir'
+    - Command: ':CtrlPDir [starting-directory]'
     - Search for a directory and change the working directory to it.
     - Mappings:
       + <cr> change the local working directory for |CtrlP| and keep it open.
@@ -634,8 +660,12 @@ Special thanks:~
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
 
+    + Extend |g:ctrlp_custom_ignore| to specifically filter dir, file and link.
+
+Before 2012/01/05~
+
     + New feature: Buffer Tag extension.
-    + New command: |:CtrlPBufTag|.
+    + New commands: |:CtrlPBufTag|, |:CtrlPBufTagAll|.
     + New options: |g:ctrlp_cmd|,
                    |g:ctrlp_custom_ignore|
 

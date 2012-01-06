@@ -2,6 +2,9 @@
 " File:          autoload/ctrlp/buffertag.vim
 " Description:   Buffer Tag extension
 " Maintainer:    Kien Nguyen <github.com/kien>
+" Credits:       Much of the code was taken from tagbar.vim by Jan Larres, plus
+"                a few lines from taglist.vim by Yegappan Lakshmanan and from
+"                buffertag.vim by Takeshi Nishida.
 " =============================================================================
 
 " Init {{{1
@@ -10,8 +13,8 @@ if exists('g:loaded_ctrlp_buftag') && g:loaded_ctrlp_buftag
 en
 let g:loaded_ctrlp_buftag = 1
 
-let s:buftag_var = ['ctrlp#buffertag#init(s:crfile, s:crbufnr)',
-	\ 'ctrlp#buffertag#accept', 'buffer tags', 'bft']
+let s:buftag_var = ['ctrlp#buffertag#init(s:crfile)', 'ctrlp#buffertag#accept',
+	\ 'buffer tags', 'bft', 'ctrlp#buffertag#exit()']
 
 let g:ctrlp_ext_vars = exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)
 	\ ? add(g:ctrlp_ext_vars, s:buftag_var) : [s:buftag_var]
@@ -167,16 +170,16 @@ fu! s:process(fname, ftype)
 	let ftime = getftime(a:fname)
 	if has_key(g:ctrlp_buftags, a:fname)
 		\ && g:ctrlp_buftags[a:fname]['time'] >= ftime
-		let data = g:ctrlp_buftags[a:fname]['data']
+		let lines = g:ctrlp_buftags[a:fname]['lines']
 	el
 		let data = s:exectagsonfile(a:fname, a:ftype)
-		let cache = { a:fname : { 'time': ftime, 'data': data } }
+		let [raw, lines] = [split(data, '\n\+'), []]
+		for line in raw | if len(split(line, ';"')) == 2
+			cal add(lines, s:parseline(line))
+		en | endfo
+		let cache = { a:fname : { 'time': ftime, 'lines': lines } }
 		cal extend(g:ctrlp_buftags, cache)
 	en
-	let [raw, lines] = [split(data, '\n\+'), []]
-	for line in raw | if len(split(line, ';"')) == 2
-		cal add(lines, s:parseline(line))
-	en | endfo
 	retu lines
 endf
 
@@ -184,17 +187,27 @@ fu! s:parseline(line)
 	let eval = '\v^([^\t]+)\t(.+)\t\/\^(.+)\$\/\;\"\t(.+)\tline(no)?\:(\d+)'
 	let vals = matchlist(a:line, eval)
 	if empty(vals) | retu '' | en
-	retu vals[1].'	'.vals[4].'|'.vals[6].'| '.vals[3]
+	let [bufnr, bufname] = [bufnr(vals[2]), fnamemodify(vals[2], ':p:t')]
+	retu vals[1].'	'.vals[4].'|'.bufnr.':'.bufname.'|'.vals[6].'| '.vals[3]
 endf
 " Public {{{1
-fu! ctrlp#buffertag#init(fname, bufnr)
+fu! ctrlp#buffertag#init(fname)
+	let fname = exists('s:bufname') ? s:bufname : a:fname
+	let bufs = exists('s:btmode') && s:btmode ? ctrlp#allbufs() : [fname]
+	let lines = []
+	for each in bufs
+		let tftype = get(split(getbufvar(each, '&ft'), '\.'), 0, '')
+		cal extend(lines, s:process(each, tftype))
+	endfo
 	sy match CtrlPTabExtra '\zs\t.*\ze$'
 	hi link CtrlPTabExtra Comment
-	retu s:process(a:fname, get(split(getbufvar(a:bufnr, '&ft'), '\.'), 0, ''))
+	retu lines
 endf
 
 fu! ctrlp#buffertag#accept(mode, str)
 	cal ctrlp#exit()
+	let vals = matchlist(a:str, '\v^[^\t]+\t+[^\t|]+\|(\d+)\:[^\t|]+\|(\d+)\|')
+	let [bufnr, linenr] = [vals[1], vals[2]]
 	if a:mode == 't'
 		tab sp
 	elsei a:mode == 'h'
@@ -202,11 +215,22 @@ fu! ctrlp#buffertag#accept(mode, str)
 	elsei a:mode == 'v'
 		vs
 	en
-	cal ctrlp#j2l(matchstr(a:str, '^[^\t]\+\t\+[^\t|]\+|\zs\d\+\ze|'))
+	if exists('s:btmode') && s:btmode
+		exe 'hid b' bufnr
+	en
+	cal ctrlp#j2l(linenr)
 endf
 
-fu! ctrlp#buffertag#id()
+fu! ctrlp#buffertag#cmd(mode, ...)
+	let s:btmode = a:mode
+	if a:0 && !empty(a:1)
+		let s:bufname = fnamemodify(a:1, ':p')
+	en
 	retu s:id
+endf
+
+fu! ctrlp#buffertag#exit()
+	unl! s:btmode s:bufname
 endf
 "}}}
 

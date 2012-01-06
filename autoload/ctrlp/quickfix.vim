@@ -11,7 +11,7 @@ en
 let g:loaded_ctrlp_quickfix = 1
 
 let s:var_qf = ['ctrlp#quickfix#init()', 'ctrlp#quickfix#accept', 'quickfix',
-	\ 'qfx', [1]]
+	\ 'qfx']
 
 let g:ctrlp_ext_vars = exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)
 	\ ? add(g:ctrlp_ext_vars, s:var_qf) : [s:var_qf]

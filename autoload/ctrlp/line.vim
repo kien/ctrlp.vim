@@ -1,8 +1,15 @@
 " =============================================================================
 " File:          autoload/ctrlp/line.vim
-" Description:   Line extension - find a line in any buffer.
+" Description:   Line extension - Find a line in any buffer
 " Author:        Kien Nguyen <github.com/kien>
 " =============================================================================
+
+" User Configuration {{{1
+" Enable:
+"        let g:ctrlp_extensions += ['line']
+" Create A Command:
+"        com! CtrlPLine cal ctrlp#init(ctrlp#line#id())
+"}}}
 
 " Init {{{1
 if exists('g:loaded_ctrlp_line') && g:loaded_ctrlp_line
@@ -18,16 +25,7 @@ let g:ctrlp_ext_vars = exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 " Public {{{1
 fu! ctrlp#line#init()
-	let [bufs, lines] = [[], []]
-	for each in range(1, bufnr('$'))
-		if getbufvar(each, '&bl')
-			let bufname = bufname(each)
-			if strlen(bufname) && bufname != 'ControlP'
-				cal add(bufs, fnamemodify(bufname, ':p'))
-			en
-		en
-	endfo
-	cal filter(bufs, 'filereadable(v:val)')
+	let [bufs, lines] = [ctrlp#allbufs(), []]
 	for each in bufs
 		let from_file = readfile(each)
 		cal map(from_file, 'tr(v:val, ''	'', '' '')')
