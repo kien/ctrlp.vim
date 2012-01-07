@@ -1242,7 +1242,9 @@ fu! s:openfile(cmd, filpath, ...)
 		if !empty(tail)
 			sil! norm! zvzz
 		en
-		cal ctrlp#setdir(getcwd(), haslocaldir() ? 'lc!' : 'cd!')
+		if exists('*haslocaldir')
+			cal ctrlp#setdir(getcwd(), haslocaldir() ? 'lc!' : 'cd!')
+		en
 	endt
 endf
 
