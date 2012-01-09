@@ -741,6 +741,12 @@ endf
 fu! s:AcceptSelection(mode)
 	if a:mode == 'e' | if s:SpecInputs() | retu | en | en
 	" Get the selected line
+	let line = getline('.')
+	if line == ' == NO ENTRIES =='
+		cal <SID>CreateNewFile()
+		retu
+	en
+	let matchstr = matchstr(line, '^> \zs.\+\ze\t*$')
 	let matchstr = matchstr(getline('.'), '^> \zs.\+\ze\t*$')
 	if empty(matchstr) | retu | en
 	" Do something with it
