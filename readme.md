@@ -75,6 +75,6 @@ Examples:
 
 _Check [the docs][2] for more mappings, commands and options._
 
-[1]: http://i.imgur.com/3rtLt.png
+[1]: http://i.imgur.com/yIynr.png
 [2]: https://github.com/kien/ctrlp.vim/blob/master/doc/ctrlp.txt
 [3]: https://github.com/kien/ctrlp.vim/tree/extensions

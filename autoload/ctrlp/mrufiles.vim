@@ -15,42 +15,46 @@ fu! ctrlp#mrufiles#opts()
 	for [ke, va] in items(opts)
 		exe 'let' va[0] '=' string(exists(ke) ? eval(ke) : va[1])
 	endfo
+	let s:csen = s:csen ? '#' : '?'
+	let s:cadir = ctrlp#utils#cachedir().ctrlp#utils#lash().'mru'
+	let s:cafile = s:cadir.ctrlp#utils#lash().'cache.txt'
 endf
 cal ctrlp#mrufiles#opts()
 fu! ctrlp#mrufiles#list(bufnr, ...) "{{{1
 	if s:locked | retu | en
 	" Get the list
-	let cadir  = ctrlp#utils#cachedir().ctrlp#utils#lash().'mru'
-	let cafile = cadir.ctrlp#utils#lash().'cache.txt'
-	let mrufs  = ctrlp#utils#readfile(cafile)
+	let mrufs = ctrlp#utils#readfile(s:cafile)
 	" Remove non-existent files
-	if exists('a:1') && a:1 == 1
-		let mrufs = s:rmdeleted(mrufs, cadir, cafile)
-	elsei exists('a:1') && a:1 == 2
-		cal ctrlp#utils#writecache([], cadir, cafile)
+	if a:0 && a:1 == 1
+		let mrufs = s:rmdeleted(mrufs)
+	elsei a:0 && a:1 == 2
+		cal ctrlp#utils#writecache([], s:cadir, s:cafile)
 		retu []
 	en
-	" Return the list
-	if a:bufnr == -1 | retu mrufs | en
+	" Return the list, filter the active buffer
+	if a:bufnr == -1
+		let crfile = fnamemodify(bufname(winbufnr(winnr('#'))), ':p')
+		retu empty(crfile) ? mrufs : filter(mrufs, 'v:val !='.s:csen.' crfile')
+	en
 	" Filter it
 	let filename = fnamemodify(bufname(a:bufnr + 0), ':p')
 	if empty(filename) || !empty(&bt)
 		\ || ( !empty(s:include) && filename !~# s:include )
 		\ || ( !empty(s:exclude) && filename =~# s:exclude )
-		\ || ( index(mrufs, filename) == -1 && !filereadable(filename) )
+		\ || ( index(mrufs, filename) < 0 && !filereadable(filename) )
 		retu
 	en
 	" Remove old matched entry
-	cal filter(mrufs, 'v:val !='.( s:csen ? "#" : "?" ).' filename')
+	cal filter(mrufs, 'v:val !='.s:csen.' filename')
 	" Insert new one
 	cal insert(mrufs, filename)
 	" Remove oldest entry
 	if len(mrufs) > s:max | cal remove(mrufs, s:max, -1) | en
-	cal ctrlp#utils#writecache(mrufs, cadir, cafile)
+	cal ctrlp#utils#writecache(mrufs, s:cadir, s:cafile)
 endf "}}}
-fu! s:rmdeleted(mrufs, cadir, cafile) "{{{
+fu! s:rmdeleted(mrufs) "{{{
 	cal filter(a:mrufs, '!empty(ctrlp#utils#glob(v:val, 1))')
-	cal ctrlp#utils#writecache(a:mrufs, a:cadir, a:cafile)
+	cal ctrlp#utils#writecache(a:mrufs, s:cadir, s:cafile)
 	retu a:mrufs
 endf
 fu! ctrlp#mrufiles#init() "{{{1

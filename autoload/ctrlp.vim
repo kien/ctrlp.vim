@@ -190,13 +190,13 @@ fu! s:lsCmd()
 	if type(cmd) == 1
 		retu cmd
 	elsei type(cmd) == 3 && len(cmd) >= 2 && !empty(cmd[0]) && !empty(cmd[1])
-		let rmarker = cmd[0]
 		" Find a repo root
-		cal s:findroot(getcwd(), rmarker, 0, 1)
+		cal s:findroot(getcwd(), cmd[0], 0, 1)
 		if !exists('s:vcsroot') || ( exists('s:vcsroot') && empty(s:vcsroot) )
 			" Try the secondary_command
 			retu len(cmd) == 3 ? cmd[2] : ''
 		en
+		unl! s:vcsroot
 		let s:vcscmd = s:lash == '\' ? 1 : 0
 		retu cmd[1]
 	en
@@ -742,19 +742,17 @@ fu! s:AcceptSelection(mode)
 	if a:mode == 'e' | if s:SpecInputs() | retu | en | en
 	" Get the selected line
 	let line = getline('.')
-	if line == ' == NO ENTRIES =='
-		cal <SID>CreateNewFile()
-		retu
+	if a:mode != 'e' && s:itemtype < 3 && line == ' == NO ENTRIES =='
+		cal s:CreateNewFile(a:mode) | retu
 	en
 	let matchstr = matchstr(line, '^> \zs.\+\ze\t*$')
-	let matchstr = matchstr(getline('.'), '^> \zs.\+\ze\t*$')
 	if empty(matchstr) | retu | en
 	" Do something with it
-	let actfunc = s:itemtype =~ '0\|1\|2' ? 'ctrlp#acceptfile'
+	let actfunc = s:itemtype < 3 ? 'ctrlp#acceptfile'
 		\ : g:ctrlp_ext_vars[s:itemtype - ( g:ctrlp_builtins + 1 )][1]
 	cal call(actfunc, [a:mode, matchstr])
 endf
-fu! s:CreateNewFile() "{{{1
+fu! s:CreateNewFile(...) "{{{1
 	let str = join(s:prompt, '')
 	if empty(str) | retu | en
 	let str = s:sanstail(str)
@@ -769,9 +767,9 @@ fu! s:CreateNewFile() "{{{1
 		let filpath = getcwd().s:lash.optyp
 		cal s:insertcache(str)
 		cal s:PrtExit()
-		let cmd = s:newfop == 1 ? 'tabe'
-			\ : s:newfop == 2 ? 'new'
-			\ : s:newfop == 3 ? 'vne' : ctrlp#normcmd('e')
+		let cmd = s:newfop == 1 || ( a:0 && a:1 == 't' ) ? 'tabe'
+			\ : s:newfop == 2 || ( a:0 && a:1 == 'h' ) ? 'new'
+			\ : s:newfop == 3 || ( a:0 && a:1 == 'v' ) ? 'vne' : ctrlp#normcmd('e')
 		cal s:openfile(cmd, filpath)
 	en
 endf
@@ -1089,6 +1087,7 @@ fu! ctrlp#recordhist()
 	if len(hst) > 1 && hst[1] == str | retu | en
 	cal extend(hst, [str], 1)
 	if len(hst) > s:maxhst | cal remove(hst, s:maxhst, -1) | en
+	cal ctrlp#utils#writecache(hst, s:gethistloc()[0], s:gethistloc()[1])
 endf
 " Signs {{{2
 fu! s:unmarksigns()
@@ -1181,7 +1180,6 @@ fu! s:leavepre()
 		\ ( has('clientserver') && len(split(serverlist(), "\n")) == 1 ) )
 		cal ctrlp#clra(1)
 	en
-	cal ctrlp#utils#writecache(s:hstry, s:gethistloc()[0], s:gethistloc()[1])
 endf
 
 fu! s:checkbuf()

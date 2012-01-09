@@ -115,7 +115,8 @@ be enabled for directories that have more than 4000 files: >
 Note: you can quickly purge the cache by pressing <F5> while inside |CtrlP|.
 
                                                 *'g:ctrlp_clear_cache_on_exit'*
-Set this to 0 to enable cross-sessions caching: >
+Set this to 0 to enable cross-sessions caching by not clearing the cache files
+upon exiting Vim: >
   let g:ctrlp_clear_cache_on_exit = 1
 <
 
@@ -287,7 +288,7 @@ The maximum number of input strings you want |CtrlP| to remember. The default
 value mirrors Vim’s global |'history'| option: >
   let g:ctrlp_max_history = &history
 <
-Set to 0 to disable prompt’s history.
+Set to 0 to disable prompt’s history. Browse the history with <c-n> and <c-p>.
 
                                                          *'g:ctrlp_open_multi'*
 If non-zero, this will enable opening multiple files with <c-z> and <c-o>: >
@@ -515,8 +516,8 @@ c)  End the string with a colon ':' followed by a Vim command to execute that
          instance of 'my:function'.
          'abc:+setf\ myfiletype|50' will open the selected file and set its
          filetype to 'myfiletype', then jump to line 50.
-         'abc:difft' will open the selected file and run |:diffthis| on the first
-         four files.
+         'abc:diffthis' will open the selected file and run |:diffthis| on the
+         first 4 files.
 
     See also Vim’s |++opt| and |+cmd|.
 
@@ -656,6 +657,30 @@ Special thanks:~
 
     * Yasuhiro Matsumoto <github.com/mattn>
         Added option to use Migemo for Japanese language.
+
+    * Kyo Nagashima <github.com/hail2u>
+        Made some enhancements to file opening mappings.
+
+    * Simon Ruderich
+    * Ken Earley <github.com/kenearley>
+    * Zak Johnson <github.com/zakj>
+    * Diego Viola <github.com/diegoviola>
+        Bugfixes/Corrections.
+
+===============================================================================
+USERS-CONFIGURATION                                        *ctrlp-users-config*
+
+Some configurations for your .vimrc:~
+
++) MRU ==> MRE (most-recently-entered): >
+  autocmd BufEnter * call ctrlp#mrufiles#list(expand('<abuf>', 1))
+<
+The default implementation of MRU is similar to that of desktop applications.
+Use the above |autocmd| to change it to recording most-recently-entered buffers
+(that have a file) instead.
+
++) |g:ctrlp_user_command| config that makes use of your |wildignore| setting:
+   https://github.com/kien/ctrlp.vim/issues/70 by Rich Alesi
 
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
