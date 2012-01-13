@@ -48,7 +48,6 @@ e.g. `abc:45` will open the file matched the pattern and jump to line 45.
         .bzr/
         _darcs/
         root.dir
-        .vimprojects
 
 * If you want to exclude directories or files from the search, you can use the Vim’s option `wildignore`
 and/or the option `g:ctrlp_custom_ignore`.  

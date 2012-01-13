@@ -1324,11 +1324,11 @@ fu! s:walker(max, pos, dir)
 endf
 
 fu! s:matchfname(item, pat)
-	retu match(split(a:item, '[\/]\ze[^\/]\+$')[-1], a:pat)
+	retu match(split(a:item, s:lash)[-1], a:pat)
 endf
 
 fu! s:matchtab(item, pat)
-	retu match(split(a:item, '\t\+[^\t]\+$')[0], a:pat)
+	retu match(split(a:item, '\t\+')[0], a:pat)
 endf
 
 fu! s:maxf(len)
