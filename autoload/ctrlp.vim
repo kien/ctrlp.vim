@@ -7,12 +7,14 @@
 
 " Static variables {{{1
 fu! s:opts()
+	" Options
 	let hst = exists('+hi') ? &hi : 20
 	let opts = {
+		\ 'g:ctrlp_arg_map':               ['s:argmap', 0],
 		\ 'g:ctrlp_by_filename':           ['s:byfname', 0],
 		\ 'g:ctrlp_clear_cache_on_exit':   ['s:clrex', 1],
 		\ 'g:ctrlp_custom_ignore':         ['s:usrign', ''],
-		\ 'g:ctrlp_dont_split':            ['s:nosplit', ''],
+		\ 'g:ctrlp_dont_split':            ['s:nosplit', 'netrw'],
 		\ 'g:ctrlp_dotfiles':              ['s:dotfiles', 1],
 		\ 'g:ctrlp_extensions':            ['s:extensions', []],
 		\ 'g:ctrlp_follow_symlinks':       ['s:folsym', 0],
@@ -26,7 +28,7 @@ fu! s:opts()
 		\ 'g:ctrlp_max_height':            ['s:mxheight', 10],
 		\ 'g:ctrlp_max_history':           ['s:maxhst', hst],
 		\ 'g:ctrlp_open_multi':            ['s:opmul', '1v'],
-		\ 'g:ctrlp_open_new_file':         ['s:newfop', 3],
+		\ 'g:ctrlp_open_new_file':         ['s:newfop', 'v'],
 		\ 'g:ctrlp_prompt_mappings':       ['s:urprtmaps', 0],
 		\ 'g:ctrlp_regexp_search':         ['s:regexp', 0],
 		\ 'g:ctrlp_root_markers':          ['s:rmarkers', []],
@@ -43,33 +45,95 @@ fu! s:opts()
 	let s:glob = s:dotfiles ? '.*\|*' : '*'
 	let s:maxdepth = min([s:maxdepth, 100])
 	let s:igntype = empty(s:usrign) ? -1 : type(s:usrign)
+	" Extensions
 	let g:ctrlp_builtins = 2
 	if !empty(s:extensions) | for each in s:extensions
 		exe 'ru autoload/ctrlp/'.each.'.vim'
 	endfo | en
+	" Keymaps
+	let [s:lcmap, s:prtmaps] = ['nn <buffer> <silent>', {
+		\ 'PrtBS()':              ['<bs>', '<c-]>'],
+		\ 'PrtDelete()':          ['<del>'],
+		\ 'PrtDeleteWord()':      ['<c-w>'],
+		\ 'PrtClear()':           ['<c-u>'],
+		\ 'PrtSelectMove("j")':   ['<c-j>', '<down>'],
+		\ 'PrtSelectMove("k")':   ['<c-k>', '<up>'],
+		\ 'PrtHistory(-1)':       ['<c-n>'],
+		\ 'PrtHistory(1)':        ['<c-p>'],
+		\ 'AcceptSelection("e")': ['<cr>', '<c-m>', '<2-LeftMouse>'],
+		\ 'AcceptSelection("h")': ['<c-x>', '<c-cr>', '<c-s>'],
+		\ 'AcceptSelection("t")': ['<c-t>', '<MiddleMouse>'],
+		\ 'AcceptSelection("v")': ['<c-v>', '<RightMouse>'],
+		\ 'ToggleFocus()':        ['<tab>', '<c-i>'],
+		\ 'ToggleRegex()':        ['<c-r>'],
+		\ 'ToggleByFname()':      ['<c-d>'],
+		\ 'ToggleType(1)':        ['<c-f>', '<c-up>'],
+		\ 'ToggleType(-1)':       ['<c-b>', '<c-down>'],
+		\ 'PrtInsert("w")':       ['<F2>'],
+		\ 'PrtInsert("s")':       ['<F3>'],
+		\ 'PrtInsert("v")':       ['<F4>'],
+		\ 'PrtInsert("+")':       ['<F6>'],
+		\ 'PrtCurStart()':        ['<c-a>'],
+		\ 'PrtCurEnd()':          ['<c-e>'],
+		\ 'PrtCurLeft()':         ['<c-h>', '<left>', '<c-^>'],
+		\ 'PrtCurRight()':        ['<c-l>', '<right>'],
+		\ 'PrtClearCache()':      ['<F5>'],
+		\ 'PrtDeleteMRU()':       ['<F7>'],
+		\ 'CreateNewFile()':      ['<c-y>'],
+		\ 'MarkToOpen()':         ['<c-z>'],
+		\ 'OpenMulti()':          ['<c-o>'],
+		\ 'PrtExit()':            ['<esc>', '<c-c>', '<c-g>'],
+		\ }]
+	if !has('gui_running') && ( has('win32') || has('win64') )
+		cal add(s:prtmaps['PrtBS()'], remove(s:prtmaps['PrtCurLeft()'], 0))
+	en
+	if type(s:urprtmaps) == 4
+		cal extend(s:prtmaps, s:urprtmaps)
+	en
+	let s:prtunmaps = [
+		\ 'PrtBS()',
+		\ 'PrtDelete()',
+		\ 'PrtDeleteWord()',
+		\ 'PrtClear()',
+		\ 'PrtCurStart()',
+		\ 'PrtCurEnd()',
+		\ 'PrtCurLeft()',
+		\ 'PrtCurRight()',
+		\ 'PrtHistory(-1)',
+		\ 'PrtHistory(1)',
+		\ 'PrtInsert("w")',
+		\ 'PrtInsert("s")',
+		\ 'PrtInsert("v")',
+		\ 'PrtInsert("+")',
+		\ ]
+	" Global options
+	let s:glbs = { 'magic': 1, 'to': 1, 'tm': 0, 'sb': 1, 'hls': 0, 'im': 0,
+		\ 'report': 9999, 'sc': 0, 'ss': 0, 'siso': 0, 'mfd': 200, 'mouse': 'n',
+		\ 'gcr': 'a:blinkon0', 'ic': 1, 'scs': 1 }
+	if s:lazy
+		cal extend(s:glbs, { 'ut': ( s:lazy > 1 ? s:lazy : 250 ) })
+	en
+	" Regexp
+	let s:fpats = {
+		\ '^\(\\|\)\|\(\\|\)$': '\\|',
+		\ '^\\\(zs\|ze\|<\|>\)': '^\\\(zs\|ze\|<\|>\)',
+		\ '^\S\*$': '\*',
+		\ '^\S\\?$': '\\?',
+		\ }
 endf
 cal s:opts()
 
 let s:lash = ctrlp#utils#lash()
-
-" Global options
-let s:glbs = { 'magic': 1, 'to': 1, 'tm': 0, 'sb': 1, 'hls': 0, 'im': 0,
-	\ 'report': 9999, 'sc': 0, 'ss': 0, 'siso': 0, 'mfd': 200, 'mouse': 'n',
-	\ 'gcr': 'a:blinkon0', 'ic': 1, 'scs': 1 }
-
-if s:lazy
-	cal extend(s:glbs, { 'ut': ( s:lazy > 1 ? s:lazy : 250 ) })
-en
 
 " Limiters
 let [s:compare_lim, s:nocache_lim, s:mltipats_lim] = [3000, 4000, 2000]
 " * Open & Close {{{1
 fu! s:Open()
 	if exists('g:ctrlp_log') && g:ctrlp_log
-		sil! exe 'redi >>' ctrlp#utils#cachedir().s:lash.'ctrlp.log'
+		sil! exe 'redi! >' ctrlp#utils#cachedir().s:lash.'ctrlp.log'
 	en
 	cal s:getenv()
-	sil! exe 'keepa' ( s:mwbottom ? 'bo' : 'to' ) '1new ControlP'
+	sil! exe 'noa keepa' ( s:mwbottom ? 'bo' : 'to' ) '1new ControlP'
 	let [s:bufnr, s:prompt] = [bufnr('%'), ['', '', '']]
 	abc <buffer>
 	if !exists('s:hstry')
@@ -86,7 +150,7 @@ fu! s:Open()
 endf
 
 fu! s:Close()
-	try | bun! | cat | clo! | endt
+	try | noa bun! | cat | noa clo! | endt
 	cal s:unmarksigns()
 	for key in keys(s:glbs)
 		sil! exe 'let &'.key.' = s:glb_'.key
@@ -119,8 +183,8 @@ fu! ctrlp#clra(...)
 	let cache_dir = ctrlp#utils#cachedir()
 	if isdirectory(cache_dir)
 		let cache_files = split(s:glbpath(cache_dir, '**', 1), "\n")
-		cal filter(cache_files, '!isdirectory(v:val) && v:val !~ ''\<cache\.txt$''')
-		sil! cal map(cache_files, 'delete(v:val)')
+		let eval = '!isdirectory(v:val) && v:val !~ ''\<cache\.txt$\|\.log$'''
+		sil! cal map(filter(cache_files, eval), 'delete(v:val)')
 	en
 	cal ctrlp#clr()
 endf
@@ -189,10 +253,10 @@ fu! s:lsCmd()
 	let cmd = s:usrcmd
 	if type(cmd) == 1
 		retu cmd
-	elsei type(cmd) == 3 && len(cmd) >= 2 && !empty(cmd[0]) && !empty(cmd[1])
+	elsei type(cmd) == 3 && len(cmd) >= 2 && cmd[:1] != ['', '']
 		" Find a repo root
 		cal s:findroot(getcwd(), cmd[0], 0, 1)
-		if !exists('s:vcsroot') || ( exists('s:vcsroot') && empty(s:vcsroot) )
+		if !exists('s:vcsroot')
 			" Try the secondary_command
 			retu len(cmd) == 3 ? cmd[2] : ''
 		en
@@ -253,17 +317,7 @@ endf
 fu! s:SplitPattern(str, ...) "{{{1
 	let str = s:sanstail(a:str)
 	if s:migemo && s:regexp && len(str) > 0 && executable('cmigemo')
-		let dict = s:glbpath(&rtp, printf("dict/%s/migemo-dict", &encoding), 1)
-		if !len(dict)
-			let dict = s:glbpath(&rtp, "dict/migemo-dict", 1)
-		en
-		if len(dict)
-			let [tokens, str, cmd] = [split(str, '\s'), '', 'cmigemo -v -w %s -d %s']
-			for token in tokens
-				let rtn = system(printf(cmd, shellescape(token), shellescape(dict)))
-				let str .= !v:shell_error && len(rtn) > 0 ? '.*'.rtn : token
-			endfo
-		en
+		let str = s:migemo(str)
 	en
 	let s:savestr = str
 	if s:regexp || match(str, '\\\(zs\|ze\|<\|>\)\|[*|]') >= 0
@@ -551,75 +605,20 @@ fu! s:MapKeys(...)
 endf
 
 fu! s:MapSpecs(...)
-	let [lcmap, prtmaps] = ['nn <buffer> <silent>', {
-		\ 'PrtBS()':              ['<bs>', '<c-]>'],
-		\ 'PrtDelete()':          ['<del>'],
-		\ 'PrtDeleteWord()':      ['<c-w>'],
-		\ 'PrtClear()':           ['<c-u>'],
-		\ 'PrtSelectMove("j")':   ['<c-j>', '<down>'],
-		\ 'PrtSelectMove("k")':   ['<c-k>', '<up>'],
-		\ 'PrtHistory(-1)':       ['<c-n>'],
-		\ 'PrtHistory(1)':        ['<c-p>'],
-		\ 'AcceptSelection("e")': ['<cr>', '<c-m>', '<2-LeftMouse>'],
-		\ 'AcceptSelection("h")': ['<c-x>', '<c-cr>', '<c-s>'],
-		\ 'AcceptSelection("t")': ['<c-t>', '<MiddleMouse>'],
-		\ 'AcceptSelection("v")': ['<c-v>', '<RightMouse>'],
-		\ 'ToggleFocus()':        ['<tab>', '<c-i>'],
-		\ 'ToggleRegex()':        ['<c-r>'],
-		\ 'ToggleByFname()':      ['<c-d>'],
-		\ 'ToggleType(1)':        ['<c-f>', '<c-up>'],
-		\ 'ToggleType(-1)':       ['<c-b>', '<c-down>'],
-		\ 'PrtInsert("w")':       ['<F2>'],
-		\ 'PrtInsert("s")':       ['<F3>'],
-		\ 'PrtInsert("v")':       ['<F4>'],
-		\ 'PrtInsert("+")':       ['<F6>'],
-		\ 'PrtCurStart()':        ['<c-a>'],
-		\ 'PrtCurEnd()':          ['<c-e>'],
-		\ 'PrtCurLeft()':         ['<c-h>', '<left>', '<c-^>'],
-		\ 'PrtCurRight()':        ['<c-l>', '<right>'],
-		\ 'PrtClearCache()':      ['<F5>'],
-		\ 'PrtDeleteMRU()':       ['<F7>'],
-		\ 'CreateNewFile()':      ['<c-y>'],
-		\ 'MarkToOpen()':         ['<c-z>'],
-		\ 'OpenMulti()':          ['<c-o>'],
-		\ 'PrtExit()':            ['<esc>', '<c-c>', '<c-g>'],
-		\ }]
-	if !has('gui_running') && ( has('win32') || has('win64') )
-		cal add(prtmaps['PrtBS()'], remove(prtmaps['PrtCurLeft()'], 0))
-	en
-	if type(s:urprtmaps) == 4
-		cal extend(prtmaps, s:urprtmaps)
-	en
 	" Correct arrow keys in terminal
 	if ( has('termresponse') && match(v:termresponse, "\<ESC>") >= 0 )
 		\ || &term =~? 'xterm\|\<k\?vt\|gnome\|screen\|linux'
 		for each in ['\A <up>','\B <down>','\C <right>','\D <left>']
-			exe lcmap.' <esc>['.each
+			exe s:lcmap.' <esc>['.each
 		endfo
 	en
 	if exists('a:1')
-		let prtunmaps = [
-			\ 'PrtBS()',
-			\ 'PrtDelete()',
-			\ 'PrtDeleteWord()',
-			\ 'PrtClear()',
-			\ 'PrtCurStart()',
-			\ 'PrtCurEnd()',
-			\ 'PrtCurLeft()',
-			\ 'PrtCurRight()',
-			\ 'PrtHistory(-1)',
-			\ 'PrtHistory(1)',
-			\ 'PrtInsert("w")',
-			\ 'PrtInsert("s")',
-			\ 'PrtInsert("v")',
-			\ 'PrtInsert("+")',
-			\ ]
-		for ke in prtunmaps | for kp in prtmaps[ke]
-			exe lcmap kp '<Nop>'
+		for ke in s:prtunmaps | for kp in s:prtmaps[ke]
+			exe s:lcmap kp '<Nop>'
 		endfo | endfo
 	el
-		for [ke, va] in items(prtmaps) | for kp in va
-			exe lcmap kp ':<c-u>cal <SID>'.ke.'<cr>'
+		for [ke, va] in items(s:prtmaps) | for kp in va
+			exe s:lcmap kp ':<c-u>cal <SID>'.ke.'<cr>'
 		endfo | endfo
 	en
 endf
@@ -677,7 +676,7 @@ fu! s:SetWD(...) "{{{1
 		cal ctrlp#setdir(s:crfpath)
 	en
 	if pathmode == 1 | retu | en
-	let markers = ['root.dir','.git/','.hg/','.vimprojects','_darcs/','.bzr/']
+	let markers = ['root.dir','.git/','.hg/','_darcs/','.bzr/']
 	if type(s:rmarkers) == 3 && !empty(s:rmarkers)
 		cal extend(markers, s:rmarkers, 0)
 	en
@@ -717,8 +716,8 @@ fu! ctrlp#acceptfile(mode, matchstr, ...)
 	en
 endf
 
-fu! s:SpecInputs()
-	let [str, type] = [join(s:prompt, ''), s:type()]
+fu! s:SpecInputs(str)
+	let [str, type] = [a:str, s:type()]
 	if str == '..' && type =~ '0\|dir'
 		cal s:parentdir(getcwd())
 		cal s:SetLines(s:itemtype)
@@ -739,10 +738,12 @@ fu! s:SpecInputs()
 endf
 
 fu! s:AcceptSelection(mode)
-	if a:mode == 'e' | if s:SpecInputs() | retu | en | en
+	let str = join(s:prompt, '')
+	if a:mode == 'e' | if s:SpecInputs(str) | retu | en | en
 	" Get the selected line
 	let line = getline('.')
 	if a:mode != 'e' && s:itemtype < 3 && line == ' == NO ENTRIES =='
+		\ && str !~ '\v^(\.\.|/|\\|\?)$'
 		cal s:CreateNewFile(a:mode) | retu
 	en
 	let matchstr = matchstr(line, '^> \zs.\+\ze\t*$')
@@ -753,8 +754,13 @@ fu! s:AcceptSelection(mode)
 	cal call(actfunc, [a:mode, matchstr])
 endf
 fu! s:CreateNewFile(...) "{{{1
-	let str = join(s:prompt, '')
+	let [md, str] = ['', join(s:prompt, '')]
 	if empty(str) | retu | en
+	if s:argmap && !a:0
+		" Get the extra argument
+		let md = s:argmaps(md, 1)
+		if md == 'cancel' | retu | en
+	en
 	let str = s:sanstail(str)
 	let arr = split(str, '[\/]')
 	let fname = remove(arr, -1)
@@ -767,9 +773,11 @@ fu! s:CreateNewFile(...) "{{{1
 		let filpath = getcwd().s:lash.optyp
 		cal s:insertcache(str)
 		cal s:PrtExit()
-		let cmd = s:newfop == 1 || ( a:0 && a:1 == 't' ) ? 'tabe'
-			\ : s:newfop == 2 || ( a:0 && a:1 == 'h' ) ? 'new'
-			\ : s:newfop == 3 || ( a:0 && a:1 == 'v' ) ? 'vne' : ctrlp#normcmd('e')
+		let cmd = md == 'r' ? ctrlp#normcmd('e') :
+			\ s:newfop =~ '1\|t' || ( a:0 && a:1 == 't' ) || md == 't' ? 'tabe' :
+			\ s:newfop =~ '2\|h' || ( a:0 && a:1 == 'h' ) || md == 'h' ? 'new' :
+			\ s:newfop =~ '3\|v' || ( a:0 && a:1 == 'v' ) || md == 'v' ? 'vne' :
+			\ ctrlp#normcmd('e')
 		cal s:openfile(cmd, filpath)
 	en
 endf
@@ -807,34 +815,27 @@ fu! s:MarkToOpen()
 endf
 
 fu! s:OpenMulti()
-	if !exists('s:marked') || !s:opmul
-		cal s:AcceptSelection('e') | retu
+	if !exists('s:marked') || !s:opmul | retu | en
+	" Get the options
+	let [nr, md, ucr] = matchlist(s:opmul, '\v^(\d+)(\w)=(\w)=$')[1:3]
+	if s:argmap
+		let md = s:argmaps(md)
+		if md == 'cancel' | retu | en
 	en
 	let mkd = s:marked
 	cal s:sanstail(join(s:prompt, ''))
 	cal s:PrtExit()
-	" Try not to open a new tab
-	let [ntab, norwins] = [0, s:normbuf()]
-	if empty(norwins) | let ntab = 1 | el
-		for each in norwins
-			let bufnr = winbufnr(each)
-			if !empty(bufname(bufnr)) && !empty(getbufvar(bufnr, '&ft'))
-				\ && bufname(bufnr) != 'ControlP'
-				let ntab = 1
-			en
-		endfo
-		if !ntab | let wnr = min(norwins) | en
-	en
-	if ntab | tabnew | en
-	let [ic, wnr] = [1, exists('wnr') ? wnr : 1]
-	let cmds = { 'v': 'vne', 'h': 'new', 't': 'tabe' }
-	let [nr, md] = matchlist(s:opmul, '\v^(\d+)(\w)$')[1:2]
-	let spt = len(s:opmul) > 1 ? cmds[md] : 'vne'
-	exe wnr.'winc w'
+	" Move the cursor to a reusable window
+	let fst = ctrlp#normcmd('e')
+	" Check if it's a replaceable buffer
+	let repabl = ( empty(bufname('%')) && empty(&l:ft) ) || s:nosplit()
+	" Pick a command for the rest of the files
+	let [ic, cmds] = [1, { 'v': 'vne', 'h': 'new', 't': 'tabe' }]
+	let snd = len(s:opmul) > 1 && has_key(cmds, md) ? cmds[md] : 'vne'
+	" Open the files
 	for va in values(mkd)
-		let cmd = ic == 1 ? 'e' : spt
-		cal s:openfile(cmd, va)
-		if nr > 1 && nr < ic | clo! | el | let ic += 1 | en
+		cal s:openfile(ic == 1 && ( ucr == 'r' || repabl ) ? fst : snd, va)
+		if nr > 1 && nr < ic | sil! hid clo! | el | let ic += 1 | en
 	endfo
 endf
 " ** Helper functions {{{1
@@ -900,7 +901,7 @@ fu! s:mixedsort(s1, s2)
 	retu 2 * cml + cln
 endf
 " Statusline {{{2
-fu! ctrlp#statusline(...)
+fu! ctrlp#statusline()
 	if !exists('s:statypes')
 		let s:statypes = [
 			\ ['files', 'fil'],
@@ -978,7 +979,7 @@ endf
 
 fu! s:samerootsyml(each, isfile, cwd)
 	let resolve = resolve(a:each)
-	let resolve = ( a:isfile ? fnamemodify(resolve, ':p:h') : resolve ).s:lash
+	let resolve = fnamemodify(resolve, ':p:h').s:lash
 	retu !( stridx(resolve, a:cwd) && ( stridx(a:cwd, resolve) || a:isfile ) )
 endf
 
@@ -1016,9 +1017,9 @@ fu! s:findroot(curr, mark, depth, type)
 	let [depth, notfound] = [a:depth + 1, empty(s:glbpath(a:curr, a:mark, 1))]
 	if !notfound || depth > s:maxdepth
 		if notfound | cal ctrlp#setdir(s:cwd) | en
-		if a:type
-			let s:vcsroot = depth <= s:maxdepth ? a:curr : ''
-		el
+		if a:type | if depth <= s:maxdepth
+			let s:vcsroot = a:curr
+		en | el
 			cal ctrlp#setdir(a:curr)
 			let s:foundroot = 1
 		en
@@ -1152,19 +1153,30 @@ fu! s:normbuf()
 endf
 
 fu! ctrlp#normcmd(cmd)
-	if !empty(s:nosplit) && match([bufname('%'), &l:ft], s:nosplit) >= 0
+	if s:nosplit()
 		retu a:cmd
 	en
-	" Find a regular buffer
+	" Find a normal buffer
 	let norwins = s:normbuf()
+	for each in norwins
+		let bufnr = winbufnr(each)
+		if empty(bufname(bufnr)) && empty(getbufvar(bufnr, '&ft'))
+			let fstemp = each
+			brea
+		en
+	endfo
 	let norwin = empty(norwins) ? 0 : norwins[0]
 	if norwin
 		if index(norwins, winnr()) < 0
-			exe norwin.'winc w'
+			exe ( exists('fstemp') ? fstemp : norwin ).'winc w'
 		en
 		retu a:cmd
 	en
 	retu 'bo vne'
+endf
+
+fu! s:nosplit()
+	retu !empty(s:nosplit) && match([bufname('%'), &l:ft], s:nosplit) >= 0
 endf
 
 fu! s:setupblank()
@@ -1206,6 +1218,21 @@ fu! s:sanstail(str)
 	en
 	retu substitute(str, '\\\ze:', '', 'g')
 endf
+
+fu! s:argmaps(md, ...)
+	redr
+	echoh MoreMsg
+	echon '[t]ab/[v]ertical/[h]orizontal'.( a:0 ? '/[r]eplace' : '' ).'? '
+	echoh None
+	let char = nr2char(getchar())
+	if index(['r', 'h', 't', 'v'], char) >= 0
+		retu char
+	elsei char =~# "\\v\<Esc>|\<C-c>|\<C-[>"
+		cal s:BuildPrompt(0)
+		retu 'cancel'
+	en
+	retu a:md
+endf
 " Misc {{{2
 fu! s:getenv()
 	let [s:cwd, s:winres] = [getcwd(), [winrestcmd(), &lines, winnr('$')]]
@@ -1230,6 +1257,22 @@ fu! s:lastvisual()
 	cal setreg('"', oureg, outype)
 	cal winrestview(cview)
 	retu selected
+endf
+
+fu! s:migemo(str)
+	let str = a:str
+	let dict = s:glbpath(&rtp, printf("dict/%s/migemo-dict", &enc), 1)
+	if !len(dict)
+		let dict = s:glbpath(&rtp, "dict/migemo-dict", 1)
+	en
+	if len(dict)
+		let [tokens, str, cmd] = [split(str, '\s'), '', 'cmigemo -v -w %s -d %s']
+		for token in tokens
+			let rtn = system(printf(cmd, shellescape(token), shellescape(dict)))
+			let str .= !v:shell_error && len(rtn) > 0 ? '.*'.rtn : token
+		endfo
+	en
+	retu str
 endf
 
 fu! ctrlp#msg(msg)
@@ -1267,14 +1310,8 @@ endf
 
 fu! s:regexfilter(str)
 	let str = a:str
-	let pats = {
-		\ '^\(\\|\)\|\(\\|\)$': '\\|',
-		\ '^\\\(zs\|ze\|<\|>\)': '^\\\(zs\|ze\|<\|>\)',
-		\ '^\S\*$': '\*',
-		\ '^\S\\?$': '\\?',
-		\ }
-	for key in keys(pats) | if match(str, key) >= 0
-		let str = substitute(str, pats[key], '', 'g')
+	for key in keys(s:fpats) | if match(str, key) >= 0
+		let str = substitute(str, s:fpats[key], '', 'g')
 	en | endfo
 	retu str
 endf

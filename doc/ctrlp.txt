@@ -77,11 +77,13 @@ Set the maximum height of the match window: >
 <
 
                                                      *'g:ctrlp_jump_to_buffer'*
-Set this to 0 to disable the jump-to-open-buffer feature.
-Set to 2 to also jump tab if the selected buffer’s opened in another tab.
-Set to 1 to only jump to it if it’s opened in the current tab: >
+When opening a file, if it's already opened somewhere |CtrlP| will try to jump
+to it instead of opening a new window or new tab: >
   let g:ctrlp_jump_to_buffer = 2
 <
+  1 - only jump to the buffer if it’s opened in the current tab.
+  2 - jump tab as well if the buffer's opened in another tab.
+  0 - disable this feature.
 
                                                   *'g:ctrlp_working_path_mode'*
 When starting up the prompt, temporarily set the working directory (i.e. the
@@ -93,7 +95,6 @@ When starting up the prompt, temporarily set the working directory (i.e. the
       .bzr/
       _darcs/
       root.dir
-      .vimprojects
   0 - don’t manage working directory.
 >
   let g:ctrlp_working_path_mode = 2
@@ -209,7 +210,7 @@ e.g. exclude version control directories: >
   set wildignore+=*/.git/*,*/.hg/*,*/.svn/*  " Linux/MacOSX
   set wildignore+=.git\*,.hg\*,.svn\*        " Windows
 <
-Note #1: the `*/` in front of each glob is required.
+Note #1: the `*/` in front of each directory glob is required.
 
 Note #2: |wildignore| influences the result of |expand()|, |globpath()| and
 |glob()| which many plugins use to find stuff on the system (e.g. fugitive.vim
@@ -261,8 +262,8 @@ Examples: >
   let g:ctrlp_user_command = 'find %s -type f | grep (?!tmp/.*)'
   let g:ctrlp_user_command = 'dir %s /-n /b /s /a-d | findstr .*\.py$'
 <
-Use a version control listing command when inside a repository, this is a lot
-faster when working with large projects: >
+Use a version control listing command when inside a repository, this is faster
+when scanning large projects: >
   let g:ctrlp_user_command = [repo_marker, vcs_ls_command, fallback_command]
 <
 If the fallback_command is empty or not defined, |globpath()| will then be used
@@ -272,23 +273,23 @@ Examples: >
   let g:ctrlp_user_command = ['.hg/', 'hg --cwd %s locate -I .']
 <
 
-                                                      *'g:ctrlp_open_new_file'*
-Use this option to specify how the newly created file is to be opened when
-pressing <c-y>:
-  1 - in a new tab
-  2 - in a new horizontal split
-  3 - in a new vertical split
-  0 - in the current window
->
-  let g:ctrlp_open_new_file = 3
-<
-
                                                         *'g:ctrlp_max_history'*
 The maximum number of input strings you want |CtrlP| to remember. The default
 value mirrors Vim’s global |'history'| option: >
   let g:ctrlp_max_history = &history
 <
 Set to 0 to disable prompt’s history. Browse the history with <c-n> and <c-p>.
+
+                                                      *'g:ctrlp_open_new_file'*
+Use this option to specify how the newly created file is to be opened when
+pressing <c-y>:
+  t - in a new tab
+  h - in a new horizontal split
+  v - in a new vertical split
+  r - in the current window
+>
+  let g:ctrlp_open_new_file = 'v'
+<
 
                                                          *'g:ctrlp_open_multi'*
 If non-zero, this will enable opening multiple files with <c-z> and <c-o>: >
@@ -302,15 +303,34 @@ For the letter:
   t - each in a tab
   h - each in a horizontal split
   v - each in a vertical split
+Reuse the current window:
+  tr,
+  hr,
+  vr - open the first file in the current window, then the remaining files in
+       new splits or new tabs just like with t, h, v.
+
+                                                            *'g:ctrlp_arg_map'*
+When this is set to 1, the <c-o> and <c-y> mappings will accept one extra key
+as an argument to override their default behavior: >
+  let g:ctrlp_arg_map = 0
+<
+Pressing <c-o> or <c-y> will then prompt for a keypress. The key can be:
+  t - open in tab(s)
+  h - open in horizontal split(s)
+  v - open in vertical split(s)
+  r - open in current window (for <c-y> only)
+  <esc>, <c-c> - cancel and go back to |CtrlP|
+  Any other key - use the default behavior specified by |g:ctrlp_open_new_file|
+  and |g:ctrlp_open_multi|.
 
                                                          *'g:ctrlp_dont_split'*
 When opening a file with <cr>, |CtrlP| avoids opening it in windows created by
 plugins, help and quickfix. Use this to setup some exceptions: >
-  let g:ctrlp_dont_split = ''
+  let g:ctrlp_dont_split = 'netrw'
 <
 Acceptable values are partial names or filetypes of the special buffers. Use
 |regexp| to specify the pattern. Example: >
-  let g:ctrlp_dont_split = 'netrw\|help'
+  let g:ctrlp_dont_split = 'netrw\|help\|quickfix'
 <
 
                                                     *'g:ctrlp_follow_symlinks'*
@@ -628,6 +648,21 @@ A new search type will show up the next time you open |CtrlP|.
 For more details, check out the comments inside sample.vim.~
 
 ===============================================================================
+USER-CONFIGURATION                                          *ctrlp-user-config*
+
+Some miscellaneous configurations:~
+
++) MRU ==> MRE (most-recently-entered): >
+  autocmd BufEnter,BufUnload * call ctrlp#mrufiles#list(expand('<abuf>', 1))
+<
+The default implementation of MRU is similar to that of desktop applications.
+Use the above |autocmd| to change it to recording most-recently-entered buffers
+(that have a file) instead.
+
++) |g:ctrlp_user_command| config that makes use of your |wildignore| setting:
+   https://github.com/kien/ctrlp.vim/issues/70 by Rich Alesi
+
+===============================================================================
 CREDITS                                                         *ctrlp-credits*
 
 Developed by Kien Nguyen <github.com/kien>, initially based on the Command-T
@@ -668,23 +703,12 @@ Special thanks:~
         Bugfixes/Corrections.
 
 ===============================================================================
-USERS-CONFIGURATION                                        *ctrlp-users-config*
-
-Some configurations for your .vimrc:~
-
-+) MRU ==> MRE (most-recently-entered): >
-  autocmd BufEnter * call ctrlp#mrufiles#list(expand('<abuf>', 1))
-<
-The default implementation of MRU is similar to that of desktop applications.
-Use the above |autocmd| to change it to recording most-recently-entered buffers
-(that have a file) instead.
-
-+) |g:ctrlp_user_command| config that makes use of your |wildignore| setting:
-   https://github.com/kien/ctrlp.vim/issues/70 by Rich Alesi
-
-===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
 
+Before 2012/01/14~
+
+    + New option: |g:ctrlp_arg_map| for <c-y>, <c-o> to accept an argument.
+    + Extend |g:ctrlp_open_multi| with new optional values: tr, hr, vr.
     + Extend |g:ctrlp_custom_ignore| to specifically filter dir, file and link.
 
 Before 2012/01/05~
