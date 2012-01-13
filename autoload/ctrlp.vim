@@ -113,13 +113,6 @@ fu! s:opts()
 	if s:lazy
 		cal extend(s:glbs, { 'ut': ( s:lazy > 1 ? s:lazy : 250 ) })
 	en
-	" Regexp
-	let s:fpats = {
-		\ '^\(\\|\)\|\(\\|\)$': '\\|',
-		\ '^\\\(zs\|ze\|<\|>\)': '^\\\(zs\|ze\|<\|>\)',
-		\ '^\S\*$': '\*',
-		\ '^\S\\?$': '\\?',
-		\ }
 endf
 cal s:opts()
 
@@ -127,6 +120,14 @@ let s:lash = ctrlp#utils#lash()
 
 " Limiters
 let [s:compare_lim, s:nocache_lim, s:mltipats_lim] = [3000, 4000, 2000]
+
+" Regexp
+let s:fpats = {
+	\ '^\(\\|\)\|\(\\|\)$': '\\|',
+	\ '^\\\(zs\|ze\|<\|>\)': '^\\\(zs\|ze\|<\|>\)',
+	\ '^\S\*$': '\*',
+	\ '^\S\\?$': '\\?',
+	\ }
 " * Open & Close {{{1
 fu! s:Open()
 	if exists('g:ctrlp_log') && g:ctrlp_log
@@ -143,7 +144,7 @@ fu! s:Open()
 	for [ke, va] in items(s:glbs)
 		sil! exe 'let s:glb_'.ke.' = &'.ke.' | let &'.ke.' = '.string(va)
 	endfo
-	if s:opmul && has('signs')
+	if s:opmul != '0' && has('signs')
 		sign define ctrlpmark text=+> texthl=Search
 	en
 	cal s:setupblank()
@@ -783,7 +784,7 @@ fu! s:CreateNewFile(...) "{{{1
 endf
 " * OpenMulti() {{{1
 fu! s:MarkToOpen()
-	if s:bufnr <= 0 || !s:opmul
+	if s:bufnr <= 0 || s:opmul == '0'
 		\ || ( s:itemtype > g:ctrlp_builtins && s:type() !~ 'rts' )
 		retu
 	en
@@ -815,9 +816,9 @@ fu! s:MarkToOpen()
 endf
 
 fu! s:OpenMulti()
-	if !exists('s:marked') || !s:opmul | retu | en
+	if !exists('s:marked') || s:opmul == '0' | retu | en
 	" Get the options
-	let [nr, md, ucr] = matchlist(s:opmul, '\v^(\d+)(\w)=(\w)=$')[1:3]
+	let [nr, md, ucr] = matchlist(s:opmul, '\v^(\d+)=(\w)=(\w)=$')[1:3]
 	if s:argmap
 		let md = s:argmaps(md)
 		if md == 'cancel' | retu | en
@@ -831,11 +832,13 @@ fu! s:OpenMulti()
 	let repabl = ( empty(bufname('%')) && empty(&l:ft) ) || s:nosplit()
 	" Pick a command for the rest of the files
 	let [ic, cmds] = [1, { 'v': 'vne', 'h': 'new', 't': 'tabe' }]
-	let snd = len(s:opmul) > 1 && has_key(cmds, md) ? cmds[md] : 'vne'
+	let snd = md != '' && has_key(cmds, md) ? cmds[md] : 'vne'
 	" Open the files
 	for va in values(mkd)
 		cal s:openfile(ic == 1 && ( ucr == 'r' || repabl ) ? fst : snd, va)
-		if nr > 1 && nr < ic | sil! hid clo! | el | let ic += 1 | en
+		if ( nr != '' && nr > 1 && nr < ic ) || ( nr == '' && ic > 1 )
+			sil! hid clo! | el | let ic += 1
+		en
 	endfo
 endf
 " ** Helper functions {{{1
@@ -925,7 +928,7 @@ fu! ctrlp#statusline()
 	let item    = '%#Character# '.item.' %*'
 	let slider  = ' <'.prv.'>={'.item.'}=<'.nxt.'>'
 	let dir     = ' %=%<%#LineNr# '.getcwd().' %*'
-	let marked = s:opmul ? exists('s:marked') ? ' <'.s:dismrk().'>' : ' <+>' : ''
+	let marked = s:opmul != '0' ? exists('s:marked') ? ' <'.s:dismrk().'>' : ' <+>' : ''
 	let &l:stl = focus.byfname.regex.slider.marked.dir
 endf
 
@@ -1111,7 +1114,7 @@ fu! s:remarksigns()
 endf
 
 fu! s:dosigns()
-	retu exists('s:marked') && s:bufnr > 0 && s:opmul && has('signs')
+	retu exists('s:marked') && s:bufnr > 0 && s:opmul != '0' && has('signs')
 endf
 " Dictionaries {{{2
 fu! s:dictindex(dict, expr)

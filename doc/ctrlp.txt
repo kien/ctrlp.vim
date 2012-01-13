@@ -296,9 +296,11 @@ If non-zero, this will enable opening multiple files with <c-z> and <c-o>: >
   let g:ctrlp_open_multi = '1v'
 <
 For the number:
-  If bigger than 1, it’ll be used as the maximum number of windows or tabs to
-  create when opening the files (the rest will be hidden buffers). If is 1,
-  <c-o> will open all files, each in a new window or new tab.
+  - If bigger than 1, it’ll be used as the maximum number of windows or tabs to
+    create when opening the files, the rest will be hidden buffers.
+  - If is 1, <c-o> will open all files, each in a new window or new tab.
+  - If no number is given, only the first file will be opened in a window,
+    either new window or reused, and the rest will be hidden buffers.
 For the letter:
   t - each in a tab
   h - each in a horizontal split
