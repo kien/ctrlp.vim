@@ -354,6 +354,18 @@ works in |regexp| mode. To split the pattern, separate words with space: >
   let g:ctrlp_use_migemo = 0
 <
 
+                                                        *'g:ctrlp_status_func'*
+Use this to set custom statuslines for the |CtrlP| window: >
+  let g:ctrlp_status_func = {}
+<
+Example: >
+  let g:ctrlp_status_func = {
+    \ 'main': 'function_name_1',
+    \ 'prog': 'function_name_2',
+    \ }
+<
+See https://gist.github.com/1610859 for a working example.
+
 ===============================================================================
 3. Commands                                                    *ctrlp-commands*
 
@@ -709,7 +721,8 @@ CHANGELOG                                                     *ctrlp-changelog*
 
 Before 2012/01/14~
 
-    + New option: |g:ctrlp_arg_map| for <c-y>, <c-o> to accept an argument.
+    + New options: |g:ctrlp_arg_map| for <c-y>, <c-o> to accept an argument.
+                   |g:ctrlp_status_func| custom statusline.
     + Extend |g:ctrlp_open_multi| with new optional values: tr, hr, vr.
     + Extend |g:ctrlp_custom_ignore| to specifically filter dir, file and link.
 

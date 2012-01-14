@@ -33,6 +33,7 @@ fu! s:opts()
 		\ 'g:ctrlp_regexp_search':         ['s:regexp', 0],
 		\ 'g:ctrlp_root_markers':          ['s:rmarkers', []],
 		\ 'g:ctrlp_split_window':          ['s:splitwin', 0],
+		\ 'g:ctrlp_status_func':           ['s:status', {}],
 		\ 'g:ctrlp_use_caching':           ['s:caching', 1],
 		\ 'g:ctrlp_use_migemo':            ['s:migemo', 0],
 		\ 'g:ctrlp_user_command':          ['s:usrcmd', ''],
@@ -922,14 +923,20 @@ fu! ctrlp#statusline()
 	let item = tps[s:itemtype][0]
 	let focus   = s:Focus() ? 'prt'  : 'win'
 	let byfname = s:byfname ? 'file' : 'path'
-	let regex   = s:regexp  ? '%#LineNr# regex %*' : ''
-	let focus   = '%#LineNr# '.focus.' %*'
-	let byfname = '%#Character# '.byfname.' %*'
-	let item    = '%#Character# '.item.' %*'
-	let slider  = ' <'.prv.'>={'.item.'}=<'.nxt.'>'
-	let dir     = ' %=%<%#LineNr# '.getcwd().' %*'
-	let marked = s:opmul != '0' ? exists('s:marked') ? ' <'.s:dismrk().'>' : ' <+>' : ''
-	let &l:stl = focus.byfname.regex.slider.marked.dir
+	let marked  = s:opmul != '0' ?
+		\ exists('s:marked') ? ' <'.s:dismrk().'>' : ' <+>' : ''
+	if has_key(s:status, 'main')
+		let args = [focus, byfname, s:regexp, prv, item, nxt, marked]
+		let &l:stl = call(s:status.main, args)
+	el
+		let item    = '%#Character# '.item.' %*'
+		let focus   = '%#LineNr# '.focus.' %*'
+		let byfname = '%#Character# '.byfname.' %*'
+		let regex   = s:regexp  ? '%#LineNr# regex %*' : ''
+		let slider  = ' <'.prv.'>={'.item.'}=<'.nxt.'>'
+		let dir     = ' %=%<%#LineNr# '.getcwd().' %*'
+		let &l:stl  = focus.byfname.regex.slider.marked.dir
+	en
 endf
 
 fu! s:dismrk()
@@ -939,7 +946,8 @@ endf
 
 fu! ctrlp#progress(len)
 	if has('macunix') || has('mac') | sl 1m | en
-	let &l:stl = '%#Function# '.a:len.' %* %=%<%#LineNr# '.getcwd().' %*'
+	let &l:stl = has_key(s:status, 'prog') ? call(s:status.prog, [a:len])
+		\ : '%#Function# '.a:len.' %* %=%<%#LineNr# '.getcwd().' %*'
 	redr
 endf
 " Paths {{{2
