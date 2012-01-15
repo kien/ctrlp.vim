@@ -18,8 +18,13 @@ if ( exists('g:loaded_ctrlp_undo') && g:loaded_ctrlp_undo )
 en
 let g:loaded_ctrlp_undo = 1
 
-let s:undo_var = ['ctrlp#undo#init(s:undotree)', 'ctrlp#undo#accept',
-	\ 'undo', 'udo']
+let s:undo_var = {
+	\ 'init': 'ctrlp#undo#init(s:undotree)',
+	\ 'accept': 'ctrlp#undo#accept',
+	\ 'lname': 'undo',
+	\ 'sname': 'udo',
+	\ 'type': 'line',
+	\ }
 
 let g:ctrlp_ext_vars = exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)
 	\ ? add(g:ctrlp_ext_vars, s:undo_var) : [s:undo_var]

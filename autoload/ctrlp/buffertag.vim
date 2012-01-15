@@ -13,8 +13,14 @@ if exists('g:loaded_ctrlp_buftag') && g:loaded_ctrlp_buftag
 en
 let g:loaded_ctrlp_buftag = 1
 
-let s:buftag_var = ['ctrlp#buffertag#init(s:crfile)', 'ctrlp#buffertag#accept',
-	\ 'buffer tags', 'bft', 'ctrlp#buffertag#exit()']
+let s:buftag_var = {
+	\ 'init': 'ctrlp#buffertag#init(s:crfile)',
+	\ 'accept': 'ctrlp#buffertag#accept',
+	\ 'lname': 'buffer tags',
+	\ 'sname': 'bft',
+	\ 'exit': 'ctrlp#buffertag#exit()',
+	\ 'type': 'tabs',
+	\ }
 
 let g:ctrlp_ext_vars = exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)
 	\ ? add(g:ctrlp_ext_vars, s:buftag_var) : [s:buftag_var]

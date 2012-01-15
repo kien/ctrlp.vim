@@ -1,4 +1,4 @@
-*ctrlp.txt*       Fuzzy file, buffer, mru and tag finder. v1.6.6
+*ctrlp.txt*       Fuzzy file, buffer, mru and tag finder. v1.6.7
 *CtrlP* *ControlP* *'ctrlp'* *'ctrl-p'*
 ===============================================================================
 #                                                                             #
@@ -195,6 +195,11 @@ Example: >
   let g:ctrlp_mruf_include = '\.py$\|\.rb$'
 <
 
+                                                      *'g:ctrlp_mruf_relative'*
+Set this to 1 to show only MRU files in the current working directory: >
+  let g:ctrlp_mruf_relative = 0
+<
+
                                                 *'g:ctrlp_mruf_case_sensitive'*
 Match this with your file system case-sensitivity setting to avoid duplicate
 MRU entries: >
@@ -227,7 +232,7 @@ Examples: >
   let g:ctrlp_custom_ignore = {
     \ 'dir':  '\.git$\|\.hg$\|\.svn$',
     \ 'file': '\.exe$\|\.so$\|\.dll$',
-    \ 'link': 'bad_symbolic_link',
+    \ 'link': 'some$\|bad$\|symbolic$\|links$',
     \ }
 >
 
@@ -355,13 +360,13 @@ works in |regexp| mode. To split the pattern, separate words with space: >
 <
 
                                                         *'g:ctrlp_status_func'*
-Use this to set custom statuslines for the |CtrlP| window: >
+Use this to customize the statuslines for the |CtrlP| window: >
   let g:ctrlp_status_func = {}
 <
 Example: >
   let g:ctrlp_status_func = {
-    \ 'main': 'function_name_1',
-    \ 'prog': 'function_name_2',
+    \ 'main': 'Function_Name_1',
+    \ 'prog': 'Function_Name_2',
     \ }
 <
 See https://gist.github.com/1610859 for a working example.
@@ -396,7 +401,7 @@ See https://gist.github.com/1610859 for a working example.
 
                                                                   *:ResetCtrlP*
 :ResetCtrlP
-   Reset all options, take in new values of the option variables in section 2.
+   Reset all options and take in new values of the option variables.
 
 -------------------------------------------------------------------------------
 The following commands ignore the current value of |g:ctrlp_working_path_mode|:
@@ -423,7 +428,7 @@ Once inside the prompt:~
     Toggle between the string mode (section 5.a & b) and full |regexp| mode.
     (note: in full |regexp| mode, the prompt’s base is 'r>>' instead of '>>>')
 
-    See also |input-formats| and |g:ctrlp_regexp_search|.
+    See also |input-formats| (guide) and |g:ctrlp_regexp_search| (option).
 
   <c-d>
     Toggle between full path search and filename only search.
@@ -500,7 +505,8 @@ Once inside the prompt:~
     Previous string in the prompt’s history
 
   <c-z>
-    Mark/unmark a file to be opened with <c-o>.
+    - Mark/unmark a file to be opened with <c-o>.
+    - Mark/unmark a file to create a new file in the same directory with <c-y>.
 
   <c-o>
     Open files marked by <c-z>.
@@ -546,7 +552,7 @@ c)  End the string with a colon ':' followed by a Vim command to execute that
     with a backslash: '\:'. When opening multiple files, the command will be
     executed on each opening file.
     e.g. 'abc:45' will open the selected file and jump to line 45.
-         'abc:/my\:function' will open the selected file and jump to the first
+         'abc:/my\:string' will open the selected file and jump to the first
          instance of 'my:function'.
          'abc:+setf\ myfiletype|50' will open the selected file and set its
          filetype to 'myfiletype', then jump to line 50.
@@ -563,9 +569,14 @@ e)  Similarly, submit '/' or '\' to find and go to the project’s root. If the
     project is large, using a VCS listing command to look for files might help
     speeding up the intial scan (see |g:ctrlp_user_command| for more details).
 
-f)  Type the name of a non-existent file and press <c-y> to create it.
-    e.g. 'parentdir/file.txt' will create a directory named 'parentdir' as well
-         as 'file.txt'.
+f)  Type the name of a non-existent file and press <c-y> to create it. Mark a
+    file with <c-z> to create the new file in the same directory as the marked
+    file.
+    e.g. 'parentdir/newfile.txt' will create a directory named 'parentdir' as
+         well as 'newfile.txt'.
+         If 'some/old/dirs/oldfile.txt' is marked with <c-z>, then 'parentdir'
+         and 'newfile.txt' will be created in 'some/old/dirs'. The final path
+         will then be 'some/old/dirs/parentdir/newfile.txt'.
          Use '\' in place of '/' on Windows (if |'ssl'| is not set).
 
 g)  Submit ? to open this help file.
@@ -575,7 +586,7 @@ g)  Submit ? to open this help file.
 
 Extensions are optional. To enable an extension, add its name to the variable
 g:ctrlp_extensions: >
-  let g:ctrlp_extensions = ['tag', 'buffertag', 'quickfix', 'dir']
+  let g:ctrlp_extensions = ['tag', 'buffertag', 'quickfix', 'dir', 'rtscript']
 <
 The order of the items will be the order they appear on the statusline and when
 using <c-f>, <c-b>.
@@ -616,6 +627,12 @@ Available extensions:~
       + <c-v> change the local working directory for the current window (exit).
       + <c-x> change the global working directory to |CtrlP|’s current local
         working directory (exit).
+
+                                                                    *:CtrlPRTS*
+  * Runtime script mode:~
+    - Name: 'rts'
+    - Command: ':CtrlPRTS'
+    - Search for vimscripts in runtimepath.
 
 -------------------------------------------------------------------------------
 Buffer Tag mode options:~
@@ -719,10 +736,11 @@ Special thanks:~
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
 
-Before 2012/01/14~
+Before 2012/01/15~
 
     + New options: |g:ctrlp_arg_map| for <c-y>, <c-o> to accept an argument.
                    |g:ctrlp_status_func| custom statusline.
+                   |g:ctrlp_mruf_relative| show only MRU files inside cwd.
     + Extend |g:ctrlp_open_multi| with new optional values: tr, hr, vr.
     + Extend |g:ctrlp_custom_ignore| to specifically filter dir, file and link.
 

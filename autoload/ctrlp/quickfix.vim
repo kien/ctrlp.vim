@@ -10,8 +10,13 @@ if exists('g:loaded_ctrlp_quickfix') && g:loaded_ctrlp_quickfix
 en
 let g:loaded_ctrlp_quickfix = 1
 
-let s:var_qf = ['ctrlp#quickfix#init()', 'ctrlp#quickfix#accept', 'quickfix',
-	\ 'qfx']
+let s:var_qf = {
+	\ 'init': 'ctrlp#quickfix#init()',
+	\ 'accept': 'ctrlp#quickfix#accept',
+	\ 'lname': 'quickfix',
+	\ 'sname': 'qfx',
+	\ 'type': 'line',
+	\ }
 
 let g:ctrlp_ext_vars = exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)
 	\ ? add(g:ctrlp_ext_vars, s:var_qf) : [s:var_qf]

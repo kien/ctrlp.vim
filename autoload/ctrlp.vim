@@ -2,7 +2,7 @@
 " File:          autoload/ctrlp.vim
 " Description:   Fuzzy file, buffer, mru and tag finder.
 " Author:        Kien Nguyen <github.com/kien>
-" Version:       1.6.6
+" Version:       1.6.7
 " =============================================================================
 
 " Static variables {{{1
@@ -19,14 +19,15 @@ fu! s:opts()
 		\ 'g:ctrlp_extensions':            ['s:extensions', []],
 		\ 'g:ctrlp_follow_symlinks':       ['s:folsym', 0],
 		\ 'g:ctrlp_highlight_match':       ['s:mathi', [1, 'Identifier']],
-		\ 'g:ctrlp_lazy_update':           ['s:lazy', 0],
 		\ 'g:ctrlp_jump_to_buffer':        ['s:jmptobuf', 2],
+		\ 'g:ctrlp_lazy_update':           ['s:lazy', 0],
 		\ 'g:ctrlp_match_window_bottom':   ['s:mwbottom', 1],
 		\ 'g:ctrlp_match_window_reversed': ['s:mwreverse', 1],
 		\ 'g:ctrlp_max_depth':             ['s:maxdepth', 40],
 		\ 'g:ctrlp_max_files':             ['s:maxfiles', 20000],
 		\ 'g:ctrlp_max_height':            ['s:mxheight', 10],
 		\ 'g:ctrlp_max_history':           ['s:maxhst', hst],
+		\ 'g:ctrlp_mruf_relative':         ['s:relate', 0],
 		\ 'g:ctrlp_open_multi':            ['s:opmul', '1v'],
 		\ 'g:ctrlp_open_new_file':         ['s:newfop', 'v'],
 		\ 'g:ctrlp_prompt_mappings':       ['s:urprtmaps', 0],
@@ -164,11 +165,8 @@ fu! s:Close()
 	en
 	unl! s:focus s:hisidx s:hstgot s:marked s:statypes s:cline s:init s:savestr
 		\ g:ctrlp_nolimit
-	if exists('g:ctrlp_ext_vars')
-		cal map(filter(copy(g:ctrlp_ext_vars),
-			\ 'exists("v:val[4]")'), 'eval(v:val[4])')
-	en
 	cal ctrlp#recordhist()
+	cal s:onexit()
 	if exists('g:ctrlp_log') && g:ctrlp_log
 		sil! redi END
 	en
@@ -290,16 +288,20 @@ fu! s:MatchIt(items, pat, limit, mfunc)
 endf
 
 fu! s:MatchedItems(items, pats, limit)
-	let [items, pats, limit, ipt] = [a:items, a:pats, a:limit, s:ispathitem()]
+	let [items, pats, limit] = [a:items, a:pats, a:limit]
 	" If items is longer than s:mltipats_lim, use only the last pattern
 	if len(items) >= s:mltipats_lim || ( exists('s:height') && s:height > 20 )
 		let pats = [pats[-1]]
 	en
 	cal map(pats, 'substitute(v:val, "\\\~", "\\\\\\~", "g")')
 	if !s:regexp | cal map(pats, 'escape(v:val, ".")') | en
-	let mfunc = s:byfname && ipt ? 's:matchfname'
-		\ : s:itemtype > 2 && len(items) < 30000 && !ipt ? 's:matchtab'
-		\ : 'match'
+	let [type, ipt, mfunc] = [s:type(1), s:ispathitem(), 'match']
+	if s:byfname && ipt
+		let mfunc = 's:matchfname'
+	elsei s:itemtype > 2
+		let types = { 'tabs': 's:matchtabs', 'tabe': 's:matchtabe' }
+		if has_key(types, type) | let mfunc = types[type] | en
+	en
 	" Loop through the patterns
 	for pat in pats
 		" If newitems is small, set it as items to search in
@@ -651,7 +653,7 @@ endf
 fu! s:ToggleType(dir)
 	let ext = exists('g:ctrlp_ext_vars') ? len(g:ctrlp_ext_vars) : 0
 	let s:itemtype = s:walker(g:ctrlp_builtins + ext, s:itemtype, a:dir)
-	let s:extid = s:itemtype - ( g:ctrlp_builtins + 1 )
+	if s:byfname && !s:ispathitem() | let s:byfname = 0 | en
 	unl! g:ctrlp_nolimit
 	cal s:SetLines(s:itemtype)
 	cal s:PrtSwitcher()
@@ -692,7 +694,7 @@ endf
 fu! ctrlp#acceptfile(mode, matchstr, ...)
 	let [md, matchstr] = [a:mode, a:matchstr]
 	" Get the full path
-	let filpath = s:itemtype ? matchstr : getcwd().s:lash.matchstr
+	let filpath = s:nocwd() ? getcwd().s:lash.matchstr : matchstr
 	cal s:PrtExit()
 	let bufnum = bufnr(filpath)
 	if s:jmptobuf && bufnum > 0 && md =~ 'e\|t'
@@ -752,7 +754,7 @@ fu! s:AcceptSelection(mode)
 	if empty(matchstr) | retu | en
 	" Do something with it
 	let actfunc = s:itemtype < 3 ? 'ctrlp#acceptfile'
-		\ : g:ctrlp_ext_vars[s:itemtype - ( g:ctrlp_builtins + 1 )][1]
+		\ : g:ctrlp_ext_vars[s:itemtype - ( g:ctrlp_builtins + 1 )]['accept']
 	cal call(actfunc, [a:mode, matchstr])
 endf
 fu! s:CreateNewFile(...) "{{{1
@@ -766,22 +768,28 @@ fu! s:CreateNewFile(...) "{{{1
 	let str = s:sanstail(str)
 	let arr = split(str, '[\/]')
 	let fname = remove(arr, -1)
+	if exists('s:marked') && len(s:marked)
+		" Use the first marked file's path
+		let val = values(s:marked)[0]
+		let mrk = ctrlp#rmbasedir([val])[0]
+		if val != mrk
+			let arr = extend(split(mrk, '[\/]')[:-2], arr)
+			let str = ctrlp#rmbasedir([fnamemodify(val, ':p:h').s:lash.str])[0]
+		en
+	en
 	if len(arr) | if isdirectory(s:createparentdirs(arr))
-		let optyp = str
-	en | el
-		let optyp = fname
+		let optyp = str | en | el | let optyp = fname
 	en
-	if exists('optyp')
-		let filpath = getcwd().s:lash.optyp
-		cal s:insertcache(str)
-		cal s:PrtExit()
-		let cmd = md == 'r' ? ctrlp#normcmd('e') :
-			\ s:newfop =~ '1\|t' || ( a:0 && a:1 == 't' ) || md == 't' ? 'tabe' :
-			\ s:newfop =~ '2\|h' || ( a:0 && a:1 == 'h' ) || md == 'h' ? 'new' :
-			\ s:newfop =~ '3\|v' || ( a:0 && a:1 == 'v' ) || md == 'v' ? 'vne' :
-			\ ctrlp#normcmd('e')
-		cal s:openfile(cmd, filpath)
-	en
+	if !exists('optyp') | retu | en
+	let filpath = getcwd().s:lash.optyp
+	cal s:insertcache(str)
+	cal s:PrtExit()
+	let cmd = md == 'r' ? ctrlp#normcmd('e') :
+		\ s:newfop =~ '1\|t' || ( a:0 && a:1 == 't' ) || md == 't' ? 'tabe' :
+		\ s:newfop =~ '2\|h' || ( a:0 && a:1 == 'h' ) || md == 'h' ? 'new' :
+		\ s:newfop =~ '3\|v' || ( a:0 && a:1 == 'v' ) || md == 'v' ? 'vne' :
+		\ ctrlp#normcmd('e')
+	cal s:openfile(cmd, filpath)
 endf
 " * OpenMulti() {{{1
 fu! s:MarkToOpen()
@@ -791,7 +799,7 @@ fu! s:MarkToOpen()
 	en
 	let matchstr = matchstr(getline('.'), '^> \zs.\+\ze\t*$')
 	if empty(matchstr) | retu | en
-	let filpath = s:itemtype ? matchstr : getcwd().s:lash.matchstr
+	let filpath = s:nocwd() ? getcwd().s:lash.matchstr : matchstr
 	if exists('s:marked') && s:dictindex(s:marked, filpath) > 0
 		" Unmark and remove the file from s:marked
 		let key = s:dictindex(s:marked, filpath)
@@ -913,7 +921,8 @@ fu! ctrlp#statusline()
 			\ ['mru files', 'mru'],
 			\ ]
 		if exists('g:ctrlp_ext_vars')
-			cal map(copy(g:ctrlp_ext_vars), 'add(s:statypes, [ v:val[2], v:val[3] ])')
+			cal map(copy(g:ctrlp_ext_vars),
+				\ 'add(s:statypes, [ v:val["lname"], v:val["sname"] ])')
 		en
 	en
 	let tps = s:statypes
@@ -927,7 +936,7 @@ fu! ctrlp#statusline()
 		\ exists('s:marked') ? ' <'.s:dismrk().'>' : ' <+>' : ''
 	if has_key(s:status, 'main')
 		let args = [focus, byfname, s:regexp, prv, item, nxt, marked]
-		let &l:stl = call(s:status.main, args)
+		let &l:stl = call(s:status['main'], args)
 	el
 		let item    = '%#Character# '.item.' %*'
 		let focus   = '%#LineNr# '.focus.' %*'
@@ -944,17 +953,17 @@ fu! s:dismrk()
 		\ '%<'.join(values(map(copy(s:marked), 'split(v:val, "[\\/]")[-1]')), ', ')
 endf
 
-fu! ctrlp#progress(len)
+fu! ctrlp#progress(enum)
 	if has('macunix') || has('mac') | sl 1m | en
-	let &l:stl = has_key(s:status, 'prog') ? call(s:status.prog, [a:len])
-		\ : '%#Function# '.a:len.' %* %=%<%#LineNr# '.getcwd().' %*'
+	let &l:stl = has_key(s:status, 'prog') ? call(s:status['prog'], [a:enum])
+		\ : '%#Function# '.a:enum.' %* %=%<%#LineNr# '.getcwd().' %*'
 	redr
 endf
 " Paths {{{2
 fu! s:ispathitem()
 	let ext = s:itemtype - ( g:ctrlp_builtins + 1 )
 	retu s:itemtype < 3
-		\ || ( s:itemtype > 2 && g:ctrlp_ext_vars[ext][3] =~ 'dir\|rts' )
+		\ || ( s:itemtype > 2 && g:ctrlp_ext_vars[ext]['type'] == 'path' )
 endf
 
 fu! ctrlp#dirnfile(entries)
@@ -996,7 +1005,7 @@ endf
 
 fu! ctrlp#rmbasedir(items)
 	let cwd = getcwd()
-	if !stridx(a:items[0], cwd)
+	if a:items != [] && !stridx(a:items[0], cwd)
 		let idx = strlen(cwd) + 1
 		retu map(a:items, 'strpart(v:val, idx)')
 	en
@@ -1066,7 +1075,7 @@ endf
 
 fu! s:highlight(pat, grp)
 	cal clearmatches()
-	if !empty(a:pat) && s:itemtype < 3
+	if !empty(a:pat) && s:ispathitem()
 		let pat = substitute(a:pat, '\~', '\\~', 'g')
 		if !s:regexp | let pat = escape(pat, '.') | en
 		" Match only filename
@@ -1319,6 +1328,10 @@ fu! ctrlp#j2l(nr)
 	sil! norm! zvzz
 endf
 
+fu! s:nocwd()
+	retu !s:itemtype || ( s:itemtype == 2 && s:relate )
+endf
+
 fu! s:regexfilter(str)
 	let str = a:str
 	for key in keys(s:fpats) | if match(str, key) >= 0
@@ -1335,8 +1348,12 @@ fu! s:matchfname(item, pat)
 	retu match(split(a:item, s:lash)[-1], a:pat)
 endf
 
-fu! s:matchtab(item, pat)
+fu! s:matchtabs(item, pat)
 	retu match(split(a:item, '\t\+')[0], a:pat)
+endf
+
+fu! s:matchtabe(item, pat)
+	retu match(split(a:item, '\t\+[^\t]\+$')[0], a:pat)
 endf
 
 fu! s:maxf(len)
@@ -1360,13 +1377,20 @@ fu! s:insertcache(str)
 	cal s:writecache(0, ctrlp#utils#cachefile())
 endf
 " Extensions {{{2
-fu! s:type()
-	retu s:itemtype > 2 ?
-		\ g:ctrlp_ext_vars[s:itemtype - ( g:ctrlp_builtins + 1 )][3] : s:itemtype
+fu! s:type(...)
+	let ext = s:itemtype - ( g:ctrlp_builtins + 1 )
+	retu s:itemtype > 2 ? g:ctrlp_ext_vars[ext][a:0 ? 'type' : 'sname'] : s:itemtype
 endf
 
 fu! s:tagfiles()
 	retu filter(map(tagfiles(), 'fnamemodify(v:val, ":p")'), 'filereadable(v:val)')
+endf
+
+fu! s:onexit()
+	if exists('g:ctrlp_ext_vars')
+		cal map(filter(copy(g:ctrlp_ext_vars),
+			\ 'has_key(v:val, "exit")'), 'eval(v:val["exit"])')
+	en
 endf
 
 fu! ctrlp#allbufs()
@@ -1404,7 +1428,7 @@ fu! s:SetLines(type)
 		\ 'ctrlp#mrufiles#list(-1)',
 		\ ]
 	if exists('g:ctrlp_ext_vars')
-		cal map(copy(g:ctrlp_ext_vars), 'add(types, v:val[0])')
+		cal map(copy(g:ctrlp_ext_vars), 'add(types, v:val["init"])')
 	en
 	let g:ctrlp_lines = eval(types[a:type])
 endf

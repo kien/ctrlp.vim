@@ -11,6 +11,7 @@ fu! ctrlp#mrufiles#opts()
 		\ 'g:ctrlp_mruf_include': ['s:include', ''],
 		\ 'g:ctrlp_mruf_exclude': ['s:exclude', ''],
 		\ 'g:ctrlp_mruf_case_sensitive': ['s:csen', 1],
+		\ 'g:ctrlp_mruf_relative': ['s:relate', 0],
 		\ }
 	for [ke, va] in items(opts)
 		exe 'let' va[0] '=' string(exists(ke) ? eval(ke) : va[1])
@@ -47,8 +48,14 @@ fu! ctrlp#mrufiles#list(bufnr, ...) "{{{1
 	en
 	" Return the list with the active buffer removed
 	if bufnr == -1
-		let crfile = fnamemodify(bufname(winbufnr(winnr('#'))), ':p')
-		retu empty(crfile) ? mrufs : filter(mrufs, 'v:val !='.s:csen.' crfile')
+		let crf = fnamemodify(bufname(winbufnr(winnr('#'))), ':p')
+		let mrufs = empty(crf) ? mrufs : filter(mrufs, 'v:val !='.s:csen.' crf')
+		if s:relate
+			let cwd = getcwd()
+			cal filter(mrufs, '!stridx(v:val, cwd)')
+			cal ctrlp#rmbasedir(mrufs)
+		en
+		retu mrufs
 	en
 	" Remove old entry
 	cal filter(mrufs, 'v:val !='.s:csen.' filename')

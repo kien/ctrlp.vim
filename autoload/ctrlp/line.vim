@@ -17,7 +17,13 @@ if exists('g:loaded_ctrlp_line') && g:loaded_ctrlp_line
 en
 let g:loaded_ctrlp_line = 1
 
-let s:line_var = ['ctrlp#line#init()', 'ctrlp#line#accept', 'lines', 'lns']
+let s:line_var = {
+	\ 'init': 'ctrlp#line#init()',
+	\ 'accept': 'ctrlp#line#accept',
+	\ 'lname': 'lines',
+	\ 'sname': 'lns',
+	\ 'type': 'tabe',
+	\ }
 
 let g:ctrlp_ext_vars = exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)
 	\ ? add(g:ctrlp_ext_vars, s:line_var) : [s:line_var]
