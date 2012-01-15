@@ -213,18 +213,8 @@ endf
 fu! ctrlp#buffertag#accept(mode, str)
 	cal ctrlp#exit()
 	let vals = matchlist(a:str, '\v^[^\t]+\t+[^\t|]+\|(\d+)\:[^\t|]+\|(\d+)\|')
-	let [bufnr, linenr] = [vals[1], vals[2]]
-	if a:mode == 't'
-		tab sp
-	elsei a:mode == 'h'
-		sp
-	elsei a:mode == 'v'
-		vs
-	en
-	if exists('s:btmode') && s:btmode
-		exe 'hid b' bufnr
-	en
-	cal ctrlp#j2l(linenr)
+	let [bufnm, linenr] = [fnamemodify(bufname(str2nr(vals[1])), ':p'), vals[2]]
+	cal ctrlp#acceptfile(a:mode, bufnm, linenr)
 endf
 
 fu! ctrlp#buffertag#cmd(mode, ...)
