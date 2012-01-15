@@ -211,7 +211,6 @@ fu! ctrlp#buffertag#init(fname)
 endf
 
 fu! ctrlp#buffertag#accept(mode, str)
-	cal ctrlp#exit()
 	let vals = matchlist(a:str, '\v^[^\t]+\t+[^\t|]+\|(\d+)\:[^\t|]+\|(\d+)\|')
 	let [bufnm, linenr] = [fnamemodify(bufname(str2nr(vals[1])), ':p'), vals[2]]
 	cal ctrlp#acceptfile(a:mode, bufnm, linenr)
