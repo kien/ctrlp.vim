@@ -36,12 +36,19 @@ let g:loaded_ctrlp_sample = 1
 " + the name of the input function (including the brackets and any argument)
 " + the name of the action function (only the name)
 " + the long and short names to use for the statusline
-let s:sample_var = [
-	\ 'ctrlp#sample#init()',
-	\ 'ctrlp#sample#accept',
-	\ 'long statusline name',
-	\ 'shortname',
-	\ ]
+" + the matching type: line, path, tabs, tabe
+"                      |     |     |     |
+"                      |     |     |     `- match last tab delimited str
+"                      |     |     `- match first tab delimited str
+"                      |     `- match full line like file/dir path
+"                      `- match full line
+let s:sample_var = {
+	\ 'init': 'ctrlp#sample#init()',
+	\ 'accept': 'ctrlp#sample#accept',
+	\ 'lname': 'long statusline name',
+	\ 'sname': 'shortname',
+	\ 'type': 'line',
+	\ }
 
 
 " Append s:sample_var to g:ctrlp_ext_vars
