@@ -142,11 +142,12 @@ only need to keep the lines that you’ve changed the values (inside []): >
     \ 'AcceptSelection("h")': ['<c-x>', '<c-cr>', '<c-s>'],
     \ 'AcceptSelection("t")': ['<c-t>', '<MiddleMouse>'],
     \ 'AcceptSelection("v")': ['<c-v>', '<RightMouse>'],
-    \ 'ToggleFocus()':        ['<tab>', '<c-i>'],
+    \ 'ToggleFocus()':        ['<s-tab>'],
     \ 'ToggleRegex()':        ['<c-r>'],
     \ 'ToggleByFname()':      ['<c-d>'],
     \ 'ToggleType(1)':        ['<c-f>', '<c-up>'],
     \ 'ToggleType(-1)':       ['<c-b>', '<c-down>'],
+    \ 'PrtExpandDir()':       ['<tab>', '<c-i>'],
     \ 'PrtInsert("w")':       ['<F2>'],
     \ 'PrtInsert("s")':       ['<F3>'],
     \ 'PrtInsert("v")':       ['<F4>'],
@@ -443,6 +444,10 @@ Once inside the prompt:~
     Scroll to the 'previous' search mode in the sequence.
 
   <tab>
+    Auto-complete directory names under the current working directory inside
+    the prompt.
+
+  <s-tab>
     Toggle the focus between the match window and the prompt.
 
   <c-j>,
@@ -738,6 +743,8 @@ CHANGELOG                                                     *ctrlp-changelog*
 
 Before 2012/01/15~
 
+    + New mapping: Switch <tab> and <s-tab>. <tab> is now used for completion
+                   of directory names under the current working directory.
     + New options: |g:ctrlp_arg_map| for <c-y>, <c-o> to accept an argument.
                    |g:ctrlp_status_func| custom statusline.
                    |g:ctrlp_mruf_relative| show only MRU files inside cwd.

@@ -55,7 +55,7 @@ if index(s:ext, 'buffertag') >= 0
 	com! CtrlPBufTagAll cal ctrlp#init(ctrlp#buffertag#cmd(1))
 en
 
-if index(s:ext, 'rts') >= 0
+if index(s:ext, 'rtscript') >= 0
 	com! CtrlPRTS cal ctrlp#init(ctrlp#rtscript#id())
 en
 

@@ -14,7 +14,7 @@ let s:ars = [
 	\ 's:maxdepth',
 	\ 's:maxfiles',
 	\ 's:compare_lim',
-	\ 's:glob',
+	\ 's:dotfiles',
 	\ ]
 
 let s:dir_var = {
@@ -31,7 +31,10 @@ let g:ctrlp_ext_vars = exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 " Utilities {{{1
 fu! s:globdirs(dirs, depth)
-	let entries = split(globpath(a:dirs, s:glob), "\n")
+	let entries = split(globpath(a:dirs, '*'), "\n")
+	if s:dotfiles
+		let entries += split(globpath(a:dirs, '.*'), "\n")
+	en
 	let [dirs, depth] = [ctrlp#dirnfile(entries)[0], a:depth + 1]
 	cal extend(g:ctrlp_alldirs, dirs)
 	if !empty(dirs) && !s:max(len(g:ctrlp_alldirs), s:maxfiles)

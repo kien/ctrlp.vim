@@ -44,7 +44,6 @@ fu! s:opts()
 		exe 'let' va[0] '=' string(exists(ke) ? eval(ke) : va[1])
 	endfo
 	if !exists('g:ctrlp_newcache') | let g:ctrlp_newcache = 0 | en
-	let s:glob = s:dotfiles ? '.*\|*' : '*'
 	let s:maxdepth = min([s:maxdepth, 100])
 	let s:igntype = empty(s:usrign) ? -1 : type(s:usrign)
 	" Extensions
@@ -66,11 +65,12 @@ fu! s:opts()
 		\ 'AcceptSelection("h")': ['<c-x>', '<c-cr>', '<c-s>'],
 		\ 'AcceptSelection("t")': ['<c-t>', '<MiddleMouse>'],
 		\ 'AcceptSelection("v")': ['<c-v>', '<RightMouse>'],
-		\ 'ToggleFocus()':        ['<tab>', '<c-i>'],
+		\ 'ToggleFocus()':        ['<s-tab>'],
 		\ 'ToggleRegex()':        ['<c-r>'],
 		\ 'ToggleByFname()':      ['<c-d>'],
 		\ 'ToggleType(1)':        ['<c-f>', '<c-up>'],
 		\ 'ToggleType(-1)':       ['<c-b>', '<c-down>'],
+		\ 'PrtExpandDir()':       ['<tab>', '<c-i>'],
 		\ 'PrtInsert("w")':       ['<F2>'],
 		\ 'PrtInsert("s")':       ['<F3>'],
 		\ 'PrtInsert("v")':       ['<F4>'],
@@ -224,7 +224,10 @@ fu! s:Files()
 endf
 
 fu! s:GlobPath(dirs, depth)
-	let entries = split(globpath(a:dirs, s:glob), "\n")
+	let entries = split(globpath(a:dirs, '*'), "\n")
+	if s:dotfiles
+		let entries += split(globpath(a:dirs, '.*'), "\n")
+	en
 	let [dnf, depth] = [ctrlp#dirnfile(entries), a:depth + 1]
 	cal extend(g:ctrlp_allfiles, dnf[1])
 	if !empty(dnf[0]) && !s:maxf(len(g:ctrlp_allfiles)) && depth <= s:maxdepth
@@ -485,6 +488,26 @@ fu! s:PrtInsert(type)
 		\ : a:type == 's' ? getreg('/')
 		\ : a:type == 'v' ? s:crvisual
 		\ : a:type == '+' ? substitute(getreg('+'), '\n', '\\n', 'g') : s:prompt[0]
+	cal s:BuildPrompt(1)
+endf
+
+fu! s:PrtExpandDir()
+	let prt = s:prompt
+	if prt[0] == '' | retu | en
+	let parts = split(prt[0], '[\/]\ze[^\/]\+[\/:]\?$')
+	if len(parts) == 1
+		let seed = parts[0]
+		let begin = ''
+	elsei len(parts) > 1
+		let seed = parts[1]
+		let begin = parts[0].s:lash
+	en
+	let dirs = s:dircompl(begin, seed)
+	if len(dirs) == 1
+		let prt[0] = dirs[0]
+	elsei len(dirs) > 1
+		let prt[0] .= s:findcommon(dirs, prt[0])
+	en
 	cal s:BuildPrompt(1)
 endf
 " Movement {{{2
@@ -960,6 +983,33 @@ fu! ctrlp#progress(enum)
 	redr
 endf
 " Paths {{{2
+fu! s:dircompl(dir, seed)
+	if a:seed == '' | retu [] | en
+	let [dir, seed] = a:dir == ''
+		\ ? [getcwd().s:lash, a:seed] : [a:dir, a:dir.a:seed]
+	let dirs = ctrlp#rmbasedir(split(globpath(dir, '*/'), "\n"))
+	if s:dotfiles
+		let dirs += ctrlp#rmbasedir(split(globpath(dir, '.*/'), "\n"))
+	en
+	cal filter(dirs, '!match(v:val, escape(seed, ''''''~$.\'')) && ( !s:dotfiles'
+		\ . ' || ( s:dotfiles && match(v:val, ''[\/]\.\{,2}[\/:]$'') < 0) )')
+	retu dirs
+endf
+
+fu! s:findcommon(items, seed)
+	let [items, id, cmn, ic] = [copy(a:items), strlen(a:seed), '', 0]
+	cal map(items, 'strpart(v:val, id)')
+	for char in split(items[0], '\zs')
+		for item in items[1:]
+			if item[ic] != char | let brk = 1 | brea | en
+		endfo
+		if exists('brk') | brea | en
+		let cmn .= char
+		let ic += 1
+	endfo
+	retu cmn
+endf
+
 fu! s:ispathitem()
 	let ext = s:itemtype - ( g:ctrlp_builtins + 1 )
 	retu s:itemtype < 3
