@@ -1100,7 +1100,8 @@ fu! s:findroot(curr, mark, depth, type)
 endf
 
 fu! s:glbpath(...)
-	retu call('globpath',  v:version > 701 ? a:000 : a:000[:1])
+	let cond = ( v:version == 702 && has('patch051') ) || v:version > 702
+	retu call('globpath', cond ? a:000 : a:000[:1])
 endf
 
 fu! ctrlp#fnesc(path)
