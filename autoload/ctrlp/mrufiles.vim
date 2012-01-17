@@ -12,6 +12,7 @@ fu! ctrlp#mrufiles#opts()
 		\ 'g:ctrlp_mruf_exclude': ['s:exclude', ''],
 		\ 'g:ctrlp_mruf_case_sensitive': ['s:csen', 1],
 		\ 'g:ctrlp_mruf_relative': ['s:relate', 0],
+		\ 'g:ctrlp_mruf_last_entered': ['s:mre', 0],
 		\ }
 	for [ke, va] in items(opts)
 		exe 'let' va[0] '=' string(exists(ke) ? eval(ke) : va[1])
@@ -43,7 +44,7 @@ fu! ctrlp#mrufiles#list(bufnr, ...) "{{{1
 	let mrufs = ctrlp#utils#readfile(s:cafile)
 	" Remove non-existent files
 	if a:0 && a:1 == 1
-		cal filter(mrufs, '!empty(ctrlp#utils#glob(v:val, 1))')
+		cal filter(mrufs, '!empty(ctrlp#utils#glob(v:val, 1)) && !s:excl(v:val)')
 		cal ctrlp#utils#writecache(mrufs, s:cadir, s:cafile)
 	en
 	" Return the list with the active buffer removed
@@ -65,12 +66,19 @@ fu! ctrlp#mrufiles#list(bufnr, ...) "{{{1
 	if len(mrufs) > s:max | cal remove(mrufs, s:max, -1) | en
 	cal ctrlp#utils#writecache(mrufs, s:cadir, s:cafile)
 endf "}}}
+fu! s:excl(fname) "{{{
+	retu !empty(s:exclude) && a:fname =~# s:exclude
+endf "}}}
 fu! ctrlp#mrufiles#init() "{{{1
 	let s:locked = 0
 	aug CtrlPMRUF
 		au!
 		au BufReadPost,BufNewFile,BufWritePost *
 			\ cal ctrlp#mrufiles#list(expand('<abuf>', 1))
+		if s:mre
+			au BufEnter,BufUnload *
+				\ cal ctrlp#mrufiles#list(expand('<abuf>', 1))
+		en
 		au QuickFixCmdPre  *vimgrep* let s:locked = 1
 		au QuickFixCmdPost *vimgrep* let s:locked = 0
 	aug END

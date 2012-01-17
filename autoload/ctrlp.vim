@@ -45,6 +45,7 @@ fu! s:opts()
 	endfo
 	if !exists('g:ctrlp_newcache') | let g:ctrlp_newcache = 0 | en
 	let s:maxdepth = min([s:maxdepth, 100])
+	let s:mxheight = max([s:mxheight, 1])
 	let s:igntype = empty(s:usrign) ? -1 : type(s:usrign)
 	" Extensions
 	let g:ctrlp_builtins = 2
@@ -1087,11 +1088,10 @@ fu! s:findroot(curr, mark, depth, type)
 	let [depth, notfound] = [a:depth + 1, empty(s:glbpath(a:curr, a:mark, 1))]
 	if !notfound || depth > s:maxdepth
 		if notfound | cal ctrlp#setdir(s:cwd) | en
-		if a:type | if depth <= s:maxdepth
+		if a:type && depth <= s:maxdepth
 			let s:vcsroot = a:curr
-		en | el
-			cal ctrlp#setdir(a:curr)
-			let s:foundroot = 1
+		elsei !a:type && !notfound
+			cal ctrlp#setdir(a:curr) | let s:foundroot = 1
 		en
 	el
 		let parent = s:getparent(a:curr)

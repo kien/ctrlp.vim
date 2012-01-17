@@ -66,8 +66,8 @@ Set this to 0 to show the match window at the top of the screen: >
 <
 
                                               *'g:ctrlp_match_window_reversed'*
-Reverse the sort order of the matched files in the match window. The default
-setting is from bottom to top: >
+Change the listing order of the matched files in the match window. The default
+setting (1) is from bottom to top: >
   let g:ctrlp_match_window_reversed = 1
 <
 
@@ -179,7 +179,7 @@ Specify the number of recently opened files you want |CtrlP| to remember: >
 <
 
                                                        *'g:ctrlp_mruf_exclude'*
-Files you don’t want |CtrlP| to remember; use |regexp| to specify the patterns:
+Files you don’t want |CtrlP| to remember. Use |regexp| to specify the patterns:
 >
   let g:ctrlp_mruf_exclude = ''
 <
@@ -205,6 +205,11 @@ Set this to 1 to show only MRU files in the current working directory: >
 Match this with your file system case-sensitivity setting to avoid duplicate
 MRU entries: >
   let g:ctrlp_mruf_case_sensitive = 1
+<
+
+                                                  *'g:ctrlp_mruf_last_entered'*
+Set to 1 to sort the MRU file list to most-recently-entered-buffer order: >
+  let g:ctrlp_mruf_last_entered = 0
 <
 
                                                            *'g:ctrlp_dotfiles'*
@@ -235,7 +240,7 @@ Examples: >
     \ 'file': '\.exe$\|\.so$\|\.dll$',
     \ 'link': 'some$\|bad$\|symbolic$\|links$',
     \ }
->
+<
 
                                                     *'g:ctrlp_highlight_match'*
 Use this to enable/disable highlighting of the matched patterns and to specify
@@ -688,13 +693,6 @@ USER-CONFIGURATION                                          *ctrlp-user-config*
 
 Some miscellaneous configurations:~
 
-+) MRU ==> MRE (most-recently-entered): >
-  autocmd BufEnter,BufUnload * call ctrlp#mrufiles#list(expand('<abuf>', 1))
-<
-The default implementation of MRU is similar to that of desktop applications.
-Use the above |autocmd| to change it to recording most-recently-entered buffers
-(that have a file) instead.
-
 +) |g:ctrlp_user_command| config that makes use of your |wildignore| setting:
    https://github.com/kien/ctrlp.vim/issues/70 by Rich Alesi
 
@@ -740,6 +738,8 @@ Special thanks:~
 
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
+
+    + New option: |g:ctrlp_mruf_last_entered| change MRU to recently-entered
 
 Before 2012/01/15~
 
