@@ -10,12 +10,16 @@ fu! ctrlp#utils#lash()
 endf
 let s:lash = ctrlp#utils#lash()
 
+fu! s:lash(...)
+	retu match(a:0 ? a:1 : getcwd(), '[\/]$') < 0 ? s:lash : ''
+endf
+
 fu! ctrlp#utils#opts()
-	let s:cache_dir = $HOME.s:lash.'.ctrlp_cache'
+	let s:cache_dir = $HOME.s:lash($HOME).'.ctrlp_cache'
 	if exists('g:ctrlp_cache_dir')
 		let s:cache_dir = expand(g:ctrlp_cache_dir, 1)
-		if isdirectory(s:cache_dir.s:lash.'.ctrlp_cache')
-			let s:cache_dir = s:cache_dir.s:lash.'.ctrlp_cache'
+		if isdirectory(s:cache_dir.s:lash(s:cache_dir).'.ctrlp_cache')
+			let s:cache_dir = s:cache_dir.s:lash(s:cache_dir).'.ctrlp_cache'
 		en
 	en
 endf
@@ -28,7 +32,7 @@ endf
 fu! ctrlp#utils#cachefile(...)
 	let tail = exists('a:1') ? '.'.a:1 : ''
 	let cache_file = substitute(getcwd(), '\([\/]\|^\a\zs:\)', '%', 'g').tail.'.txt'
-	retu exists('a:1') ? cache_file : s:cache_dir.s:lash.cache_file
+	retu exists('a:1') ? cache_file : s:cache_dir.s:lash(s:cache_dir).cache_file
 endf
 
 fu! ctrlp#utils#readfile(file)

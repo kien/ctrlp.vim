@@ -134,7 +134,8 @@ let s:fpats = {
 " * Open & Close {{{1
 fu! s:Open()
 	if exists('g:ctrlp_log') && g:ctrlp_log
-		sil! exe 'redi! >' ctrlp#utils#cachedir().s:lash.'ctrlp.log'
+		let cadir = ctrlp#utils#cachedir()
+		sil! exe 'redi! >' cadir.s:lash(cadir).'ctrlp.log'
 	en
 	cal s:getenv()
 	sil! exe 'noa keepa' ( s:mwbottom ? 'bo' : 'to' ) '1new ControlP'
@@ -716,7 +717,7 @@ endf
 fu! ctrlp#acceptfile(mode, matchstr, ...)
 	let [md, matchstr] = [a:mode, a:matchstr]
 	" Get the full path
-	let filpath = s:nocwd() ? getcwd().s:lash.matchstr : matchstr
+	let filpath = s:nocwd() ? getcwd().s:lash().matchstr : matchstr
 	cal s:PrtExit()
 	let bufnum = bufnr(filpath)
 	if s:jmptobuf && bufnum > 0 && md =~ 'e\|t'
@@ -796,14 +797,15 @@ fu! s:CreateNewFile(...) "{{{1
 		let mrk = ctrlp#rmbasedir([val])[0]
 		if val != mrk
 			let arr = extend(split(mrk, '[\/]')[:-2], arr)
-			let str = ctrlp#rmbasedir([fnamemodify(val, ':p:h').s:lash.str])[0]
+			let pah = fnamemodify(val, ':p:h')
+			let str = ctrlp#rmbasedir([pah.s:lash(pad).str])[0]
 		en
 	en
 	if len(arr) | if isdirectory(s:createparentdirs(arr))
 		let optyp = str | en | el | let optyp = fname
 	en
 	if !exists('optyp') | retu | en
-	let filpath = getcwd().s:lash.optyp
+	let filpath = getcwd().s:lash().optyp
 	cal s:insertcache(str)
 	cal s:PrtExit()
 	let cmd = md == 'r' ? ctrlp#normcmd('e') :
@@ -821,7 +823,7 @@ fu! s:MarkToOpen()
 	en
 	let matchstr = matchstr(getline('.'), '^> \zs.\+\ze\t*$')
 	if empty(matchstr) | retu | en
-	let filpath = s:nocwd() ? getcwd().s:lash.matchstr : matchstr
+	let filpath = s:nocwd() ? getcwd().s:lash().matchstr : matchstr
 	if exists('s:marked') && s:dictindex(s:marked, filpath) > 0
 		" Unmark and remove the file from s:marked
 		let key = s:dictindex(s:marked, filpath)
@@ -897,7 +899,7 @@ fu! s:comparent(s1, s2)
 	" By same parent dir
 	let cwd = getcwd()
 	if match(s:crfpath, escape(cwd, '.^$*\')) >= 0
-		let [as1, as2] = [cwd.s:lash.a:s1, cwd.s:lash.a:s2]
+		let [as1, as2] = [cwd.s:lash().a:s1, cwd.s:lash().a:s2]
 		let [loc1, loc2] = [s:getparent(as1), s:getparent(as2)]
 		if loc1 == s:crfpath && loc2 != s:crfpath | retu -1 | en
 		if loc2 == s:crfpath && loc1 != s:crfpath | retu 1  | en
@@ -984,7 +986,7 @@ endf
 " Paths {{{2
 fu! s:dircompl(be, sd)
 	if a:sd == '' | retu [] | en
-	let [be, sd] = a:be == '' ? [getcwd(), a:sd] : [a:be, a:be.s:lash.a:sd]
+	let [be, sd] = a:be == '' ? [getcwd(), a:sd] : [a:be, a:be.s:lash(a:be).a:sd]
 	let dirs = ctrlp#rmbasedir(split(globpath(be, a:sd.'*/'), "\n"))
 	cal filter(dirs, '!match(v:val, escape(sd, ''~$.\''))'
 		\ . ' && match(v:val, ''\v(^|[\/])\.{1,2}[\/]$'') < 0')
@@ -1005,6 +1007,10 @@ fu! s:findcommon(items, seed)
 	retu cmn
 endf
 
+fu! s:lash(...)
+	retu match(a:0 ? a:1 : getcwd(), '[\/]$') < 0 ? s:lash : ''
+endf
+
 fu! s:ispathitem()
 	let ext = s:itemtype - ( g:ctrlp_builtins + 1 )
 	retu s:itemtype < 3
@@ -1012,7 +1018,7 @@ fu! s:ispathitem()
 endf
 
 fu! ctrlp#dirnfile(entries)
-	let [items, cwd] = [[[], []], getcwd().s:lash]
+	let [items, cwd] = [[[], []], getcwd().s:lash()]
 	for each in a:entries
 		let etype = getftype(each)
 		if s:igntype >= 0 && s:usrign(each, etype) | con | en
@@ -1043,15 +1049,15 @@ fu! s:usrign(item, type)
 endf
 
 fu! s:samerootsyml(each, isfile, cwd)
-	let resolve = resolve(a:each)
-	let resolve = fnamemodify(resolve, ':p:h').s:lash
+	let resolve = fnamemodify(resolve(a:each), ':p:h')
+	let resolve .= s:lash(resolve)
 	retu !( stridx(resolve, a:cwd) && ( stridx(a:cwd, resolve) || a:isfile ) )
 endf
 
 fu! ctrlp#rmbasedir(items)
 	let cwd = getcwd()
 	if a:items != [] && !stridx(a:items[0], cwd)
-		let idx = strlen(cwd) + 1
+		let idx = strlen(cwd) + ( match(cwd, '[\/]$') < 0 )
 		retu map(a:items, 'strpart(v:val, idx)')
 	en
 	retu a:items
@@ -1072,7 +1078,7 @@ endf
 
 fu! s:createparentdirs(arr)
 	for each in a:arr
-		let curr = exists('curr') ? curr.s:lash.each : each
+		let curr = exists('curr') ? curr.s:lash(curr).each : each
 		cal ctrlp#utils#mkdir(curr)
 	endfo
 	retu curr
@@ -1138,8 +1144,9 @@ fu! s:dohighlight()
 endf
 " Prompt history {{{2
 fu! s:gethistloc()
-	let cache_dir = ctrlp#utils#cachedir().s:lash.'hist'
-	retu [cache_dir, cache_dir.s:lash.'cache.txt']
+	let utilcadir = ctrlp#utils#cachedir()
+	let cache_dir = utilcadir.s:lash(utilcadir).'hist'
+	retu [cache_dir, cache_dir.s:lash(cache_dir).'cache.txt']
 endf
 
 fu! s:gethistdata()
@@ -1165,7 +1172,7 @@ endf
 
 fu! s:remarksigns()
 	if !s:dosigns() | retu | en
-	let [nls, head] = [s:matched, s:itemtype ? '' : getcwd().s:lash]
+	let [nls, head] = [s:matched, s:itemtype ? '' : getcwd().s:lash()]
 	for ic in range(1, len(nls))
 		let filpath = head.nls[ic - 1]
 		let key = s:dictindex(s:marked, filpath)
