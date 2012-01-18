@@ -18,6 +18,7 @@ Once CtrlP is open:
 
 * Press `<c-f>` and `<c-b>` to switch between find file, buffer, and MRU file modes.
 * Press `<c-d>` to switch to filename only search instead of full path.
+* Press `<F5>` to purge the cache for the current directory and get new files.
 * Use `*` or `|` in the prompt to submit the string as a Vim’s regexp pattern.
 * Or press `<c-r>` to switch to regexp mode.
 * End the input string with a colon `:` followed by a command to execute after opening the file.  
@@ -61,7 +62,7 @@ Examples:
     let g:ctrlp_custom_ignore = {
       \ 'dir':  '\.git$\|\.hg$\|\.svn$',
       \ 'file': '\.exe$\|\.so$\|\.dll$',
-      \ 'link': 'bad_symbolic_link',
+      \ 'link': 'some_bad_symbolic_links',
       \ }
     ```
 

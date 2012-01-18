@@ -497,13 +497,11 @@ fu! s:PrtExpandDir()
 	if prt[0] == '' | retu | en
 	let parts = split(prt[0], '[\/]\ze[^\/]\+[\/:]\?$')
 	if len(parts) == 1
-		let seed = parts[0]
-		let begin = ''
-	elsei len(parts) > 1
-		let seed = parts[1]
-		let begin = parts[0].s:lash
+		let [base, seed] = ['', parts[0]]
+	elsei len(parts) == 2
+		let [base, seed] = parts
 	en
-	let dirs = s:dircompl(begin, seed)
+	let dirs = s:dircompl(base, seed)
 	if len(dirs) == 1
 		let prt[0] = dirs[0]
 	elsei len(dirs) > 1
@@ -984,16 +982,12 @@ fu! ctrlp#progress(enum)
 	redr
 endf
 " Paths {{{2
-fu! s:dircompl(dir, seed)
-	if a:seed == '' | retu [] | en
-	let [dir, seed] = a:dir == ''
-		\ ? [getcwd().s:lash, a:seed] : [a:dir, a:dir.a:seed]
-	let dirs = ctrlp#rmbasedir(split(globpath(dir, '*/'), "\n"))
-	if s:dotfiles
-		let dirs += ctrlp#rmbasedir(split(globpath(dir, '.*/'), "\n"))
-	en
-	cal filter(dirs, '!match(v:val, escape(seed, ''''''~$.\'')) && ( !s:dotfiles'
-		\ . ' || ( s:dotfiles && match(v:val, ''[\/]\.\{,2}[\/:]$'') < 0) )')
+fu! s:dircompl(be, sd)
+	if a:sd == '' | retu [] | en
+	let [be, sd] = a:be == '' ? [getcwd(), a:sd] : [a:be, a:be.s:lash.a:sd]
+	let dirs = ctrlp#rmbasedir(split(globpath(be, a:sd.'*/'), "\n"))
+	cal filter(dirs, '!match(v:val, escape(sd, ''~$.\''))'
+		\ . ' && match(v:val, ''\v(^|[\/])\.{1,2}[\/]$'') < 0')
 	retu dirs
 endf
 
@@ -1023,7 +1017,7 @@ fu! ctrlp#dirnfile(entries)
 		let etype = getftype(each)
 		if s:igntype >= 0 && s:usrign(each, etype) | con | en
 		if etype == 'dir'
-			if s:dotfiles | if match(each, '[\/]\.\{,2}$') < 0
+			if s:dotfiles | if match(each, '[\/]\.\{1,2}$') < 0
 				cal add(items[0], each)
 			en | el
 				cal add(items[0], each)
@@ -1100,7 +1094,7 @@ fu! s:findroot(curr, mark, depth, type)
 endf
 
 fu! s:glbpath(...)
-	let cond = ( v:version == 702 && has('patch051') ) || v:version > 702
+	let cond = v:version > 702 || ( v:version == 702 && has('patch051') )
 	retu call('globpath', cond ? a:000 : a:000[:1])
 endf
 

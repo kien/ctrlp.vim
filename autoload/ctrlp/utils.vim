@@ -61,8 +61,8 @@ fu! ctrlp#utils#writecache(lines, ...)
 endf
 
 fu! ctrlp#utils#glob(...)
-	let cond = ( v:version == 702 && has('patch051') ) || v:version > 702
-	retu call('glob',  cond ? a:000 : [a:1])
+	let cond = v:version > 702 || ( v:version == 702 && has('patch051') )
+	retu call('glob', cond ? a:000 : [a:1])
 endf
 "}}}
 
