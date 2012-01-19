@@ -276,7 +276,7 @@ fu! s:Buffers() "{{{1
 		if getbufvar(each, '&bl') && each != s:crbufnr
 			let bufname = bufname(each)
 			if strlen(bufname) && getbufvar(each, '&ma') && bufname != 'ControlP'
-				cal add(allbufs, bufname)
+				cal add(allbufs, fnamemodify(bufname, ':.'))
 			en
 		en
 	endfo
@@ -717,8 +717,7 @@ endf
 fu! ctrlp#acceptfile(mode, matchstr, ...)
 	let [md, matchstr] = [a:mode, a:matchstr]
 	" Get the full path
-	let filpath = s:nocwd() ? getcwd().s:lash().matchstr :
-		\ s:itemtype == 1 ? fnamemodify(matchstr, ':p') : matchstr
+	let filpath = s:nocwd() ? getcwd().s:lash().matchstr : matchstr
 	cal s:PrtExit()
 	let bufnum = bufnr(filpath)
 	if s:jmptobuf && bufnum > 0 && md =~ 'e\|t'
