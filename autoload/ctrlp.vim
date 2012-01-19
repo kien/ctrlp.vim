@@ -796,7 +796,7 @@ fu! s:CreateNewFile(...) "{{{1
 		if val != mrk
 			let arr = extend(split(mrk, '[\/]')[:-2], arr)
 			let pah = fnamemodify(val, ':p:h')
-			let str = ctrlp#rmbasedir([pah.s:lash(pad).str])[0]
+			let str = ctrlp#rmbasedir([pah.s:lash(pah).str])[0]
 		en
 	en
 	if len(arr) | if isdirectory(s:createparentdirs(arr))
