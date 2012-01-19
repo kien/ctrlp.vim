@@ -46,6 +46,7 @@ fu! s:opts()
 	if !exists('g:ctrlp_newcache') | let g:ctrlp_newcache = 0 | en
 	let s:maxdepth = min([s:maxdepth, 100])
 	let s:mxheight = max([s:mxheight, 1])
+	let s:glob = s:dotfiles ? '.*\|*' : '*'
 	let s:igntype = empty(s:usrign) ? -1 : type(s:usrign)
 	" Extensions
 	let g:ctrlp_builtins = 2
@@ -226,10 +227,7 @@ fu! s:Files()
 endf
 
 fu! s:GlobPath(dirs, depth)
-	let entries = split(globpath(a:dirs, '*'), "\n")
-	if s:dotfiles
-		let entries += split(globpath(a:dirs, '.*'), "\n")
-	en
+	let entries = split(globpath(a:dirs, s:glob), "\n")
 	let [dnf, depth] = [ctrlp#dirnfile(entries), a:depth + 1]
 	cal extend(g:ctrlp_allfiles, dnf[1])
 	if !empty(dnf[0]) && !s:maxf(len(g:ctrlp_allfiles)) && depth <= s:maxdepth
