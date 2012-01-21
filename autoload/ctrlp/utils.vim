@@ -15,9 +15,16 @@ fu! s:lash(...)
 endf
 
 fu! ctrlp#utils#opts()
-	let s:cache_dir = $HOME.s:lash($HOME).'.ctrlp_cache'
+	let cache_home = exists('$XDG_CACHE_HOME') ? $XDG_CACHE_HOME : $HOME.'/.cache'
+	let s:cache_dir = cache_home.'/ctrlp'
+	" Support old default, for compatibility
+	if !isdirectory(s:cache_dir) && isdirectory($HOME.s:lash($HOME).'.ctrlp_cache')
+		let s:cache_dir = $HOME.s:lash($HOME).'.ctrlp_cache'
+	en
+	" User option
 	if exists('g:ctrlp_cache_dir')
 		let s:cache_dir = expand(g:ctrlp_cache_dir, 1)
+		" Support old suffix
 		if isdirectory(s:cache_dir.s:lash(s:cache_dir).'.ctrlp_cache')
 			let s:cache_dir = s:cache_dir.s:lash(s:cache_dir).'.ctrlp_cache'
 		en
