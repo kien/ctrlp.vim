@@ -795,20 +795,24 @@ fu! s:CreateNewFile(...) "{{{1
 		if md == 'cancel' | retu | en
 	en
 	let str = s:sanstail(str)
-	let arr = split(str, '[\/]')
-	let fname = remove(arr, -1)
+	let parts = split(str, '[\/]\ze[^\/]\+[\/:]\?$')
+	if len(parts) == 1
+		let [base, fname] = ['', parts[0]]
+	elsei len(parts) == 2
+		let [base, fname] = parts
+	en
+	if fname =~ '^[\/]$' | retu | en
 	if exists('s:marked') && len(s:marked)
 		" Use the first marked file's path
-		let val = values(s:marked)[0]
-		let mrk = fnamemodify(val, ':.')
-		if val != mrk
-			let arr = extend(split(mrk, '[\/]')[:-2], arr)
-			let pah = fnamemodify(val, ':p:h')
-			let str = fnamemodify(pah.s:lash(pah).str, ':.')
-		en
+		let path = fnamemodify(values(s:marked)[0], ':p:h')
+		let base = path.s:lash(path).base
+		let str = fnamemodify(base.s:lash.fname, ':.')
 	en
-	if len(arr) | if isdirectory(s:createpath(arr))
-		let optyp = str | en | el | let optyp = fname
+	if base == '' | let optyp = fname | el
+		cal ctrlp#utils#mkdir(base)
+		if isdirectory(base)
+			let optyp = str
+		en
 	en
 	if !exists('optyp') | retu | en
 	let filpath = fnamemodify(optyp, ':p')
@@ -1029,14 +1033,6 @@ fu! s:ispathitem()
 	let ext = s:itemtype - ( g:ctrlp_builtins + 1 )
 	retu s:itemtype < 3
 		\ || ( s:itemtype > 2 && g:ctrlp_ext_vars[ext]['type'] == 'path' )
-endf
-
-fu! s:createpath(arr)
-	for each in a:arr
-		let curr = exists('curr') ? curr.s:lash(curr).each : each
-		cal ctrlp#utils#mkdir(curr)
-	endfo
-	retu curr
 endf
 
 fu! ctrlp#dirnfile(entries)

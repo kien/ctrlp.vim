@@ -15,7 +15,10 @@ fu! s:lash(...)
 endf
 
 fu! ctrlp#utils#opts()
-	let s:cache_dir = $HOME.s:lash($HOME).'.ctrlp_cache'
+	let usrhome = $HOME.s:lash($HOME)
+	let cahome = exists('$XDG_CACHE_HOME') ? $XDG_CACHE_HOME : usrhome.'.cache'
+	let s:cache_dir = isdirectory(usrhome.'.ctrlp_cache')
+		\ ? usrhome.'.ctrlp_cache' : cahome.s:lash(cahome).'ctrlp'
 	if exists('g:ctrlp_cache_dir')
 		let s:cache_dir = expand(g:ctrlp_cache_dir, 1)
 		if isdirectory(s:cache_dir.s:lash(s:cache_dir).'.ctrlp_cache')
@@ -48,8 +51,8 @@ fu! ctrlp#utils#readfile(file)
 endf
 
 fu! ctrlp#utils#mkdir(dir)
-	if exists('*mkdir') && !isdirectory(a:dir)
-		sil! cal mkdir(a:dir)
+	if exists('*mkdir')
+		sil! cal mkdir(a:dir, 'p')
 	en
 endf
 
