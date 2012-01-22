@@ -16,7 +16,7 @@ endf
 
 fu! ctrlp#utils#opts()
 	let usrhome = $HOME.s:lash($HOME)
-	let cahome = exists('$XDG_CACHE_HOME') ? $XDG_CACHE_HOME : usrhome.'.cache'
+	let cahome = usrhome.'.cache'
 	let s:cache_dir = isdirectory(usrhome.'.ctrlp_cache')
 		\ ? usrhome.'.ctrlp_cache' : cahome.s:lash(cahome).'ctrlp'
 	if exists('g:ctrlp_cache_dir')

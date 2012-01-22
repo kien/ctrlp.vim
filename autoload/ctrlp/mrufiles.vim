@@ -55,6 +55,8 @@ fu! ctrlp#mrufiles#list(bufnr, ...) "{{{1
 			let cwd = getcwd()
 			cal filter(mrufs, '!stridx(v:val, cwd)')
 			cal ctrlp#rmbasedir(mrufs)
+		el
+			cal map(mrufs, 'fnamemodify(v:val, '':.'')')
 		en
 		retu mrufs
 	en

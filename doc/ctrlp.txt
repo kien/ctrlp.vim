@@ -1,4 +1,4 @@
-*ctrlp.txt*       Fuzzy file, buffer, mru and tag finder. v1.6.7
+*ctrlp.txt*       Fuzzy file, buffer, mru and tag finder. v1.6.8
 *CtrlP* *ControlP* *'ctrlp'* *'ctrl-p'*
 ===============================================================================
 #                                                                             #
@@ -350,6 +350,7 @@ Acceptable values are partial names or filetypes of the special buffers. Use
 Set this to 1 to follow symbolic links when listing files: >
   let g:ctrlp_follow_symlinks = 0
 <
+When enabled, looped internal symlinks will be ignored to avoid duplicates.
 
                                                         *'g:ctrlp_lazy_update'*
 Set this to 1 to enable the lazy-update feature: only update the match window
@@ -729,6 +730,9 @@ Special thanks:~
 
     * Kyo Nagashima <github.com/hail2u>
         Made some enhancements to file opening mappings.
+
+    * Kent Sibilev <github.com/datanoise>
+        Debugged and made various patches.
 
     * Simon Ruderich
     * Ken Earley <github.com/kenearley>
