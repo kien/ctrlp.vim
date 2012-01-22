@@ -181,7 +181,10 @@ fu! s:process(fname, ftype)
 		let data = s:exectagsonfile(a:fname, a:ftype)
 		let [raw, lines] = [split(data, '\n\+'), []]
 		for line in raw | if len(split(line, ';"')) == 2
-			cal add(lines, s:parseline(line))
+			let parsed_line = s:parseline(line)
+			if parsed_line != ''
+				cal add(lines, parsed_line)
+			en
 		en | endfo
 		let cache = { a:fname : { 'time': ftime, 'lines': lines } }
 		cal extend(g:ctrlp_buftags, cache)

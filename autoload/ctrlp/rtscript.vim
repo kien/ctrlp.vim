@@ -26,7 +26,8 @@ let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 fu! ctrlp#rtscript#init()
 	if g:ctrlp_newrts || !exists('g:ctrlp_rtscache')
 		sil! cal ctrlp#progress('Indexing...')
-		let entries = split(globpath(&rtp, '**/*.\(vim\|txt\)'), "\n")
+		let entries = split(globpath(&rtp, '**/*.*'), "\n")
+		cal filter(entries,'index(entries, v:val, v:key + 1) < 0')
 		let [g:ctrlp_rtscache, g:ctrlp_newrts] = [ctrlp#dirnfile(entries)[1], 0]
 	en
 	retu g:ctrlp_rtscache

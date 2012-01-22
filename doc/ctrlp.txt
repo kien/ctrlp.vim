@@ -640,9 +640,9 @@ Available extensions:~
 
                                                                     *:CtrlPRTS*
   * Runtime script mode:~
-    - Name: 'rts'
+    - Name: 'rtscript'
     - Command: ':CtrlPRTS'
-    - Search for vimscripts in runtimepath.
+    - Search for files (vimscripts, docs...) in runtimepath.
 
 -------------------------------------------------------------------------------
 Buffer Tag mode options:~

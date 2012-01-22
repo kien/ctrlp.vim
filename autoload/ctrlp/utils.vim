@@ -15,16 +15,12 @@ fu! s:lash(...)
 endf
 
 fu! ctrlp#utils#opts()
-	let cache_home = exists('$XDG_CACHE_HOME') ? $XDG_CACHE_HOME : $HOME.'/.cache'
-	let s:cache_dir = cache_home.'/ctrlp'
-	" Support old default, for compatibility
-	if !isdirectory(s:cache_dir) && isdirectory($HOME.s:lash($HOME).'.ctrlp_cache')
-		let s:cache_dir = $HOME.s:lash($HOME).'.ctrlp_cache'
-	en
-	" User option
+	let usrhome = $HOME.s:lash($HOME)
+	let cahome = exists('$XDG_CACHE_HOME') ? $XDG_CACHE_HOME : usrhome.'.cache'
+	let s:cache_dir = isdirectory(usrhome.'.ctrlp_cache')
+		\ ? usrhome.'.ctrlp_cache' : cahome.s:lash(cahome).'ctrlp'
 	if exists('g:ctrlp_cache_dir')
 		let s:cache_dir = expand(g:ctrlp_cache_dir, 1)
-		" Support old suffix
 		if isdirectory(s:cache_dir.s:lash(s:cache_dir).'.ctrlp_cache')
 			let s:cache_dir = s:cache_dir.s:lash(s:cache_dir).'.ctrlp_cache'
 		en
@@ -60,10 +56,16 @@ fu! ctrlp#utils#mkdir(dir)
 	en
 endf
 
+fu! ctrlp#utils#createpath(arr)
+	for each in a:arr
+		let curr = exists('curr') ? curr.s:lash(curr).each : each
+		cal ctrlp#utils#mkdir(curr)
+	endfo
+	retu curr
+endf
+
 fu! ctrlp#utils#writecache(lines, ...)
-	let cache_dir = exists('a:1') ? a:1 : s:cache_dir
-	cal ctrlp#utils#mkdir(cache_dir)
-	if isdirectory(cache_dir)
+	if isdirectory(ctrlp#utils#createpath(split(a:0 ? a:1 : s:cache_dir, '[\/]')))
 		sil! cal writefile(a:lines, exists('a:2') ? a:2 : ctrlp#utils#cachefile())
 		if !exists('a:1')
 			let g:ctrlp_newcache = 0
