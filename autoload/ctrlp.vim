@@ -807,7 +807,7 @@ fu! s:CreateNewFile(...) "{{{1
 			let str = fnamemodify(pah.s:lash(pah).str, ':.')
 		en
 	en
-	if len(arr) | if isdirectory(ctrlp#utils#createpath(arr))
+	if len(arr) | if isdirectory(s:createpath(arr))
 		let optyp = str | en | el | let optyp = fname
 	en
 	if !exists('optyp') | retu | en
@@ -1029,6 +1029,14 @@ fu! s:ispathitem()
 	let ext = s:itemtype - ( g:ctrlp_builtins + 1 )
 	retu s:itemtype < 3
 		\ || ( s:itemtype > 2 && g:ctrlp_ext_vars[ext]['type'] == 'path' )
+endf
+
+fu! s:createpath(arr)
+	for each in a:arr
+		let curr = exists('curr') ? curr.s:lash(curr).each : each
+		cal ctrlp#utils#mkdir(curr)
+	endfo
+	retu curr
 endf
 
 fu! ctrlp#dirnfile(entries)

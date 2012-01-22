@@ -15,10 +15,7 @@ fu! s:lash(...)
 endf
 
 fu! ctrlp#utils#opts()
-	let usrhome = $HOME.s:lash($HOME)
-	let cahome = usrhome.'.cache'
-	let s:cache_dir = isdirectory(usrhome.'.ctrlp_cache')
-		\ ? usrhome.'.ctrlp_cache' : cahome.s:lash(cahome).'ctrlp'
+	let s:cache_dir = $HOME.s:lash($HOME).'.ctrlp_cache'
 	if exists('g:ctrlp_cache_dir')
 		let s:cache_dir = expand(g:ctrlp_cache_dir, 1)
 		if isdirectory(s:cache_dir.s:lash(s:cache_dir).'.ctrlp_cache')
@@ -56,16 +53,10 @@ fu! ctrlp#utils#mkdir(dir)
 	en
 endf
 
-fu! ctrlp#utils#createpath(arr)
-	for each in a:arr
-		let curr = exists('curr') ? curr.s:lash(curr).each : each
-		cal ctrlp#utils#mkdir(curr)
-	endfo
-	retu curr
-endf
-
 fu! ctrlp#utils#writecache(lines, ...)
-	if isdirectory(ctrlp#utils#createpath(split(a:0 ? a:1 : s:cache_dir, '[\/]')))
+	let cache_dir = exists('a:1') ? a:1 : s:cache_dir
+	cal ctrlp#utils#mkdir(cache_dir)
+	if isdirectory(cache_dir)
 		sil! cal writefile(a:lines, exists('a:2') ? a:2 : ctrlp#utils#cachefile())
 		if !exists('a:1')
 			let g:ctrlp_newcache = 0
