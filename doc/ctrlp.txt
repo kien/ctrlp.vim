@@ -1,4 +1,4 @@
-*ctrlp.txt*       Fuzzy file, buffer, mru and tag finder. v1.6.8
+*ctrlp.txt*       Fuzzy file, buffer, mru and tag finder. v1.6.9
 *CtrlP* *ControlP* *'ctrlp'* *'ctrl-p'*
 ===============================================================================
 #                                                                             #
@@ -458,66 +458,66 @@ Once inside the prompt:~
 
   <c-j>,
   <down>
-    Move selection down
+    Move selection down.
 
   <c-k>,
   <up>
-    Move selection up
+    Move selection up.
 
   <c-a>
-    Move the cursor to the 'start' of the prompt
+    Move the cursor to the 'start' of the prompt.
 
   <c-e>
-    Move the cursor to the 'end' of the prompt
+    Move the cursor to the 'end' of the prompt.
 
   <c-h>,
   <left>,
   <c-^>
-    Move the cursor one character to the 'left'
+    Move the cursor one character to the 'left'.
 
   <c-l>,
   <right>
-    Move the cursor one character to the 'right'
+    Move the cursor one character to the 'right'.
 
   <c-]>,
   <bs>
-    Delete the preceding character
+    Delete the preceding character.
 
   <del>
-    Delete the current character
+    Delete the current character.
 
   <c-w>
-    Delete a preceding inner word
+    Delete a preceding inner word.
 
   <c-u>
-    Clear the input field
+    Clear the input field.
 
   <cr>
     Open selected file in the active window if possible.
 
   <c-t>
-    Open selected file in a new 'tab'
+    Open selected file in a new 'tab' after the last tabpage.
 
   <c-v>
-    Open selected file in a 'vertical' split
+    Open selected file in a 'vertical' split.
 
   <c-cr>,
   <c-s>,
   <c-x>
-    Open selected file in a 'horizontal' split
+    Open selected file in a 'horizontal' split.
 
   <c-y>
     Create a new file and its parent directories.
 
   <c-n>
-    Next string in the prompt’s history
+    Next string in the prompt’s history.
 
   <c-p>
-    Previous string in the prompt’s history
+    Previous string in the prompt’s history.
 
   <c-z>
     - Mark/unmark a file to be opened with <c-o>.
-    - Mark/unmark a file to create a new file in the same directory with <c-y>.
+    - Mark/unmark a file to create a new file in its directory using <c-y>.
 
   <c-o>
     Open files marked by <c-z>.
@@ -726,13 +726,13 @@ Special thanks:~
         Forked and suggested the support for VCS listing commands.
 
     * Yasuhiro Matsumoto <github.com/mattn>
-        Added option to use Migemo for Japanese language.
+        Added option to use Migemo for Japanese filenames.
 
     * Kyo Nagashima <github.com/hail2u>
         Made some enhancements to file opening mappings.
 
     * Piet Delport <github.com/pjdelport>
-        Changed default cache dir to meet XDG spec.
+        Changed the default cache directory to meet XDG spec.
 
     * Kent Sibilev <github.com/datanoise>
         Debugged and made various patches.
@@ -746,7 +746,7 @@ Special thanks:~
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
 
-    + New option: |g:ctrlp_mruf_last_entered| change MRU to recently-entered
+    + New option: |g:ctrlp_mruf_last_entered| change MRU to recently-entered.
 
 Before 2012/01/15~
 

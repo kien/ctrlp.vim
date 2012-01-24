@@ -54,12 +54,11 @@ fu! ctrlp#utils#mkdir(dir)
 	if exists('*mkdir')
 		sil! cal mkdir(a:dir, 'p')
 	en
+	retu a:dir
 endf
 
 fu! ctrlp#utils#writecache(lines, ...)
-	let cache_dir = exists('a:1') ? a:1 : s:cache_dir
-	cal ctrlp#utils#mkdir(cache_dir)
-	if isdirectory(cache_dir)
+	if isdirectory(ctrlp#utils#mkdir(exists('a:1') ? a:1 : s:cache_dir))
 		sil! cal writefile(a:lines, exists('a:2') ? a:2 : ctrlp#utils#cachefile())
 		if !exists('a:1')
 			let g:ctrlp_newcache = 0
