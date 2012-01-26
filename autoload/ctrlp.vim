@@ -541,7 +541,8 @@ fu! s:PrtCurEnd()
 endf
 
 fu! s:PrtSelectMove(dir)
-	exe 'keepj norm!' ( a:dir =~ '^[tb]$' ? {'t': 'gg', 'b': 'G'}[a:dir] : a:dir )
+	let torb = { 't': 'gg', 'b': 'G' }
+	exe 'keepj norm!' ( a:dir =~ '^[tb]$' ? torb[a:dir] : a:dir )
 	if !exists('g:ctrlp_nolimit') | let s:cline = line('.') | en
 	if line('$') > winheight(0) | cal s:BuildPrompt(0, s:Focus()) | en
 endf
