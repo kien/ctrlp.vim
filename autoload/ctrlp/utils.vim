@@ -51,7 +51,7 @@ fu! ctrlp#utils#readfile(file)
 endf
 
 fu! ctrlp#utils#mkdir(dir)
-	if exists('*mkdir')
+	if exists('*mkdir') && !isdirectory(a:dir)
 		sil! cal mkdir(a:dir, 'p')
 	en
 	retu a:dir
