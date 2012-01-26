@@ -1123,23 +1123,27 @@ endf
 " Highlighting {{{2
 fu! s:syntax()
 	sy match CtrlPNoEntries '^ == NO ENTRIES ==$'
-	sy match CtrlPLineMarker '^>'
+	sy match CtrlPLinePre '^>'
 	hi link CtrlPNoEntries Error
-	hi CtrlPLineMarker guifg=bg
+	if exists('g:colors_name')
+		exe 'hi CtrlPLinePre '.( has("gui_running") ? 'gui' : 'cterm' ).'fg=bg'
+	en
 endf
 
 fu! s:highlight(pat, grp, bfn)
 	cal clearmatches()
 	if !empty(a:pat) && s:ispathitem()
 		let pat = substitute(a:pat, '\~', '\\~', 'g')
-		let pat = s:regexp ? pat : escape(pat, '.')
+		let pat = s:regexp
+			\ ? substitute(pat, '\\\@<!\^', '^> \\zs', 'g')
+			\ : escape(pat, '.')
 		" Match only filename
 		if s:byfname && a:bfn
 			let pat = substitute(pat, '\[\^\(.\{-}\)\]\\{-}', '[^\\/\1]\\{-}', 'g')
 			let pat = substitute(pat, '$', '\\ze[^\\/]*$', 'g')
 		en
 		cal matchadd(a:grp, '\c'.pat)
-		cal matchadd('CtrlPLineMarker', '^>')
+		cal matchadd('CtrlPLinePre', '^>')
 	en
 endf
 
