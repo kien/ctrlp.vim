@@ -28,7 +28,7 @@ Written in pure Vimscript for MacVim and Vim version 7.0+. Has full support for
 Vim’s |regexp| as search pattern, built-in MRU files monitoring, project’s root
 finder, and more.
 
-To enable optional extensions (tag, quickfix, dir...), see |ctrlp-extensions|.
+To enable optional extensions (tag, dir, rtscript...), see |ctrlp-extensions|.
 
 ===============================================================================
 2. Options                                                      *ctrlp-options*
@@ -77,8 +77,8 @@ Set the maximum height of the match window: >
 <
 
                                                      *'g:ctrlp_jump_to_buffer'*
-When opening a file, if it's already opened somewhere |CtrlP| will try to jump
-to it instead of opening a new window or new tab: >
+When opening a file with <cr> or <c-t>, if the file's already opened somewhere
+|CtrlP| will try to jump to it instead of opening a new instance: >
   let g:ctrlp_jump_to_buffer = 2
 <
   1 - only jump to the buffer if it’s opened in the current tab.
@@ -86,8 +86,10 @@ to it instead of opening a new window or new tab: >
   0 - disable this feature.
 
                                                   *'g:ctrlp_working_path_mode'*
-When starting up the prompt, temporarily set the working directory (i.e. the
-|current-directory|) to:
+When starting up, |CtrlP| sets its local working directory according to this
+variable: >
+  let g:ctrlp_working_path_mode = 2
+<
   1 - the parent directory of the current file.
   2 - the nearest ancestor that contains one of these directories/files:
       .git/
@@ -96,9 +98,6 @@ When starting up the prompt, temporarily set the working directory (i.e. the
       _darcs/
       root.dir
   0 - don’t manage working directory.
->
-  let g:ctrlp_working_path_mode = 2
-<
 
                                                        *'g:ctrlp_root_markers'*
 Use this to set your own root markers in addition to the default ones. Your
@@ -106,7 +105,7 @@ markers will take precedence: >
   let g:ctrlp_root_markers = ['']
 <
 These markers (builtins and yours) will serve as identifiers for the '/' and
-'\' special inputs (section 5.e)
+'\' special inputs (section 5.e).
 
                                                         *'g:ctrlp_use_caching'*
 Set this to 0 to disable per-session caching. When disabled, caching will still
@@ -116,7 +115,7 @@ be enabled for directories that have more than 4000 files: >
 Note: you can quickly purge the cache by pressing <F5> while inside |CtrlP|.
 
                                                 *'g:ctrlp_clear_cache_on_exit'*
-Set this to 0 to enable cross-sessions caching by not clearing the cache files
+Set this to 0 to enable cross-session caching by not deleting the cache files
 upon exiting Vim: >
   let g:ctrlp_clear_cache_on_exit = 1
 <
@@ -165,8 +164,9 @@ only need to keep the lines that you’ve changed the values (inside []): >
     \ }
 <
 Note: In some terminals, it’s not possible to remap <c-h> without also changing
-<bs>. So if pressing <bs> moves the cursor to the left instead of deleting a
-char for you, add this to your |vimrc| to change the default <c-h> mapping: >
+<bs> (|key-codes|). So if pressing <bs> moves the cursor to the left instead of
+deleting a char for you, add this to your |vimrc| to change the default <c-h>
+mapping: >
   let g:ctrlp_prompt_mappings = {
     \ 'PrtBS()':      ['<bs>', '<c-]>', '<c-h>'],
     \ 'PrtCurLeft()': ['<left>', '<c-^>'],
@@ -217,7 +217,8 @@ Set this to 0 if you don’t want |CtrlP| to search for dotfiles and dotdirs: >
   let g:ctrlp_dotfiles = 1
 <
 You can use |'wildignore'| to exclude anything from the search.
-e.g. exclude version control directories: >
+Examples: >
+  " Excluding version control directories
   set wildignore+=*/.git/*,*/.hg/*,*/.svn/*  " Linux/MacOSX
   set wildignore+=.git\*,.hg\*,.svn\*        " Windows
 <
@@ -225,7 +226,7 @@ Note #1: the `*/` in front of each directory glob is required.
 
 Note #2: |wildignore| influences the result of |expand()|, |globpath()| and
 |glob()| which many plugins use to find stuff on the system (e.g. fugitive.vim
-looks for .git/, some other plugins look for external exe tools on Windows).
+looks for .git/, some other plugins look for external .exe tools on Windows).
 So be a little mindful of what you put in your |wildignore|.
 
                                                       *'g:ctrlp_custom_ignore'*
@@ -260,8 +261,8 @@ The maximum depth of a directory tree to recurse into: >
 Note: the larger these values, the more memory Vim uses.
 
                                                        *'g:ctrlp_user_command'*
-Specify an external tool to use for listing files instead of Vim’s globpath().
-Use %s in place of the target directory: >
+Specify an external tool to use for listing files instead of using Vim’s
+|globpath()|. Use %s in place of the target directory: >
   let g:ctrlp_user_command = ''
 <
 Examples: >
@@ -332,7 +333,7 @@ Pressing <c-o> or <c-y> will then prompt for a keypress. The key can be:
   h - open in horizontal split(s)
   v - open in vertical split(s)
   r - open in current window (for <c-y> only)
-  <esc>, <c-c> - cancel and go back to |CtrlP|
+  <esc>, <c-c> - cancel and go back to the prompt.
   Any other key - use the behavior specified with |g:ctrlp_open_new_file| and
   |g:ctrlp_open_multi|.
 
@@ -401,10 +402,11 @@ See https://gist.github.com/1610859 for a working example.
 :ClearCtrlPCache
    Flush the cache for the current working directory. The same as pressing <F5>
    inside |CtrlP|.
+   You can also enable/disable caching with the option |g:ctrlp_use_caching|.
 
                                                          *:ClearAllCtrlPCaches*
 :ClearAllCtrlPCaches
-   Delete all the cache files saved in |ctrlp_cache_dir|.
+   Delete all the cache files saved in |g:ctrlp_cache_dir|.
 
                                                                   *:ResetCtrlP*
 :ResetCtrlP
@@ -438,7 +440,7 @@ Once inside the prompt:~
     See also |input-formats| (guide) and |g:ctrlp_regexp_search| (option).
 
   <c-d>
-    Toggle between full path search and filename only search.
+    Toggle between full-path search and filename only search.
     (note: in filename mode, the prompt’s base is '>d>' instead of '>>>')
 
   <c-f>, 'forward'
@@ -529,14 +531,18 @@ Once inside the prompt:~
   <F7>
     Clear MRU list.
 
+  <insert>
+    Insert the word under the cursor (in the active buffer) into the prompt.
+
   <esc>,
   <c-c>,
   <c-g>
-    Exit |CtrlP|. <c-c> can also be used to stop the scan.
+    Exit |CtrlP|.
+    <c-c> can also be used to stop the scan if it’s taking too long.
 
 Choose your own mappings with |g:ctrlp_prompt_mappings|.
 
-When inside the match window (press <tab> to switch):~
+When inside the match window (press <s-tab> to switch):~
 
   a-z
   0-9
@@ -643,7 +649,7 @@ Available extensions:~
   * Runtime script mode:~
     - Name: 'rtscript'
     - Command: ':CtrlPRTS'
-    - Search for files (vimscripts, docs...) in runtimepath.
+    - Search for files (vimscripts, docs, snippets...) in runtimepath.
 
 -------------------------------------------------------------------------------
 Buffer Tag mode options:~

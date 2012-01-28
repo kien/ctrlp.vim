@@ -12,7 +12,7 @@ let [g:loaded_ctrlp_rtscript, g:ctrlp_newrts] = [1, 0]
 
 let s:rtscript_var = {
 	\ 'init': 'ctrlp#rtscript#init()',
-	\ 'accept': 'ctrlp#rtscript#accept',
+	\ 'accept': 'ctrlp#acceptfile',
 	\ 'lname': 'runtime scripts',
 	\ 'sname': 'rts',
 	\ 'type': 'path',
@@ -24,18 +24,23 @@ let g:ctrlp_ext_vars = exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 " Public {{{1
 fu! ctrlp#rtscript#init()
-	if g:ctrlp_newrts || !exists('g:ctrlp_rtscache')
+	if g:ctrlp_newrts
+		\ || !( exists('g:ctrlp_rtscache') && g:ctrlp_rtscache[0] == &rtp )
 		sil! cal ctrlp#progress('Indexing...')
 		let entries = split(globpath(&rtp, '**/*.*'), "\n")
 		cal filter(entries, 'index(entries, v:val, v:key + 1) < 0')
-		cal map(entries, 'fnamemodify(v:val, '':.'')')
-		let [g:ctrlp_rtscache, g:ctrlp_newrts] = [ctrlp#dirnfile(entries)[1], 0]
+		let [entries, echoed] = [ctrlp#dirnfile(entries)[1], 1]
+	el
+		let [entries, results] = g:ctrlp_rtscache[2:3]
 	en
-	retu g:ctrlp_rtscache
-endf
-
-fu! ctrlp#rtscript#accept(mode, str)
-	cal ctrlp#acceptfile(a:mode, a:str)
+	let cwd = getcwd()
+	if g:ctrlp_newrts
+		\ || !( exists('g:ctrlp_rtscache') && g:ctrlp_rtscache[:1] == [&rtp, cwd] )
+		if !exists('echoed') | sil! cal ctrlp#progress('Processing...') | en
+		let results = map(copy(entries), 'fnamemodify(v:val, '':.'')')
+	en
+	let [g:ctrlp_rtscache, g:ctrlp_newrts] = [[&rtp, cwd, entries, results], 0]
+	retu results
 endf
 
 fu! ctrlp#rtscript#id()

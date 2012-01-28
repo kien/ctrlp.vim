@@ -62,6 +62,8 @@ fu! s:opts()
 		\ 'PrtSelectMove("k")':   ['<c-k>', '<up>'],
 		\ 'PrtSelectMove("t")':   ['<home>'],
 		\ 'PrtSelectMove("b")':   ['<end>'],
+		\ 'PrtSelectMove("u")':   ['<PageUp>'],
+		\ 'PrtSelectMove("d")':   ['<PageDown>'],
 		\ 'PrtHistory(-1)':       ['<c-n>'],
 		\ 'PrtHistory(1)':        ['<c-p>'],
 		\ 'AcceptSelection("e")': ['<cr>', '<c-m>', '<2-LeftMouse>'],
@@ -291,7 +293,7 @@ fu! s:MatchIt(items, pat, limit, mfunc)
 	retu newitems
 endf
 
-fu! s:MatchedItems(items, pats, limit, bfn)
+fu! s:MatchedItems(items, pats, limit)
 	let [items, pats, limit] = [a:items, a:pats, a:limit]
 	" If items is longer than s:mltipats_lim, use only the last pattern
 	if len(items) >= s:mltipats_lim || ( exists('s:height') && s:height > 20 )
@@ -300,7 +302,7 @@ fu! s:MatchedItems(items, pats, limit, bfn)
 	cal map(pats, 'substitute(v:val, "\\\~", "\\\\\\~", "g")')
 	if !s:regexp | cal map(pats, 'escape(v:val, ".")') | en
 	let [type, ipt, mfunc] = [s:type(1), s:ispathitem(), 'match']
-	if s:byfname && ipt && a:bfn
+	if s:byfname && ipt
 		let mfunc = 's:matchfname'
 	elsei s:itemtype > 2
 		let types = { 'tabs': 's:matchtabs', 'tabe': 's:matchtabe' }
@@ -328,7 +330,7 @@ fu! s:SplitPattern(str, ...) "{{{1
 		let str = s:migemo(str)
 	en
 	let s:savestr = str
-	if s:regexp || match(str, '\\\(zs\|ze\|<\|>\)\|[*|]') >= 0
+	if s:regexp || match(str, '\\\(<\|>\)\|[*|]') >= 0
 		let array = [s:regexfilter(str)]
 	el
 		let array = split(str, '\zs')
@@ -354,7 +356,7 @@ fu! s:SplitPattern(str, ...) "{{{1
 	retu newpats
 endf
 " * BuildPrompt() {{{1
-fu! s:Render(lines, pat, bfn)
+fu! s:Render(lines, pat)
 	let lines = a:lines
 	" Setup the match window
 	let s:height = min([len(lines), s:mxheight])
@@ -388,7 +390,7 @@ fu! s:Render(lines, pat, bfn)
 	en
 	" Highlighting
 	if s:dohighlight()
-		cal s:highlight(a:pat, s:mathi[1] == '' ? 'Identifier' : s:mathi[1], a:bfn)
+		cal s:highlight(a:pat, s:mathi[1] == '' ? 'Identifier' : s:mathi[1])
 	en
 endf
 
@@ -404,13 +406,9 @@ fu! s:Update(str)
 	if notail == oldstr && !empty(notail) && !exists('s:force')
 		retu
 	en
-	let bfn = s:byfname && notail != '' && match(notail, '\v/|\\:@!') < 0
-	if s:byfname && s:regexp && match(notail, '\\:\@!') >= 0
-		let bfn = s:byfname
-	en
 	let lines = exists('g:ctrlp_nolimit') && empty(notail) ? copy(g:ctrlp_lines)
-		\ : s:MatchedItems(g:ctrlp_lines, copy(pats), s:mxheight, bfn)
-	cal s:Render(lines, pats[-1], bfn)
+		\ : s:MatchedItems(g:ctrlp_lines, copy(pats), s:mxheight)
+	cal s:Render(lines, pats[-1])
 endf
 
 fu! s:ForceUpdate()
@@ -541,8 +539,9 @@ fu! s:PrtCurEnd()
 endf
 
 fu! s:PrtSelectMove(dir)
-	let torb = { 't': 'gg', 'b': 'G' }
-	exe 'keepj norm!' ( a:dir =~ '^[tb]$' ? torb[a:dir] : a:dir )
+	let wht = winheight(0)
+	let dirs = {'t': 'gg','b': 'G','j': 'j','k': 'k','u': wht.'k','d': wht.'j'}
+	exe 'keepj norm!' dirs[a:dir]
 	if !exists('g:ctrlp_nolimit') | let s:cline = line('.') | en
 	if line('$') > winheight(0) | cal s:BuildPrompt(0, s:Focus()) | en
 endf
@@ -906,8 +905,9 @@ endf
 
 fu! s:comparent(s1, s2)
 	" By same parent dir
-	if match(s:crfpath, escape(getcwd(), '.^$*\')) >= 0
-		let [as1, as2] = [fnamemodify(a:s1, ':p'), fnamemodify(a:s2, ':p')]
+	let cwd = getcwd()
+	if match(s:crfpath, escape(cwd, '.^$*\')) >= 0
+		let [as1, as2] = [cwd.s:lash().a:s1, cwd.s:lash().a:s2]
 		let [loc1, loc2] = [s:getparent(as1), s:getparent(as2)]
 		if loc1 == s:crfpath && loc2 != s:crfpath | retu -1 | en
 		if loc2 == s:crfpath && loc1 != s:crfpath | retu 1  | en
@@ -1131,7 +1131,7 @@ fu! s:syntax()
 	en
 endf
 
-fu! s:highlight(pat, grp, bfn)
+fu! s:highlight(pat, grp)
 	cal clearmatches()
 	if !empty(a:pat) && s:ispathitem()
 		let pat = substitute(a:pat, '\~', '\\~', 'g')
@@ -1139,7 +1139,7 @@ fu! s:highlight(pat, grp, bfn)
 			\ ? substitute(pat, '\\\@<!\^', '^> \\zs', 'g')
 			\ : escape(pat, '.')
 		" Match only filename
-		if s:byfname && a:bfn
+		if s:byfname
 			let pat = substitute(pat, '\[\^\(.\{-}\)\]\\{-}', '[^\\/\1]\\{-}', 'g')
 			let pat = substitute(pat, '$', '\\ze[^\\/]*$', 'g')
 		en
