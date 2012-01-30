@@ -137,7 +137,7 @@ only need to keep the lines that you’ve changed the values (inside []): >
     \ 'PrtSelectMove("k")':   ['<c-k>', '<up>'],
     \ 'PrtHistory(-1)':       ['<c-n>'],
     \ 'PrtHistory(1)':        ['<c-p>'],
-    \ 'AcceptSelection("e")': ['<cr>', '<c-m>', '<2-LeftMouse>'],
+    \ 'AcceptSelection("e")': ['<cr>', '<2-LeftMouse>'],
     \ 'AcceptSelection("h")': ['<c-x>', '<c-cr>', '<c-s>'],
     \ 'AcceptSelection("t")': ['<c-t>', '<MiddleMouse>'],
     \ 'AcceptSelection("v")': ['<c-v>', '<RightMouse>'],
@@ -146,7 +146,7 @@ only need to keep the lines that you’ve changed the values (inside []): >
     \ 'ToggleByFname()':      ['<c-d>'],
     \ 'ToggleType(1)':        ['<c-f>', '<c-up>'],
     \ 'ToggleType(-1)':       ['<c-b>', '<c-down>'],
-    \ 'PrtExpandDir()':       ['<tab>', '<c-i>'],
+    \ 'PrtExpandDir()':       ['<tab>'],
     \ 'PrtInsert("w")':       ['<F2>', '<insert>'],
     \ 'PrtInsert("s")':       ['<F3>'],
     \ 'PrtInsert("v")':       ['<F4>'],
@@ -251,7 +251,7 @@ the highlight group that’ll be used: >
 
                                                           *'g:ctrlp_max_files'*
 The maximum number of files to scan, set to 0 for no limit: >
-  let g:ctrlp_max_files = 20000
+  let g:ctrlp_max_files = 10000
 <
 
                                                           *'g:ctrlp_max_depth'*
@@ -694,49 +694,15 @@ Examples: >
 <
 
 ===============================================================================
-EXTENDING                                                     *ctrlp-extending*
-
-Extending |CtrlP| is very simple. Simply create a vim file following a short
-guidelines, place it in autoload/ctrlp/ and add its name to your .vimrc.
-
-To see how it works, get the sample.vim from the extensions branch on the main
-git repository (https://github.com/kien/ctrlp.vim/tree/extensions), and place
-it along with the parent directories somewhere in your runtimepath. Then put
-this into your .vimrc: >
-  let g:ctrlp_extensions = ['sample']
-<
-A new search type will show up the next time you open |CtrlP|.
-
-For more details, check out the comments inside sample.vim.~
-
-===============================================================================
-USER-CONFIGURATION                                          *ctrlp-user-config*
-
-Some miscellaneous configurations:~
-
-+) |g:ctrlp_user_command| config that makes use of your |wildignore| setting:
-   https://github.com/kien/ctrlp.vim/issues/70 by Rich Alesi
-
-===============================================================================
 CREDITS                                                         *ctrlp-credits*
 
-Developed by Kien Nguyen <github.com/kien>, initially based on the Command-T
-and the LustyExplorer plugins. No code was taken from these plugins, but I did
-clone the majority of their (awesome) interfaces and the way they work.
+Developed by Kien Nguyen <github.com/kien>.
 
-This was originally written as a module for a would-be larger plugin called
-AutoDoc.vim which I’ve stopped developing because of lost of interest. I really
-liked the way Command-T and LustyExplorer deal with user’s input, so I wrote a
-pure Vimscript version of their prompt window, intended to use it for the
-aforementioned plugin.
-
-Homepage:             http://kien.github.com/ctrlp.vim
+Project’s homepage:   http://kien.github.com/ctrlp.vim
 Git repository:       https://github.com/kien/ctrlp.vim
 Mercurial repository: https://bitbucket.org/kien/ctrlp.vim
 
-===============================================================================
-THANKS                                                           *ctrlp-thanks*
-
+-------------------------------------------------------------------------------
 Thanks to everyone that has submitted ideas, bug reports or helped debugging on
 gibhub, bitbucket, and through email.
 
