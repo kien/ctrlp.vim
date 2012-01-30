@@ -68,7 +68,7 @@ let g:ctrlp_cmd = 'CtrlP'
 </code></pre>
 						</li>
 						<li>
-							When CtrlP is invoked, it automatically sets the working directory according to this variable:
+							When CtrlP is invoked, it sets its local working directory according to this variable:
 							<pre><code>let g:ctrlp_working_path_mode = 2</code></pre>
 							0 - don’t manage working directory.<br>
 							1 - the parent directory of the current file.<br>
@@ -76,25 +76,34 @@ let g:ctrlp_cmd = 'CtrlP'
 							<code>.git/</code> <code>.hg/</code> <code>.bzr/</code> <code>_darcs/</code> <code>root.dir</code>
 						</li>
 						<li>
-							If you want to exclude directories or files from the search, you can use the Vim’s option <code>wildignore</code>,
-							and/or the option <code>g:ctrlp_custom_ignore</code>:
+							If you want to exclude directories or files from the search, you can use the Vim’s option <code>wildignore</code>:
 							<pre><code>set wildignore+=*/.git/*,*/.hg/*,*/.svn/*,*.so     " Linux/MacOSX
 set wildignore+=.git\*,.hg\*,.svn\*,*.dll,*.exe    " Windows</code></pre>
+							And/Or the built-in option <code>g:ctrlp_custom_ignore</code>:
 							<pre><code>let g:ctrlp_custom_ignore = '\.git$\|\.hg$\|\.svn$'
 let g:ctrlp_custom_ignore = {
 	\ 'dir':  '\.git$\|\.hg$\|\.svn$',
 	\ 'file': '\.exe$\|\.so$\|\.dll$',
-	\ 'link': 'some_bad_symbolic_links',
+	\ 'link': 'SOME_BAD_SYMBOLIC_LINKS',
 	\ }</code></pre>
 						</li>
 						<li>
 							Specify an external tool to use for listing files instead of using Vim’s globpath().
-							Use %s in place of the target directory:
+							Use <code>%s</code> in place of the target directory:
 							<pre><code>let g:ctrlp_user_command = 'find %s -type f'       " MacOSX/Linux
 let g:ctrlp_user_command = 'dir %s /-n /b /s /a-d' " Windows</code></pre>
+							Single VCS listing command:
 							<pre><code>let g:ctrlp_user_command = ['.git/', 'cd %s &amp;&amp; git ls-files']
 let g:ctrlp_user_command = ['.git/', 'cd %s &amp;&amp; git ls-files', 'find %s -type f']
 let g:ctrlp_user_command = ['.hg/', 'hg --cwd %s locate -I .']</code></pre>
+							Multiple VCS listing commands:
+							<pre><code>let g:ctrlp_user_command = {
+	\ 'types': {
+		\ 1: ['.git/', 'cd %s && git ls-files'],
+		\ 2: ['.hg/', 'hg --cwd %s locate -I .'],
+		\ },
+	\ 'fallback': 'find %s -type f'
+	\ }</code></pre>
 						</li>
 					</ul>
 					<p class="note">Run <code>:help ctrlp</code> or submit <code>?</code> in CtrlP for more mappings, commands and options.</p>
