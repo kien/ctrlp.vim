@@ -57,12 +57,12 @@ fu! ctrlp#dir#init(...)
 		cal s:globdirs(s:cwd, 0)
 		cal ctrlp#rmbasedir(g:ctrlp_alldirs)
 		let read_cache = 0
+		if len(g:ctrlp_alldirs) <= s:compare_lim
+			cal sort(g:ctrlp_alldirs, 'ctrlp#complen')
+		en
 	el
 		let g:ctrlp_alldirs = ctrlp#utils#readfile(cafile)
 		let read_cache = 1
-	en
-	if len(g:ctrlp_alldirs) <= s:compare_lim
-		cal sort(g:ctrlp_alldirs, 'ctrlp#complen')
 	en
 	if !read_cache
 		cal ctrlp#utils#writecache(g:ctrlp_alldirs, cadir, cafile)

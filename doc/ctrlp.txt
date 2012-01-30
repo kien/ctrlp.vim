@@ -147,7 +147,7 @@ only need to keep the lines that you’ve changed the values (inside []): >
     \ 'ToggleType(1)':        ['<c-f>', '<c-up>'],
     \ 'ToggleType(-1)':       ['<c-b>', '<c-down>'],
     \ 'PrtExpandDir()':       ['<tab>', '<c-i>'],
-    \ 'PrtInsert("w")':       ['<F2>'],
+    \ 'PrtInsert("w")':       ['<F2>', '<insert>'],
     \ 'PrtInsert("s")':       ['<F3>'],
     \ 'PrtInsert("v")':       ['<F4>'],
     \ 'PrtInsert("+")':       ['<F6>'],
@@ -239,7 +239,7 @@ Examples: >
   let g:ctrlp_custom_ignore = {
     \ 'dir':  '\.git$\|\.hg$\|\.svn$',
     \ 'file': '\.exe$\|\.so$\|\.dll$',
-    \ 'link': 'some$\|bad$\|symbolic$\|links$',
+    \ 'link': 'SOME_BAD_SYMBOLIC_LINKS',
     \ }
 <
 
@@ -276,14 +276,28 @@ Examples: >
 <
 Use a version control listing command when inside a repository, this is faster
 when scanning large projects: >
-  let g:ctrlp_user_command = [repo_marker, vcs_ls_command, fallback_command]
+  let g:ctrlp_user_command = [root_marker, listing_command, fallback_command]
+  let g:ctrlp_user_command = {
+    \ 'types': {
+      \ 1: [root_marker_1, listing_command_1],
+      \ n: [root_marker_n, listing_command_n],
+      \ },
+    \ 'fallback': fallback_command
+    \ }
 <
-If the fallback_command is empty or not defined, |globpath()| will then be used
-when searching outside a repo.
 Examples: >
   let g:ctrlp_user_command = ['.git/', 'cd %s && git ls-files']
   let g:ctrlp_user_command = ['.hg/', 'hg --cwd %s locate -I .']
+  let g:ctrlp_user_command = {
+    \ 'types': {
+      \ 1: ['.git/', 'cd %s && git ls-files'],
+      \ 2: ['.hg/', 'hg --cwd %s locate -I .'],
+      \ },
+    \ 'fallback': 'find %s -type f'
+    \ }
 <
+If the fallback_command is empty or not defined, |globpath()| will then be used
+when searching outside a repo.
 
                                                         *'g:ctrlp_max_history'*
 The maximum number of input strings you want |CtrlP| to remember. The default

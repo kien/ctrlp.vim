@@ -218,12 +218,12 @@ fu! s:Files()
 		" Remove base directory
 		cal ctrlp#rmbasedir(g:ctrlp_allfiles)
 		let read_cache = 0
+		if len(g:ctrlp_allfiles) <= s:compare_lim
+			cal sort(g:ctrlp_allfiles, 'ctrlp#complen')
+		en
 	el
 		let g:ctrlp_allfiles = ctrlp#utils#readfile(cafile)
 		let read_cache = 1
-	en
-	if len(g:ctrlp_allfiles) <= s:compare_lim
-		cal sort(g:ctrlp_allfiles, 'ctrlp#complen')
 	en
 	cal s:writecache(read_cache, cafile)
 	retu g:ctrlp_allfiles
@@ -266,9 +266,20 @@ fu! s:lsCmd()
 			" Try the secondary_command
 			retu len(cmd) == 3 ? cmd[2] : ''
 		en
-		unl! s:vcsroot
+		unl s:vcsroot
 		let s:vcscmd = s:lash == '\' ? 1 : 0
 		retu cmd[1]
+	elsei type(cmd) == 4 && has_key(cmd, 'types')
+		for key in sort(keys(cmd['types']), 's:compval')
+			cal s:findroot(getcwd(), cmd['types'][key][0], 0, 1)
+			if exists('s:vcsroot') | brea | en
+		endfo
+		if !exists('s:vcsroot')
+			retu has_key(cmd, 'fallback') ? cmd['fallback'] : ''
+		en
+		unl s:vcsroot
+		let s:vcscmd = s:lash == '\' ? 1 : 0
+		retu cmd['types'][key][1]
 	en
 endf
 fu! s:Buffers() "{{{1
@@ -944,6 +955,10 @@ fu! s:mixedsort(s1, s2)
 	en
 	retu 2 * cml + cln
 endf
+
+fu! s:compval(...)
+	retu a:1 - a:2
+endf
 " Statusline {{{2
 fu! ctrlp#statusline()
 	if !exists('s:statypes')
@@ -1126,8 +1141,8 @@ fu! s:syntax()
 	sy match CtrlPNoEntries '^ == NO ENTRIES ==$'
 	sy match CtrlPLinePre '^>'
 	hi link CtrlPNoEntries Error
-	if exists('g:colors_name')
-		exe 'hi CtrlPLinePre '.( has("gui_running") ? 'gui' : 'cterm' ).'fg=bg'
+	if hlexists('Normal')
+		sil! exe 'hi CtrlPLinePre '.( has("gui_running") ? 'gui' : 'cterm' ).'fg=bg'
 	en
 endf
 
