@@ -1110,11 +1110,7 @@ endf
 
 fu! ctrlp#setdir(path, ...)
 	let cmd = exists('a:1') ? a:1 : 'lc!'
-	try
-		exe cmd.' '.ctrlp#fnesc(a:path)
-	cat
-		cal ctrlp#msg("Can't change working directory.")
-	endt
+	sil! exe cmd.' '.ctrlp#fnesc(a:path)
 endf
 " Highlighting {{{2
 fu! s:syntax()
@@ -1345,25 +1341,17 @@ fu! s:migemo(str)
 	retu str
 endf
 
-fu! ctrlp#msg(msg)
-	redr | echoh Identifier | echon "CtrlP: ".a:msg | echoh None
-endf
-
 fu! s:openfile(cmd, filpath, ...)
 	let cmd = a:cmd =~ '^[eb]$' && &modified ? 'hid '.a:cmd : a:cmd
 	let cmd = cmd =~ '^tab' ? tabpagenr('$').cmd : cmd
 	let tail = a:0 ? a:1 : s:tail()
-	try
-		exe cmd.tail.' '.ctrlp#fnesc(a:filpath)
-	cat
-	fina
-		if !empty(tail)
-			sil! norm! zvzz
-		en
-		if exists('*haslocaldir')
-			cal ctrlp#setdir(getcwd(), haslocaldir() ? 'lc!' : 'cd!')
-		en
-	endt
+	sil! exe cmd.tail.' '.ctrlp#fnesc(a:filpath)
+	if !empty(tail)
+		sil! norm! zvzz
+	en
+	if exists('*haslocaldir')
+		cal ctrlp#setdir(getcwd(), haslocaldir() ? 'lc!' : 'cd!')
+	en
 endf
 
 fu! s:writecache(read_cache, cache_file)

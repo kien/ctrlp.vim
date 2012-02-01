@@ -43,13 +43,8 @@ fu! ctrlp#quickfix#accept(mode, str)
 	let cmd = md == 't' ? 'tabe' : md == 'h' ? 'new' : md == 'v' ? 'vne'
 		\ : ctrlp#normcmd('e')
 	let cmd = cmd == 'e' && &modified ? 'hid e' : cmd
-	try
-		exe cmd.' '.ctrlp#fnesc(filpath)
-	cat
-		cal ctrlp#msg("Invalid command or argument.")
-	fina
-		cal cursor(items[2], items[3]) | sil! norm! zvzz
-	endt
+	sil! exe cmd.' '.ctrlp#fnesc(filpath)
+	cal cursor(items[2], items[3]) | sil! norm! zvzz
 endf
 
 fu! ctrlp#quickfix#id()

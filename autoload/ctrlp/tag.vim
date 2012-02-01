@@ -90,19 +90,15 @@ fu! ctrlp#tag#accept(mode, str)
 		\ }
 	let cmd = fnd[0] == 1 ? cmds[md][0] : cmds[md][1]
 	let cmd = cmd == 'tj' && &modified ? 'hid '.cmd : cmd
-	try
-		let cmd = cmd =~ '^tab' ? tabpagenr('$').cmd : cmd
-		if fnd[0] == 1
-			if cmd != ''
-				exe cmd
-			en
-			exe fnd[1].'ta' tg
-		el
-			exe cmd.' '.tg
+	let cmd = cmd =~ '^tab' ? tabpagenr('$').cmd : cmd
+	if fnd[0] == 1
+		if cmd != ''
+			sil! exe cmd
 		en
-	cat
-		cal ctrlp#msg("Tag not found.")
-	endt
+		sil! exe fnd[1].'ta' tg
+	el
+		sil! exe cmd.' '.tg
+	en
 endf
 
 fu! ctrlp#tag#id()

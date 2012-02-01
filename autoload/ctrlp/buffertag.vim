@@ -165,9 +165,6 @@ fu! s:esctagscmd(bin, args, ...)
 		let last = s:enc != &enc ? s:enc : !empty($LANG) ? $LANG : &enc
 		let cmd = iconv(cmd, &enc, last)
 	en
-	if empty(cmd)
-		cal ctrlp#msg("Encoding conversion failed!")
-	en
 	retu cmd
 endf
 
