@@ -705,7 +705,7 @@ endf
 fu! ctrlp#acceptfile(mode, matchstr, ...)
 	let [md, filpath] = [a:mode, fnamemodify(a:matchstr, ':p')]
 	cal s:PrtExit()
-	let [bufnr, tail] = [bufnr(filpath), s:tail()]
+	let [bufnr, tail] = [bufnr('^'.filpath.'$'), s:tail()]
 	if s:jmptobuf && bufnr > 0 && md =~ 'e\|t'
 		let [jmpb, bufwinnr] = [1, bufwinnr(bufnr)]
 		let buftab = s:jmptobuf > 1 ? s:buftab(bufnr, md) : [0, 0]
@@ -850,7 +850,7 @@ fu! s:OpenMulti()
 	cal s:PrtExit()
 	" Move the cursor to a reusable window
 	let emptytail = empty(s:tail())
-	let useb = bufnr(mkd[0]) > 0 && emptytail
+	let useb = bufnr('^'.mkd[0].'$') > 0 && emptytail
 	let fst = call('ctrlp#normcmd', useb ? ['b', 'bo vert sb'] : ['e'])
 	" Check if it's a replaceable buffer
 	let repabl = ( empty(bufname('%')) && empty(&l:ft) ) || s:nosplit()
@@ -860,7 +860,7 @@ fu! s:OpenMulti()
 	let [swb, &swb] = [&swb, '']
 	" Open the files
 	for va in mkd
-		let bufnr = bufnr(va)
+		let bufnr = bufnr('^'.va.'$')
 		let useb = bufnr > 0 && emptytail
 		let snd = md != '' && has_key(cmds, md)
 			\ ? ( useb ? cmds[md][0] : cmds[md][1] ) : ( useb ? 'vert sb' : 'vne' )

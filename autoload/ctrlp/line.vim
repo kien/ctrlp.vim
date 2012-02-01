@@ -35,7 +35,7 @@ fu! ctrlp#line#init()
 	for each in bufs
 		let from_file = readfile(each)
 		cal map(from_file, 'tr(v:val, ''	'', '' '')')
-		let [id, len_ff, bufnr] = [1, len(from_file), bufnr(each)]
+		let [id, len_ff, bufnr] = [1, len(from_file), bufnr('^'.each.'$')]
 		wh id <= len_ff
 			let from_file[id-1] .= '	#:'.bufnr.':'.id
 			let id += 1
