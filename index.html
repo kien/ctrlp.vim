@@ -18,8 +18,11 @@
 				<li><a href="//github.com/kien/ctrlp.vim/issues">Issue Tracker</a></li>
 				<li class="tags"><a href="//github.com/kien/ctrlp.vim/tags">Older Versions</a></li>
 			</ul>
+
 			<div class="article">
+
 				<h1>ctrlp.vim</h1>
+
 				<div class="entry-content">
 					<h2>Full path fuzzy file, buffer, mru and tag finder for Vim.</h2>
 					<ul class="special">
@@ -35,7 +38,7 @@
 					</ul>
 					<p class="note">
 						Screenshot: CtrlP in regex and full path mode with 3 files selected to open.<br>
-						<img src="images/ctrlp.png" alt="screenshot">
+						<a href="images/ctrlp.png"><img src="images/ctrlp.png" alt="screenshot"></a>
 					</p>
 					<h3>Basic Usage:</h3>
 					<ul>
@@ -99,7 +102,7 @@ let g:ctrlp_user_command = ['.hg/', 'hg --cwd %s locate -I .']</code></pre>
 							Multiple VCS listing commands:
 							<pre><code>let g:ctrlp_user_command = {
 	\ 'types': {
-		\ 1: ['.git/', 'cd %s && git ls-files'],
+		\ 1: ['.git/', 'cd %s &amp;&amp; git ls-files'],
 		\ 2: ['.hg/', 'hg --cwd %s locate -I .'],
 		\ },
 	\ 'fallback': 'find %s -type f'
