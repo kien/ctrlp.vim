@@ -18,7 +18,7 @@ fu! s:opts()
 		\ 'g:ctrlp_dotfiles':              ['s:dotfiles', 1],
 		\ 'g:ctrlp_extensions':            ['s:extensions', []],
 		\ 'g:ctrlp_follow_symlinks':       ['s:folsym', 0],
-		\ 'g:ctrlp_highlight_match':       ['s:mathi', [1, 'Identifier']],
+		\ 'g:ctrlp_highlight_match':       ['s:mathi', [1, 'CtrlPMatch']],
 		\ 'g:ctrlp_jump_to_buffer':        ['s:jmptobuf', 2],
 		\ 'g:ctrlp_lazy_update':           ['s:lazy', 0],
 		\ 'g:ctrlp_match_window_bottom':   ['s:mwbottom', 1],
@@ -195,8 +195,8 @@ fu! ctrlp#clra(...)
 	cal ctrlp#clr()
 endf
 
-fu! ctrlp#reset()
-	if ( has('dialog_gui') || has('dialog_con') ) &&
+fu! ctrlp#reset(...)
+	if !exists('a:1') && ( has('dialog_gui') || has('dialog_con') ) &&
 		\ confirm("Reset and apply new options?", "&OK\n&Cancel") != 1 | retu | en
 	cal s:opts()
 	cal ctrlp#utils#opts()
@@ -965,12 +965,12 @@ fu! ctrlp#statusline()
 		let args = [focus, byfname, s:regexp, prv, item, nxt, marked]
 		let &l:stl = call(s:status['main'], args)
 	el
-		let item    = '%#Character# '.item.' %*'
-		let focus   = '%#LineNr# '.focus.' %*'
-		let byfname = '%#Character# '.byfname.' %*'
-		let regex   = s:regexp  ? '%#LineNr# regex %*' : ''
+		let item    = '%#CtrlPMode1# '.item.' %*'
+		let focus   = '%#CtrlPMode2# '.focus.' %*'
+		let byfname = '%#CtrlPMode1# '.byfname.' %*'
+		let regex   = s:regexp  ? '%#CtrlPMode2# regex %*' : ''
 		let slider  = ' <'.prv.'>={'.item.'}=<'.nxt.'>'
-		let dir     = ' %=%<%#LineNr# '.getcwd().' %*'
+		let dir     = ' %=%<%#CtrlPMode2# '.getcwd().' %*'
 		let &l:stl  = focus.byfname.regex.slider.marked.dir
 	en
 endf
@@ -983,7 +983,7 @@ endf
 fu! ctrlp#progress(enum)
 	if has('macunix') || has('mac') | sl 1m | en
 	let &l:stl = has_key(s:status, 'prog') ? call(s:status['prog'], [a:enum])
-		\ : '%#Function# '.a:enum.' %* %=%<%#LineNr# '.getcwd().' %*'
+		\ : '%#CtrlPStats# '.a:enum.' %* %=%<%#CtrlPMode2# '.getcwd().' %*'
 	redr
 endf
 " Paths {{{2
@@ -1117,7 +1117,12 @@ fu! s:syntax()
 	sy match CtrlPNoEntries '^ == NO ENTRIES ==$'
 	sy match CtrlPLinePre '^>'
 	hi link CtrlPNoEntries Error
+	hi link CtrlPMode1 Character
+	hi link CtrlPMode2 LineNr
+	hi link CtrlPStats Function
+	hi link CtrlPMatch Identifier
 	if hlexists('Normal')
+		" Hide the prefix
 		sil! exe 'hi CtrlPLinePre '.( has("gui_running") ? 'gui' : 'cterm' ).'fg=bg'
 	en
 endf
