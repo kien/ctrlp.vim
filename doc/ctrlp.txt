@@ -697,25 +697,28 @@ Examples: >
 CUSTOMIZATION                                             *ctrlp-customization*
 
 Highlighting:~
-  * For the buffer:
-    CtrlPNoEntries (links to |hl-Error|)
-    CtrlPMatch (links to |hl-Identifier|)
+  * For the |CtrlP| buffer:
+    CtrlPNoEntries (links to Error)
+    CtrlPMatch (links to Identifier)
+    CtrlPPrtBase (links to Comment)
+    CtrlPPrtText (links to |hl-Normal|)
+    CtrlPPrtCursor (links to Constant)
     CtrlPLinePre (links to |hl-Normal|’s |guibg| and |ctermbg|)
 
   * In extensions:
-    CtrlPTabExtra (links to |hl-Comment|)
+    CtrlPTabExtra (links to Comment)
     CtrlPqfLineCol (links to |hl-Search|)
     CtrlPUndoT (links to |hl-Directory|)
-    CtrlPUndoBr (links to |hl-Comment|)
-    CtrlPUndoNr (links to |hl-String|)
+    CtrlPUndoBr (links to Comment)
+    CtrlPUndoNr (links to String)
 
 Statuslines:~
   * Highlight groups:
-    CtrlPMode1 (links to |hl-Character|)
+    CtrlPMode1 (links to Character)
     CtrlPMode2 (links to |hl-LineNr|)
-    CtrlPStats (links to |hl-Function|)
+    CtrlPStats (links to Function)
 
-  For rebuilding the statuslines, see |g:ctrlp_status_func|.
+  * For rebuilding the statuslines, see |g:ctrlp_status_func|.
 
 ===============================================================================
 CREDITS                                                         *ctrlp-credits*

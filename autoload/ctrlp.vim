@@ -420,9 +420,9 @@ fu! s:BuildPrompt(upd, ...)
 	sil! cal ctrlp#statusline()
 	" Toggling
 	let [hiactive, hicursor, base] = exists('a:1') && !a:1
-		\ ? ['Comment', 'Comment', tr(base, '>', '-')]
-		\ : ['Normal', 'Constant', base]
-	let hibase = 'Comment'
+		\ ? ['CtrlPPrtBase', 'CtrlPPrtBase', tr(base, '>', '-')]
+		\ : ['CtrlPPrtText', 'CtrlPPrtCursor', base]
+	let hibase = 'CtrlPPrtBase'
 	" Build it
 	redr
 	exe 'echoh' hibase '| echon "'.base.'"
@@ -1121,8 +1121,10 @@ fu! s:syntax()
 	hi link CtrlPMode2 LineNr
 	hi link CtrlPStats Function
 	hi link CtrlPMatch Identifier
+	hi link CtrlPPrtBase Comment
+	hi link CtrlPPrtText Normal
+	hi link CtrlPPrtCursor Constant
 	if hlexists('Normal')
-		" Hide the prefix
 		sil! exe 'hi CtrlPLinePre '.( has("gui_running") ? 'gui' : 'cterm' ).'fg=bg'
 	en
 endf
@@ -1480,8 +1482,10 @@ fu! ctrlp#init(type, ...)
 	cal s:SetWD(a:0 ? a:1 : '')
 	cal s:MapKeys()
 	cal s:SetLines(a:type)
+	if has('syntax') && exists('g:syntax_on')
+		cal s:syntax()
+	en
 	cal s:BuildPrompt(1)
-	if has('syntax') && exists('g:syntax_on') | cal s:syntax() | en
 endf
 if has('autocmd') "{{{1
 	aug CtrlPAug
