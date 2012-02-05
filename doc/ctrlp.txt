@@ -1,4 +1,4 @@
-*ctrlp.txt*       Fuzzy file, buffer, mru and tag finder. v1.6.9
+*ctrlp.txt*       Fuzzy file, buffer, mru and tag finder. v1.7.1
 *CtrlP* *ControlP* *'ctrlp'* *'ctrl-p'*
 ===============================================================================
 #                                                                             #
@@ -698,27 +698,27 @@ CUSTOMIZATION                                             *ctrlp-customization*
 
 Highlighting:~
   * For the |CtrlP| buffer:
-    CtrlPNoEntries (links to Error)
-    CtrlPMatch (links to Identifier)
-    CtrlPPrtBase (links to Comment)
-    CtrlPPrtText (links to |hl-Normal|)
-    CtrlPPrtCursor (links to Constant)
-    CtrlPLinePre (links to |hl-Normal|’s |guibg| and |ctermbg|)
+    CtrlPNoEntries : the message when no match is found (Error)
+    CtrlPMatch     : the matched pattern (Identifier)
+    CtrlPLinePre   : the line prefix '>' in the match window
+    CtrlPPrtBase   : the prompt’s base (Comment)
+    CtrlPPrtText   : the prompt’s text (|hl-Normal|)
+    CtrlPPrtCursor : the prompt’s cursor when moving over the text (Constant)
 
   * In extensions:
-    CtrlPTabExtra (links to Comment)
-    CtrlPqfLineCol (links to |hl-Search|)
-    CtrlPUndoT (links to |hl-Directory|)
-    CtrlPUndoBr (links to Comment)
-    CtrlPUndoNr (links to String)
+    CtrlPTabExtra  : the part of each line that’s not matched against (Comment)
+    CtrlPqfLineCol : the line and column numbers in quickfix mode (|hl-Search|)
+    CtrlPUndoT     : the elapsed time in undo mode (|hl-Directory|)
+    CtrlPUndoBr    : the square brackets [] in undo mode (Comment)
+    CtrlPUndoNr    : the undo number inside [] in undo mode (String)
 
 Statuslines:~
   * Highlight groups:
-    CtrlPMode1 (links to Character)
-    CtrlPMode2 (links to |hl-LineNr|)
-    CtrlPStats (links to Function)
+    CtrlPMode1 : 'prt' or 'win', also for 'regex' (Character)
+    CtrlPMode2 : 'file' or 'path', also for the local working dir (|hl-LineNr|)
+    CtrlPStats : the scanning status (Function)
 
-  * For rebuilding the statuslines, see |g:ctrlp_status_func|.
+  For rebuilding the statuslines, see |g:ctrlp_status_func|.
 
 ===============================================================================
 CREDITS                                                         *ctrlp-credits*

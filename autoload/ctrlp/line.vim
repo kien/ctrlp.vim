@@ -43,8 +43,10 @@ fu! ctrlp#line#init()
 		cal filter(from_file, 'v:val !~ ''^\s*\t#:\d\+:\d\+$''')
 		cal extend(lines, from_file)
 	endfo
+	if !hlexists('CtrlPTabExtra')
+		hi link CtrlPTabExtra Comment
+	en
 	sy match CtrlPTabExtra '\zs\t.*\ze$'
-	hi link CtrlPTabExtra Comment
 	retu lines
 endf
 

@@ -28,7 +28,7 @@ fu! ctrlp#rtscript#init()
 		\ || !( exists('g:ctrlp_rtscache') && g:ctrlp_rtscache[0] == &rtp )
 		sil! cal ctrlp#progress('Indexing...')
 		let entries = split(globpath(&rtp, '**/*.*'), "\n")
-		cal filter(entries, 'index(entries, v:val, v:key + 1) < 0')
+		cal filter(entries, 'count(entries, v:val) == 1')
 		let [entries, echoed] = [ctrlp#dirnfile(entries)[1], 1]
 	el
 		let [entries, results] = g:ctrlp_rtscache[2:3]

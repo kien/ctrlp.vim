@@ -80,12 +80,14 @@ fu! s:humantime(nr)
 endf
 
 fu! s:syntax()
+	for [ke, va] in items({'T': 'Directory', 'Br': 'Comment', 'Nr': 'String'})
+		if !hlexists('CtrlPUndo'.ke)
+			exe 'hi link CtrlPUndo'.ke va
+		en
+	endfo
 	sy match CtrlPUndoT '\d\+ \zs[^ ]\+\ze'
 	sy match CtrlPUndoBr '\[\|\]'
 	sy match CtrlPUndoNr '\[\d\+\]$' contains=CtrlPUndoBr
-	hi link CtrlPUndoT Directory
-	hi link CtrlPUndoBr Comment
-	hi link CtrlPUndoNr String
 endf
 
 fu! s:dict2list(dict)

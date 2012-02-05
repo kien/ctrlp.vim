@@ -205,8 +205,10 @@ fu! ctrlp#buffertag#init(fname)
 		let tftype = get(split(getbufvar(each, '&ft'), '\.'), 0, '')
 		cal extend(lines, s:process(each, tftype))
 	endfo
+	if !hlexists('CtrlPTabExtra')
+		hi link CtrlPTabExtra Comment
+	en
 	sy match CtrlPTabExtra '\zs\t.*\ze$'
-	hi link CtrlPTabExtra Comment
 	retu lines
 endf
 
