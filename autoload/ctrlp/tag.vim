@@ -97,9 +97,9 @@ fu! ctrlp#tag#accept(mode, str)
 		if cmd != ''
 			sil! exe cmd
 		en
-		sil! exe fnd[1].'ta' tg
+		exe fnd[1].'ta' tg
 	el
-		sil! exe cmd.' '.tg
+		exe cmd.' '.tg
 	en
 endf
 

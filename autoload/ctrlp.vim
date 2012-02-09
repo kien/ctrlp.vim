@@ -334,7 +334,7 @@ fu! s:MatchedItems(items, pat, limit)
 	retu newitems
 endf
 fu! s:SplitPattern(str) "{{{1
-	let str = s:sanstail(a:str)
+	let str = a:str
 	if s:migemo && s:regexp && len(str) > 0 && executable('cmigemo')
 		let str = s:migemo(str)
 	en
@@ -402,16 +402,14 @@ endf
 fu! s:Update(str)
 	" Get the previous string if existed
 	let oldstr = exists('s:savestr') ? s:savestr : ''
-	let pat = s:SplitPattern(a:str)
 	" Get the new string sans tail
-	let notail = substitute(a:str, '\\\\', '\', 'g')
-	let notail = substitute(notail, '\\\@<!:\([^:]\|\\:\)*$', '', '')
-	let notail = substitute(notail, '\\\ze:', '', 'g')
+	let str = s:sanstail(a:str)
 	" Stop if the string's unchanged
-	if notail == oldstr && !empty(notail) && !exists('s:force')
+	if str == oldstr && !empty(str) && !exists('s:force')
 		retu
 	en
-	let lines = exists('g:ctrlp_nolimit') && empty(notail) ? copy(g:ctrlp_lines)
+	let pat = s:SplitPattern(str)
+	let lines = exists('g:ctrlp_nolimit') && empty(str) ? copy(g:ctrlp_lines)
 		\ : s:MatchedItems(g:ctrlp_lines, pat, s:mxheight)
 	cal s:Render(lines, pat)
 endf
@@ -1365,7 +1363,7 @@ fu! s:openfile(cmd, filpath, ...)
 	let cmd = a:cmd =~ '^[eb]$' && &modified ? 'hid '.a:cmd : a:cmd
 	let cmd = cmd =~ '^tab' ? tabpagenr('$').cmd : cmd
 	let tail = a:0 ? a:1 : s:tail()
-	sil! exe cmd.tail.' '.ctrlp#fnesc(a:filpath)
+	exe cmd.tail.' '.ctrlp#fnesc(a:filpath)
 	if !empty(tail)
 		sil! norm! zvzz
 	en
