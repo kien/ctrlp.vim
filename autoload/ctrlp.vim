@@ -402,6 +402,7 @@ endf
 fu! s:Update(str)
 	" Get the previous string if existed
 	let oldstr = exists('s:savestr') ? s:savestr : ''
+	let pat = s:SplitPattern(a:str)
 	" Get the new string sans tail
 	let notail = substitute(a:str, '\\\\', '\', 'g')
 	let notail = substitute(notail, '\\\@<!:\([^:]\|\\:\)*$', '', '')
@@ -410,7 +411,6 @@ fu! s:Update(str)
 	if notail == oldstr && !empty(notail) && !exists('s:force')
 		retu
 	en
-	let pat = s:SplitPattern(a:str)
 	let lines = exists('g:ctrlp_nolimit') && empty(notail) ? copy(g:ctrlp_lines)
 		\ : s:MatchedItems(g:ctrlp_lines, pat, s:mxheight)
 	cal s:Render(lines, pat)
@@ -1147,7 +1147,7 @@ fu! s:highlight(pat, grp)
 		if s:byfname
 			" Match only filename
 			let pat = substitute(pat, '\[\^\(.\{-}\)\]\\{-}', '[^\\/\1]\\{-}', 'g')
-			let pat = substitute(pat, '$', '\\ze[^\\/]*$', 'g')
+			let pat = substitute(pat, '\$\@<!$', '\\ze[^\\/]*$', 'g')
 		en
 		cal matchadd(a:grp, '\c'.pat)
 		if hlexists('CtrlPLinePre')
