@@ -1363,8 +1363,9 @@ fu! s:openfile(cmd, filpath, ...)
 	let cmd = a:cmd =~ '^[eb]$' && &modified ? 'hid '.a:cmd : a:cmd
 	let cmd = cmd =~ '^tab' ? tabpagenr('$').cmd : cmd
 	let tail = a:0 ? a:1 : s:tail()
-	exe cmd.tail.' '.ctrlp#fnesc(a:filpath)
+	exe cmd.' '.ctrlp#fnesc(a:filpath)
 	if !empty(tail)
+		call cursor(str2nr(tail), 1)
 		sil! norm! zvzz
 	en
 	if exists('*haslocaldir')
