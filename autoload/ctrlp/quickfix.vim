@@ -45,8 +45,9 @@ fu! ctrlp#quickfix#accept(mode, str)
 	let cmd = md == 't' ? 'tabe' : md == 'h' ? 'new' : md == 'v' ? 'vne'
 		\ : ctrlp#normcmd('e')
 	let cmd = cmd == 'e' && &modified ? 'hid e' : cmd
-	exe cmd.' '.ctrlp#fnesc(filpath)
-	cal cursor(items[2], items[3]) | sil! norm! zvzz
+	exe cmd ctrlp#fnesc(filpath)
+	cal cursor(items[2], items[3])
+	sil! norm! zvzz
 endf
 
 fu! ctrlp#quickfix#id()

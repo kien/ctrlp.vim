@@ -95,11 +95,11 @@ fu! ctrlp#tag#accept(mode, str)
 	let cmd = cmd =~ '^tab' ? tabpagenr('$').cmd : cmd
 	if fnd[0] == 1
 		if cmd != ''
-			sil! exe cmd
+			exe cmd
 		en
 		exe fnd[1].'ta' tg
 	el
-		exe cmd.' '.tg
+		exe cmd tg
 	en
 endf
 

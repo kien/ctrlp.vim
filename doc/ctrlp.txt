@@ -755,6 +755,7 @@ Special thanks:~
     * Zak Johnson <github.com/zakj>
     * Diego Viola <github.com/diegoviola>
     * Thibault Duplessis <github.com/ornicar>
+    * Tacahiroy <github.com/tacahiroy>
         Bugfixes/Corrections.
 
 ===============================================================================
