@@ -155,7 +155,7 @@ fu! s:Open()
 	en
 	cal s:getenv()
 	sil! exe 'noa keepa' ( s:mwbottom ? 'bo' : 'to' ) '1new ControlP'
-	let [s:bufnr, s:prompt] = [bufnr('%'), ['', '', '']]
+	let [s:bufnr, s:prompt, s:winw] = [bufnr('%'), ['', '', ''], winwidth(0)]
 	abc <buffer>
 	if !exists('s:hstry')
 		let hst = filereadable(s:gethistloc()[1]) ? s:gethistdata() : ['']
@@ -316,9 +316,9 @@ fu! s:MatchIt(items, pat, limit, mfunc)
 	retu newitems
 endf
 
-fu! s:MatchedItems(items, pat, limit)
-	let [items, pat, limit] = [a:items, a:pat, a:limit]
-	let [type, ipt, mfunc] = [s:type(1), s:ispathitem(), 'match']
+fu! s:MatchedItems(items, pat, limit, ipt)
+	let [items, pat, limit, ipt] = [a:items, a:pat, a:limit, a:ipt]
+	let [type, mfunc] = [s:type(1), 'match']
 	if s:byfname && ipt
 		let mfunc = 's:matchfname'
 	elsei s:itemtype > 2
@@ -358,7 +358,7 @@ fu! s:SplitPattern(str) "{{{1
 	retu escape(pat, '~')
 endf
 " * BuildPrompt() {{{1
-fu! s:Render(lines, pat)
+fu! s:Render(lines, pat, ipt)
 	let lines = a:lines
 	" Setup the match window
 	let s:height = min([len(lines), s:winh])
@@ -382,7 +382,7 @@ fu! s:Render(lines, pat)
 	en
 	if s:mwreverse | cal reverse(lines) | en
 	let s:matched = copy(lines)
-	cal map(lines, '"> ".v:val')
+	cal map(lines, 's:formatline(v:val, a:ipt)')
 	cal setline(1, lines)
 	exe 'keepj norm!' ( s:mwreverse ? 'G' : 'gg' ).'1|'
 	cal s:unmarksigns()
@@ -392,7 +392,7 @@ fu! s:Render(lines, pat)
 	en
 	" Highlighting
 	if s:dohighlight()
-		cal s:highlight(a:pat, s:mathi[1] == '' ? 'Identifier' : s:mathi[1])
+		cal s:highlight(a:pat, s:mathi[1] == '' ? 'Identifier' : s:mathi[1], a:ipt)
 	en
 endf
 
@@ -406,9 +406,10 @@ fu! s:Update(str)
 		retu
 	en
 	let pat = s:SplitPattern(str)
+	let ipt = s:ispathitem()
 	let lines = exists('g:ctrlp_nolimit') && empty(str) ? copy(g:ctrlp_lines)
-		\ : s:MatchedItems(g:ctrlp_lines, pat, s:winh)
-	cal s:Render(lines, pat)
+		\ : s:MatchedItems(g:ctrlp_lines, pat, s:winh, ipt)
+	cal s:Render(lines, pat, ipt)
 endf
 
 fu! s:ForceUpdate()
@@ -823,9 +824,10 @@ fu! s:MarkToOpen()
 		\ || ( s:itemtype > g:ctrlp_builtins && s:type() !~ 'rts' )
 		retu
 	en
-	let matchstr = matchstr(getline('.'), '^> \zs.\+\ze\t*$')
-	if empty(matchstr) | retu | en
-	let filpath = fnamemodify(matchstr, ':p')
+	let line = exists('s:matched') && !empty(s:matched)
+		\ ? s:matched[line('.') - 1] : ''
+	if empty(line) | retu | en
+	let filpath = fnamemodify(line, ':p')
 	if exists('s:marked') && s:dictindex(s:marked, filpath) > 0
 		" Unmark and remove the file from s:marked
 		let key = s:dictindex(s:marked, filpath)
@@ -1001,6 +1003,11 @@ fu! ctrlp#progress(enum)
 	redr
 endf
 " Paths {{{2
+fu! s:formatline(str, ipt)
+	retu '> '.( a:ipt && ( s:winw - ( s:dosigns() ? 2 : 0 ) - 2 )
+		\ < s:strwidth(a:str) ? pathshorten(a:str) : a:str )
+endf
+
 fu! s:dircompl(be, sd)
 	if a:sd == '' | retu [] | en
 	let [be, sd] = a:be == '' ? [getcwd(), a:sd] : [a:be, a:be.s:lash(a:be).a:sd]
@@ -1141,9 +1148,9 @@ fu! s:syntax()
 	en
 endf
 
-fu! s:highlight(pat, grp)
+fu! s:highlight(pat, grp, ipt)
 	cal clearmatches()
-	if !empty(a:pat) && s:ispathitem()
+	if !empty(a:pat) && a:ipt
 		let pat = s:regexp ? substitute(a:pat, '\\\@<!\^', '^> \\zs', 'g') : a:pat
 		if s:byfname
 			" Match only filename
@@ -1320,6 +1327,10 @@ fu! s:argmaps(md, ...)
 	retu a:md
 endf
 " Misc {{{2
+fu! s:strwidth(str)
+	retu v:version > 702 ? strdisplaywidth(a:str) : strlen(a:str)
+endf
+
 fu! s:getenv()
 	let [s:cwd, s:winres] = [getcwd(), [winrestcmd(), &lines, winnr('$')]]
 	let [s:crfile, s:crfpath] = [expand('%:p', 1), expand('%:p:h', 1)]
