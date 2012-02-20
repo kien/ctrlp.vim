@@ -102,7 +102,9 @@ endf
 fu! ctrlp#undo#init(undo)
 	let entries = a:undo['entries']
 	if empty(entries) | retu [] | en
-	cal s:syntax()
+	if has('syntax') && exists('g:syntax_on')
+		cal s:syntax()
+	en
 	let g:ctrlp_nolimit = 1
 	let entries = sort(s:dict2list(s:flatten(entries)), 's:compval')
 	retu map(entries, 'v:val[1]." [".v:val[0]."]"')

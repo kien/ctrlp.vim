@@ -23,14 +23,6 @@ let g:ctrlp_ext_vars = exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)
 
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 " Utilities {{{1
-fu! s:nodup(items)
-	let dict = {}
-	for each in a:items
-		cal extend(dict, { each : 0 })
-	endfo
-	retu keys(dict)
-endf
-
 fu! s:findcount(str)
 	let [tg, fname] = split(a:str, '\t\+\ze[^\t]\+$')
 	let [fname, tgs] = [expand(fname, 1), taglist('^'.tg.'$')]
@@ -67,7 +59,8 @@ endf
 " Public {{{1
 fu! ctrlp#tag#init(tagfiles)
 	if empty(a:tagfiles) | retu [] | en
-	let [tagfiles, g:ctrlp_alltags] = [sort(s:nodup(a:tagfiles)), []]
+	let g:ctrlp_alltags = []
+	let tagfiles = sort(filter(a:tagfiles, 'count(a:tagfiles, v:val) == 1'))
 	for each in tagfiles
 		let alltags = s:filter(ctrlp#utils#readfile(each))
 		cal extend(g:ctrlp_alltags, alltags)
@@ -82,15 +75,14 @@ endf
 fu! ctrlp#tag#accept(mode, str)
 	cal ctrlp#exit()
 	let str = matchstr(a:str, '^[^\t]\+\t\+[^\t]\+\ze\t')
-	let [md, tg] = [a:mode, split(str, '^[^\t]\+\zs\t')[0]]
-	let fnd = s:findcount(str)
+	let [tg, fnd] = [split(str, '^[^\t]\+\zs\t')[0], s:findcount(str)]
 	let cmds = {
 		\ 't': ['tab sp', 'tab stj'],
 		\ 'h': ['sp', 'stj'],
 		\ 'v': ['vs', 'vert stj'],
 		\ 'e': ['', 'tj'],
 		\ }
-	let cmd = fnd[0] == 1 ? cmds[md][0] : cmds[md][1]
+	let cmd = fnd[0] == 1 ? cmds[a:mode][0] : cmds[a:mode][1]
 	let cmd = cmd == 'tj' && &modified ? 'hid '.cmd : cmd
 	let cmd = cmd =~ '^tab' ? tabpagenr('$').cmd : cmd
 	if fnd[0] == 1

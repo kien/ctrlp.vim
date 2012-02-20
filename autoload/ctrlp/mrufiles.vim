@@ -36,8 +36,13 @@ fu! ctrlp#mrufiles#list(bufnr, ...) "{{{1
 		let s:cafile = s:cadir.ctrlp#utils#lash().'cache.txt'
 	en
 	if a:0 && a:1 == 2
-		cal ctrlp#utils#writecache([], s:cadir, s:cafile)
-		retu []
+		let mrufs = []
+		if a:0 == 2
+			let mrufs = ctrlp#utils#readfile(s:cafile)
+			cal filter(mrufs, 'index(a:2, v:val) < 0')
+		en
+		cal ctrlp#utils#writecache(mrufs, s:cadir, s:cafile)
+		retu map(mrufs, 'fnamemodify(v:val, '':.'')')
 	en
 	" Get the list
 	let mrufs = ctrlp#utils#readfile(s:cafile)
@@ -59,8 +64,7 @@ fu! ctrlp#mrufiles#list(bufnr, ...) "{{{1
 			let cwd = exists('+ssl') ? tr(getcwd(), '/', '\') : getcwd()
 			cal filter(mrufs, '!stridx(v:val, cwd)')
 		en
-		cal map(mrufs, 'fnamemodify(v:val, '':.'')')
-		retu mrufs
+		retu map(mrufs, 'fnamemodify(v:val, '':.'')')
 	en
 	" Remove old entry
 	cal filter(mrufs, 'v:val !='.s:csen.' fn')

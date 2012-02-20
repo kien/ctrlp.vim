@@ -96,7 +96,6 @@ variable: >
       .hg/
       .bzr/
       _darcs/
-      root.dir
   0 - don’t manage working directory.
 
                                                        *'g:ctrlp_root_markers'*
@@ -543,7 +542,8 @@ Once inside the prompt:~
     - Remove deleted files from MRU list.
 
   <F7>
-    Clear MRU list.
+    - Wipe MRU list.
+    - Delete MRU entries marked by <c-z>.
 
   <insert>
     Insert the word under the cursor (in the active buffer) into the prompt.
@@ -762,6 +762,7 @@ Special thanks:~
 CHANGELOG                                                     *ctrlp-changelog*
 
     + New option: |g:ctrlp_mruf_last_entered| change MRU to recently-entered.
+    + Extend |g:ctrlp_user_command| to support multiple commands.
 
 Before 2012/01/15~
 
