@@ -97,6 +97,7 @@ variable: >
       .bzr/
       _darcs/
   0 - don’t manage working directory.
+Use b:ctrlp_working_path_mode (a |b:var|) to set this option for each buffer.
 
                                                        *'g:ctrlp_root_markers'*
 Use this to set your own root markers in addition to the default ones. Your

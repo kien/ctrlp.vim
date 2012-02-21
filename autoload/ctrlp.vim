@@ -689,7 +689,7 @@ fu! s:PrtSwitcher()
 	unl s:force
 endf
 fu! s:SetWD(...) "{{{1
-	let pathmode = s:pathmode
+	let pathmode = s:wpmode
 	if a:0 && strlen(a:1) | if type(a:1)
 		cal ctrlp#setdir(a:1) | retu
 	el
@@ -1338,6 +1338,8 @@ fu! s:getenv()
 	let [s:winh, s:crcursor] = [min([s:mxheight, &lines]), getpos('.')]
 	let [s:crbufnr, s:crvisual] = [bufnr('%'), s:lastvisual()]
 	let s:currwin = s:mwbottom ? winnr() : winnr() + has('autocmd')
+	let s:wpmode = exists('b:ctrlp_working_path_mode')
+		\ ? b:ctrlp_working_path_mode : s:pathmode
 	if exists('g:ctrlp_extensions')
 		if index(g:ctrlp_extensions, 'undo') >= 0
 			\ && v:version > 702 && has('patch005') && exists('*undotree')
