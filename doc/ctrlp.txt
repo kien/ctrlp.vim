@@ -165,10 +165,9 @@ only need to keep the lines that you’ve changed the values (inside []): >
 <
 Note: In some terminals, it’s not possible to remap <c-h> without also changing
 <bs> (|key-codes|). So if pressing <bs> moves the cursor to the left instead of
-deleting a char for you, add this to your |vimrc| to change the default <c-h>
+deleting a char for you, add this to your |vimrc| to disable the default <c-h>
 mapping: >
   let g:ctrlp_prompt_mappings = {
-    \ 'PrtBS()':      ['<bs>', '<c-]>', '<c-h>'],
     \ 'PrtCurLeft()': ['<left>', '<c-^>'],
     \ }
 <
@@ -213,7 +212,7 @@ Set to 1 to sort the MRU file list to most-recently-entered-buffer order: >
 <
 
                                                            *'g:ctrlp_dotfiles'*
-Set this to 0 if you don’t want |CtrlP| to search for dotfiles and dotdirs: >
+Set this to 0 if you don’t want |CtrlP| to scan for dotfiles and dotdirs: >
   let g:ctrlp_dotfiles = 1
 <
 You can use |'wildignore'| to exclude anything from the search.
@@ -762,6 +761,8 @@ Special thanks:~
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
 
+Before 2012/03/01~
+
     + New option: |g:ctrlp_mruf_last_entered| change MRU to recently-entered.
     + Extend |g:ctrlp_user_command| to support multiple commands.
 
@@ -854,7 +855,7 @@ Before 2011/09/12~
                    |g:ctrlp_mruf_max|,
                    |g:ctrlp_mruf_exclude|,
                    |g:ctrlp_mruf_include|
-    + New command: |:CtrlPMRUFiles|
+    + New command: |:CtrlPMRU|
 
 First public release: 2011/09/06~
 

@@ -26,7 +26,7 @@ com! CtrlPCurWD   cal ctrlp#init(0, 0)
 com! CtrlPCurFile cal ctrlp#init(0, 1)
 com! CtrlPRoot    cal ctrlp#init(0, 2)
 
-if g:ctrlp_map != ''
+if g:ctrlp_map != '' && !hasmapto(':<c-u>'.g:ctrlp_cmd.'<cr>', 'n')
 	exe 'nn <silent>' g:ctrlp_map ':<c-u>'.g:ctrlp_cmd.'<cr>'
 en
 

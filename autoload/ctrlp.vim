@@ -60,10 +60,10 @@ fu! s:opts()
 		\ 'PrtClear()':           ['<c-u>'],
 		\ 'PrtSelectMove("j")':   ['<c-j>', '<down>'],
 		\ 'PrtSelectMove("k")':   ['<c-k>', '<up>'],
-		\ 'PrtSelectMove("t")':   ['<home>'],
-		\ 'PrtSelectMove("b")':   ['<end>'],
-		\ 'PrtSelectMove("u")':   ['<PageUp>'],
-		\ 'PrtSelectMove("d")':   ['<PageDown>'],
+		\ 'PrtSelectMove("t")':   ['<Home>', '<kHome>'],
+		\ 'PrtSelectMove("b")':   ['<End>', '<kEnd>'],
+		\ 'PrtSelectMove("u")':   ['<PageUp>', '<kPageUp>'],
+		\ 'PrtSelectMove("d")':   ['<PageDown>', '<kPageDown>'],
 		\ 'PrtHistory(-1)':       ['<c-n>'],
 		\ 'PrtHistory(1)':        ['<c-p>'],
 		\ 'AcceptSelection("e")': ['<cr>', '<2-LeftMouse>'],
@@ -97,22 +97,6 @@ fu! s:opts()
 	if type(s:urprtmaps) == 4
 		cal extend(s:prtmaps, s:urprtmaps)
 	en
-	let s:prtunmaps = [
-		\ 'PrtBS()',
-		\ 'PrtDelete()',
-		\ 'PrtDeleteWord()',
-		\ 'PrtClear()',
-		\ 'PrtCurStart()',
-		\ 'PrtCurEnd()',
-		\ 'PrtCurLeft()',
-		\ 'PrtCurRight()',
-		\ 'PrtHistory(-1)',
-		\ 'PrtHistory(1)',
-		\ 'PrtInsert("w")',
-		\ 'PrtInsert("s")',
-		\ 'PrtInsert("v")',
-		\ 'PrtInsert("+")',
-		\ ]
 	" Global options
 	let s:glbs = { 'magic': 1, 'to': 1, 'tm': 0, 'sb': 1, 'hls': 0, 'im': 0,
 		\ 'report': 9999, 'sc': 0, 'ss': 0, 'siso': 0, 'mfd': 200, 'mouse': 'n',
@@ -134,6 +118,31 @@ let s:fpats = {
 	\ '^\\\(zs\|ze\|<\|>\)': '^\\\(zs\|ze\|<\|>\)',
 	\ '^\S\*$': '\*',
 	\ '^\S\\?$': '\\?',
+	\ }
+
+" Mappings
+let s:prtunmaps = [
+	\ 'PrtBS()',
+	\ 'PrtDelete()',
+	\ 'PrtDeleteWord()',
+	\ 'PrtClear()',
+	\ 'PrtCurStart()',
+	\ 'PrtCurEnd()',
+	\ 'PrtCurLeft()',
+	\ 'PrtCurRight()',
+	\ 'PrtHistory(-1)',
+	\ 'PrtHistory(1)',
+	\ 'PrtInsert("w")',
+	\ 'PrtInsert("s")',
+	\ 'PrtInsert("v")',
+	\ 'PrtInsert("+")',
+	\ ]
+let s:kprange = {
+	\ 'Plus': '+',
+	\ 'Minus': '-',
+	\ 'Divide': '/',
+	\ 'Multiply': '*',
+	\ 'Point': '.',
 	\ }
 
 " Highlight groups
@@ -361,18 +370,17 @@ endf
 fu! s:Render(lines, pat, ipt)
 	let lines = a:lines
 	" Setup the match window
-	let s:height = min([len(lines), s:winh])
+	let [&ma, s:height] = [1, min([len(lines), s:winh])]
 	sil! exe '%d _ | res' s:height
 	" Print the new items
 	if empty(lines)
-		setl nocul
 		let s:matched = []
 		cal setline(1, ' == NO ENTRIES ==')
+		setl noma nocul
 		cal s:unmarksigns()
 		if s:dohighlight() | cal clearmatches() | en
 		retu
 	en
-	setl cul
 	" Sort if not MRU
 	if ( s:itemtype != 2 && !exists('g:ctrlp_nolimit') )
 		\ || !empty(join(s:prompt, ''))
@@ -384,6 +392,7 @@ fu! s:Render(lines, pat, ipt)
 	let s:matched = copy(lines)
 	cal map(lines, 's:formatline(v:val, a:ipt)')
 	cal setline(1, lines)
+	setl noma cul
 	exe 'keepj norm!' ( s:mwreverse ? 'G' : 'gg' ).'1|'
 	cal s:unmarksigns()
 	cal s:remarksigns()
@@ -623,6 +632,13 @@ fu! s:MapKeys(...)
 	for each in range(32, 126)
 		exe printf(cmd, each, pfunc, escape(nr2char(each), '"|\'), dojmp)
 	endfo
+	let kpcmd = substitute(cmd, 'char-%d', 'k%s', '')
+	for each in range(0, 9)
+		exe printf(kpcmd, each, pfunc, each, dojmp)
+	endfo
+	for [ke, va] in items(s:kprange)
+		exe printf(kpcmd, ke, pfunc, va, dojmp)
+	endfo
 	" Special keys
 	if a:0 < 2
 		cal call('s:MapSpecs', a:0 && !a:1 ? [1] : [])
@@ -712,8 +728,8 @@ fu! s:SetWD(...) "{{{1
 	unl! s:foundroot
 endf
 " * AcceptSelection() {{{1
-fu! ctrlp#acceptfile(mode, matchstr, ...)
-	let [md, filpath] = [a:mode, fnamemodify(a:matchstr, ':p')]
+fu! ctrlp#acceptfile(mode, line, ...)
+	let [md, filpath] = [a:mode, fnamemodify(a:line, ':p')]
 	cal s:PrtExit()
 	let [bufnr, tail] = [bufnr('^'.filpath.'$'), s:tail()]
 	let j2l = a:0 ? a:1 : str2nr(matchstr(tail, '^ +\D*\zs\d\+\ze\D*'))
@@ -976,7 +992,7 @@ fu! ctrlp#statusline()
 	let focus   = s:Focus() ? 'prt'  : 'win'
 	let byfname = s:byfname ? 'file' : 'path'
 	let marked  = s:opmul != '0' ?
-		\ exists('s:marked') ? ' <'.s:dismrk().'>' : ' <>' : ''
+		\ exists('s:marked') ? ' <'.s:dismrk().'>' : ' <->' : ''
 	if has_key(s:status, 'main')
 		let args = [focus, byfname, s:regexp, prv, item, nxt, marked]
 		let &l:stl = call(s:status['main'], args)
@@ -1004,8 +1020,8 @@ fu! ctrlp#progress(enum)
 endf
 " Paths {{{2
 fu! s:formatline(str, ipt)
-	retu '> '.( a:ipt && ( s:winw - ( s:dosigns() ? 2 : 0 ) - 2 )
-		\ < s:strwidth(a:str) ? pathshorten(a:str) : a:str )
+	let cond = a:ipt && ( s:winw - 4 ) < s:strwidth(a:str)
+	retu '> '.( cond ? pathshorten(a:str) : a:str )
 endf
 
 fu! s:dircompl(be, sd)
