@@ -49,9 +49,9 @@ fu! s:opts()
 	let s:igntype = empty(s:usrign) ? -1 : type(s:usrign)
 	" Extensions
 	let g:ctrlp_builtins = 2
-	if !empty(s:extensions) | for each in s:extensions
+	for each in s:extensions
 		exe 'ru autoload/ctrlp/'.each.'.vim'
-	endfo | en
+	endfo
 	" Keymaps
 	let [s:lcmap, s:prtmaps] = ['nn <buffer> <silent>', {
 		\ 'PrtBS()':              ['<bs>', '<c-]>'],
@@ -219,7 +219,6 @@ fu! ctrlp#reset()
 	cal s:opts()
 	cal ctrlp#utils#opts()
 	cal ctrlp#mrufiles#opts()
-	unl! s:cline
 endf
 " * Files() {{{1
 fu! s:Files()
@@ -383,7 +382,7 @@ fu! s:Render(lines, pat, ipt)
 	en
 	" Sort if not MRU
 	if ( s:itemtype != 2 && !exists('g:ctrlp_nolimit') )
-		\ || !empty(join(s:prompt, ''))
+		\ || s:prompt != ['', '', '']
 		let s:compat = a:pat
 		cal sort(lines, 's:mixedsort')
 		unl s:compat
@@ -401,7 +400,7 @@ fu! s:Render(lines, pat, ipt)
 	en
 	" Highlighting
 	if s:dohighlight()
-		cal s:highlight(a:pat, s:mathi[1] == '' ? 'Identifier' : s:mathi[1], a:ipt)
+		cal s:highlight(a:pat, s:mathi[1] == '' ? 'CtrlPMatch' : s:mathi[1], a:ipt)
 	en
 endf
 
@@ -411,11 +410,8 @@ fu! s:Update(str)
 	" Get the new string sans tail
 	let str = s:sanstail(a:str)
 	" Stop if the string's unchanged
-	if str == oldstr && !empty(str) && !exists('s:force')
-		retu
-	en
-	let pat = s:SplitPattern(str)
-	let ipt = s:ispathitem()
+	if str == oldstr && !empty(str) && !exists('s:force') | retu | en
+	let [pat, ipt] = [s:SplitPattern(str), s:ispathitem()]
 	let lines = exists('g:ctrlp_nolimit') && empty(str) ? copy(g:ctrlp_lines)
 		\ : s:MatchedItems(g:ctrlp_lines, pat, s:winh, ipt)
 	cal s:Render(lines, pat, ipt)
@@ -627,17 +623,17 @@ endf
 fu! s:MapKeys(...)
 	" Normal keys
 	let pfunc = a:0 && !a:1 ? 'PrtSelectJump' : 'PrtAdd'
-	let dojmp = s:byfname && pfunc == 'PrtSelectJump' ? ', 1' : ''
-	let cmd = "nn \<buffer> \<silent> \<char-%d> :\<c-u>cal \<SID>%s(\"%s\"%s)\<cr>"
+	let dojmp = s:byfname && a:0 && !a:1 ? ', 1' : ''
+	let pcmd = "nn \<buffer> \<silent> \<k%s> :\<c-u>cal \<SID>%s(\"%s\"%s)\<cr>"
+	let cmd = substitute(pcmd, 'k%s', 'char-%d', '')
 	for each in range(32, 126)
 		exe printf(cmd, each, pfunc, escape(nr2char(each), '"|\'), dojmp)
 	endfo
-	let kpcmd = substitute(cmd, 'char-%d', 'k%s', '')
 	for each in range(0, 9)
-		exe printf(kpcmd, each, pfunc, each, dojmp)
+		exe printf(pcmd, each, pfunc, each, dojmp)
 	endfo
 	for [ke, va] in items(s:kprange)
-		exe printf(kpcmd, ke, pfunc, va, dojmp)
+		exe printf(pcmd, ke, pfunc, va, dojmp)
 	endfo
 	" Special keys
 	if a:0 < 2
@@ -791,8 +787,7 @@ fu! s:AcceptSelection(mode)
 	let str = join(s:prompt, '')
 	if a:mode == 'e' | if s:SpecInputs(str) | retu | en | en
 	" Get the selected line
-	let line = exists('s:matched') && !empty(s:matched)
-		\ ? s:matched[line('.') - 1] : ''
+	let line = !empty(s:matched) ? s:matched[line('.') - 1] : ''
 	if a:mode != 'e' && s:itemtype < 3 && line == ''
 		\ && str !~ '\v^(\.\.|/|\\|\?)$'
 		cal s:CreateNewFile(a:mode) | retu
@@ -840,8 +835,7 @@ fu! s:MarkToOpen()
 		\ || ( s:itemtype > g:ctrlp_builtins && s:type() !~ 'rts' )
 		retu
 	en
-	let line = exists('s:matched') && !empty(s:matched)
-		\ ? s:matched[line('.') - 1] : ''
+	let line = !empty(s:matched) ? s:matched[line('.') - 1] : ''
 	if empty(line) | retu | en
 	let filpath = fnamemodify(line, ':p')
 	if exists('s:marked') && s:dictindex(s:marked, filpath) > 0
@@ -938,6 +932,13 @@ fu! s:comparent(s1, s2)
 	retu 0
 endf
 
+fu! s:compfnlen(s1, s2)
+	" By filename length
+	let len1 = strlen(split(a:s1, s:lash)[-1])
+	let len2 = strlen(split(a:s2, s:lash)[-1])
+	retu len1 == len2 ? 0 : len1 > len2 ? 1 : -1
+endf
+
 fu! s:matchlens(str, pat, ...)
 	if empty(a:pat) || index(['^', '$'], a:pat) >= 0 | retu {} | en
 	let st   = a:0 ? a:1 : 0
@@ -959,11 +960,12 @@ endf
 fu! s:mixedsort(s1, s2)
 	let [cml, cln] = [s:compmatlen(a:s1, a:s2), ctrlp#complen(a:s1, a:s2)]
 	if s:itemtype < 3 && s:height < 51
-		let par = s:comparent(a:s1, a:s2)
+		let [par, cfn] = [s:comparent(a:s1, a:s2), s:compfnlen(a:s1, a:s2)]
 		if s:height < 21
-			retu 6 * cml + 3 * par + 2 * s:comptime(a:s1, a:s2) + cln
+			let ctm = s:comptime(a:s1, a:s2)
+			retu 12 * cml + 6 * par + 3 * cfn + 2 * ctm + cln
 		en
-		retu 3 * cml + 2 * par + cln
+		retu 6 * cml + 3 * par + 2 * cfn + cln
 	en
 	retu 2 * cml + cln
 endf
@@ -1344,7 +1346,7 @@ fu! s:argmaps(md, ...)
 endf
 " Misc {{{2
 fu! s:strwidth(str)
-	retu v:version > 702 ? strdisplaywidth(a:str) : strlen(a:str)
+	retu exists('*strdisplaywidth') ? strdisplaywidth(a:str) : strlen(a:str)
 endf
 
 fu! s:getenv()
