@@ -367,9 +367,8 @@ fu! s:SplitPattern(str) "{{{1
 endf
 " * BuildPrompt() {{{1
 fu! s:Render(lines, pat, ipt)
-	let lines = a:lines
+	let [&ma, lines, s:height] = [1, a:lines, min([len(a:lines), s:winh])]
 	" Setup the match window
-	let [&ma, s:height] = [1, min([len(lines), s:winh])]
 	sil! exe '%d _ | res' s:height
 	" Print the new items
 	if empty(lines)
@@ -888,12 +887,21 @@ fu! s:OpenMulti()
 	for va in mkd
 		let bufnr = bufnr('^'.va.'$')
 		let useb = bufnr > 0 && emptytail
-		let snd = md != '' && has_key(cmds, md)
-			\ ? ( useb ? cmds[md][0] : cmds[md][1] ) : ( useb ? 'vert sb' : 'vne' )
-		let fid = useb ? bufnr : va
-		cal s:openfile(ic == 1 && ( ucr == 'r' || repabl ) ? fst : snd, fid, tail)
+		let snd = md != '' && has_key(cmds, md) ?
+			\ ( useb ? cmds[md][0] : cmds[md][1] ) : ( useb ? 'vert sb' : 'vne' )
+		let cmd = ic == 1 && ( ucr == 'r' || repabl ) ? fst : snd
 		if ( nr != '' && nr > 1 && nr < ic ) || ( nr == '' && ic > 1 )
-			sil! hid clo! | el | let ic += 1
+			" If exceeded the max number of windows
+			if bufnr <= 0 | if exists('*fnameescape')
+				" Use :badd if fnameescape exists
+				cal s:openfile('bad', fnamemodify(va, ':.'), '')
+			el
+				" Else use a regular cmd
+				cal s:openfile(cmd, va, tail) | sil! hid clo!
+			en | en
+		el
+			let fid = useb ? bufnr : va
+			cal s:openfile(cmd, fid, tail) | let ic += 1
 		en
 	endfo
 	let &swb = swb
@@ -1018,7 +1026,7 @@ fu! ctrlp#progress(enum)
 	if has('macunix') || has('mac') | sl 1m | en
 	let &l:stl = has_key(s:status, 'prog') ? call(s:status['prog'], [a:enum])
 		\ : '%#CtrlPStats# '.a:enum.' %* %=%<%#CtrlPMode2# '.getcwd().' %*'
-	redr
+	redraws
 endf
 " Paths {{{2
 fu! s:formatline(str, ipt)
@@ -1408,7 +1416,7 @@ fu! s:openfile(cmd, fid, tail, ...)
 	if !empty(a:tail) || j2l
 		sil! norm! zvzz
 	en
-	if exists('*haslocaldir')
+	if exists('*haslocaldir') && cmd != 'bad'
 		cal ctrlp#setdir(getcwd(), haslocaldir() ? 'lc!' : 'cd!')
 	en
 endf
