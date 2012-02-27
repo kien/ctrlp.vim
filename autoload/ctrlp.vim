@@ -869,7 +869,7 @@ fu! s:OpenMulti()
 	cal s:sanstail(join(s:prompt, ''))
 	cal s:PrtExit()
 	" Move the cursor to a reusable window
-	let [tail, fnesc] = [s:tail(), exists('*fnameescape') && v:version > 702]
+	let [tail, fnesc] = [s:tail(), exists('*fnameescape') && v:version > 701]
 	let emptytail = empty(tail)
 	let useb = bufnr('^'.mkd[0].'$') > 0 && emptytail
 	let fst = call('ctrlp#normcmd', useb ? ['b', 'bo vert sb'] : ['e'])
@@ -1369,8 +1369,8 @@ fu! s:getenv()
 	let s:wpmode = exists('b:ctrlp_working_path_mode')
 		\ ? b:ctrlp_working_path_mode : s:pathmode
 	if exists('g:ctrlp_extensions')
-		if index(g:ctrlp_extensions, 'undo') >= 0
-			\ && v:version > 702 && has('patch005') && exists('*undotree')
+		if index(g:ctrlp_extensions, 'undo') >= 0 && exists('*undotree')
+			\ && ( v:version > 703 || ( v:version == 703 && has('patch005') ) )
 			let s:undotree = undotree()
 		en
 		if index(g:ctrlp_extensions, 'tag') >= 0

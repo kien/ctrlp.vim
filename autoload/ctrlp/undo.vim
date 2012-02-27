@@ -13,7 +13,7 @@
 
 " Init {{{1
 if ( exists('g:loaded_ctrlp_undo') && g:loaded_ctrlp_undo )
-	\ || !( v:version > 702 && has('patch005') )
+	\ || !( v:version > 703 || ( v:version == 703 && has('patch005') ) )
 	fini
 en
 let g:loaded_ctrlp_undo = 1
