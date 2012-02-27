@@ -100,7 +100,8 @@ fu! s:opts()
 	" Global options
 	let s:glbs = { 'magic': 1, 'to': 1, 'tm': 0, 'sb': 1, 'hls': 0, 'im': 0,
 		\ 'report': 9999, 'sc': 0, 'ss': 0, 'siso': 0, 'mfd': 200, 'mouse': 'n',
-		\ 'gcr': 'a:blinkon0', 'ic': 1, 'scs': 1, 'lmap': '' }
+		\ 'gcr': 'a:blinkon0', 'ic': 1, 'scs': 1, 'lmap': '', 'mousef': 0,
+		\ 'imd': 1 }
 	if s:lazy
 		cal extend(s:glbs, { 'ut': ( s:lazy > 1 ? s:lazy : 250 ) })
 	en
@@ -158,10 +159,7 @@ let s:hlgrps = {
 	\ }
 " * Open & Close {{{1
 fu! s:Open()
-	if exists('g:ctrlp_log') && g:ctrlp_log
-		let cadir = ctrlp#utils#cachedir()
-		sil! exe 'redi! >' cadir.s:lash(cadir).'ctrlp.log'
-	en
+	cal s:log(1)
 	cal s:getenv()
 	sil! exe 'noa keepa' ( s:mwbottom ? 'bo' : 'to' ) '1new ControlP'
 	let [s:bufnr, s:prompt, s:winw] = [bufnr('%'), ['', '', ''], winwidth(0)]
@@ -170,9 +168,9 @@ fu! s:Open()
 		let hst = filereadable(s:gethistloc()[1]) ? s:gethistdata() : ['']
 		let s:hstry = empty(hst) || !s:maxhst ? [''] : hst
 	en
-	for [ke, va] in items(s:glbs)
+	for [ke, va] in items(s:glbs) | if exists('+'.ke)
 		sil! exe 'let s:glb_'.ke.' = &'.ke.' | let &'.ke.' = '.string(va)
-	endfo
+	en | endfo
 	if s:opmul != '0' && has('signs')
 		sign define ctrlpmark text=+> texthl=Search
 	en
@@ -183,9 +181,9 @@ fu! s:Close()
 	try | noa bun!
 	cat | noa clo! | endt
 	cal s:unmarksigns()
-	for key in keys(s:glbs)
+	for key in keys(s:glbs) | if exists('+'.key)
 		sil! exe 'let &'.key.' = s:glb_'.key
-	endfo
+	en | endfo
 	if exists('s:glb_acd') | let &acd = s:glb_acd | en
 	let [g:ctrlp_lines, g:ctrlp_allfiles] = [[], []]
 	if s:winres[1] >= &lines && s:winres[2] == winnr('$')
@@ -195,9 +193,7 @@ fu! s:Close()
 		\ s:winh g:ctrlp_nolimit
 	cal ctrlp#recordhist()
 	cal s:onexit()
-	if exists('g:ctrlp_log') && g:ctrlp_log
-		sil! redi END
-	en
+	cal s:log(0)
 	ec
 endf
 " * Clear caches {{{1
@@ -900,8 +896,7 @@ fu! s:OpenMulti()
 				cal s:openfile(cmd, va, tail) | sil! hid clo!
 			en | en
 		el
-			let fid = useb ? bufnr : va
-			cal s:openfile(cmd, fid, tail) | let ic += 1
+			cal s:openfile(cmd, useb ? bufnr : va, tail) | let ic += 1
 		en
 	endfo
 	let &swb = swb
@@ -1353,6 +1348,15 @@ fu! s:argmaps(md, ...)
 	retu a:md
 endf
 " Misc {{{2
+fu! s:log(m)
+	if exists('g:ctrlp_log') && g:ctrlp_log | if a:m
+		let cadir = ctrlp#utils#cachedir()
+		sil! exe 'redi! >' cadir.s:lash(cadir).'ctrlp.log'
+	el
+		sil! redi END
+	en | en
+endf
+
 fu! s:strwidth(str)
 	retu exists('*strdisplaywidth') ? strdisplaywidth(a:str) : strlen(a:str)
 endf
