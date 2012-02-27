@@ -869,7 +869,7 @@ fu! s:OpenMulti()
 	cal s:sanstail(join(s:prompt, ''))
 	cal s:PrtExit()
 	" Move the cursor to a reusable window
-	let tail = s:tail()
+	let [tail, fnesc] = [s:tail(), exists('*fnameescape') && v:version > 702]
 	let emptytail = empty(tail)
 	let useb = bufnr('^'.mkd[0].'$') > 0 && emptytail
 	let fst = call('ctrlp#normcmd', useb ? ['b', 'bo vert sb'] : ['e'])
@@ -888,11 +888,9 @@ fu! s:OpenMulti()
 		let cmd = ic == 1 && ( ucr == 'r' || repabl ) ? fst : snd
 		if ( nr != '' && nr > 1 && nr < ic ) || ( nr == '' && ic > 1 )
 			" If exceeded the max number of windows
-			if bufnr <= 0 | if exists('*fnameescape')
-				" Use :badd if fnameescape exists
+			if bufnr <= 0 | if fnesc
 				cal s:openfile('bad', fnamemodify(va, ':.'), '')
 			el
-				" Else use a regular cmd
 				cal s:openfile(cmd, va, tail) | sil! hid clo!
 			en | en
 		el
