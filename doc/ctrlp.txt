@@ -51,14 +51,16 @@ Use this to disable the plugin completely: >
 <
 
                                                         *'g:ctrlp_by_filename'*
-Set this to 1 to set search by filename (not full path) as the default: >
+Set this to 1 to set searching by filename (not full path) as the default: >
   let g:ctrlp_by_filename = 0
 <
+Can be toggled on/off by pressing <c-d> inside the prompt.
 
-                                                      *'g:ctrlp_regexp_search'*
+                                                             *'g:ctrlp_regexp'*
 Set this to 1 to set |regexp| search as the default: >
-  let g:ctrlp_regexp_search = 0
+  let g:ctrlp_regexp = 0
 <
+Can be toggled on/off by pressing <c-r> inside the prompt.
 
                                                 *'g:ctrlp_match_window_bottom'*
 Set this to 0 to show the match window at the top of the screen: >
@@ -66,8 +68,8 @@ Set this to 0 to show the match window at the top of the screen: >
 <
 
                                               *'g:ctrlp_match_window_reversed'*
-Change the listing order of the matched files in the match window. The default
-setting (1) is from bottom to top: >
+Change the listing order of the files in the match window. The default setting
+(1) is from bottom to top: >
   let g:ctrlp_match_window_reversed = 1
 <
 
@@ -76,13 +78,13 @@ Set the maximum height of the match window: >
   let g:ctrlp_max_height = 10
 <
 
-                                                     *'g:ctrlp_jump_to_buffer'*
-When opening a file with <cr> or <c-t>, if the file's already opened somewhere
+                                                      *'g:ctrlp_switch_buffer'*
+When opening a file with <cr> or <c-t>, if the file’s already opened somewhere
 |CtrlP| will try to jump to it instead of opening a new instance: >
-  let g:ctrlp_jump_to_buffer = 2
+  let g:ctrlp_switch_buffer = 2
 <
   1 - only jump to the buffer if it’s opened in the current tab.
-  2 - jump tab as well if the buffer's opened in another tab.
+  2 - jump tab as well if the buffer’s opened in another tab.
   0 - disable this feature.
 
                                                   *'g:ctrlp_working_path_mode'*
@@ -91,13 +93,11 @@ variable: >
   let g:ctrlp_working_path_mode = 2
 <
   1 - the parent directory of the current file.
-  2 - the nearest ancestor that contains one of these directories/files:
-      .git/
-      .hg/
-      .bzr/
-      _darcs/
+  2 - the nearest ancestor that contains one of these directories or files:
+      .git/ .hg/ .bzr/ _darcs/ .svn/
   0 - don’t manage working directory.
-Use b:ctrlp_working_path_mode (a |b:var|) to set this option for each buffer.
+Note: you can use b:ctrlp_working_path_mode (a |b:var|) to set this option on a
+per buffer basis.
 
                                                        *'g:ctrlp_root_markers'*
 Use this to set your own root markers in addition to the default ones. Your
@@ -168,7 +168,7 @@ Note: In some terminals, it’s not possible to remap <c-h> without also changin
 deleting a char for you, add this to your |vimrc| to disable the default <c-h>
 mapping: >
   let g:ctrlp_prompt_mappings = {
-    \ 'PrtCurLeft()': ['<left>', '<c-^>'],
+    \ 'PrtCurLeft()': ['<left>', '<c-^>']
     \ }
 <
 
@@ -240,12 +240,6 @@ Examples: >
     \ 'file': '\.exe$\|\.so$\|\.dll$',
     \ 'link': 'SOME_BAD_SYMBOLIC_LINKS',
     \ }
-<
-
-                                                    *'g:ctrlp_highlight_match'*
-Use this to enable/disable highlighting of the matched patterns and to specify
-the highlight group that’ll be used: >
-  let g:ctrlp_highlight_match = [1, 'Identifier']
 <
 
                                                           *'g:ctrlp_max_files'*
@@ -350,14 +344,15 @@ Pressing <c-o> or <c-y> will then prompt for a keypress. The key can be:
   Any other key - use the behavior specified with |g:ctrlp_open_new_file| and
   |g:ctrlp_open_multi|.
 
-                                                         *'g:ctrlp_dont_split'*
+                                                       *'g:ctrlp_reuse_window'*
 When opening a file with <cr>, |CtrlP| avoids opening it in windows created by
 plugins, help and quickfix. Use this to setup some exceptions: >
-  let g:ctrlp_dont_split = 'netrw'
+  let g:ctrlp_reuse_window = 'netrw'
 <
 Acceptable values are partial names or filetypes of the special buffers. Use
-|regexp| to specify the pattern. Example: >
-  let g:ctrlp_dont_split = 'netrw\|help\|quickfix'
+|regexp| to specify the pattern.
+Example: >
+  let g:ctrlp_reuse_window = 'netrw\|help\|quickfix'
 <
 
                                                     *'g:ctrlp_follow_symlinks'*
@@ -721,7 +716,7 @@ Statuslines:~
   For rebuilding the statuslines, see |g:ctrlp_status_func|.
 
 ===============================================================================
-CUSTOM-CONFIGS                                           *ctrlp-custom-configs*
+MISCELLANEOUS-CONFIGS                             *ctrlp-miscellaneous-configs*
 
 * Use |wildignore| for |g:ctrlp_user_command|:
 >
@@ -745,8 +740,8 @@ CUSTOM-CONFIGS                                           *ctrlp-custom-configs*
 <
 (submitted by Rich Alesi <github.com/ralesi>)
 
-* Set the working directory to the project’s root, or to the parent directory
-  of the current file if a root can’t be found:
+* A standalone function to set the working directory to the project’s root, or
+  to the parent directory of the current file if a root can’t be found:
 >
   function! s:setcwd()
     let cph = expand('%:p:h', 1)

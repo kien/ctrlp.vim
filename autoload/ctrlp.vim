@@ -42,6 +42,14 @@ fu! s:opts()
 	for [ke, va] in items(opts)
 		exe 'let' va[0] '=' string(exists(ke) ? eval(ke) : va[1])
 	endfo
+	let new_opts = {
+		\ 'g:ctrlp_reuse_window': 's:nosplit',
+		\ 'g:ctrlp_regexp': 's:regexp',
+		\ 'g:ctrlp_switch_buffer': 's:jmptobuf',
+		\ }
+	for [key, val] in items(new_opts)
+		exe 'let' val '=' string(eval(exists(key) ? key : val))
+	endfo
 	if !exists('g:ctrlp_newcache') | let g:ctrlp_newcache = 0 | en
 	let s:maxdepth = min([s:maxdepth, 100])
 	let s:mxheight = max([s:mxheight, 1])
@@ -138,6 +146,8 @@ let s:prtunmaps = [
 	\ 'PrtInsert("v")',
 	\ 'PrtInsert("+")',
 	\ ]
+
+" Keypad
 let s:kprange = {
 	\ 'Plus': '+',
 	\ 'Minus': '-',
@@ -395,7 +405,7 @@ fu! s:Render(lines, pat, ipt)
 	en
 	" Highlighting
 	if s:dohighlight()
-		cal s:highlight(a:pat, s:mathi[1] == '' ? 'CtrlPMatch' : s:mathi[1], a:ipt)
+		cal s:highlight(a:pat, s:mathi[1], a:ipt)
 	en
 endf
 
@@ -708,7 +718,7 @@ fu! s:SetWD(...) "{{{1
 		cal ctrlp#setdir(s:crfpath)
 	en
 	if pathmode == 1 | retu | en
-	let markers = ['root.dir','.git/','.hg/','_darcs/','.bzr/']
+	let markers = ['root.dir', '.git/', '.hg/', '.svn/', '_darcs/', '.bzr/']
 	if type(s:rmarkers) == 3 && !empty(s:rmarkers)
 		cal extend(markers, s:rmarkers, 0)
 	en
@@ -1184,7 +1194,7 @@ fu! s:highlight(pat, grp, ipt)
 endf
 
 fu! s:dohighlight()
-	retu len(s:mathi) > 1 && s:mathi[0] && exists('*clearmatches')
+	retu s:mathi[0] && exists('*clearmatches')
 endf
 " Prompt history {{{2
 fu! s:gethistloc()
