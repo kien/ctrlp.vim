@@ -43,8 +43,9 @@ fu! s:opts()
 		exe 'let' va[0] '=' string(exists(ke) ? eval(ke) : va[1])
 	endfo
 	let new_opts = {
-		\ 'g:ctrlp_reuse_window': 's:nosplit',
+		\ 'g:ctrlp_open_multiple_files': 's:opmul',
 		\ 'g:ctrlp_regexp': 's:regexp',
+		\ 'g:ctrlp_reuse_window': 's:nosplit',
 		\ 'g:ctrlp_switch_buffer': 's:jmptobuf',
 		\ }
 	for [key, val] in items(new_opts)
@@ -718,7 +719,7 @@ fu! s:SetWD(...) "{{{1
 		cal ctrlp#setdir(s:crfpath)
 	en
 	if pathmode == 1 | retu | en
-	let markers = ['root.dir', '.git/', '.hg/', '.svn/', '_darcs/', '.bzr/']
+	let markers = ['root.dir', '.git/', '.hg/', '.svn/', '.bzr/', '_darcs/']
 	if type(s:rmarkers) == 3 && !empty(s:rmarkers)
 		cal extend(markers, s:rmarkers, 0)
 	en
@@ -880,7 +881,7 @@ fu! s:OpenMulti()
 	cal s:PrtExit()
 	" Move the cursor to a reusable window
 	let [tail, fnesc] = [s:tail(), exists('*fnameescape') && v:version > 701]
-	let emptytail = empty(tail)
+	let [emptytail, nwpt] = [empty(tail), exists('g:ctrlp_open_multiple_files')]
 	let useb = bufnr('^'.mkd[0].'$') > 0 && emptytail
 	let fst = call('ctrlp#normcmd', useb ? ['b', 'bo vert sb'] : ['e'])
 	" Check if it's a replaceable buffer
@@ -896,8 +897,9 @@ fu! s:OpenMulti()
 		let snd = md != '' && has_key(cmds, md) ?
 			\ ( useb ? cmds[md][0] : cmds[md][1] ) : ( useb ? 'vert sb' : 'vne' )
 		let cmd = ic == 1 && ( ucr == 'r' || repabl ) ? fst : snd
-		if ( nr != '' && nr > 1 && nr < ic ) || ( nr == '' && ic > 1 )
-			" If exceeded the max number of windows
+		let conds = [( nr != '' && nr > 1 && nr < ic ) || ( nr == '' && ic > 1 ),
+			\ nr != '' && nr < ic]
+		if conds[nwpt]
 			if bufnr <= 0 | if fnesc
 				cal s:openfile('bad', fnamemodify(va, ':.'), '')
 			el

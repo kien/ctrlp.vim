@@ -21,7 +21,7 @@ CONTENTS                                                       *ctrlp-contents*
     6. Extensions...................................|ctrlp-extensions|
 
 ===============================================================================
-1. Intro                                                          *ctrlp-intro*
+INTRO                                                             *ctrlp-intro*
 
 Full path fuzzy file, buffer, mru and tag finder with an intuitive interface.
 Written in pure Vimscript for MacVim and Vim version 7.0+. Has full support for
@@ -31,7 +31,7 @@ finder, and more.
 To enable optional extensions (tag, dir, rtscript...), see |ctrlp-extensions|.
 
 ===============================================================================
-2. Options                                                      *ctrlp-options*
+OPTIONS                                                         *ctrlp-options*
 
 Below are the available options and their default values:~
 
@@ -94,7 +94,7 @@ variable: >
 <
   1 - the parent directory of the current file.
   2 - the nearest ancestor that contains one of these directories or files:
-      .git/ .hg/ .bzr/ _darcs/ .svn/
+      .git/ .hg/ .svn/ .bzr/ _darcs/
   0 - don’t manage working directory.
 Note: you can use b:ctrlp_working_path_mode (a |b:var|) to set this option on a
 per buffer basis.
@@ -105,7 +105,7 @@ markers will take precedence: >
   let g:ctrlp_root_markers = ['']
 <
 These markers (builtins and yours) will serve as identifiers for the '/' and
-'\' special inputs (section 5.e).
+'\' special inputs (|ctrlp-input-formats| (e)).
 
                                                         *'g:ctrlp_use_caching'*
 Set this to 0 to disable per-session caching. When disabled, caching will still
@@ -310,20 +310,21 @@ pressing <c-y>:
   let g:ctrlp_open_new_file = 'v'
 <
 
-                                                         *'g:ctrlp_open_multi'*
+                                                *'g:ctrlp_open_multiple_files'*
 If non-zero, this will enable opening multiple files with <c-z> and <c-o>: >
-  let g:ctrlp_open_multi = '1v'
+  let g:ctrlp_open_multiple_files = 'v'
+<
+Example: >
+  let g:ctrlp_open_multiple_files = '2vr'
 <
 For the number:
-  - If bigger than 1, it’ll be used as the maximum number of windows or tabs to
-    create when opening the files (the rest will be hidden buffers).
-  - If is 1, <c-o> will open all files, each in a new window or new tab.
-  - If no number is given, only the first file will be opened in a window,
-    either new window or reused, and the rest will be hidden buffers.
+  - If given, it’ll be used as the maximum number of windows or tabs to create
+    when opening the files (the rest will be opened as hidden buffers).
+  - If not given, <c-o> will open all files, each in a new window or new tab.
 For the letters:
-  t - each in a new tab
-  h - each in a new horizontal split
-  v - each in a new vertical split
+  t - each file in a new tab.
+  h - each file in a new horizontal split.
+  v - each file in a new vertical split.
   Reuse the current window:
   tr,
   hr,
@@ -342,7 +343,7 @@ Pressing <c-o> or <c-y> will then prompt for a keypress. The key can be:
   r - open in current window (for <c-y> only)
   <esc>, <c-c> - cancel and go back to the prompt.
   Any other key - use the behavior specified with |g:ctrlp_open_new_file| and
-  |g:ctrlp_open_multi|.
+  |g:ctrlp_open_multiple_files|.
 
                                                        *'g:ctrlp_reuse_window'*
 When opening a file with <cr>, |CtrlP| avoids opening it in windows created by
@@ -388,7 +389,7 @@ Example: >
 See https://gist.github.com/1610859 for a working example.
 
 ===============================================================================
-3. Commands                                                    *ctrlp-commands*
+COMMANDS                                                       *ctrlp-commands*
 
                                                                        *:CtrlP*
 :CtrlP [starting-directory]
@@ -433,7 +434,7 @@ The following commands ignore the current value of |g:ctrlp_working_path_mode|:
    This acts like |:CtrlP| with |path_mode| = 2
 
 ===============================================================================
-4. Mappings                                                    *ctrlp-mappings*
+MAPPINGS                                                       *ctrlp-mappings*
 
                                                                 *'ctrlp-<c-p>'*
 <c-p>
@@ -442,14 +443,14 @@ The following commands ignore the current value of |g:ctrlp_working_path_mode|:
 Once inside the prompt:~
 
   <c-r>                                                    *'ctrlp-fullregexp'*
-    Toggle between the string mode (section 5.a & b) and full |regexp| mode.
-    (note: in full |regexp| mode, the prompt’s base is 'r>>' instead of '>>>')
+    Toggle between the string mode and full |regexp| mode.
+    Note: in full |regexp| mode, the prompt’s base is 'r>>' instead of '>>>'
 
     See also |input-formats| (guide) and |g:ctrlp_regexp_search| (option).
 
   <c-d>
     Toggle between full-path search and filename only search.
-    (note: in filename mode, the prompt’s base is '>d>' instead of '>>>')
+    Note: in filename mode, the prompt’s base is '>d>' instead of '>>>'
 
   <c-f>, 'forward'
   <c-up>
@@ -547,7 +548,7 @@ Once inside the prompt:~
   <c-c>,
   <c-g>
     Exit |CtrlP|.
-    <c-c> can also be used to stop the scan if it’s taking too long.
+    Note: <c-c> can also be used to stop the scan if it’s taking too long.
 
 Choose your own mappings with |g:ctrlp_prompt_mappings|.
 
@@ -560,7 +561,7 @@ When inside the match window (press <s-tab> to switch):~
     matches that key.
 
 ===============================================================================
-5. Input Formats                                          *ctrlp-input-formats*
+INPUT FORMATS                                             *ctrlp-input-formats*
 
 Formats for inputting in the prompt:~
 
@@ -608,7 +609,7 @@ f)  Type the name of a non-existent file and press <c-y> to create it. Mark a
 g)  Submit ? to open this help file.
 
 ===============================================================================
-6. Extensions                                              *g:ctrlp-extensions*
+EXTENSIONS                                                 *g:ctrlp-extensions*
 
 Extensions are optional. To enable an extension, add its name to the variable
 g:ctrlp_extensions: >
@@ -716,7 +717,7 @@ Statuslines:~
   For rebuilding the statuslines, see |g:ctrlp_status_func|.
 
 ===============================================================================
-MISCELLANEOUS-CONFIGS                             *ctrlp-miscellaneous-configs*
+MISCELLANEOUS CONFIGS                             *ctrlp-miscellaneous-configs*
 
 * Use |wildignore| for |g:ctrlp_user_command|:
 >
@@ -798,10 +799,17 @@ Special thanks:~
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
 
-Before 2012/03/01~
+Before 2012/03/02~
 
-    + New option: |g:ctrlp_mruf_last_entered| change MRU to recently-entered.
+    + Rename:
+        *g:ctrlp_regexp_search* -> |g:ctrlp_regexp|,
+        *g:ctrlp_dont_split* -> |g:ctrlp_reuse_window|,
+        *g:ctrlp_jump_to_buffer* -> |g:ctrlp_switch_buffer|.
+    + Rename and tweak:
+        *g:ctrlp_open_multi* -> |g:ctrlp_open_multiple_files|.
+    + Deprecate *g:ctrlp_highlight_match*
     + Extend |g:ctrlp_user_command| to support multiple commands.
+    + New option: |g:ctrlp_mruf_last_entered| change MRU to Recently-Entered.
 
 Before 2012/01/15~
 
@@ -810,7 +818,7 @@ Before 2012/01/15~
     + New options: |g:ctrlp_arg_map| for <c-y>, <c-o> to accept an argument.
                    |g:ctrlp_status_func| custom statusline.
                    |g:ctrlp_mruf_relative| show only MRU files inside cwd.
-    + Extend |g:ctrlp_open_multi| with new optional values: tr, hr, vr.
+    + Extend g:ctrlp_open_multi with new optional values: tr, hr, vr.
     + Extend |g:ctrlp_custom_ignore| to specifically filter dir, file and link.
 
 Before 2012/01/05~
@@ -830,29 +838,29 @@ Before 2011/11/30~
 
 Before 2011/11/13~
 
-    + New special input: '/' and '\' find root (section 5.e)
+    + New special input: '/' and '\' find root (|ctrlp-input-formats| (e))
     + Remove ctrlp#SetWorkingPath().
-    + Remove |g:ctrlp_mru_files|, make MRU permanent.
-    + Extend |g:ctrlp_open_multi|, add new ways to open files.
-    + New option: |g:ctrlp_dont_split|,
+    + Remove *g:ctrlp_mru_files* and make MRU mode permanent.
+    + Extend g:ctrlp_open_multi, add new ways to open files.
+    + New option: g:ctrlp_dont_split,
                   |g:ctrlp_mruf_case_sensitive|
 
 Before 2011/10/30~
 
     + New feature: Support for custom extensions.
                    <F5> also removes non-existent files from MRU list.
-    + New option: |g:ctrlp_jump_to_buffer|
+    + New option: g:ctrlp_jump_to_buffer
 
 Before 2011/10/12~
 
     + New features: Open multiple files.
                     Pass Vim’s |++opt| and |+cmd| to the opening file
-                    (section 5.c)
+                    (|ctrlp-input-formats| (c))
                     Auto-complete each dir for |:CtrlP| [starting-directory]
     + New mappings: <c-z> mark/unmark a file to be opened with <c-o>.
                     <c-o> open all marked files.
-    + New option: |g:ctrlp_open_multi|
-    + Remove |g:ctrlp_persistent_input|, |g:ctrlp_live_update| and <c-^>.
+    + New option: g:ctrlp_open_multi
+    + Remove *g:ctrlp_persistent_input* *g:ctrlp_live_update* and <c-^>.
 
 Before 2011/09/29~
 
@@ -867,19 +875,19 @@ Before 2011/09/19~
     + New command: |ResetCtrlP|
     + New options: |g:ctrlp_max_files|,
                    |g:ctrlp_max_depth|,
-                   |g:ctrlp_live_update|
+                   g:ctrlp_live_update
     + New mapping: <c-^>
 
 Before 2011/09/12~
 
     + Ability to cycle through matched lines in the match window.
-    + Extend the behavior of |g:ctrlp_persistent_input|
+    + Extend the behavior of g:ctrlp_persistent_input
     + Extend the behavior of |:CtrlP|
     + New options: |g:ctrlp_dotfiles|,
                    |g:ctrlp_clear_cache_on_exit|,
-                   |g:ctrlp_highlight_match|,
+                   g:ctrlp_highlight_match,
                    |g:ctrlp_user_command|
-    + New special input: '..' (section 5.d)
+    + New special input: '..' (|ctrlp-input-formats| (d))
     + New mapping: <F5>.
     + New commands: |:CtrlPCurWD|,
                     |:CtrlPCurFile|,
@@ -888,7 +896,7 @@ Before 2011/09/12~
     + New feature: Search in most recently used (MRU) files
     + New mapping: <c-b>.
     + Extended the behavior of <c-f>.
-    + New options: |g:ctrlp_mru_files|,
+    + New options: g:ctrlp_mru_files,
                    |g:ctrlp_mruf_max|,
                    |g:ctrlp_mruf_exclude|,
                    |g:ctrlp_mruf_include|
