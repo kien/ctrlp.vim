@@ -407,18 +407,18 @@ COMMANDS                                                       *ctrlp-commands*
 :CtrlPMRU
    Open |CtrlP| in find Most-Recently-Used file mode.
 
-                                                             *:ClearCtrlPCache*
-:ClearCtrlPCache
+                                                             *:CtrlPClearCache*
+:CtrlPClearCache
    Flush the cache for the current working directory. The same as pressing <F5>
    inside |CtrlP|.
    You can also enable/disable caching with the option |g:ctrlp_use_caching|.
 
-                                                         *:ClearAllCtrlPCaches*
-:ClearAllCtrlPCaches
+                                                         *:CtrlPClearAllCaches*
+:CtrlPClearAllCaches
    Delete all the cache files saved in |g:ctrlp_cache_dir|.
 
-                                                                  *:ResetCtrlP*
-:ResetCtrlP
+                                                                  *:CtrlPReset*
+:CtrlPReset
    Reset all options and take in new values of the option variables.
 
 -------------------------------------------------------------------------------
