@@ -1164,6 +1164,12 @@ fu! ctrlp#setdir(path, ...)
 	let cmd = a:0 ? a:1 : 'lc!'
 	sil! exe cmd ctrlp#fnesc(a:path)
 endf
+
+fu! ctrlp#setlcdir()
+	if exists('*haslocaldir')
+		cal ctrlp#setdir(getcwd(), haslocaldir() ? 'lc!' : 'cd!')
+	en
+endf
 " Highlighting {{{2
 fu! s:syntax()
 	for [ke, va] in items(s:hlgrps) | if !hlexists('CtrlP'.ke)
@@ -1430,8 +1436,8 @@ fu! s:openfile(cmd, fid, tail, ...)
 	if !empty(a:tail) || j2l
 		sil! norm! zvzz
 	en
-	if exists('*haslocaldir') && cmd != 'bad'
-		cal ctrlp#setdir(getcwd(), haslocaldir() ? 'lc!' : 'cd!')
+	if cmd != 'bad'
+		cal ctrlp#setlcdir()
 	en
 endf
 

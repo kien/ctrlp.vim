@@ -93,6 +93,7 @@ fu! ctrlp#tag#accept(mode, str)
 	el
 		exe cmd tg
 	en
+	cal ctrlp#setlcdir()
 endf
 
 fu! ctrlp#tag#id()

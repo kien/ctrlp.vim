@@ -48,6 +48,7 @@ fu! ctrlp#quickfix#accept(mode, str)
 	exe cmd ctrlp#fnesc(filpath)
 	cal cursor(items[2], items[3])
 	sil! norm! zvzz
+	cal ctrlp#setlcdir()
 endf
 
 fu! ctrlp#quickfix#id()

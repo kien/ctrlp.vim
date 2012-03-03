@@ -47,18 +47,14 @@ according to this variable:
     0 - don’t manage working directory.  
     1 - the parent directory of the current file.  
     2 - the nearest ancestor that contains one of these directories or files:
+    `.git/` `.hg/` `.svn/` `.bzr/` `_darcs/`
 
-        .git/
-        .hg/
-        .bzr/
-        _darcs/
-
-* If you want to exclude directories or files from the search, you can use the
-Vim’s option `wildignore` and/or the option `g:ctrlp_custom_ignore`. Examples:
+* If you want to exclude directories or files from the search, use the Vim’s
+option `wildignore` and/or the option `g:ctrlp_custom_ignore`. Examples:
 
     ```vim
-    set wildignore+=*/.git/*,*/.hg/*,*/.svn/*   " for Linux/MacOSX
-    set wildignore+=.git\*,.hg\*,.svn\*         " for Windows
+    set wildignore+=*/tmp/*,*.so,*.swp,*.zip  " MacOSX/Linux
+    set wildignore+=tmp\*,*.swp,*.zip,*.exe   " Windows
 
     let g:ctrlp_custom_ignore = '\.git$\|\.hg$\|\.svn$'
     let g:ctrlp_custom_ignore = {
@@ -71,8 +67,8 @@ Vim’s option `wildignore` and/or the option `g:ctrlp_custom_ignore`. Examples:
 * Use a custom file listing command with:
 
     ```vim
-    let g:ctrlp_user_command = 'find %s -type f'       " MacOSX/Linux
-    let g:ctrlp_user_command = 'dir %s /-n /b /s /a-d' " Windows
+    let g:ctrlp_user_command = 'find %s -type f'        " MacOSX/Linux
+    let g:ctrlp_user_command = 'dir %s /-n /b /s /a-d'  " Windows
     ```
 
 _Check [the docs][2] for more mappings, commands and options._

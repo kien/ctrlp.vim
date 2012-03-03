@@ -87,6 +87,17 @@ When opening a file with <cr> or <c-t>, if the file’s already opened somewhere
   2 - jump tab as well if the buffer’s opened in another tab.
   0 - disable this feature.
 
+                                                       *'g:ctrlp_reuse_window'*
+When opening a file with <cr>, |CtrlP| avoids opening it in windows created by
+plugins, help and quickfix. Use this to setup some exceptions: >
+  let g:ctrlp_reuse_window = 'netrw'
+<
+Acceptable values are partial names or filetypes of the special buffers. Use
+|regexp| to specify the pattern.
+Example: >
+  let g:ctrlp_reuse_window = 'netrw\|help\|quickfix'
+<
+
                                                   *'g:ctrlp_working_path_mode'*
 When starting up, |CtrlP| sets its local working directory according to this
 variable: >
@@ -224,9 +235,9 @@ Examples: >
 Note #1: the `*/` in front of each directory glob is required.
 
 Note #2: |wildignore| influences the result of |expand()|, |globpath()| and
-|glob()| which many plugins use to find stuff on the system (e.g. fugitive.vim
-looks for .git/, some other plugins look for external .exe tools on Windows).
-So be a little mindful of what you put in your |wildignore|.
+|glob()| which many plugins use to find stuff on the system (e.g. VCS related
+plugins look for .git/, .hg/,... some other plugins look for external *.exe
+tools on Windows). So be a little mindful of what you put in your |wildignore|.
 
                                                       *'g:ctrlp_custom_ignore'*
 In addition to |'wildignore'|, use this for files and directories you want only
@@ -344,17 +355,6 @@ Pressing <c-o> or <c-y> will then prompt for a keypress. The key can be:
   <esc>, <c-c> - cancel and go back to the prompt.
   Any other key - use the behavior specified with |g:ctrlp_open_new_file| and
   |g:ctrlp_open_multiple_files|.
-
-                                                       *'g:ctrlp_reuse_window'*
-When opening a file with <cr>, |CtrlP| avoids opening it in windows created by
-plugins, help and quickfix. Use this to setup some exceptions: >
-  let g:ctrlp_reuse_window = 'netrw'
-<
-Acceptable values are partial names or filetypes of the special buffers. Use
-|regexp| to specify the pattern.
-Example: >
-  let g:ctrlp_reuse_window = 'netrw\|help\|quickfix'
-<
 
                                                     *'g:ctrlp_follow_symlinks'*
 Set this to 1 to follow symbolic links when listing files: >
