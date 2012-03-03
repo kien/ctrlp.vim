@@ -774,37 +774,29 @@ gibhub, bitbucket, and through email.
 Special thanks:~
 
     * Woojong Koh <github.com/wjkoh>
-        Forked and suggested the support for VCS listing commands.
-
-    * Yasuhiro Matsumoto <github.com/mattn>
-        Added option to use Migemo for Japanese filenames.
-
-    * Kyo Nagashima <github.com/hail2u>
-        Made some enhancements to file opening mappings.
-
-    * Piet Delport <github.com/pjdelport>
-        Changed the default cache directory to meet XDG spec.
-
-    * Kent Sibilev <github.com/datanoise>
-        Debugged and made various patches.
-
     * Simon Ruderich
+    * Yasuhiro Matsumoto <github.com/mattn>
     * Ken Earley <github.com/kenearley>
+    * Kyo Nagashima <github.com/hail2u>
     * Zak Johnson <github.com/zakj>
     * Diego Viola <github.com/diegoviola>
+    * Piet Delport <github.com/pjdelport>
     * Thibault Duplessis <github.com/ornicar>
+    * Kent Sibilev <github.com/datanoise>
     * Tacahiroy <github.com/tacahiroy>
-        Bugfixes/Corrections.
+    * Luca Pette <github.com/lucapette>
 
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
-
-Before 2012/03/02~
 
     + Rename:
         *ClearCtrlPCache* -> |CtrlPClearCache|
         *ClearAllCtrlPCaches* -> |CtrlPClearAllCaches|
         *ResetCtrlP* -> |CtrlPReload|
+
+Before 2012/03/02~
+
+    + Rename:
         *g:ctrlp_regexp_search* -> |g:ctrlp_regexp|,
         *g:ctrlp_dont_split* -> |g:ctrlp_reuse_window|,
         *g:ctrlp_jump_to_buffer* -> |g:ctrlp_switch_buffer|.
