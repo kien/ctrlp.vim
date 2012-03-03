@@ -417,9 +417,9 @@ COMMANDS                                                       *ctrlp-commands*
 :CtrlPClearAllCaches
    Delete all the cache files saved in |g:ctrlp_cache_dir|.
 
-                                                                  *:CtrlPReset*
-:CtrlPReset
-   Reset all options and take in new values of the option variables.
+                                                                 *:CtrlPReload*
+:CtrlPReload
+   Load new values for the option variables.
 
 -------------------------------------------------------------------------------
 The following commands ignore the current value of |g:ctrlp_working_path_mode|:
@@ -802,6 +802,9 @@ CHANGELOG                                                     *ctrlp-changelog*
 Before 2012/03/02~
 
     + Rename:
+        *ClearCtrlPCache* -> |CtrlPClearCache|
+        *ClearAllCtrlPCaches* -> |CtrlPClearAllCaches|
+        *ResetCtrlP* -> |CtrlPReload|
         *g:ctrlp_regexp_search* -> |g:ctrlp_regexp|,
         *g:ctrlp_dont_split* -> |g:ctrlp_reuse_window|,
         *g:ctrlp_jump_to_buffer* -> |g:ctrlp_switch_buffer|.
@@ -872,7 +875,7 @@ Before 2011/09/29~
 
 Before 2011/09/19~
 
-    + New command: |ResetCtrlP|
+    + New command: ResetCtrlP
     + New options: |g:ctrlp_max_files|,
                    |g:ctrlp_max_depth|,
                    g:ctrlp_live_update

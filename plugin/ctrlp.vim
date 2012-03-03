@@ -20,7 +20,11 @@ com! CtrlPMRUFiles cal ctrlp#init(2)
 
 com! CtrlPClearCache     cal ctrlp#clr()
 com! CtrlPClearAllCaches cal ctrlp#clra()
-com! CtrlPReset          cal ctrlp#reset()
+com! CtrlPReload         cal ctrlp#reset()
+
+com! ClearCtrlPCache     cal ctrlp#clr()
+com! ClearAllCtrlPCaches cal ctrlp#clra()
+com! ResetCtrlP          cal ctrlp#reset()
 
 com! CtrlPCurWD   cal ctrlp#init(0, 0)
 com! CtrlPCurFile cal ctrlp#init(0, 1)
