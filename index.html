@@ -77,12 +77,12 @@ let g:ctrlp_cmd = 'CtrlP'
 							0 - don’t manage working directory.<br>
 							1 - the parent directory of the current file.<br>
 							2 - the nearest ancestor that contains one of these directories or files:<br>
-							<code>.git/</code> <code>.hg/</code> <code>.bzr/</code> <code>_darcs/</code> <code>root.dir</code>
+							<code>.git/</code> <code>.hg/</code> <code>.svn/</code> <code>.bzr/</code> <code>_darcs/</code> or your own <code>marker_dir/</code> <code>marker_file</code>
 						</li>
 						<li>
 							If you want to exclude directories or files from the search, you can use the Vim’s option <code>wildignore</code>:
-							<pre><code>set wildignore+=*/.git/*,*/.hg/*,*/.svn/*,*.so     " Linux/MacOSX
-set wildignore+=.git\*,.hg\*,.svn\*,*.dll,*.exe    " Windows</code></pre>
+							<pre><code>set wildignore+=*/tmp/*,*.so,*.swp,*.zip   " Linux/MacOSX
+set wildignore+=tmp\*,*.swp,*.zip,*.exe    " Windows</code></pre>
 							And/Or the built-in option <code>g:ctrlp_custom_ignore</code>:
 							<pre><code>let g:ctrlp_custom_ignore = '\.git$\|\.hg$\|\.svn$'
 let g:ctrlp_custom_ignore = {
@@ -94,8 +94,8 @@ let g:ctrlp_custom_ignore = {
 						<li>
 							Specify an external tool to use for listing files instead of using Vim’s globpath().
 							Use <code>%s</code> in place of the target directory:
-							<pre><code>let g:ctrlp_user_command = 'find %s -type f'       " MacOSX/Linux
-let g:ctrlp_user_command = 'dir %s /-n /b /s /a-d' " Windows</code></pre>
+							<pre><code>let g:ctrlp_user_command = 'find %s -type f'        " MacOSX/Linux
+let g:ctrlp_user_command = 'dir %s /-n /b /s /a-d'  " Windows</code></pre>
 							Single VCS listing command:
 							<pre><code>let g:ctrlp_user_command = ['.git/', 'cd %s &amp;&amp; git ls-files']
 let g:ctrlp_user_command = ['.git/', 'cd %s &amp;&amp; git ls-files', 'find %s -type f']

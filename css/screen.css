@@ -230,6 +230,10 @@ a.external:after {
 	padding:0 0 0 1em;
 	list-style:square outside;
 }
+.article ul li small,
+.article ol li small {
+	font-size:.83em;
+}
 .article ul.special {
 	padding:0;
 	list-style:none outside;
@@ -261,7 +265,7 @@ a.external:after {
 	padding:0;
 }
 .article p.note {
-	font-size:13px;
+	font-size:.91em;
 }
 .article img {
 	display:block;
