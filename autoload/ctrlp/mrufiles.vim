@@ -57,9 +57,6 @@ fu! ctrlp#mrufiles#list(bufnr, ...) "{{{1
 	en
 	" Return the list with the active buffer removed
 	if bufnr == -1
-		let crf = fnamemodify(bufname(winbufnr(winnr('#'))), ':p')
-		let crf = exists('+ssl') ? tr(crf, '/', '\') : crf
-		let mrufs = empty(crf) ? mrufs : filter(mrufs, 'v:val !='.s:csen.' crf')
 		if s:re
 			let cwd = exists('+ssl') ? tr(getcwd(), '/', '\') : getcwd()
 			cal filter(mrufs, '!stridx(v:val, cwd)')

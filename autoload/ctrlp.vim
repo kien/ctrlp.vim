@@ -310,9 +310,9 @@ endf
 fu! s:Buffers() "{{{1
 	let allbufs = []
 	for each in range(1, bufnr('$'))
-		if getbufvar(each, '&bl') && each != s:crbufnr
+		if each != s:bufnr && getbufvar(each, '&bl')
 			let bufname = bufname(each)
-			if strlen(bufname) && getbufvar(each, '&ma') && bufname != 'ControlP'
+			if strlen(bufname) && getbufvar(each, '&ma')
 				cal add(allbufs, fnamemodify(bufname, ':.'))
 			en
 		en
@@ -320,10 +320,10 @@ fu! s:Buffers() "{{{1
 	retu allbufs
 endf
 " * MatchedItems() {{{1
-fu! s:MatchIt(items, pat, limit, mfunc)
-	let newitems = []
+fu! s:MatchIt(items, pat, limit, mfunc, ipt)
+	let [newitems, crfile] = [[], exists('s:crfilerel') ? s:crfilerel : '']
 	for item in a:items
-		try | if call(a:mfunc, [item, a:pat]) >= 0
+		try | if !( a:ipt && item == crfile ) && call(a:mfunc, [item, a:pat]) >= 0
 			cal add(newitems, item)
 		en | cat | brea | endt
 		if a:limit > 0 && len(newitems) >= a:limit | brea | en
@@ -332,15 +332,14 @@ fu! s:MatchIt(items, pat, limit, mfunc)
 endf
 
 fu! s:MatchedItems(items, pat, limit, ipt)
-	let [items, pat, limit, ipt] = [a:items, a:pat, a:limit, a:ipt]
 	let [type, mfunc] = [s:type(1), 'match']
-	if s:byfname && ipt
+	if s:byfname && a:ipt
 		let mfunc = 's:matchfname'
 	elsei s:itemtype > 2
 		let types = { 'tabs': 's:matchtabs', 'tabe': 's:matchtabe' }
 		if has_key(types, type) | let mfunc = types[type] | en
 	en
-	let newitems = s:MatchIt(items, pat, limit, mfunc)
+	let newitems = s:MatchIt(a:items, a:pat, a:limit, mfunc, a:ipt)
 	let s:matches = len(newitems)
 	retu newitems
 endf
@@ -707,7 +706,7 @@ fu! s:PrtSwitcher()
 	unl s:force
 endf
 fu! s:SetWD(...) "{{{1
-	let pathmode = s:wpmode
+	let [pathmode, s:crfilerel] = [s:wpmode, fnamemodify(s:crfile, ':.')]
 	if a:0 && strlen(a:1) | if type(a:1)
 		cal ctrlp#setdir(a:1) | retu
 	el
@@ -1163,6 +1162,7 @@ endf
 fu! ctrlp#setdir(path, ...)
 	let cmd = a:0 ? a:1 : 'lc!'
 	sil! exe cmd ctrlp#fnesc(a:path)
+	let s:crfilerel = fnamemodify(s:crfile, ':.')
 endf
 
 fu! ctrlp#setlcdir()
