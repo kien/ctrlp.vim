@@ -65,10 +65,12 @@ fu! ctrlp#tag#init(tagfiles)
 		let alltags = s:filter(ctrlp#utils#readfile(each))
 		cal extend(g:ctrlp_alltags, alltags)
 	endfo
-	if !hlexists('CtrlPTabExtra')
-		hi link CtrlPTabExtra Comment
+	if has('syntax') && exists('g:syntax_on')
+		if !hlexists('CtrlPTabExtra')
+			hi link CtrlPTabExtra Comment
+		en
+		sy match CtrlPTabExtra '\zs\t.*\ze$'
 	en
-	sy match CtrlPTabExtra '\zs\t.*\ze$'
 	retu g:ctrlp_alltags
 endf
 

@@ -201,7 +201,7 @@ fu! s:Close()
 		exe s:winres[0]
 	en
 	unl! s:focus s:hisidx s:hstgot s:marked s:statypes s:cline s:init s:savestr
-		\ s:winh g:ctrlp_nolimit
+		\ g:ctrlp_nolimit
 	cal ctrlp#recordhist()
 	cal s:onexit()
 	cal s:log(0)
@@ -227,8 +227,8 @@ fu! ctrlp#reset()
 	cal ctrlp#utils#opts()
 	cal ctrlp#mrufiles#opts()
 endf
-" * Files() {{{1
-fu! s:Files()
+" * Files {{{1
+fu! ctrlp#files()
 	let [cwd, cafile, g:ctrlp_allfiles] = [getcwd(), ctrlp#utils#cachefile(), []]
 	if g:ctrlp_newcache || !filereadable(cafile) || !s:caching
 		let lscmd = s:lsCmd()
@@ -307,17 +307,11 @@ fu! s:lsCmd()
 		retu cmd['types'][key][1]
 	en
 endf
-fu! s:Buffers() "{{{1
-	let allbufs = []
-	for each in range(1, bufnr('$'))
-		if each != s:bufnr && getbufvar(each, '&bl')
-			let bufname = bufname(each)
-			if strlen(bufname) && getbufvar(each, '&ma')
-				cal add(allbufs, fnamemodify(bufname, ':.'))
-			en
-		en
-	endfo
-	retu allbufs
+" Buffers {{{1
+fu! ctrlp#buffers()
+	retu map(filter(range(1, bufnr('$')), 'empty(getbufvar(v:val, "&bt"))'
+		\ .' && getbufvar(v:val, "&bl") && strlen(bufname(v:val))'),
+		\ 'fnamemodify(bufname(v:val), ":.")')
 endf
 " * MatchedItems() {{{1
 fu! s:MatchIt(items, pat, limit, mfunc, ipt)
@@ -585,7 +579,7 @@ fu! s:PrtClearCache()
 	if s:itemtype == 2
 		let g:ctrlp_lines = ctrlp#mrufiles#list(-1, 1)
 	el
-		cal s:SetLines(s:itemtype)
+		cal ctrlp#setlines(s:itemtype)
 	en
 	let s:force = 1
 	cal s:BuildPrompt(1)
@@ -694,9 +688,9 @@ fu! s:ToggleType(dir)
 	if s:byfname && !s:ispathitem() | let s:byfname = 0 | en
 	unl! g:ctrlp_nolimit
 	if has('syntax') && exists('g:syntax_on')
-		cal s:syntax()
+		cal ctrlp#syntax()
 	en
-	cal s:SetLines(s:itemtype)
+	cal ctrlp#setlines(s:itemtype)
 	cal s:PrtSwitcher()
 endf
 
@@ -771,12 +765,12 @@ fu! s:SpecInputs(str)
 	let [str, type] = [a:str, s:type()]
 	if str == '..' && type =~ '\v^(0|dir)$'
 		cal s:parentdir(getcwd())
-		cal s:SetLines(s:itemtype)
+		cal ctrlp#setlines(s:itemtype)
 		cal s:PrtClear()
 		retu 1
 	elsei str =~ '^[\/]$' && type =~ '\v^(0|dir)$'
 		cal s:SetWD(2, 0)
-		cal s:SetLines(s:itemtype)
+		cal ctrlp#setlines(s:itemtype)
 		cal s:PrtClear()
 		retu 1
 	elsei str == '?'
@@ -1171,7 +1165,7 @@ fu! ctrlp#setlcdir()
 	en
 endf
 " Highlighting {{{2
-fu! s:syntax()
+fu! ctrlp#syntax()
 	for [ke, va] in items(s:hlgrps) | if !hlexists('CtrlP'.ke)
 		exe 'hi link CtrlP'.ke va
 	en | endfo
@@ -1263,37 +1257,21 @@ fu! s:buftab(bufnr, md)
 		let buflist = tabpagebuflist(tabnr)
 		if index(buflist, a:bufnr) >= 0
 			for winnr in range(1, tabpagewinnr(tabnr, '$'))
-				if buflist[winnr - 1] == a:bufnr
-					retu [tabnr, winnr]
-				en
+				if buflist[winnr - 1] == a:bufnr | retu [tabnr, winnr] | en
 			endfo
 		en
 	endfo
 	retu [0, 0]
 endf
 
-fu! s:normbuf()
-	let winnrs = []
-	for each in range(1, winnr('$'))
-		let bufnr = winbufnr(each)
-		if getbufvar(bufnr, '&bl') && empty(getbufvar(bufnr, '&bt'))
-			\ && getbufvar(bufnr, '&ma')
-			cal add(winnrs, each)
-		en
-	endfo
-	retu winnrs
-endf
-
 fu! ctrlp#normcmd(cmd, ...)
-	if s:nosplit()
-		retu a:cmd
-	en
-	let norwins = s:normbuf()
+	if s:nosplit() | retu a:cmd | en
+	let norwins = filter(range(1, winnr('$')),
+		\ 'empty(getbufvar(winbufnr(v:val), "&bt"))')
 	for each in norwins
 		let bufnr = winbufnr(each)
 		if empty(bufname(bufnr)) && empty(getbufvar(bufnr, '&ft'))
-			let fstemp = each
-			brea
+			let fstemp = each | brea
 		en
 	endfo
 	let norwin = empty(norwins) ? 0 : norwins[0]
@@ -1307,7 +1285,7 @@ fu! ctrlp#normcmd(cmd, ...)
 endf
 
 fu! s:nosplit()
-	retu !empty(s:nosplit) && match([bufname('%'), &l:ft], s:nosplit) >= 0
+	retu !empty(s:nosplit) && match([bufname('%'), &l:ft, &l:bt], s:nosplit) >= 0
 endf
 
 fu! s:setupblank()
@@ -1515,20 +1493,6 @@ fu! s:onexit()
 	en
 endf
 
-fu! ctrlp#allbufs()
-	let bufs = []
-	for each in range(1, bufnr('$'))
-		if getbufvar(each, '&bl')
-			let bufname = bufname(each)
-			if strlen(bufname) && bufname != 'ControlP'
-				cal add(bufs, fnamemodify(bufname, ':p'))
-			en
-		en
-	endfo
-	cal filter(bufs, 'filereadable(v:val)')
-	retu bufs
-endf
-
 fu! ctrlp#exit()
 	cal s:PrtExit()
 endf
@@ -1536,17 +1500,13 @@ endf
 fu! ctrlp#prtclear()
 	cal s:PrtClear()
 endf
-
-fu! ctrlp#setlines(type)
-	cal s:SetLines(a:type)
-endf
 "}}}1
 " * Initialization {{{1
-fu! s:SetLines(type)
+fu! ctrlp#setlines(type)
 	let s:itemtype = a:type
 	let types = [
-		\ 's:Files()',
-		\ 's:Buffers()',
+		\ 'ctrlp#files()',
+		\ 'ctrlp#buffers()',
 		\ 'ctrlp#mrufiles#list(-1)',
 		\ ]
 	if exists('g:ctrlp_ext_vars')
@@ -1562,9 +1522,9 @@ fu! ctrlp#init(type, ...)
 	cal s:SetWD(a:0 ? a:1 : '')
 	cal s:MapKeys()
 	if has('syntax') && exists('g:syntax_on')
-		cal s:syntax()
+		cal ctrlp#syntax()
 	en
-	cal s:SetLines(a:type)
+	cal ctrlp#setlines(a:type)
 	cal s:BuildPrompt(1)
 endf
 if has('autocmd') "{{{1

@@ -198,17 +198,20 @@ fu! s:parseline(line)
 endf
 " Public {{{1
 fu! ctrlp#buffertag#init(fname)
-	let fname = exists('s:bufname') ? s:bufname : a:fname
-	let bufs = exists('s:btmode') && s:btmode ? ctrlp#allbufs() : [fname]
+	let bufs = exists('s:btmode') && s:btmode
+		\ ? filter(ctrlp#buffers(), 'filereadable(v:val)')
+		\ : [exists('s:bufname') ? s:bufname : a:fname]
 	let lines = []
 	for each in bufs
 		let tftype = get(split(getbufvar(each, '&ft'), '\.'), 0, '')
 		cal extend(lines, s:process(each, tftype))
 	endfo
-	if !hlexists('CtrlPTabExtra')
-		hi link CtrlPTabExtra Comment
+	if has('syntax') && exists('g:syntax_on')
+		if !hlexists('CtrlPTabExtra')
+			hi link CtrlPTabExtra Comment
+		en
+		sy match CtrlPTabExtra '\zs\t.*\ze$'
 	en
-	sy match CtrlPTabExtra '\zs\t.*\ze$'
 	retu lines
 endf
 

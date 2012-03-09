@@ -92,8 +92,8 @@ When opening a file with <cr>, |CtrlP| avoids opening it in windows created by
 plugins, help and quickfix. Use this to setup some exceptions: >
   let g:ctrlp_reuse_window = 'netrw'
 <
-Acceptable values are partial names or filetypes of the special buffers. Use
-|regexp| to specify the pattern.
+Acceptable values are partial name, filetype or buftype of the special buffers.
+Use |regexp| to specify the pattern.
 Example: >
   let g:ctrlp_reuse_window = 'netrw\|help\|quickfix'
 <

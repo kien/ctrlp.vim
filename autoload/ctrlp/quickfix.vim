@@ -30,10 +30,12 @@ endf
 " Public {{{1
 fu! ctrlp#quickfix#init()
 	let g:ctrlp_nolimit = 1
-	if !hlexists('CtrlPqfLineCol')
-		hi link CtrlPqfLineCol Search
+	if has('syntax') && exists('g:syntax_on')
+		if !hlexists('CtrlPqfLineCol')
+			hi link CtrlPqfLineCol Search
+		en
+		sy match CtrlPqfLineCol '|\zs\d\+:\d\+\ze|'
 	en
-	sy match CtrlPqfLineCol '|\zs\d\+:\d\+\ze|'
 	retu map(getqflist(), 's:lineout(v:val)')
 endf
 
