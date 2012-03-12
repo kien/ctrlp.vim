@@ -21,6 +21,7 @@ fu! s:opts()
 		\ 'g:ctrlp_highlight_match':       ['s:mathi', [1, 'CtrlPMatch']],
 		\ 'g:ctrlp_jump_to_buffer':        ['s:jmptobuf', 2],
 		\ 'g:ctrlp_lazy_update':           ['s:lazy', 0],
+		\ 'g:ctrlp_match_func':            ['s:matcher', {}],
 		\ 'g:ctrlp_match_window_bottom':   ['s:mwbottom', 1],
 		\ 'g:ctrlp_match_window_reversed': ['s:mwreverse', 1],
 		\ 'g:ctrlp_max_depth':             ['s:maxdepth', 40],
@@ -314,10 +315,10 @@ fu! ctrlp#buffers()
 		\ 'fnamemodify(bufname(v:val), ":.")')
 endf
 " * MatchedItems() {{{1
-fu! s:MatchIt(items, pat, limit, mfunc, ipt)
-	let [newitems, crfile] = [[], exists('s:crfilerel') ? s:crfilerel : '']
+fu! s:MatchIt(items, pat, limit, mfunc, ipt, exc)
+	let newitems = []
 	for item in a:items
-		try | if !( a:ipt && item == crfile ) && call(a:mfunc, [item, a:pat]) >= 0
+		try | if !( a:ipt && item == a:exc ) && call(a:mfunc, [item, a:pat]) >= 0
 			cal add(newitems, item)
 		en | cat | brea | endt
 		if a:limit > 0 && len(newitems) >= a:limit | brea | en
@@ -325,7 +326,7 @@ fu! s:MatchIt(items, pat, limit, mfunc, ipt)
 	retu newitems
 endf
 
-fu! s:MatchedItems(items, pat, limit, ipt)
+fu! s:MatchedItems(items, str, pat, limit, ipt)
 	let [type, mfunc] = [s:type(1), 'match']
 	if s:byfname && a:ipt
 		let mfunc = 's:matchfname'
@@ -333,7 +334,14 @@ fu! s:MatchedItems(items, pat, limit, ipt)
 		let types = { 'tabs': 's:matchtabs', 'tabe': 's:matchtabe' }
 		if has_key(types, type) | let mfunc = types[type] | en
 	en
-	let newitems = s:MatchIt(a:items, a:pat, a:limit, mfunc, a:ipt)
+	let exc = exists('s:crfilerel') ? s:crfilerel : ''
+	let matfunc = 's:MatchIt'
+	let argms = [a:items, a:pat, a:limit, mfunc, a:ipt, exc]
+	if s:matcher != {} && has_key(s:matcher, 'match')
+		let [matfunc, argms[1], argms[3]] = s:matargs(mfunc, a:str)
+		let argms += [s:regexp]
+	en
+	let newitems = call(matfunc, argms)
 	let s:matches = len(newitems)
 	retu newitems
 endf
@@ -412,7 +420,7 @@ fu! s:Update(str)
 	if str == oldstr && !empty(str) && !exists('s:force') | retu | en
 	let [pat, ipt] = [s:SplitPattern(str), s:ispathitem()]
 	let lines = exists('g:ctrlp_nolimit') && empty(str) ? copy(g:ctrlp_lines)
-		\ : s:MatchedItems(g:ctrlp_lines, pat, s:winh, ipt)
+		\ : s:MatchedItems(g:ctrlp_lines, str, pat, s:winh, ipt)
 	cal s:Render(lines, pat, ipt)
 endf
 
@@ -1001,7 +1009,7 @@ fu! ctrlp#statusline()
 	let byfname = s:byfname ? 'file' : 'path'
 	let marked  = s:opmul != '0' ?
 		\ exists('s:marked') ? ' <'.s:dismrk().'>' : ' <->' : ''
-	if has_key(s:status, 'main')
+	if s:status != {} && has_key(s:status, 'main')
 		let args = [focus, byfname, s:regexp, prv, item, nxt, marked]
 		let &l:stl = call(s:status['main'], args)
 	el
@@ -1022,7 +1030,8 @@ endf
 
 fu! ctrlp#progress(enum)
 	if has('macunix') || has('mac') | sl 1m | en
-	let &l:stl = has_key(s:status, 'prog') ? call(s:status['prog'], [a:enum])
+	let &l:stl = s:status != {} && has_key(s:status, 'prog')
+		\ ? call(s:status['prog'], [a:enum])
 		\ : '%#CtrlPStats# '.a:enum.' %* %=%<%#CtrlPMode2# '.getcwd().' %*'
 	redraws
 endf
@@ -1180,6 +1189,7 @@ fu! ctrlp#syntax()
 endf
 
 fu! s:highlight(pat, grp, ipt)
+	if s:matcher != {} | retu | en
 	cal clearmatches()
 	if !empty(a:pat) && a:ipt
 		let pat = s:regexp ? substitute(a:pat, '\\\@<!\^', '^> \\zs', 'g') : a:pat
@@ -1342,6 +1352,16 @@ fu! s:argmaps(md, ...)
 	retu a:md
 endf
 " Misc {{{2
+fu! s:matargs(mfunc, str)
+	let match_type = {
+		\ 'match': 'full-line',
+		\ 's:matchfname': 'filename-only',
+		\ 's:matchtabs': 'first-non-tab',
+		\ 's:matchtabe': 'until-last-tab',
+		\ }
+	retu [s:matcher['match'], a:str, match_type[a:mfunc]]
+endf
+
 fu! s:log(m)
 	if exists('g:ctrlp_log') && g:ctrlp_log | if a:m
 		let cadir = ctrlp#utils#cachedir()

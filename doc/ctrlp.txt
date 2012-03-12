@@ -178,9 +178,7 @@ Note: In some terminals, it’s not possible to remap <c-h> without also changin
 <bs> (|key-codes|). So if pressing <bs> moves the cursor to the left instead of
 deleting a char for you, add this to your |vimrc| to disable the default <c-h>
 mapping: >
-  let g:ctrlp_prompt_mappings = {
-    \ 'PrtCurLeft()': ['<left>', '<c-^>']
-    \ }
+  let g:ctrlp_prompt_mappings = { 'PrtCurLeft()': ['<left>', '<c-^>'] }
 <
 
                                                            *'g:ctrlp_mruf_max'*
@@ -386,7 +384,74 @@ Example: >
     \ 'prog': 'Function_Name_2',
     \ }
 <
+Structure of the functions: >
+  function! Function_Name_1(focus, byfname, regex, prev, item, next, marked)
+    " a:focus a:byfname a:regex a:prev a:item a:next a:marked
+    " |       |         |       |      |      |      |
+    " |       |         |       |      |      |      +- Number of marked files.
+    " |       |         |       |      |      |
+    " |       |         |       |      |      +- The next search mode.
+    " |       |         |       |      |
+    " |       |         |       |      +- The current search mode.
+    " |       |         |       |
+    " |       |         |       +- The previous search mode.
+    " |       |         |
+    " |       |         +- In regex mode: 1 or 0.
+    " |       |
+    " |       +- In filename mode or in full path mode: "file" or "path".
+    " |
+    " +- The focus of the prompt: "prt" or "win".
+
+    return full_statusline
+  endfunction
+
+  function! Function_Name_2(str)
+    " a:str
+    " |
+    " + Either a number of files scanned so far, or a string indicating the
+    "   directory is being scanned with a user_command.
+
+    return full_statusline
+  endfunction
+<
 See https://gist.github.com/1610859 for a working example.
+
+                                                         *'g:ctrlp_match_func'*
+Set an external fuzzy matching function for |CtrlP| to use: >
+  let g:ctrlp_match_func = {}
+<
+Example: >
+  let g:ctrlp_match_func = { 'match': 'Function_Name' }
+<
+Structure of the function: >
+  function! Function_Name(items, str, limit, mmode, ispath, crfile, regex)
+    " a:items a:str a:limit a:mmode a:ispath a:crfile a:regex
+    " |       |     |       |       |        |        |
+    " |       |     |       |       |        |        +- In regex mode: 1 or 0.
+    " |       |     |       |       |        |
+    " |       |     |       |       |        +- The file in the current window
+    " |       |     |       |       |           Should be excluded from the
+    " |       |     |       |       |           results when a:ispath == 1.
+    " |       |     |       |       |
+    " |       |     |       |       +- Is 1 when searching in file, buffer, mru
+    " |       |     |       |          dir, rtscript... modes. Is 0 otherwise.
+    " |       |     |       |
+    " |       |     |       +- The match mode. Can be one of these strings:
+    " |       |     |        + "full-line": match the entire line.
+    " |       |     |        + "filename-only": match only the filename.
+    " |       |     |        + "first-non-tab": match until the first tab char.
+    " |       |     |        + "until-last-tab": match until the last tab char.
+    " |       |     |
+    " |       |     +- The max height of the match window. Can be used to limit
+    " |       |        the number of items to return.
+    " |       |
+    " |       +- The string entered by the user.
+    " |
+    " +- The full list of items to search in (e.g. all files in a dir tree).
+
+    return list_of_matched_items
+  endfunction
+<
 
 ===============================================================================
 COMMANDS                                                       *ctrlp-commands*
@@ -789,6 +854,7 @@ Special thanks:~
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
 
+    + New option: |g:ctrlp_match_func|, allow using a custom fuzzy matcher.
     + Rename:
         *ClearCtrlPCache* -> |CtrlPClearCache|
         *ClearAllCtrlPCaches* -> |CtrlPClearAllCaches|
