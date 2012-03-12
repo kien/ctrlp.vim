@@ -1,19 +1,8 @@
 " =============================================================================
 " File:          autoload/ctrlp/changes.vim
-" Description:   Change list extension - Jump to a recent change in any buffer
+" Description:   Change list extension
 " Author:        Kien Nguyen <github.com/kien>
 " =============================================================================
-
-" User Configuration {{{1
-" Enable:
-"        let g:ctrlp_extensions += ['changes']
-" Create Some Commands:
-"        " Single buffer
-"        com! -n=? -com=buffer CtrlPChange
-"          \ cal ctrlp#init(ctrlp#changes#cmd(0, <q-args>))
-"        " All listed buffers
-"        com! CtrlPChangeAll cal ctrlp#init(ctrlp#changes#cmd(1))
-"}}}
 
 " Init {{{1
 if exists('g:loaded_ctrlp_changes') && g:loaded_ctrlp_changes
@@ -54,6 +43,17 @@ fu! s:process(clines, ...)
 	endfo
 	retu reverse(filter(clines, 'count(clines, v:val) == 1'))
 endf
+
+fu! s:syntax()
+	if !hlexists('CtrlPBufName')
+		hi link CtrlPBufName Directory
+	en
+	if !hlexists('CtrlPTabExtra')
+		hi link CtrlPTabExtra Comment
+	en
+	sy match CtrlPBufName '\t|\d\+:\zs[^|]\+\ze|\d\+:\d\+|$'
+	sy match CtrlPTabExtra '\zs\t.*\ze$' contains=CtrlPBufName
+endf
 " Public {{{1
 fu! ctrlp#changes#init(original_bufnr, fname)
 	let fname = exists('s:bufname') ? s:bufname : a:fname
@@ -72,10 +72,7 @@ fu! ctrlp#changes#init(original_bufnr, fname)
 	let g:ctrlp_nolimit = 1
 	if has('syntax') && exists('g:syntax_on')
 		cal ctrlp#syntax()
-		if !hlexists('CtrlPTabExtra')
-			hi link CtrlPTabExtra Comment
-		en
-		sy match CtrlPTabExtra '\zs\t.*\ze$'
+		cal s:syntax()
 	en
 	retu lines
 endf

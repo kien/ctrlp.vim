@@ -1,15 +1,8 @@
 " =============================================================================
 " File:          autoload/ctrlp/undo.vim
-" Description:   Undo extension - Browse undo history (requires Vim 7.3.005+)
+" Description:   Undo extension
 " Author:        Kien Nguyen <github.com/kien>
 " =============================================================================
-
-" User Configuration {{{1
-" Enable:
-"        let g:ctrlp_extensions += ['undo']
-" Create A Command:
-"        com! CtrlPUndo cal ctrlp#init(ctrlp#undo#id())
-"}}}
 
 " Init {{{1
 if ( exists('g:loaded_ctrlp_undo') && g:loaded_ctrlp_undo )
@@ -31,12 +24,14 @@ let g:ctrlp_ext_vars = exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)
 
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 " Utilities {{{1
-fu! s:flatten(tree)
+fu! s:flatten(tree, cur)
 	let flatdict = {}
 	for each in a:tree
-		cal extend(flatdict, { each['seq'] : each['time'] })
+		let saved = has_key(each, 'save') ? 'saved' : ''
+		let current = each['seq'] == a:cur ? 'current' : ''
+		cal extend(flatdict, { each['seq'] : [each['time'], saved, current] })
 		if has_key(each, 'alt')
-			cal extend(flatdict, s:flatten(each['alt']))
+			cal extend(flatdict, s:flatten(each['alt'], a:cur))
 		en
 	endfo
 	retu flatdict
@@ -80,23 +75,34 @@ fu! s:humantime(nr)
 endf
 
 fu! s:syntax()
-	for [ke, va] in items({'T': 'Directory', 'Br': 'Comment', 'Nr': 'String'})
+	for [ke, va] in items({'T': 'Directory', 'Br': 'Comment', 'Nr': 'String',
+		\ 'Sv': 'Comment', 'Po': 'Title'})
 		if !hlexists('CtrlPUndo'.ke)
 			exe 'hi link CtrlPUndo'.ke va
 		en
 	endfo
 	sy match CtrlPUndoT '\d\+ \zs[^ ]\+\ze'
 	sy match CtrlPUndoBr '\[\|\]'
-	sy match CtrlPUndoNr '\[\d\+\]$' contains=CtrlPUndoBr
+	sy match CtrlPUndoNr '\[\d\+\]' contains=CtrlPUndoBr
+	sy match CtrlPUndoSv 'saved'
+	sy match CtrlPUndoPo 'current'
 endf
 
 fu! s:dict2list(dict)
-	let dict = map(a:dict, 's:humantime(v:val)')
-	retu map(keys(dict), 'eval(''[v:val, dict[v:val]]'')')
+	for ke in keys(a:dict)
+		let a:dict[ke][0] = s:humantime(a:dict[ke][0])
+	endfo
+	retu map(keys(a:dict), 'eval(''[v:val, a:dict[v:val]]'')')
 endf
 
 fu! s:compval(...)
 	retu a:2[0] - a:1[0]
+endf
+
+fu! s:format(...)
+	let saved = !empty(a:1[1][1]) ? ' '.a:1[1][1] : ''
+	let current = !empty(a:1[1][2]) ? ' '.a:1[1][2] : ''
+	retu a:1[1][0].' ['.a:1[0].']'.saved.current
 endf
 " Public {{{1
 fu! ctrlp#undo#init(undo)
@@ -106,8 +112,8 @@ fu! ctrlp#undo#init(undo)
 		cal s:syntax()
 	en
 	let g:ctrlp_nolimit = 1
-	let entries = sort(s:dict2list(s:flatten(entries)), 's:compval')
-	retu map(entries, 'v:val[1]." [".v:val[0]."]"')
+	let entries = s:dict2list(s:flatten(entries, a:undo['seq_cur']))
+	retu map(sort(entries, 's:compval'), 's:format(v:val)')
 endf
 
 fu! ctrlp#undo#accept(mode, str)

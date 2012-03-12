@@ -1,15 +1,8 @@
 " =============================================================================
 " File:          autoload/ctrlp/line.vim
-" Description:   Line extension - Find a line in any buffer
+" Description:   Line extension
 " Author:        Kien Nguyen <github.com/kien>
 " =============================================================================
-
-" User Configuration {{{1
-" Enable:
-"        let g:ctrlp_extensions += ['line']
-" Create A Command:
-"        com! CtrlPLine cal ctrlp#init(ctrlp#line#id())
-"}}}
 
 " Init {{{1
 if exists('g:loaded_ctrlp_line') && g:loaded_ctrlp_line
@@ -29,6 +22,17 @@ let g:ctrlp_ext_vars = exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)
 	\ ? add(g:ctrlp_ext_vars, s:line_var) : [s:line_var]
 
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
+" Utilities {{{1
+fu! s:syntax()
+	if !hlexists('CtrlPBufName')
+		hi link CtrlPBufName Directory
+	en
+	if !hlexists('CtrlPTabExtra')
+		hi link CtrlPTabExtra Comment
+	en
+	sy match CtrlPBufName '\t|\zs[^|]\+\ze|\d\+:\d\+|$'
+	sy match CtrlPTabExtra '\zs\t.*\ze$' contains=CtrlPBufName
+endf
 " Public {{{1
 fu! ctrlp#line#init()
 	let [bufs, lines] = [filter(ctrlp#buffers(), 'filereadable(v:val)'), []]
@@ -44,10 +48,7 @@ fu! ctrlp#line#init()
 		cal extend(lines, from_file)
 	endfo
 	if has('syntax') && exists('g:syntax_on')
-		if !hlexists('CtrlPTabExtra')
-			hi link CtrlPTabExtra Comment
-		en
-		sy match CtrlPTabExtra '\zs\t.*\ze$'
+		cal s:syntax()
 	en
 	retu lines
 endf

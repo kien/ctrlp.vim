@@ -65,4 +65,18 @@ if index(s:ext, 'rtscript') >= 0
 	com! CtrlPRTS cal ctrlp#init(ctrlp#rtscript#id())
 en
 
+if index(s:ext, 'undo') >= 0
+	com! CtrlPUndo cal ctrlp#init(ctrlp#undo#id())
+en
+
+if index(s:ext, 'line') >= 0
+	com! CtrlPLine cal ctrlp#init(ctrlp#line#id())
+en
+
+if index(s:ext, 'changes') >= 0
+	com! -n=? -com=buffer CtrlPChange
+		\ cal ctrlp#init(ctrlp#changes#cmd(0, <q-args>))
+	com! CtrlPChangeAll cal ctrlp#init(ctrlp#changes#cmd(1))
+en
+
 unl s:ext

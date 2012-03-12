@@ -699,8 +699,8 @@ Available extensions:~
     - Name: 'buffertag'
     - Commands: ':CtrlPBufTag [buffer-name]',
                 ':CtrlPBufTagAll'.
-    - Search for a tag within the current buffer or all buffers and jump to the
-      definition. Requires |exuberant_ctags| or compatible programs.
+    - Search for a tag within the current buffer or all listed buffers and jump
+      to the definition. Requires |exuberant_ctags| or compatible programs.
 
                                                                *:CtrlPQuickfix*
   * Quickfix mode:~
@@ -725,6 +725,27 @@ Available extensions:~
     - Name: 'rtscript'
     - Command: ':CtrlPRTS'
     - Search for files (vimscripts, docs, snippets...) in runtimepath.
+
+                                                                   *:CtrlPUndo*
+  * Undo mode:~
+    - Name: 'undo'
+    - Command: ':CtrlPUndo'
+    - Browse undo history (requires Vim 7.3.005+).
+
+                                                                   *:CtrlPLine*
+  * Line mode:~
+    - Name: 'line'
+    - Command: ':CtrlPLine'
+    - Search for a line in all listed buffer.
+
+                                                                 *:CtrlPChange*
+                                                              *:CtrlPChangeAll*
+  * Change list mode:~
+    - Name: 'changes'
+    - Commands: ':CtrlPChange [buffer-name]',
+                ':CtrlPChangeAll'.
+    - Search for and jump to a recent change in the current buffer or in all
+      listed buffers.
 
 -------------------------------------------------------------------------------
 Buffer Tag mode options:~
