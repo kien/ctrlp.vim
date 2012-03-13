@@ -1,4 +1,4 @@
-*ctrlp.txt*       Fuzzy file, buffer, mru and tag finder. v1.7.2
+*ctrlp.txt*       Fuzzy file, buffer, mru and tag finder. v1.7.3
 *CtrlP* *ControlP* *'ctrlp'* *'ctrl-p'*
 ===============================================================================
 #                                                                             #
@@ -408,7 +408,7 @@ Structure of the functions: >
   function! Function_Name_2(str)
     " a:str
     " |
-    " + Either a number of files scanned so far, or a string indicating the
+    " + Either the number of files scanned so far, or a string indicating the
     "   directory is being scanned with a user_command.
 
     return full_statusline
@@ -736,7 +736,7 @@ Available extensions:~
   * Line mode:~
     - Name: 'line'
     - Command: ':CtrlPLine'
-    - Search for a line in all listed buffer.
+    - Search for a line in all listed buffers.
 
                                                                  *:CtrlPChange*
                                                               *:CtrlPChangeAll*
@@ -789,10 +789,14 @@ Highlighting:~
 
   * In extensions:
     CtrlPTabExtra  : the part of each line that’s not matched against (Comment)
-    CtrlPqfLineCol : the line and column numbers in quickfix mode (|hl-Search|)
-    CtrlPUndoT     : the elapsed time in undo mode (|hl-Directory|)
-    CtrlPUndoBr    : the square brackets [] in undo mode (Comment)
-    CtrlPUndoNr    : the undo number inside [] in undo mode (String)
+    CtrlPBufName   : the buffer name an entry belongs to (|hl-Directory|)
+    CtrlPTagKind   : the kind of the tag in buffer-tag mode (|hl-Title|)
+    CtrlPqfLineCol : the line and column numbers in quickfix mode (Comment)
+    CtrlPUndoT  : the elapsed time in undo mode (|hl-Directory|)
+    CtrlPUndoBr : the square brackets [] in undo mode (Comment)
+    CtrlPUndoNr : the undo number inside [] in undo mode (String)
+    CtrlPUndoSv : the point where the file was saved (Comment)
+    CtrlPUndoPo : the current position in the undo tree (|hl-Title|)
 
 Statuslines:~
   * Highlight groups:
