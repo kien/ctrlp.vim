@@ -62,7 +62,8 @@ fu! ctrlp#changes#init(original_bufnr, fname)
 	let [swb, &swb] = [&swb, '']
 	let lines = []
 	for each in bufs
-		let [bufnr, fnamet] = [bufnr('^'.each.'$'), fnamemodify(each, ':t')]
+		let [bname, fnamet] = [fnamemodify(each, ':p'), fnamemodify(each, ':t')]
+		let bufnr = bufnr('^'.bname.'$')
 		if bufnr > 0
 			cal extend(lines, s:process(s:changelist(bufnr), bufnr, fnamet))
 		en

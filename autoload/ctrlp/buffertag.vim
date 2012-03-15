@@ -218,8 +218,9 @@ fu! ctrlp#buffertag#init(fname)
 		\ : [exists('s:bufname') ? s:bufname : a:fname]
 	let lines = []
 	for each in bufs
-		let tftype = get(split(getbufvar(each, '&ft'), '\.'), 0, '')
-		cal extend(lines, s:process(each, tftype))
+		let bname = fnamemodify(each, ':p')
+		let tftype = get(split(getbufvar(bname, '&ft'), '\.'), 0, '')
+		cal extend(lines, s:process(bname, tftype))
 	endfo
 	if has('syntax') && exists('g:syntax_on')
 		cal s:syntax()

@@ -38,8 +38,9 @@ fu! ctrlp#line#init()
 	let [bufs, lines] = [filter(ctrlp#buffers(), 'filereadable(v:val)'), []]
 	for each in bufs
 		let [fnamet, from_file] = [fnamemodify(each, ':t'), readfile(each)]
+		let bname = fnamemodify(each, ':p')
 		cal map(from_file, 'tr(v:val, ''	'', '' '')')
-		let [id, len_ff, bufnr] = [1, len(from_file), bufnr('^'.each.'$')]
+		let [id, len_ff, bufnr] = [1, len(from_file), bufnr('^'.bname.'$')]
 		wh id <= len_ff
 			let from_file[id-1] .= '	|'.fnamet.'|'.bufnr.':'.id.'|'
 			let id += 1
