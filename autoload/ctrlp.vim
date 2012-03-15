@@ -316,13 +316,16 @@ fu! ctrlp#buffers()
 endf
 " * MatchedItems() {{{1
 fu! s:MatchIt(items, pat, limit, mfunc, ipt, exc)
-	let newitems = []
-	for item in a:items
+	let [newitems, id, itlen] = [[], 0, len(a:items)]
+	wh id < itlen
+		let item = a:items[id]
+		let id += 1
 		try | if !( a:ipt && item == a:exc ) && call(a:mfunc, [item, a:pat]) >= 0
 			cal add(newitems, item)
 		en | cat | brea | endt
 		if a:limit > 0 && len(newitems) >= a:limit | brea | en
-	endfo
+	endw
+	let s:mdata = [s:dyncwd, s:itemtype, s:regexp, a:items[(id):]]
 	retu newitems
 endf
 
@@ -336,7 +339,8 @@ fu! s:MatchedItems(items, str, pat, limit, ipt)
 	en
 	let exc = exists('s:crfilerel') ? s:crfilerel : ''
 	let matfunc = 's:MatchIt'
-	let argms = [a:items, a:pat, a:limit, mfunc, a:ipt, exc]
+	let items = s:narrowable() ? s:matched + s:mdata[3] : a:items
+	let argms = [items, a:pat, a:limit, mfunc, a:ipt, exc]
 	if s:matcher != {} && has_key(s:matcher, 'match')
 		let [matfunc, argms[1], argms[3]] = s:matargs(mfunc, a:str)
 		let argms += [s:regexp]
@@ -387,9 +391,8 @@ fu! s:Render(lines, pat, ipt)
 		if s:dohighlight() | cal clearmatches() | en
 		retu
 	en
-	" Sort if not MRU
-	if ( s:itemtype != 2 && !exists('g:ctrlp_nolimit') )
-		\ || s:prompt != ['', '', '']
+	if ( ( s:itemtype != 2 && !exists('g:ctrlp_nolimit') )
+		\ || s:prompt != ['', '', ''] ) && s:matcher == {}
 		let s:compat = a:pat
 		cal sort(lines, 's:mixedsort')
 		unl s:compat
@@ -467,8 +470,10 @@ endf
 
 fu! s:PrtAdd(char)
 	unl! s:hstgot
+	let s:act_add = 1
 	let s:prompt[0] .= a:char
 	cal s:BuildPrompt(1)
+	unl s:act_add
 endf
 
 fu! s:PrtBS()
@@ -708,7 +713,8 @@ fu! s:PrtSwitcher()
 	unl s:force
 endf
 fu! s:SetWD(...) "{{{1
-	let [pathmode, s:crfilerel] = [s:wpmode, fnamemodify(s:crfile, ':.')]
+	let pathmode = s:wpmode
+	let [s:crfilerel, s:dyncwd] = [fnamemodify(s:crfile, ':.'), getcwd()]
 	if a:0 && strlen(a:1) | if type(a:1)
 		cal ctrlp#setdir(a:1) | retu
 	el
@@ -1165,7 +1171,7 @@ endf
 fu! ctrlp#setdir(path, ...)
 	let cmd = a:0 ? a:1 : 'lc!'
 	sil! exe cmd ctrlp#fnesc(a:path)
-	let s:crfilerel = fnamemodify(s:crfile, ':.')
+	let [s:crfilerel, s:dyncwd] = [fnamemodify(s:crfile, ':.'), getcwd()]
 endf
 
 fu! ctrlp#setlcdir()
@@ -1352,6 +1358,12 @@ fu! s:argmaps(md, ...)
 	retu a:md
 endf
 " Misc {{{2
+fu! s:narrowable()
+	retu exists('s:act_add') && exists('s:matched') && s:matched != []
+		\ && exists('s:mdata') && s:mdata[:2] == [s:dyncwd, s:itemtype, s:regexp]
+		\ && s:matcher == {}
+endf
+
 fu! s:matargs(mfunc, str)
 	let match_type = {
 		\ 'match': 'full-line',
