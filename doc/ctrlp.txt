@@ -175,9 +175,9 @@ only need to keep the lines that you’ve changed the values (inside []): >
     \ }
 <
 Note: In some terminals, it’s not possible to remap <c-h> without also changing
-<bs> (|key-codes|). So if pressing <bs> moves the cursor to the left instead of
-deleting a char for you, add this to your |vimrc| to disable the default <c-h>
-mapping: >
+<bs> (|keycodes|). So if pressing <bs> moves the cursor to the left instead of
+deleting a char for you, add this to your |.vimrc| to disable the plugin’s
+default <c-h> mapping: >
   let g:ctrlp_prompt_mappings = { 'PrtCurLeft()': ['<left>', '<c-^>'] }
 <
 
@@ -386,30 +386,29 @@ Example: >
 <
 Structure of the functions: >
   function! Function_Name_1(focus, byfname, regex, prev, item, next, marked)
-    " a:focus a:byfname a:regex a:prev a:item a:next a:marked
-    " |       |         |       |      |      |      |
-    " |       |         |       |      |      |      +- Number of marked files.
-    " |       |         |       |      |      |
-    " |       |         |       |      |      +- The next search mode.
-    " |       |         |       |      |
-    " |       |         |       |      +- The current search mode.
-    " |       |         |       |
-    " |       |         |       +- The previous search mode.
-    " |       |         |
-    " |       |         +- In regex mode: 1 or 0.
-    " |       |
-    " |       +- In filename mode or in full path mode: "file" or "path".
+    " Arguments:
     " |
-    " +- The focus of the prompt: "prt" or "win".
+    " +- a:focus   : The focus of the prompt: "prt" or "win".
+    " |
+    " +- a:byfname : In filename mode or in full path mode: "file" or "path".
+    " |
+    " +- a:regex   : In regex mode: 1 or 0.
+    " |
+    " +- a:prev    : The previous search mode.
+    " |
+    " +- a:item    : The current search mode.
+    " |
+    " +- a:next    : The next search mode.
+    " |
+    " +- a:marked  : The number of marked files, or a comma separated list of
+    "                the filenames.
 
     return full_statusline
   endfunction
 
   function! Function_Name_2(str)
-    " a:str
-    " |
-    " + Either the number of files scanned so far, or a string indicating the
-    "   directory is being scanned with a user_command.
+    " a:str : Either the number of files scanned so far, or a string indicating
+    "         the current directory is being scanned with a user_command.
 
     return full_statusline
   endfunction
@@ -425,29 +424,28 @@ Example: >
 <
 Structure of the function: >
   function! Function_Name(items, str, limit, mmode, ispath, crfile, regex)
-    " a:items a:str a:limit a:mmode a:ispath a:crfile a:regex
-    " |       |     |       |       |        |        |
-    " |       |     |       |       |        |        +- In regex mode: 1 or 0.
-    " |       |     |       |       |        |
-    " |       |     |       |       |        +- The file in the current window
-    " |       |     |       |       |           Should be excluded from the
-    " |       |     |       |       |           results when a:ispath == 1.
-    " |       |     |       |       |
-    " |       |     |       |       +- Is 1 when searching in file, buffer, mru
-    " |       |     |       |          dir, rtscript... modes. Is 0 otherwise.
-    " |       |     |       |
-    " |       |     |       +- The match mode. Can be one of these strings:
-    " |       |     |        + "full-line": match the entire line.
-    " |       |     |        + "filename-only": match only the filename.
-    " |       |     |        + "first-non-tab": match until the first tab char.
-    " |       |     |        + "until-last-tab": match until the last tab char.
-    " |       |     |
-    " |       |     +- The max height of the match window. Can be used to limit
-    " |       |        the number of items to return.
-    " |       |
-    " |       +- The string entered by the user.
+    " Arguments:
     " |
-    " +- The full list of items to search in (e.g. all files in a dir tree).
+    " +- a:items  : The full list of items to search in.
+    " |
+    " +- a:str    : The string entered by the user.
+    " |
+    " +- a:limit  : The max height of the match window. Can be used to limit
+    " |             the number of items to return.
+    " |
+    " +- a:mmode  : The match mode. Can be one of these strings:
+    " |             + "full-line": match the entire line.
+    " |             + "filename-only": match only the filename.
+    " |             + "first-non-tab": match until the first tab char.
+    " |             + "until-last-tab": match until the last tab char.
+    " |
+    " +- a:ispath : Is 1 when searching in file, buffer, mru, dir, and rtscript
+    " |             modes. Is 0 otherwise.
+    " |
+    " +- a:crfile : The file in the current window. Should be excluded from the
+    " |             results when a:ispath == 1.
+    " |
+    " +- a:regex  : In regex mode: 1 or 0.
 
     return list_of_matched_items
   endfunction
@@ -678,7 +676,8 @@ EXTENSIONS                                                 *g:ctrlp-extensions*
 
 Extensions are optional. To enable an extension, add its name to the variable
 g:ctrlp_extensions: >
-  let g:ctrlp_extensions = ['tag', 'buffertag', 'quickfix', 'dir', 'rtscript']
+  let g:ctrlp_extensions = ['tag', 'buffertag', 'quickfix', 'dir', 'rtscript',
+                            \ 'undo', 'line', 'changes']
 <
 The order of the items will be the order they appear on the statusline and when
 using <c-f>, <c-b>.
@@ -792,11 +791,11 @@ Highlighting:~
     CtrlPBufName   : the buffer name an entry belongs to (|hl-Directory|)
     CtrlPTagKind   : the kind of the tag in buffer-tag mode (|hl-Title|)
     CtrlPqfLineCol : the line and column numbers in quickfix mode (Comment)
-    CtrlPUndoT  : the elapsed time in undo mode (|hl-Directory|)
-    CtrlPUndoBr : the square brackets [] in undo mode (Comment)
-    CtrlPUndoNr : the undo number inside [] in undo mode (String)
-    CtrlPUndoSv : the point where the file was saved (Comment)
-    CtrlPUndoPo : the current position in the undo tree (|hl-Title|)
+    CtrlPUndoT     : the elapsed time in undo mode (|hl-Directory|)
+    CtrlPUndoBr    : the square brackets [] in undo mode (Comment)
+    CtrlPUndoNr    : the undo number inside [] in undo mode (String)
+    CtrlPUndoSv    : the point where the file was saved (Comment)
+    CtrlPUndoPo    : the current position in the undo tree (|hl-Title|)
 
 Statuslines:~
   * Highlight groups:
