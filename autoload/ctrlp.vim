@@ -590,7 +590,7 @@ fu! s:PrtClearCache()
 		cal ctrlp#clr(s:statypes[s:itemtype][1])
 	en
 	if s:itemtype == 2
-		let g:ctrlp_lines = ctrlp#mrufiles#list(-1, 1)
+		let g:ctrlp_lines = ctrlp#mrufiles#refresh()
 	el
 		cal ctrlp#setlines(s:itemtype)
 	en
@@ -601,13 +601,13 @@ endf
 
 fu! s:PrtDeleteMRU()
 	if s:itemtype != 2 | retu | en
-	let [s:force, ags] = [1, [-1, 2]]
+	let [s:force, tbrem] = [1, []]
 	if exists('s:marked')
-		let ags = [-1, 2, values(s:marked)]
+		let tbrem = values(s:marked)
 		cal s:unmarksigns()
 		unl s:marked
 	en
-	let g:ctrlp_lines = call('ctrlp#mrufiles#list', ags)
+	let g:ctrlp_lines = ctrlp#mrufiles#remove(tbrem)
 	cal s:BuildPrompt(1)
 	unl s:force
 endf
@@ -939,6 +939,15 @@ fu! s:comptime(s1, s2)
 	retu time1 == time2 ? 0 : time1 < time2 ? 1 : -1
 endf
 
+fu! s:compmre(...)
+	" By last entered time (buffer only)
+	if !exists('s:mrbs')
+		let s:mrbs = ctrlp#mrufiles#bufs()
+	en
+	let cwd = getcwd()
+	retu index(s:mrbs, cwd.s:lash().a:1) - index(s:mrbs, cwd.s:lash().a:2)
+endf
+
 fu! s:comparent(s1, s2)
 	" By same parent dir
 	let cwd = getcwd()
@@ -982,8 +991,11 @@ fu! s:mixedsort(s1, s2)
 	if s:itemtype < 3 && s:height < 51
 		let [par, cfn] = [s:comparent(a:s1, a:s2), s:compfnlen(a:s1, a:s2)]
 		if s:height < 21
-			let ctm = s:comptime(a:s1, a:s2)
-			retu 12 * cml + 6 * par + 3 * cfn + 2 * ctm + cln
+			let [muls, ctm] = s:itemtype == 1
+				\ ? [[6, 3, 2, 12], s:compmre(a:s1, a:s2)]
+				\ : [[12, 6, 3, 2], s:comptime(a:s1, a:s2)]
+			unl! s:mrbs
+			retu muls[0] * cml + muls[1] * par + muls[2] * cfn + muls[3] * ctm + cln
 		en
 		retu 6 * cml + 3 * par + 2 * cfn + cln
 	en
@@ -1539,7 +1551,7 @@ fu! ctrlp#setlines(type)
 	let types = [
 		\ 'ctrlp#files()',
 		\ 'ctrlp#buffers()',
-		\ 'ctrlp#mrufiles#list(-1)',
+		\ 'ctrlp#mrufiles#list()',
 		\ ]
 	if exists('g:ctrlp_ext_vars')
 		cal map(copy(g:ctrlp_ext_vars), 'add(types, v:val["init"])')

@@ -17,76 +17,102 @@ fu! ctrlp#mrufiles#opts()
 	for [ke, va] in items(opts)
 		exe 'let' va[0] '=' string(exists(ke) ? eval(ke) : va[1])
 	endfo
-	let s:csen = s:csen ? '#' : '?'
+	let [s:csen, s:mrbs] = [s:csen ? '#' : '?', []]
 endf
 cal ctrlp#mrufiles#opts()
-fu! ctrlp#mrufiles#list(bufnr, ...) "{{{1
-	if s:locked | retu | en
-	let bufnr = a:bufnr + 0
-	if bufnr > 0
-		let fn = fnamemodify(bufname(bufnr), ':p')
-		let fn = exists('+ssl') ? tr(fn, '/', '\') : fn
-		if empty(fn) || !empty(&bt) || ( !empty(s:in) && fn !~# s:in )
-			\ || ( !empty(s:ex) && fn =~# s:ex ) || !filereadable(fn)
-			retu
-		en
-	en
+" Utilities {{{1
+fu! s:excl(fn)
+	retu !empty(s:ex) && a:fn =~# s:ex
+endf
+
+fu! s:readcache()
 	if !exists('s:cadir') || !exists('s:cafile')
 		let s:cadir = ctrlp#utils#cachedir().ctrlp#utils#lash().'mru'
 		let s:cafile = s:cadir.ctrlp#utils#lash().'cache.txt'
 	en
-	if a:0 && a:1 == 2
-		let mrufs = []
-		if a:0 == 2
-			let mrufs = ctrlp#utils#readfile(s:cafile)
-			cal filter(mrufs, 'index(a:2, v:val) < 0')
-		en
-		cal ctrlp#utils#writecache(mrufs, s:cadir, s:cafile)
-		retu map(mrufs, 'fnamemodify(v:val, '':.'')')
+	retu ctrlp#utils#readfile(s:cafile)
+endf
+
+fu! s:reformat(mrufs)
+	if s:re
+		let cwd = exists('+ssl') ? tr(getcwd(), '/', '\') : getcwd()
+		cal filter(a:mrufs, '!stridx(v:val, cwd)')
 	en
-	" Get the list
-	let mrufs = ctrlp#utils#readfile(s:cafile)
-	" Remove non-existent files
-	if a:0 && a:1 == 1
-		cal filter(mrufs, '!empty(ctrlp#utils#glob(v:val, 1)) && !s:excl(v:val)')
-		if exists('+ssl')
-			cal map(mrufs, 'tr(v:val, ''/'', ''\'')')
-			cal filter(mrufs, 'count(mrufs, v:val) == 1')
-		en
-		cal ctrlp#utils#writecache(mrufs, s:cadir, s:cafile)
+	retu map(a:mrufs, 'fnamemodify(v:val, '':.'')')
+endf
+
+fu! s:record(bufnr, ...)
+	if s:locked | retu | en
+	let bufnr = a:bufnr + 0
+	if bufnr <= 0 | retu | en
+	let fn = fnamemodify(bufname(bufnr), ':p')
+	let fn = exists('+ssl') ? tr(fn, '/', '\') : fn
+	cal filter(s:mrbs, 'v:val !='.s:csen.' fn')
+	cal insert(s:mrbs, fn)
+	if empty(fn) || !empty(&bt) || ( !empty(s:in) && fn !~# s:in )
+		\ || ( !empty(s:ex) && fn =~# s:ex ) || !filereadable(fn)
+		\ || ( a:0 && a:1 == 1 )
+		retu
 	en
-	" Return the list with the active buffer removed
-	if bufnr == -1
-		if s:re
-			let cwd = exists('+ssl') ? tr(getcwd(), '/', '\') : getcwd()
-			cal filter(mrufs, '!stridx(v:val, cwd)')
-		en
-		retu map(mrufs, 'fnamemodify(v:val, '':.'')')
-	en
-	" Remove old entry
+	let mrufs = s:readcache()
 	cal filter(mrufs, 'v:val !='.s:csen.' fn')
-	" Insert new one
 	cal insert(mrufs, fn)
-	" Remove oldest entry or entries
 	if len(mrufs) > s:max | cal remove(mrufs, s:max, -1) | en
 	cal ctrlp#utils#writecache(mrufs, s:cadir, s:cafile)
-endf "}}}
-fu! s:excl(fn) "{{{
-	retu !empty(s:ex) && a:fn =~# s:ex
-endf "}}}
-fu! ctrlp#mrufiles#init() "{{{1
+endf
+" Public {{{1
+fu! ctrlp#mrufiles#refresh()
+	let mrufs = s:readcache()
+	cal filter(mrufs, '!empty(ctrlp#utils#glob(v:val, 1)) && !s:excl(v:val)')
+	if exists('+ssl')
+		cal map(mrufs, 'tr(v:val, ''/'', ''\'')')
+		cal filter(mrufs, 'count(mrufs, v:val) == 1')
+	en
+	cal ctrlp#utils#writecache(mrufs, s:cadir, s:cafile)
+	retu s:reformat(mrufs)
+endf
+
+fu! ctrlp#mrufiles#remove(files)
+	let mrufs = []
+	if a:files != []
+		let mrufs = s:readcache()
+		cal filter(mrufs, 'index(a:files, v:val) < 0')
+	en
+	cal ctrlp#utils#writecache(mrufs, s:cadir, s:cafile)
+	retu map(mrufs, 'fnamemodify(v:val, '':.'')')
+endf
+
+fu! ctrlp#mrufiles#list()
+	if a:0
+		cal s:record(a:1) | retu
+	en
+	retu s:reformat(s:readcache())
+endf
+
+fu! ctrlp#mrufiles#bufs()
+	retu s:mrbs
+endf
+
+fu! ctrlp#mrufiles#init()
+	if !has('autocmd') | retu | en
 	let s:locked = 0
 	aug CtrlPMRUF
 		au!
-		au BufReadPost,BufNewFile,BufWritePost *
-			\ cal ctrlp#mrufiles#list(expand('<abuf>', 1))
-		if s:mre
-			au BufEnter,BufUnload *
-				\ cal ctrlp#mrufiles#list(expand('<abuf>', 1))
-		en
+		au BufReadPost,BufNewFile,BufWritePost * cal s:record(expand('<abuf>', 1))
+		au BufEnter,BufUnload * cal s:record(expand('<abuf>', 1), 1)
 		au QuickFixCmdPre  *vimgrep* let s:locked = 1
 		au QuickFixCmdPost *vimgrep* let s:locked = 0
 	aug END
+	if s:mre
+		aug CtrlPMRE
+			au!
+			au BufEnter,BufUnload * cal s:record(expand('<abuf>', 1))
+		aug END
+	el
+		if exists('#CtrlPMRE')
+			au! CtrlPMRE
+		en
+	en
 endf
 "}}}
 
