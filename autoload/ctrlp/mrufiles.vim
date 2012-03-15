@@ -82,7 +82,7 @@ fu! ctrlp#mrufiles#remove(files)
 	retu map(mrufs, 'fnamemodify(v:val, '':.'')')
 endf
 
-fu! ctrlp#mrufiles#list()
+fu! ctrlp#mrufiles#list(...)
 	if a:0
 		cal s:record(a:1) | retu
 	en
@@ -99,19 +99,25 @@ fu! ctrlp#mrufiles#init()
 	aug CtrlPMRUF
 		au!
 		au BufReadPost,BufNewFile,BufWritePost * cal s:record(expand('<abuf>', 1))
-		au BufEnter,BufUnload * cal s:record(expand('<abuf>', 1), 1)
 		au QuickFixCmdPre  *vimgrep* let s:locked = 1
 		au QuickFixCmdPost *vimgrep* let s:locked = 0
 	aug END
 	if s:mre
-		aug CtrlPMRE
+		aug CtrlPMREF
 			au!
 			au BufEnter,BufUnload * cal s:record(expand('<abuf>', 1))
 		aug END
-	el
-		if exists('#CtrlPMRE')
-			au! CtrlPMRE
+		if exists('#CtrlPMREB')
+			au! CtrlPMREB
 		en
+	el
+		if exists('#CtrlPMREF')
+			au! CtrlPMREF
+		en
+		aug CtrlPMREB
+			au!
+			au BufEnter,BufUnload * cal s:record(expand('<abuf>', 1), 1)
+		aug END
 	en
 endf
 "}}}

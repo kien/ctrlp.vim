@@ -5,7 +5,7 @@
 " Version:       1.7.3
 " =============================================================================
 
-" Static variables {{{1
+" * Static variables {{{1
 fu! s:opts()
 	" Options
 	let hst = exists('+hi') ? &hi : 20
@@ -308,7 +308,7 @@ fu! s:lsCmd()
 		retu cmd['types'][key][1]
 	en
 endf
-" Buffers {{{1
+" - Buffers {{{1
 fu! ctrlp#buffers()
 	retu map(filter(range(1, bufnr('$')), 'empty(getbufvar(v:val, "&bt"))'
 		\ .' && getbufvar(v:val, "&bl") && strlen(bufname(v:val))'),
@@ -349,7 +349,8 @@ fu! s:MatchedItems(items, str, pat, limit, ipt)
 	let s:matches = len(newitems)
 	retu newitems
 endf
-fu! s:SplitPattern(str) "{{{1
+
+fu! s:SplitPattern(str)
 	let str = a:str
 	if s:migemo && s:regexp && len(str) > 0 && executable('cmigemo')
 		let str = s:migemo(str)
@@ -712,7 +713,8 @@ fu! s:PrtSwitcher()
 	cal s:BuildPrompt(1, s:Focus())
 	unl s:force
 endf
-fu! s:SetWD(...) "{{{1
+" - SetWD() {{{1
+fu! s:SetWD(...)
 	let pathmode = s:wpmode
 	let [s:crfilerel, s:dyncwd] = [fnamemodify(s:crfile, ':.'), getcwd()]
 	if a:0 && strlen(a:1) | if type(a:1)
@@ -811,7 +813,8 @@ fu! s:AcceptSelection(mode)
 		\ : g:ctrlp_ext_vars[s:itemtype - ( g:ctrlp_builtins + 1 )]['accept']
 	cal call(actfunc, [a:mode, line])
 endf
-fu! s:CreateNewFile(...) "{{{1
+" - CreateNewFile() {{{1
+fu! s:CreateNewFile(...)
 	let [md, str] = ['', join(s:prompt, '')]
 	if empty(str) | retu | en
 	if s:argmap && !a:0
