@@ -20,6 +20,7 @@ let s:buftag_var = {
 	\ 'sname': 'bft',
 	\ 'exit': 'ctrlp#buffertag#exit()',
 	\ 'type': 'tabs',
+	\ 'opts': 'ctrlp#buffertag#opts()',
 	\ }
 
 let g:ctrlp_ext_vars = exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)
@@ -27,7 +28,7 @@ let g:ctrlp_ext_vars = exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)
 
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 
-fu! s:opts()
+fu! ctrlp#buffertag#opts()
 	let opts = {
 		\ 'g:ctrlp_buftag_systemenc': ['s:enc', &enc],
 		\ 'g:ctrlp_buftag_ctags_bin': ['s:bin', ''],
@@ -37,7 +38,7 @@ fu! s:opts()
 		exe 'let' va[0] '=' string(exists(ke) ? eval(ke) : va[1])
 	endfo
 endf
-cal s:opts()
+cal ctrlp#buffertag#opts()
 
 fu! s:bins()
 	let bins = [

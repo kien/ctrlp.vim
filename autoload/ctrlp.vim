@@ -204,7 +204,7 @@ fu! s:Close()
 	unl! s:focus s:hisidx s:hstgot s:marked s:statypes s:cline s:init s:savestr
 		\ g:ctrlp_nolimit
 	cal ctrlp#recordhist()
-	cal s:onexit()
+	cal s:extvar('exit')
 	cal s:log(0)
 	ec
 endf
@@ -227,6 +227,7 @@ fu! ctrlp#reset()
 	cal s:opts()
 	cal ctrlp#utils#opts()
 	cal ctrlp#mrufiles#opts()
+	cal s:extvar('opts')
 endf
 " * Files {{{1
 fu! ctrlp#files()
@@ -698,7 +699,7 @@ endf
 
 fu! s:ToggleType(dir)
 	let ext = exists('g:ctrlp_ext_vars') ? len(g:ctrlp_ext_vars) : 0
-	let s:itemtype = s:walker(g:ctrlp_builtins + ext, s:itemtype, a:dir)
+	let s:itemtype = s:walker(2 + ext, s:itemtype, a:dir)
 	if s:byfname && !s:ispathitem() | let s:byfname = 0 | en
 	unl! g:ctrlp_nolimit
 	if has('syntax') && exists('g:syntax_on')
@@ -810,7 +811,7 @@ fu! s:AcceptSelection(mode)
 	if empty(line) | retu | en
 	" Do something with it
 	let actfunc = s:itemtype < 3 ? 'ctrlp#acceptfile'
-		\ : g:ctrlp_ext_vars[s:itemtype - ( g:ctrlp_builtins + 1 )]['accept']
+		\ : g:ctrlp_ext_vars[s:itemtype - 3]['accept']
 	cal call(actfunc, [a:mode, line])
 endf
 " - CreateNewFile() {{{1
@@ -847,8 +848,7 @@ fu! s:CreateNewFile(...)
 endf
 " * OpenMulti() {{{1
 fu! s:MarkToOpen()
-	if s:bufnr <= 0 || s:opmul == '0'
-		\ || ( s:itemtype > g:ctrlp_builtins && s:type() !~ 'rts' )
+	if s:bufnr <= 0 || s:opmul == '0' || ( s:itemtype > 2 && s:type() !~ 'rts' )
 		retu
 	en
 	let line = !empty(s:matched) ? s:matched[line('.') - 1] : ''
@@ -1095,9 +1095,8 @@ fu! s:lash(...)
 endf
 
 fu! s:ispathitem()
-	let ext = s:itemtype - ( g:ctrlp_builtins + 1 )
-	retu s:itemtype < 3
-		\ || ( s:itemtype > 2 && g:ctrlp_ext_vars[ext]['type'] == 'path' )
+	retu s:itemtype < 3 ||
+		\ ( s:itemtype > 2 && g:ctrlp_ext_vars[s:itemtype - 3]['type'] == 'path' )
 endf
 
 fu! ctrlp#dirnfile(entries)
@@ -1525,18 +1524,18 @@ fu! s:insertcache(str)
 endf
 " Extensions {{{2
 fu! s:type(...)
-	let ext = s:itemtype - ( g:ctrlp_builtins + 1 )
-	retu s:itemtype > 2 ? g:ctrlp_ext_vars[ext][a:0 ? 'type' : 'sname'] : s:itemtype
+	retu s:itemtype > 2
+		\ ? g:ctrlp_ext_vars[s:itemtype - 3][a:0 ? 'type' : 'sname'] : s:itemtype
 endf
 
 fu! s:tagfiles()
 	retu filter(map(tagfiles(), 'fnamemodify(v:val, ":p")'), 'filereadable(v:val)')
 endf
 
-fu! s:onexit()
+fu! s:extvar(key)
 	if exists('g:ctrlp_ext_vars')
 		cal map(filter(copy(g:ctrlp_ext_vars),
-			\ 'has_key(v:val, "exit")'), 'eval(v:val["exit"])')
+			\ 'has_key(v:val, a:key)'), 'eval(v:val[a:key])')
 	en
 endf
 
