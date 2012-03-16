@@ -1487,8 +1487,8 @@ fu! s:regexfilter(str)
 	retu str
 endf
 
-fu! s:walker(max, pos, dir)
-	retu a:dir > 0 ? a:pos < a:max ? a:pos + 1 : 0 : a:pos > 0 ? a:pos - 1 : a:max
+fu! s:walker(m, p, d)
+	retu a:d > 0 ? a:p < a:m ? a:p + a:d : 0 : a:p > 0 ? a:p + a:d : a:m
 endf
 
 fu! s:matchfname(item, pat)
@@ -1546,6 +1546,10 @@ endf
 
 fu! ctrlp#prtclear()
 	cal s:PrtClear()
+endf
+
+fu! ctrlp#switchtype(id)
+	cal s:ToggleType(a:id - s:itemtype)
 endf
 "}}}1
 " * Initialization {{{1
