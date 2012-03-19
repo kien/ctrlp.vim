@@ -759,7 +759,7 @@ fu! ctrlp#acceptfile(mode, line, ...)
 		if j2l | cal ctrlp#j2l(j2l) | en
 	el
 		" Determine the command to use
-		let useb = bufnr > 0 && empty(tail)
+		let useb = bufnr > 0 && getbufvar(bufnr, '&bl') && empty(tail)
 		let cmd =
 			\ md == 't' || s:splitwin == 1 ? ( useb ? 'tab sb' : 'tabe' ) :
 			\ md == 'h' || s:splitwin == 2 ? ( useb ? 'sb' : 'new' ) :
@@ -892,7 +892,8 @@ fu! s:OpenMulti()
 	" Move the cursor to a reusable window
 	let [tail, fnesc] = [s:tail(), exists('*fnameescape') && v:version > 701]
 	let [emptytail, nwpt] = [empty(tail), exists('g:ctrlp_open_multiple_files')]
-	let useb = bufnr('^'.mkd[0].'$') > 0 && emptytail
+	let bufnr = bufnr('^'.mkd[0].'$')
+	let useb = bufnr > 0 && getbufvar(bufnr, '&bl') && emptytail
 	let fst = call('ctrlp#normcmd', useb ? ['b', 'bo vert sb'] : ['e'])
 	" Check if it's a replaceable buffer
 	let repabl = ( empty(bufname('%')) && empty(&l:ft) ) || s:nosplit()
@@ -903,7 +904,7 @@ fu! s:OpenMulti()
 	" Open the files
 	for va in mkd
 		let bufnr = bufnr('^'.va.'$')
-		let useb = bufnr > 0 && emptytail
+		let useb = bufnr > 0 && getbufvar(bufnr, '&bl') && emptytail
 		let snd = md != '' && has_key(cmds, md) ?
 			\ ( useb ? cmds[md][0] : cmds[md][1] ) : ( useb ? 'vert sb' : 'vne' )
 		let cmd = ic == 1 && ( ucr == 'r' || repabl ) ? fst : snd
