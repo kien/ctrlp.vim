@@ -18,6 +18,9 @@ fu! ctrlp#mrufiles#opts()
 		exe 'let' va[0] '=' string(exists(ke) ? eval(ke) : va[1])
 	endfo
 	let [s:csen, s:mrbs] = [s:csen ? '#' : '?', []]
+	if exists('s:locked')
+		cal ctrlp#mrufiles#init()
+	en
 endf
 cal ctrlp#mrufiles#opts()
 " Utilities {{{1
@@ -83,9 +86,7 @@ fu! ctrlp#mrufiles#remove(files)
 endf
 
 fu! ctrlp#mrufiles#list(...)
-	if a:0
-		cal s:record(a:1) | retu
-	en
+	if a:0 | cal s:record(a:1) | retu | en
 	retu s:reformat(s:readcache())
 endf
 
@@ -102,6 +103,13 @@ fu! ctrlp#mrufiles#init()
 		au QuickFixCmdPre  *vimgrep* let s:locked = 1
 		au QuickFixCmdPost *vimgrep* let s:locked = 0
 	aug END
+	aug CtrlPMREB
+		au!
+		au BufEnter,BufUnload * cal s:record(expand('<abuf>', 1), 1)
+	aug END
+	if exists('#CtrlPMREF')
+		au! CtrlPMREF
+	en
 	if s:mre
 		aug CtrlPMREF
 			au!
@@ -110,14 +118,6 @@ fu! ctrlp#mrufiles#init()
 		if exists('#CtrlPMREB')
 			au! CtrlPMREB
 		en
-	el
-		if exists('#CtrlPMREF')
-			au! CtrlPMREF
-		en
-		aug CtrlPMREB
-			au!
-			au BufEnter,BufUnload * cal s:record(expand('<abuf>', 1), 1)
-		aug END
 	en
 endf
 "}}}

@@ -225,6 +225,7 @@ endf
 
 fu! ctrlp#reset()
 	cal s:opts()
+	cal s:autocmds()
 	cal ctrlp#utils#opts()
 	cal ctrlp#mrufiles#opts()
 	cal s:extvar('opts')
@@ -1578,16 +1579,27 @@ fu! ctrlp#init(type, ...)
 	cal ctrlp#setlines(a:type)
 	cal s:BuildPrompt(1)
 endf
-if has('autocmd') "{{{1
+" - Autocmds {{{1
+fu! s:autocmds()
+	if !has('autocmd') | retu | en
 	aug CtrlPAug
 		au!
 		au BufEnter ControlP cal s:checkbuf()
 		au BufLeave ControlP cal s:Close()
 		au VimLeavePre * cal s:leavepre()
-		if s:lazy
-			au CursorHold ControlP cal s:ForceUpdate()
-		en
 	aug END
-en "}}}
+	if exists('CtrlPLaz')
+		au! CtrlPLaz
+	en
+	if s:lazy
+		aug CtrlPLaz
+			au!
+			au CursorHold ControlP cal s:ForceUpdate()
+		aug END
+	en
+endf
+
+cal s:autocmds()
+"}}}
 
 " vim:fen:fdm=marker:fmr={{{,}}}:fdl=0:fdc=1:ts=2:sw=2:sts=2
