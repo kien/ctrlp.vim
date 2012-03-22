@@ -67,25 +67,25 @@ dd {
 	margin-left:40px;
 }
 @font-face {
-  font-family: 'Amaranth';
-  font-style: normal;
-  font-weight: normal;
-  src: local('Amaranth'), url('../font/Amaranth.woff') format('woff');
+  font-family:'Amaranth';
+  font-style:normal;
+  font-weight:normal;
+  src:local('Amaranth'), url('../font/Amaranth.woff') format('woff');
 }
 @font-face {
-  font-family: 'Droid Sans';
-  font-style: normal;
-  font-weight: normal;
-  src: local('Droid Sans'), url('../font/DroidSans.woff') format('woff');
+  font-family:'Droid Sans';
+  font-style:normal;
+  font-weight:normal;
+  src:local('Droid Sans'), url('../font/DroidSans.woff') format('woff');
 }
 /* ============================================================{
 	Page:
 }============================================================ */
 body {
-	background:#1e1615 url(../images/black_scales.png) fixed;
+	background:#1e1615 url(../images/nami.png) fixed;
 	color:#ddd;
-	font:75%/2 georgia,serif;
-	text-align:center;
+	font:75%/2 "Droid Sans",arial,helvetica,sans-serif;
+	text-align:left;
 }
 abbr {
 	border-bottom:1px dotted #3e3635;
@@ -101,15 +101,6 @@ a:focus {
 a.external:after {
 	content:'✜';
 }
-#page {
-	font-family:"Droid Sans",arial,helvetica,sans-serif;
-	width:100%;
-	margin:0 auto;
-	text-align:left;
-	position:relative;
-	overflow:hidden;
-}
-#page:after,
 .menu:after {
 	content:"\0020";
 	display:block;
@@ -117,11 +108,6 @@ a.external:after {
 	font:0/0 serif;
 	clear:both;
 	visibility:hidden;
-}
-#page .tagline {
-	clear:both;
-	margin:0 0 3em;
-	text-align:right;
 }
 .menu {
 	font-size:1.1em;
@@ -133,7 +119,7 @@ a.external:after {
 .menu li {
 	float:left;
 }
-.menu .tags {
+.menu .issues {
 	float:right;
 }
 .menu li a {
@@ -144,8 +130,7 @@ a.external:after {
 	border-bottom:1px solid #8bad3e;
 	background:#1d1d1d;
 }
-.menu li a,
-.article h1 {
+.menu li a, h1 {
 	-webkit-transition:.5s;
 	-moz-transition:.5s;
 	-o-transition:.5s;
@@ -166,24 +151,25 @@ a.external:after {
 .menu li a:active {
 	color:#fff;
 }
-.article {
-	border-bottom:1px solid #8bad3e;
-	clear:both;
-	width:760px;
-	margin:0 auto;
-}
-.article h1 {
-	border-bottom:2px solid #8bad3e;
+h1 {
 	font:700 64px/1.5 'Palatino Linotype',Palatino,serif;
 	padding:0 0 .3em;
 	color:#2099af;
 	text-shadow:0 1px 0 #222,0 2px 0 #444,0 3px 0 #444,0 4px 0 #444,0 5px 0 #444;
+	clear:both;
+	width:760px;
+	margin:0 auto;
 }
-.article h1:hover {
+h1:hover {
 	color:#a7b8ff;
 	text-shadow:0 1px 0 #444,0 2px 0 #666,0 3px 0 #666,0 4px 0 #666,0 5px 0 #666;
 }
-.article .entry-content {
+article {
+	border-top:2px solid #8bad3e;
+	border-bottom:1px solid #8bad3e;
+	clear:both;
+	width:730px;
+	margin:0 auto;
 	font-size:1.2em;
 	letter-spacing:1px;
 	background:#1d1d1d;
@@ -192,11 +178,11 @@ a.external:after {
 	position:relative;
 	overflow:hidden;
 }
-.article h2 {
+article h2 {
 	font-size:1.25em;
 	margin:0 0 .25em;
 }
-.article h3 {
+article h3 {
 	font-size:1.15em;
 	line-height:2;
 	margin:0 -15px .5em;
@@ -206,40 +192,43 @@ a.external:after {
 	border-bottom:1px solid #333;
 	background:#252525;
 }
-.article h3 span {
+article h3 span {
 	color:#a7b8ff;
 	text-shadow:0 1px 0 #444,0 2px 0 #666;
 }
-.article h6 {
+article h6 {
 	font-size:1em;
 	font-weight:400;
 	margin:0 0 .5em;
 }
-.article p {
+article p {
 	margin:0 0 1.5em;
 }
-.article ul,
-.article ol {
+article ul,
+article ol {
 	margin:0 0 1.5em 10px;
 }
-.article ol {
+article ol {
 	padding:0 0 0 1em;
 	list-style:decimal outside;
 }
-.article ul {
+article ul {
 	padding:0 0 0 1em;
 	list-style:square outside;
 }
-.article ul li small,
-.article ol li small {
+article ul li small,
+article ol li small {
 	font-size:.83em;
 }
-.article ul.special {
+article ul.special {
 	padding:0;
 	list-style:none outside;
 }
-.article pre {
-	background:#0b1d0e url(../images/black_scales.png) fixed;
+article ul.special li:before {
+	content:"» ";
+}
+article pre {
+	background:#0b1d0e url(../images/nami.png) fixed;
 	border-radius:2px 15px 3px 2px;
 	border:1px solid #4b6d00;
 	border-left-width:5px;
@@ -250,24 +239,24 @@ a.external:after {
 	overflow:auto;
 	outline:none;
 }
-.article code {
+article code {
 	border:1px solid #4b6d00;
 	border-radius:4px;
 	font:.83em/1.75 monaco,monospace;
 	padding:0 .5em;
 	outline:none;
-	background:#0b1d0e url(../images/black_scales.png) fixed;
+	background:#0b1d0e url(../images/nami.png) fixed;
 }
-.article pre code {
+article pre code {
 	background:none;
 	border:none;
 	border-radius:0;
 	padding:0;
 }
-.article p.note {
+article p.note {
 	font-size:.91em;
 }
-.article img {
+article img {
 	display:block;
 	margin:.5em auto 0;
 }
@@ -295,24 +284,24 @@ a.external:after {
 	width:148px;
 	height:148px;
 }
-#footer {
+footer {
 	border-top:1px solid #8bad3e;
 	padding:.5em 0 2em;
 	width:760px;
 	margin:0 auto;
 	overflow:hidden;
 }
-#footer small {
+footer small {
 	float:right;
 }
 /* ============================================================{
 	Media queries:
 }============================================================ */
 @media all and (max-width:780px) {
-	.menu,.article,#footer {
+	.menu,article,footer {
 		width:90%;
 	}
-	.article img {
+	article img {
 		width:95%;
 		height:auto;
 	}
@@ -324,7 +313,7 @@ a.external:after {
 	.menu {
 		border:none;
 	}
-	.menu .tags {
+	.menu .issues {
 		float:left;
 	}
 	.menu li a {
@@ -346,28 +335,28 @@ a.external:after {
 		-moz-border-radius:0;
 		border-radius:0;
 	}
-	.article img {
+	article img {
 		width:94%;
 	}
 }
 @media all and (max-width:400px) {
-	#page {
+	body {
 		font-size:.83em;
 	}
-	.article h1 {
+	h1 {
 		font-size:48px;
 		line-height:1.25;
 		padding-bottom:.5em;
 	}
-	.article small {
+	article small {
 		font-style:normal;
 	}
-	.article img {
+	article img {
 		width:91%;
 	}
 }
 /* ==========================================================={
-	Github download button:
+	Download button:
 }=========================================================== */
 a.download {
 	display:block;
