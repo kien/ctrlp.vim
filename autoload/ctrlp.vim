@@ -1588,11 +1588,11 @@ fu! s:autocmds()
 		au BufLeave ControlP cal s:Close()
 		au VimLeavePre * cal s:leavepre()
 	aug END
-	if exists('CtrlPLaz')
-		au! CtrlPLaz
+	if exists('#CtrlPLazy')
+		au! CtrlPLazy
 	en
 	if s:lazy
-		aug CtrlPLaz
+		aug CtrlPLazy
 			au!
 			au CursorHold ControlP cal s:ForceUpdate()
 		aug END
