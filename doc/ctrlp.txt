@@ -729,7 +729,7 @@ Available extensions:~
   * Undo mode:~
     - Name: 'undo'
     - Command: ':CtrlPUndo'
-    - Browse undo history (requires Vim 7.3.005+).
+    - Browse undo history.
 
                                                                    *:CtrlPLine*
   * Line mode:~

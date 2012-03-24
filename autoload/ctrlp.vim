@@ -735,7 +735,7 @@ fu! s:SetWD(...)
 		cal extend(markers, s:rmarkers, 0)
 	en
 	for marker in markers
-		cal s:findroot(getcwd(), marker, 0, 0)
+		cal s:findroot(s:dyncwd, marker, 0, 0)
 		if exists('s:foundroot') | brea | en
 	endfo
 	unl! s:foundroot
@@ -1413,9 +1413,8 @@ fu! s:getenv()
 	let s:wpmode = exists('b:ctrlp_working_path_mode')
 		\ ? b:ctrlp_working_path_mode : s:pathmode
 	if exists('g:ctrlp_extensions')
-		if index(g:ctrlp_extensions, 'undo') >= 0 && exists('*undotree')
-			\ && ( v:version > 703 || ( v:version == 703 && has('patch005') ) )
-			let s:undotree = undotree()
+		if index(g:ctrlp_extensions, 'undo') >= 0
+			let s:undos = s:getundo()
 		en
 		if index(g:ctrlp_extensions, 'tag') >= 0
 			let s:tagfiles = s:tagfiles()
@@ -1538,6 +1537,18 @@ fu! s:extvar(key)
 	if exists('g:ctrlp_ext_vars')
 		cal map(filter(copy(g:ctrlp_ext_vars),
 			\ 'has_key(v:val, a:key)'), 'eval(v:val[a:key])')
+	en
+endf
+
+fu! s:getundo()
+	if exists('*undotree')
+		\ && ( v:version > 703 || ( v:version == 703 && has('patch005') ) )
+		retu [1, undotree()]
+	el
+		redi => result
+		sil! undol
+		redi END
+		retu [0, split(result, "\n")[1:]]
 	en
 endf
 
