@@ -38,16 +38,23 @@ let g:loaded_ctrlp_sample = 1
 " + the long and short names to use for the statusline
 " + the matching type: line, path, tabs, tabe
 "                      |     |     |     |
-"                      |     |     |     `- match last tab delimited str
-"                      |     |     `- match first tab delimited str
-"                      |     `- match full line like file/dir path
+"                      |     |     |     `- match until last tab
+"                      |     |     `- match until first tab
+"                      |     `- match full line like a file or a dir path
 "                      `- match full line
+" + the name of the function to be called before starting ctrlp
+" + the name of the function to be called after closing ctrlp
+" + the name of the extension's option handling function which is called when
+"   running :CtrlPReload
 let s:sample_var = {
 	\ 'init': 'ctrlp#sample#init()',
 	\ 'accept': 'ctrlp#sample#accept',
 	\ 'lname': 'long statusline name',
 	\ 'sname': 'shortname',
 	\ 'type': 'line',
+	\ 'enter': 'ctrlp#sample#enter()',
+	\ 'exit': 'ctrlp#sample#exit()',
+	\ 'opts': 'ctrlp#sample#opts()',
 	\ }
 
 

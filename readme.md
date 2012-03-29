@@ -20,6 +20,6 @@ let g:ctrlp_extensions = ['sample']
 
 A 4th search type will show up when you open CtrlP.
 
-_Check out [sample.vim][1] for more details_
+_Check out [sample.vim][1] for more details. For a list of extensions bundled with ctrlp, see `:help ctrlp-extensions`._
 
 [1]: https://github.com/kien/ctrlp.vim/blob/extensions/autoload/ctrlp/sample.vim
