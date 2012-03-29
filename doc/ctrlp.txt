@@ -250,6 +250,7 @@ Examples: >
     \ 'link': 'SOME_BAD_SYMBOLIC_LINKS',
     \ }
 <
+Note: ignoring only works when |globpath()| is used to scan for files.
 
                                                           *'g:ctrlp_max_files'*
 The maximum number of files to scan, set to 0 for no limit: >
@@ -385,6 +386,7 @@ Example: >
     \ }
 <
 Structure of the functions: >
+  " Main statusline
   function! Function_Name_1(focus, byfname, regex, prev, item, next, marked)
     " Arguments:
     " |
@@ -406,6 +408,7 @@ Structure of the functions: >
     return full_statusline
   endfunction
 
+  " Progress statusline
   function! Function_Name_2(str)
     " a:str : Either the number of files scanned so far, or a string indicating
     "         the current directory is being scanned with a user_command.
@@ -642,8 +645,8 @@ c)  End the string with a colon ':' followed by a Vim command to execute that
     with a backslash: '\:'. When opening multiple files, the command will be
     executed on each opening file.
     e.g. 'abc:45' will open the selected file and jump to line 45.
-         'abc:/my\:string' will open the selected file and jump to the first
-         instance of 'my:function'.
+         'abc:/any\:string' will open the selected file and jump to the first
+         instance of 'any:string'.
          'abc:+setf\ myfiletype|50' will open the selected file and set its
          filetype to 'myfiletype', then jump to line 50.
          'abc:diffthis' will open the selected file and run |:diffthis| on the
@@ -877,6 +880,8 @@ Special thanks:~
 
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
+
+Before 2012/03/28~
 
     + New option: |g:ctrlp_match_func|, allow using a custom fuzzy matcher.
     + Rename:
