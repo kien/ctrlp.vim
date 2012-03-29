@@ -11,10 +11,11 @@ en
 let g:loaded_ctrlp_tag = 1
 
 let s:tag_var = {
-	\ 'init': 'ctrlp#tag#init(s:tagfiles)',
+	\ 'init': 'ctrlp#tag#init()',
 	\ 'accept': 'ctrlp#tag#accept',
 	\ 'lname': 'tags',
 	\ 'sname': 'tag',
+	\ 'enter': 'ctrlp#tag#enter()',
 	\ 'type': 'tabs',
 	\ }
 
@@ -57,10 +58,10 @@ fu! s:filter(tags)
 	retu alltags
 endf
 " Public {{{1
-fu! ctrlp#tag#init(tagfiles)
-	if empty(a:tagfiles) | retu [] | en
+fu! ctrlp#tag#init()
+	if empty(s:tagfiles) | retu [] | en
 	let g:ctrlp_alltags = []
-	let tagfiles = sort(filter(a:tagfiles, 'count(a:tagfiles, v:val) == 1'))
+	let tagfiles = sort(filter(s:tagfiles, 'count(s:tagfiles, v:val) == 1'))
 	for each in tagfiles
 		let alltags = s:filter(ctrlp#utils#readfile(each))
 		cal extend(g:ctrlp_alltags, alltags)
@@ -100,6 +101,11 @@ endf
 
 fu! ctrlp#tag#id()
 	retu s:id
+endf
+
+fu! ctrlp#tag#enter()
+	let s:tagfiles = filter(map(tagfiles(), 'fnamemodify(v:val, ":p")'),
+		\ 'filereadable(v:val)')
 endf
 "}}}
 

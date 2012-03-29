@@ -173,6 +173,7 @@ let s:hlgrps = {
 fu! s:Open()
 	cal s:log(1)
 	cal s:getenv()
+	cal s:extvar('enter')
 	sil! exe 'noa keepa' ( s:mwbottom ? 'bo' : 'to' ) '1new ControlP'
 	let [s:bufnr, s:prompt, s:winw] = [bufnr('%'), ['', '', ''], winwidth(0)]
 	abc <buffer>
@@ -1412,14 +1413,6 @@ fu! s:getenv()
 	let s:currwin = s:mwbottom ? winnr() : winnr() + has('autocmd')
 	let s:wpmode = exists('b:ctrlp_working_path_mode')
 		\ ? b:ctrlp_working_path_mode : s:pathmode
-	if exists('g:ctrlp_extensions')
-		if index(g:ctrlp_extensions, 'undo') >= 0
-			let s:undos = s:getundo()
-		en
-		if index(g:ctrlp_extensions, 'tag') >= 0
-			let s:tagfiles = s:tagfiles()
-		en
-	en
 endf
 
 fu! s:lastvisual()
@@ -1529,26 +1522,10 @@ fu! s:type(...)
 		\ ? g:ctrlp_ext_vars[s:itemtype - 3][a:0 ? 'type' : 'sname'] : s:itemtype
 endf
 
-fu! s:tagfiles()
-	retu filter(map(tagfiles(), 'fnamemodify(v:val, ":p")'), 'filereadable(v:val)')
-endf
-
 fu! s:extvar(key)
 	if exists('g:ctrlp_ext_vars')
 		cal map(filter(copy(g:ctrlp_ext_vars),
 			\ 'has_key(v:val, a:key)'), 'eval(v:val[a:key])')
-	en
-endf
-
-fu! s:getundo()
-	if exists('*undotree')
-		\ && ( v:version > 703 || ( v:version == 703 && has('patch005') ) )
-		retu [1, undotree()]
-	el
-		redi => result
-		sil! undol
-		redi END
-		retu [0, split(result, "\n")[1:]]
 	en
 endf
 
