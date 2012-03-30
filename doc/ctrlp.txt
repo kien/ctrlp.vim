@@ -111,12 +111,10 @@ Note: you can use b:ctrlp_working_path_mode (a |b:var|) to set this option on a
 per buffer basis.
 
                                                        *'g:ctrlp_root_markers'*
-Use this to set your own root markers in addition to the default ones. Your
-markers will take precedence: >
+Use this to set your own root markers in addition to the default ones (.git/,
+.hg/, .svn/, .bzr/, and _darcs/). Your markers will take precedence: >
   let g:ctrlp_root_markers = ['']
 <
-These markers (builtins and yours) will serve as identifiers for the '/' and
-'\' special inputs (|ctrlp-input-formats| (e)).
 
                                                         *'g:ctrlp_use_caching'*
 Set this to 0 to disable per-session caching. When disabled, caching will still
@@ -368,6 +366,12 @@ after typing’s been stopped for a certain amount of time: >
 <
 If is 1, update after 250ms. If bigger than 1, the number will be used as the
 delay time in milliseconds.
+
+                                                      *'g:ctrlp_default_input'*
+Set this to 1 to enable seeding the prompt with the current file’s relative
+path: >
+  let g:ctrlp_default_input = 0
+<
 
                                                          *'g:ctrlp_use_migemo'*
 Set this to 1 to use Migemo Pattern for Japanese filenames. Migemo Search only
@@ -881,9 +885,10 @@ Special thanks:~
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
 
-Before 2012/03/28~
+Before 2012/03/31~
 
-    + New option: |g:ctrlp_match_func|, allow using a custom fuzzy matcher.
+    + New option: |g:ctrlp_default_input|, default input when entering |CtrlP|.
+                  |g:ctrlp_match_func|, allow using a custom fuzzy matcher.
     + Rename:
         *ClearCtrlPCache* -> |CtrlPClearCache|
         *ClearAllCtrlPCaches* -> |CtrlPClearAllCaches|

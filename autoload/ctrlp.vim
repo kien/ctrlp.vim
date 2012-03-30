@@ -14,6 +14,7 @@ fu! s:opts()
 		\ 'g:ctrlp_by_filename':           ['s:byfname', 0],
 		\ 'g:ctrlp_clear_cache_on_exit':   ['s:clrex', 1],
 		\ 'g:ctrlp_custom_ignore':         ['s:usrign', ''],
+		\ 'g:ctrlp_default_input':         ['s:deftxt', 0],
 		\ 'g:ctrlp_dont_split':            ['s:nosplit', 'netrw'],
 		\ 'g:ctrlp_dotfiles':              ['s:dotfiles', 1],
 		\ 'g:ctrlp_extensions':            ['s:extensions', []],
@@ -463,6 +464,16 @@ fu! s:BuildPrompt(upd, ...)
 	if empty(prt[1]) && !( a:0 && !a:1 )
 		exe 'echoh' hibase '| echon "_" | echoh None'
 	en
+endf
+" - SetDefTxt() {{{1
+fu! s:SetDefTxt()
+	if s:deftxt == '0' || s:pathmode == 1 | retu | en
+	let txt = s:deftxt
+	if !type(txt)
+		let txt = txt ? ctrlp#rmbasedir([s:crfpath])[0] : ''
+		let txt = txt != '' ? txt.s:lash(s:crfpath) : ''
+	en
+	let s:prompt[0] = txt
 endf
 " ** Prt Actions {{{1
 " Editing {{{2
@@ -1560,6 +1571,7 @@ fu! ctrlp#init(type, ...)
 	let [s:matches, s:init] = [1, 1]
 	cal s:Open()
 	cal s:SetWD(a:0 ? a:1 : '')
+	cal s:SetDefTxt()
 	cal s:MapKeys()
 	if has('syntax') && exists('g:syntax_on')
 		cal ctrlp#syntax()
