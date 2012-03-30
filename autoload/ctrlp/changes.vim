@@ -17,6 +17,7 @@ let s:changes_var = {
 	\ 'sname': 'chs',
 	\ 'exit': 'ctrlp#changes#exit()',
 	\ 'type': 'tabe',
+	\ 'sort': 0,
 	\ }
 
 let g:ctrlp_ext_vars = exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)

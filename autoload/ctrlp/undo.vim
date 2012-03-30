@@ -18,6 +18,7 @@ let s:undo_var = {
 	\ 'enter': 'ctrlp#undo#enter()',
 	\ 'exit': 'ctrlp#undo#exit()',
 	\ 'type': 'line',
+	\ 'sort': 0,
 	\ }
 
 let g:ctrlp_ext_vars = exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)

@@ -16,6 +16,7 @@ let s:var_qf = {
 	\ 'lname': 'quickfix',
 	\ 'sname': 'qfx',
 	\ 'type': 'line',
+	\ 'sort': 0,
 	\ }
 
 let g:ctrlp_ext_vars = exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)

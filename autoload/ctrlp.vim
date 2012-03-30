@@ -389,21 +389,22 @@ fu! s:Render(lines, pat, ipt)
 	sil! exe '%d _ | res' s:height
 	" Print the new items
 	if empty(lines)
-		let s:matched = []
+		let [s:matched, s:lines] = [[], []]
 		cal setline(1, ' == NO ENTRIES ==')
 		setl noma nocul
 		cal s:unmarksigns()
 		if s:dohighlight() | cal clearmatches() | en
 		retu
 	en
-	if ( ( s:itemtype != 2 && !exists('g:ctrlp_nolimit') )
-		\ || s:prompt != ['', '', ''] ) && s:matcher == {}
+	" Sorting
+	if s:dosort()
 		let s:compat = a:pat
 		cal sort(lines, 's:mixedsort')
 		unl s:compat
 	en
-	if s:mwreverse | cal reverse(lines) | en
 	let s:matched = copy(lines)
+	if s:mwreverse | cal reverse(lines) | en
+	let s:lines = copy(lines)
 	cal map(lines, 's:formatline(v:val, a:ipt)')
 	cal setline(1, lines)
 	setl noma cul
@@ -518,16 +519,20 @@ endf
 
 fu! s:PrtInsert(type)
 	unl! s:hstgot
+	let s:act_add = 1
 	let s:prompt[0] .= a:type == 'w' ? s:crword
 		\ : a:type == 's' ? getreg('/')
 		\ : a:type == 'v' ? s:crvisual
 		\ : a:type == '+' ? substitute(getreg('+'), '\n', '\\n', 'g') : s:prompt[0]
 	cal s:BuildPrompt(1)
+	unl s:act_add
 endf
 
 fu! s:PrtExpandDir()
 	let prt = s:prompt
 	if prt[0] == '' | retu | en
+	unl! s:hstgot
+	let s:act_add = 1
 	let [base, seed] = s:headntail(prt[0])
 	let dirs = s:dircompl(base, seed)
 	if len(dirs) == 1
@@ -536,6 +541,7 @@ fu! s:PrtExpandDir()
 		let prt[0] .= s:findcommon(dirs, prt[0])
 	en
 	cal s:BuildPrompt(1)
+	unl s:act_add
 endf
 " Movement {{{2
 fu! s:PrtCurLeft()
@@ -574,7 +580,7 @@ fu! s:PrtSelectMove(dir)
 endf
 
 fu! s:PrtSelectJump(char, ...)
-	let lines = copy(s:matched)
+	let lines = copy(s:lines)
 	if a:0
 		cal map(lines, 'split(v:val, ''[\/]\ze[^\/]\+$'')[-1]')
 	en
@@ -816,7 +822,7 @@ fu! s:AcceptSelection(mode)
 	let str = join(s:prompt, '')
 	if a:mode == 'e' | if s:SpecInputs(str) | retu | en | en
 	" Get the selected line
-	let line = !empty(s:matched) ? s:matched[line('.') - 1] : ''
+	let line = !empty(s:lines) ? s:lines[line('.') - 1] : ''
 	if a:mode != 'e' && s:itemtype < 3 && line == ''
 		\ && str !~ '\v^(\.\.|/|\\|\?)$'
 		cal s:CreateNewFile(a:mode) | retu
@@ -864,7 +870,7 @@ fu! s:MarkToOpen()
 	if s:bufnr <= 0 || s:opmul == '0' || ( s:itemtype > 2 && s:type() !~ 'rts' )
 		retu
 	en
-	let line = !empty(s:matched) ? s:matched[line('.') - 1] : ''
+	let line = !empty(s:lines) ? s:lines[line('.') - 1] : ''
 	if empty(line) | retu | en
 	let filpath = fnamemodify(line, ':p')
 	if exists('s:marked') && s:dictindex(s:marked, filpath) > 0
@@ -1272,8 +1278,8 @@ endf
 
 fu! s:remarksigns()
 	if !s:dosigns() | retu | en
-	for ic in range(1, len(s:matched))
-		let key = s:dictindex(s:marked, fnamemodify(s:matched[ic - 1], ':p'))
+	for ic in range(1, len(s:lines))
+		let key = s:dictindex(s:marked, fnamemodify(s:lines[ic - 1], ':p'))
 		if key > 0
 			exe 'sign place' key 'line='.ic.' name=ctrlpmark buffer='.s:bufnr
 		en
@@ -1386,6 +1392,11 @@ fu! s:argmaps(md, ...)
 	retu a:md
 endf
 " Misc {{{2
+fu! s:dosort()
+	retu s:matcher == {} && ( ( s:itemtype != 2 && !exists('g:ctrlp_nolimit') )
+		\ || s:prompt != ['', '', ''] ) && s:getextvar('sort')
+endf
+
 fu! s:narrowable()
 	retu exists('s:act_add') && exists('s:matched') && s:matched != []
 		\ && exists('s:mdata') && s:mdata[:2] == [s:dyncwd, s:itemtype, s:regexp]
@@ -1538,6 +1549,14 @@ fu! s:extvar(key)
 		cal map(filter(copy(g:ctrlp_ext_vars),
 			\ 'has_key(v:val, a:key)'), 'eval(v:val[a:key])')
 	en
+endf
+
+fu! s:getextvar(key)
+	if s:itemtype > 2
+		let vars = g:ctrlp_ext_vars[s:itemtype - 3]
+		retu has_key(vars, a:key) ? vars[a:key] : -1
+	en
+	retu -1
 endf
 
 fu! ctrlp#exit()
