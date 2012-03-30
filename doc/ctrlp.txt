@@ -36,7 +36,7 @@ OPTIONS                                                         *ctrlp-options*
 Below are the available options and their default values:~
 
                                                                 *'g:ctrlp_map'*
-Use this option to change the mapping to invoke |CtrlP| in |Normal| mode: >
+Use this option to change the mapping to invoke CtrlP in |Normal| mode: >
   let g:ctrlp_map = '<c-p>'
 <
 
@@ -80,7 +80,7 @@ Set the maximum height of the match window: >
 
                                                       *'g:ctrlp_switch_buffer'*
 When opening a file with <cr> or <c-t>, if the file’s already opened somewhere
-|CtrlP| will try to jump to it instead of opening a new instance: >
+CtrlP will try to jump to it instead of opening a new instance: >
   let g:ctrlp_switch_buffer = 2
 <
   1 - only jump to the buffer if it’s opened in the current tab.
@@ -88,7 +88,7 @@ When opening a file with <cr> or <c-t>, if the file’s already opened somewhere
   0 - disable this feature.
 
                                                        *'g:ctrlp_reuse_window'*
-When opening a file with <cr>, |CtrlP| avoids opening it in windows created by
+When opening a file with <cr>, CtrlP avoids opening it in windows created by
 plugins, help and quickfix. Use this to setup some exceptions: >
   let g:ctrlp_reuse_window = 'netrw'
 <
@@ -99,7 +99,7 @@ Example: >
 <
 
                                                   *'g:ctrlp_working_path_mode'*
-When starting up, |CtrlP| sets its local working directory according to this
+When starting up, CtrlP sets its local working directory according to this
 variable: >
   let g:ctrlp_working_path_mode = 2
 <
@@ -121,7 +121,7 @@ Set this to 0 to disable per-session caching. When disabled, caching will still
 be enabled for directories that have more than 4000 files: >
   let g:ctrlp_use_caching = 1
 <
-Note: you can quickly purge the cache by pressing <F5> while inside |CtrlP|.
+Note: you can quickly purge the cache by pressing <F5> while inside CtrlP.
 
                                                 *'g:ctrlp_clear_cache_on_exit'*
 Set this to 0 to enable cross-session caching by not deleting the cache files
@@ -135,7 +135,7 @@ Set the directory to store the cache files: >
 <
 
                                                     *'g:ctrlp_prompt_mappings'*
-Use this to customize the mappings inside |CtrlP|’s prompt to your liking. You
+Use this to customize the mappings inside CtrlP’s prompt to your liking. You
 only need to keep the lines that you’ve changed the values (inside []): >
   let g:ctrlp_prompt_mappings = {
     \ 'PrtBS()':              ['<bs>', '<c-]>'],
@@ -180,13 +180,12 @@ default <c-h> mapping: >
 <
 
                                                            *'g:ctrlp_mruf_max'*
-Specify the number of recently opened files you want |CtrlP| to remember: >
+Specify the number of recently opened files you want CtrlP to remember: >
   let g:ctrlp_mruf_max = 250
 <
 
                                                        *'g:ctrlp_mruf_exclude'*
-Files you don’t want |CtrlP| to remember. Use |regexp| to specify the patterns:
->
+Files you don’t want CtrlP to remember. Use |regexp| to specify the patterns: >
   let g:ctrlp_mruf_exclude = ''
 <
 Examples: >
@@ -195,7 +194,7 @@ Examples: >
 <
 
                                                        *'g:ctrlp_mruf_include'*
-And if you want |CtrlP| to only remember some files, specify them here: >
+And if you want CtrlP to only remember some files, specify them here: >
   let g:ctrlp_mruf_include = ''
 <
 Example: >
@@ -219,7 +218,7 @@ Set to 1 to sort the MRU file list to most-recently-entered-buffer order: >
 <
 
                                                            *'g:ctrlp_dotfiles'*
-Set this to 0 if you don’t want |CtrlP| to scan for dotfiles and dotdirs: >
+Set this to 0 if you don’t want CtrlP to scan for dotfiles and dotdirs: >
   let g:ctrlp_dotfiles = 1
 <
 You can use |'wildignore'| to exclude anything from the search.
@@ -237,7 +236,7 @@ tools on Windows). So be a little mindful of what you put in your |wildignore|.
 
                                                       *'g:ctrlp_custom_ignore'*
 In addition to |'wildignore'|, use this for files and directories you want only
-|CtrlP| to not show. Use |regexp| to specify the patterns: >
+CtrlP to not show. Use |regexp| to specify the patterns: >
   let g:ctrlp_custom_ignore = ''
 <
 Examples: >
@@ -301,7 +300,7 @@ If the fallback_command is empty or not defined, |globpath()| will then be used
 when searching outside a repo.
 
                                                         *'g:ctrlp_max_history'*
-The maximum number of input strings you want |CtrlP| to remember. The default
+The maximum number of input strings you want CtrlP to remember. The default
 value mirrors Vim’s global |'history'| option: >
   let g:ctrlp_max_history = &history
 <
@@ -380,7 +379,7 @@ works in |regexp| mode. To split the pattern, separate words with space: >
 <
 
                                                         *'g:ctrlp_status_func'*
-Use this to customize the statuslines for the |CtrlP| window: >
+Use this to customize the statuslines for the CtrlP window: >
   let g:ctrlp_status_func = {}
 <
 Example: >
@@ -423,7 +422,7 @@ Structure of the functions: >
 See https://gist.github.com/1610859 for a working example.
 
                                                          *'g:ctrlp_match_func'*
-Set an external fuzzy matching function for |CtrlP| to use: >
+Set an external fuzzy matching function for CtrlP to use: >
   let g:ctrlp_match_func = {}
 <
 Example: >
@@ -463,7 +462,7 @@ COMMANDS                                                       *ctrlp-commands*
 
                                                                        *:CtrlP*
 :CtrlP [starting-directory]
-   Open |CtrlP| in find file mode.
+   Open CtrlP in find file mode.
 
    If no argument is given, the value of |g:ctrlp_working_path_mode| will be
    used to determine the starting directory.
@@ -471,17 +470,17 @@ COMMANDS                                                       *ctrlp-commands*
 
                                                                  *:CtrlPBuffer*
 :CtrlPBuffer
-   Open |CtrlP| in find buffer mode.
+   Open CtrlP in find buffer mode.
 
                                                                     *:CtrlPMRU*
 :CtrlPMRU
-   Open |CtrlP| in find Most-Recently-Used file mode.
+   Open CtrlP in find Most-Recently-Used file mode.
 
                                                              *:CtrlPClearCache*
 :CtrlPClearCache
    Flush the cache for the current working directory. The same as pressing <F5>
-   inside |CtrlP|.
-   You can also enable/disable caching with the option |g:ctrlp_use_caching|.
+   inside CtrlP.
+   You can enable/disable caching with the |g:ctrlp_use_caching| option.
 
                                                          *:CtrlPClearAllCaches*
 :CtrlPClearAllCaches
@@ -508,7 +507,7 @@ MAPPINGS                                                       *ctrlp-mappings*
 
                                                                 *'ctrlp-<c-p>'*
 <c-p>
-   Default |Normal| mode mapping to open the |CtrlP| prompt in find file mode.
+   Default |Normal| mode mapping to open the CtrlP prompt in find file mode.
 
 Once inside the prompt:~
 
@@ -617,7 +616,7 @@ Once inside the prompt:~
   <esc>,
   <c-c>,
   <c-g>
-    Exit |CtrlP|.
+    Exit CtrlP.
     Note: <c-c> can also be used to stop the scan if it’s taking too long.
 
 Choose your own mappings with |g:ctrlp_prompt_mappings|.
@@ -654,7 +653,7 @@ c)  End the string with a colon ':' followed by a Vim command to execute that
          'abc:+setf\ myfiletype|50' will open the selected file and set its
          filetype to 'myfiletype', then jump to line 50.
          'abc:diffthis' will open the selected file and run |:diffthis| on the
-         first 4 files.
+         first 4 files (if marked).
 
     See also Vim’s |++opt| and |+cmd|.
 
@@ -720,10 +719,10 @@ Available extensions:~
     - Command: ':CtrlPDir [starting-directory]'
     - Search for a directory and change the working directory to it.
     - Mappings:
-      + <cr> change the local working directory for |CtrlP| and keep it open.
+      + <cr> change the local working directory for CtrlP and keep it open.
       + <c-t> change the global working directory (exit).
       + <c-v> change the local working directory for the current window (exit).
-      + <c-x> change the global working directory to |CtrlP|’s current local
+      + <c-x> change the global working directory to CtrlP’s current local
         working directory (exit).
 
                                                                     *:CtrlPRTS*
@@ -785,7 +784,7 @@ Examples: >
 CUSTOMIZATION                                             *ctrlp-customization*
 
 Highlighting:~
-  * For the |CtrlP| buffer:
+  * For the CtrlP buffer:
     CtrlPNoEntries : the message when no match is found (Error)
     CtrlPMatch     : the matched pattern (Identifier)
     CtrlPLinePre   : the line prefix '>' in the match window
@@ -887,7 +886,7 @@ CHANGELOG                                                     *ctrlp-changelog*
 
 Before 2012/03/31~
 
-    + New option: |g:ctrlp_default_input|, default input when entering |CtrlP|.
+    + New option: |g:ctrlp_default_input|, default input when entering CtrlP.
                   |g:ctrlp_match_func|, allow using a custom fuzzy matcher.
     + Rename:
         *ClearCtrlPCache* -> |CtrlPClearCache|
