@@ -33,19 +33,19 @@ let g:loaded_ctrlp_sample = 1
 " The main variable for this extension.
 "
 " The values are:
-" + the name of the input function (including the brackets and any argument)
-" + the name of the action function (only the name)
-" + the long and short names to use for the statusline
-" + the matching type: line, path, tabs, tabe
-"                      |     |     |     |
-"                      |     |     |     `- match until last tab
-"                      |     |     `- match until first tab
-"                      |     `- match full line like a file or a dir path
-"                      `- match full line
-" + the name of the function to be called before starting ctrlp
-" + the name of the function to be called after closing ctrlp
-" + the name of the extension's option handling function which is called when
-"   running :CtrlPReload
+" + init: the name of the input function (including the brackets and arguments)
+" + accept: the name of the action function (only the name)
+" + lname & sname: the long and short names to use for the statusline
+" + type: the matching type
+"   - line : match full line
+"   - path : match full line like a file or a dir path
+"   - tabs : match until first tab
+"   - tabe : match until last tab
+" + enter: the name of the function to be called before starting ctrlp
+" + exit: the name of the function to be called after closing ctrlp
+" + opts: the name of the extension's option handling function which is called
+"   when running :CtrlPReload
+" + sort: enable/disable sorting
 let s:sample_var = {
 	\ 'init': 'ctrlp#sample#init()',
 	\ 'accept': 'ctrlp#sample#accept',
@@ -55,6 +55,7 @@ let s:sample_var = {
 	\ 'enter': 'ctrlp#sample#enter()',
 	\ 'exit': 'ctrlp#sample#exit()',
 	\ 'opts': 'ctrlp#sample#opts()',
+	\ 'sort': 0,
 	\ }
 
 
