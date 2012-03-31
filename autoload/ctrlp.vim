@@ -59,7 +59,6 @@ fu! s:opts()
 	let s:glob = s:dotfiles ? '.*\|*' : '*'
 	let s:igntype = empty(s:usrign) ? -1 : type(s:usrign)
 	" Extensions
-	let g:ctrlp_builtins = 2
 	for each in s:extensions
 		exe 'ru autoload/ctrlp/'.each.'.vim'
 	endfo
@@ -174,7 +173,7 @@ let s:hlgrps = {
 fu! s:Open()
 	cal s:log(1)
 	cal s:getenv()
-	cal s:extvar('enter')
+	cal s:execextvar('enter')
 	sil! exe 'noa keepa' ( s:mwbottom ? 'bo' : 'to' ) '1new ControlP'
 	let [s:bufnr, s:prompt, s:winw] = [bufnr('%'), ['', '', ''], winwidth(0)]
 	abc <buffer>
@@ -206,7 +205,7 @@ fu! s:Close()
 	unl! s:focus s:hisidx s:hstgot s:marked s:statypes s:cline s:init s:savestr
 		\ g:ctrlp_nolimit
 	cal ctrlp#recordhist()
-	cal s:extvar('exit')
+	cal s:execextvar('exit')
 	cal s:log(0)
 	ec
 endf
@@ -230,7 +229,7 @@ fu! ctrlp#reset()
 	cal s:autocmds()
 	cal ctrlp#utils#opts()
 	cal ctrlp#mrufiles#opts()
-	cal s:extvar('opts')
+	cal s:execextvar('opts')
 endf
 " * Files {{{1
 fu! ctrlp#files()
@@ -1548,7 +1547,7 @@ fu! s:type(...)
 		\ ? g:ctrlp_ext_vars[s:itemtype - 3][a:0 ? 'type' : 'sname'] : s:itemtype
 endf
 
-fu! s:extvar(key)
+fu! s:execextvar(key)
 	if exists('g:ctrlp_ext_vars')
 		cal map(filter(copy(g:ctrlp_ext_vars),
 			\ 'has_key(v:val, a:key)'), 'eval(v:val[a:key])')
