@@ -1288,7 +1288,7 @@ endf
 fu! s:dosigns()
 	retu exists('s:marked') && s:bufnr > 0 && s:opmul != '0' && has('signs')
 endf
-" Lists and Dictionaries {{{2
+" Lists & Dictionaries {{{2
 fu! s:dictindex(dict, expr)
 	for key in keys(a:dict)
 		if a:dict[key] == a:expr | retu key | en
@@ -1406,6 +1406,47 @@ fu! s:narrowable()
 		\ && s:matcher == {}
 endf
 
+fu! s:migemo(str)
+	let str = a:str
+	let dict = s:glbpath(&rtp, printf("dict/%s/migemo-dict", &enc), 1)
+	if !len(dict)
+		let dict = s:glbpath(&rtp, "dict/migemo-dict", 1)
+	en
+	if len(dict)
+		let [tokens, str, cmd] = [split(str, '\s'), '', 'cmigemo -v -w %s -d %s']
+		for token in tokens
+			let rtn = system(printf(cmd, shellescape(token), shellescape(dict)))
+			let str .= !v:shell_error && strlen(rtn) > 0 ? '.*'.rtn : token
+		endfo
+	en
+	retu str
+endf
+
+fu! s:strwidth(str)
+	retu exists('*strdisplaywidth') ? strdisplaywidth(a:str) : strlen(a:str)
+endf
+
+fu! ctrlp#j2l(nr)
+	exe a:nr
+	sil! norm! zvzz
+endf
+
+fu! s:maxf(len)
+	retu s:maxfiles && a:len > s:maxfiles ? 1 : 0
+endf
+
+fu! s:regexfilter(str)
+	let str = a:str
+	for key in keys(s:fpats) | if match(str, key) >= 0
+		let str = substitute(str, s:fpats[key], '', 'g')
+	en | endfo
+	retu str
+endf
+
+fu! s:walker(m, p, d)
+	retu a:d > 0 ? a:p < a:m ? a:p + a:d : 0 : a:p > 0 ? a:p + a:d : a:m
+endf
+
 fu! s:matargs(mfunc, str)
 	let match_type = {
 		\ 'match': 'full-line',
@@ -1415,20 +1456,7 @@ fu! s:matargs(mfunc, str)
 		\ }
 	retu [s:matcher['match'], a:str, match_type[a:mfunc]]
 endf
-
-fu! s:log(m)
-	if exists('g:ctrlp_log') && g:ctrlp_log | if a:m
-		let cadir = ctrlp#utils#cachedir()
-		sil! exe 'redi! >' cadir.s:lash(cadir).'ctrlp.log'
-	el
-		sil! redi END
-	en | en
-endf
-
-fu! s:strwidth(str)
-	retu exists('*strdisplaywidth') ? strdisplaywidth(a:str) : strlen(a:str)
-endf
-
+" Entering & Exiting {{{2
 fu! s:getenv()
 	let [s:cwd, s:winres] = [getcwd(), [winrestcmd(), &lines, winnr('$')]]
 	let [s:crfile, s:crfpath] = [expand('%:p', 1), expand('%:p:h', 1)]
@@ -1452,20 +1480,13 @@ fu! s:lastvisual()
 	retu selected
 endf
 
-fu! s:migemo(str)
-	let str = a:str
-	let dict = s:glbpath(&rtp, printf("dict/%s/migemo-dict", &enc), 1)
-	if !len(dict)
-		let dict = s:glbpath(&rtp, "dict/migemo-dict", 1)
-	en
-	if len(dict)
-		let [tokens, str, cmd] = [split(str, '\s'), '', 'cmigemo -v -w %s -d %s']
-		for token in tokens
-			let rtn = system(printf(cmd, shellescape(token), shellescape(dict)))
-			let str .= !v:shell_error && strlen(rtn) > 0 ? '.*'.rtn : token
-		endfo
-	en
-	retu str
+fu! s:log(m)
+	if exists('g:ctrlp_log') && g:ctrlp_log | if a:m
+		let cadir = ctrlp#utils#cachedir()
+		sil! exe 'redi! >' cadir.s:lash(cadir).'ctrlp.log'
+	el
+		sil! redi END
+	en | en
 endf
 
 fu! s:openfile(cmd, fid, tail, ...)
@@ -1483,32 +1504,7 @@ fu! s:openfile(cmd, fid, tail, ...)
 		cal ctrlp#setlcdir()
 	en
 endf
-
-fu! s:writecache(read_cache, cache_file)
-	if !a:read_cache && ( ( g:ctrlp_newcache || !filereadable(a:cache_file) )
-		\ && s:caching || len(g:ctrlp_allfiles) > s:nocache_lim )
-		if len(g:ctrlp_allfiles) > s:nocache_lim | let s:caching = 1 | en
-		cal ctrlp#utils#writecache(g:ctrlp_allfiles)
-	en
-endf
-
-fu! ctrlp#j2l(nr)
-	exe a:nr
-	sil! norm! zvzz
-endf
-
-fu! s:regexfilter(str)
-	let str = a:str
-	for key in keys(s:fpats) | if match(str, key) >= 0
-		let str = substitute(str, s:fpats[key], '', 'g')
-	en | endfo
-	retu str
-endf
-
-fu! s:walker(m, p, d)
-	retu a:d > 0 ? a:p < a:m ? a:p + a:d : 0 : a:p > 0 ? a:p + a:d : a:m
-endf
-
+" Matchfuncs {{{2
 fu! s:matchfname(item, pat)
 	retu match(split(a:item, s:lash)[-1], a:pat)
 endf
@@ -1520,9 +1516,13 @@ endf
 fu! s:matchtabe(item, pat)
 	retu match(split(a:item, '\t\+[^\t]\+$')[0], a:pat)
 endf
-
-fu! s:maxf(len)
-	retu s:maxfiles && a:len > s:maxfiles ? 1 : 0
+" Cache {{{2
+fu! s:writecache(read_cache, cache_file)
+	if !a:read_cache && ( ( g:ctrlp_newcache || !filereadable(a:cache_file) )
+		\ && s:caching || len(g:ctrlp_allfiles) > s:nocache_lim )
+		if len(g:ctrlp_allfiles) > s:nocache_lim | let s:caching = 1 | en
+		cal ctrlp#utils#writecache(g:ctrlp_allfiles)
+	en
 endf
 
 fu! s:insertcache(str)
@@ -1577,11 +1577,7 @@ endf
 " * Initialization {{{1
 fu! ctrlp#setlines(type)
 	let s:itemtype = a:type
-	let types = [
-		\ 'ctrlp#files()',
-		\ 'ctrlp#buffers()',
-		\ 'ctrlp#mrufiles#list()',
-		\ ]
+	let types = ['ctrlp#files()', 'ctrlp#buffers()', 'ctrlp#mrufiles#list()']
 	if exists('g:ctrlp_ext_vars')
 		cal map(copy(g:ctrlp_ext_vars), 'add(types, v:val["init"])')
 	en
