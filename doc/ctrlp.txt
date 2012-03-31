@@ -51,7 +51,8 @@ Use this to disable the plugin completely: >
 <
 
                                                         *'g:ctrlp_by_filename'*
-Set this to 1 to set searching by filename (not full path) as the default: >
+Set this to 1 to set searching by filename (as opposed to full path) as the
+default: >
   let g:ctrlp_by_filename = 0
 <
 Can be toggled on/off by pressing <c-d> inside the prompt.
@@ -511,15 +512,15 @@ MAPPINGS                                                       *ctrlp-mappings*
 
 Once inside the prompt:~
 
+  <c-d>
+    Toggle between full-path search and filename only search.
+    Note: in filename mode, the prompt’s base is '>d>' instead of '>>>'
+
   <c-r>                                                    *'ctrlp-fullregexp'*
     Toggle between the string mode and full |regexp| mode.
     Note: in full |regexp| mode, the prompt’s base is 'r>>' instead of '>>>'
 
     See also |input-formats| (guide) and |g:ctrlp_regexp_search| (option).
-
-  <c-d>
-    Toggle between full-path search and filename only search.
-    Note: in filename mode, the prompt’s base is '>d>' instead of '>>>'
 
   <c-f>, 'forward'
   <c-up>
@@ -581,9 +582,9 @@ Once inside the prompt:~
   <c-v>
     Open selected file in a 'vertical' split.
 
+  <c-x>,
   <c-cr>,
-  <c-s>,
-  <c-x>
+  <c-s>
     Open selected file in a 'horizontal' split.
 
   <c-y>
@@ -597,21 +598,21 @@ Once inside the prompt:~
 
   <c-z>
     - Mark/unmark a file to be opened with <c-o>.
-    - Mark/unmark a file to create a new file in its directory using <c-y>.
+    - Or mark/unmark a file to create a new file in its directory using <c-y>.
 
   <c-o>
     Open files marked by <c-z>.
 
   <F5>
     - Refresh the match window and purge the cache for the current directory.
-    - Remove deleted files from MRU list.
+    - Or remove deleted files from the MRU list.
 
   <F7>
-    - Wipe MRU list.
-    - Delete MRU entries marked by <c-z>.
+    - Wipe the MRU list.
+    - Or delete MRU entries marked by <c-z>.
 
   <insert>
-    Insert the word under the cursor (in the active buffer) into the prompt.
+    Insert the word under the cursor (in the current buffer) into the prompt.
 
   <esc>,
   <c-c>,
@@ -635,11 +636,13 @@ INPUT FORMATS                                             *ctrlp-input-formats*
 Formats for inputting in the prompt:~
 
 a)  Simple string.
-    e.g. 'abc' is understood internally as 'a[^a]\{-}b[^b]\{-}c'
+
+    E.g. 'abc' is understood internally as 'a[^a]\{-}b[^b]\{-}c'
 
 b)  Vim |regexp|. If the input string contains '*' or '|', it’ll be treated as
     a Vim’s |regexp| |pattern| without any modification.
-    e.g. 'abc\d*efg' will be read as 'abc\d*efg'.
+
+    E.g. 'abc\d*efg' will be read as 'abc\d*efg'.
 
     See also |ctrlp-fullregexp| (keymap) and |g:ctrlp_regexp_search| (option).
 
@@ -647,12 +650,16 @@ c)  End the string with a colon ':' followed by a Vim command to execute that
     command after opening the file. If you need to use ':' literally, escape it
     with a backslash: '\:'. When opening multiple files, the command will be
     executed on each opening file.
-    e.g. 'abc:45' will open the selected file and jump to line 45.
+
+    E.g. 'abc:45' will open the selected file and jump to line 45.
+
          'abc:/any\:string' will open the selected file and jump to the first
          instance of 'any:string'.
+
          'abc:+setf\ myfiletype|50' will open the selected file and set its
          filetype to 'myfiletype', then jump to line 50.
-         'abc:diffthis' will open the selected file and run |:diffthis| on the
+
+         'abc:diffthis' will open the selected files and run |:diffthis| on the
          first 4 files (if marked).
 
     See also Vim’s |++opt| and |+cmd|.
@@ -668,11 +675,14 @@ e)  Similarly, submit '/' or '\' to find and go to the project’s root. If the
 f)  Type the name of a non-existent file and press <c-y> to create it. Mark a
     file with <c-z> to create the new file in the same directory as the marked
     file.
-    e.g. 'parentdir/newfile.txt' will create a directory named 'parentdir' as
+
+    E.g. 'parentdir/newfile.txt' will create a directory named 'parentdir' as
          well as 'newfile.txt'.
+
          If 'some/old/dirs/oldfile.txt' is marked with <c-z>, then 'parentdir'
          and 'newfile.txt' will be created in 'some/old/dirs'. The final path
          will then be 'some/old/dirs/parentdir/newfile.txt'.
+
          Use '\' in place of '/' on Windows (if |'ssl'| is not set).
 
 g)  Submit ? to open this help file.
@@ -696,7 +706,8 @@ Available extensions:~
     - Command: ':CtrlPTag'
     - Search for a tag within a generated central tags file, and jump to the
       definition. Use the Vim’s option |'tags'| to specify the names and the
-      locations of the tags file(s). Example: `set tags+=tags/help,doc/tags`
+      locations of the tags file(s).
+      E.g. set tags+=doc/tags
 
                                                                  *:CtrlPBufTag*
                                                               *:CtrlPBufTagAll*
