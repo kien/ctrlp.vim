@@ -104,8 +104,9 @@ fu! ctrlp#tag#id()
 endf
 
 fu! ctrlp#tag#enter()
-	let s:tagfiles = filter(map(tagfiles(), 'fnamemodify(v:val, ":p")'),
-		\ 'filereadable(v:val)')
+	let tfs = tagfiles()
+	let s:tagfiles = tfs != [] ? filter(map(tfs, 'fnamemodify(v:val, ":p")'),
+		\ 'filereadable(v:val)') : []
 endf
 "}}}
 

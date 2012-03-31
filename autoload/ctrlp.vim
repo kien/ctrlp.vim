@@ -320,16 +320,15 @@ fu! ctrlp#buffers()
 endf
 " * MatchedItems() {{{1
 fu! s:MatchIt(items, pat, limit, mfunc, ipt, exc)
-	let [newitems, id, itlen] = [[], 0, len(a:items)]
-	wh id < itlen
-		let item = a:items[id]
+	let [newitems, id] = [[], 0]
+	for item in a:items
 		let id += 1
 		try | if !( a:ipt && item == a:exc ) && call(a:mfunc, [item, a:pat]) >= 0
 			cal add(newitems, item)
 		en | cat | brea | endt
 		if a:limit > 0 && len(newitems) >= a:limit | brea | en
-	endw
-	let s:mdata = [s:dyncwd, s:itemtype, s:regexp, a:items[(id):]]
+	endfo
+	let s:mdata = [s:dyncwd, s:itemtype, s:regexp, s:sublist(a:items, id, -1)]
 	retu newitems
 endf
 
@@ -471,7 +470,8 @@ fu! s:SetDefTxt()
 	if s:deftxt == '0' || s:pathmode == 1 | retu | en
 	let txt = s:deftxt
 	if !type(txt)
-		let txt = txt ? ctrlp#rmbasedir([s:crfpath])[0] : ''
+		let txt = txt && !stridx(s:crfpath, s:dyncwd)
+			\ ? ctrlp#rmbasedir([s:crfpath])[0] : ''
 		let txt = txt != '' ? txt.s:lash(s:crfpath) : ''
 	en
 	let s:prompt[0] = txt
@@ -1289,7 +1289,7 @@ endf
 fu! s:dosigns()
 	retu exists('s:marked') && s:bufnr > 0 && s:opmul != '0' && has('signs')
 endf
-" Dictionaries {{{2
+" Lists and Dictionaries {{{2
 fu! s:dictindex(dict, expr)
 	for key in keys(a:dict)
 		if a:dict[key] == a:expr | retu key | en
@@ -1299,6 +1299,10 @@ endf
 
 fu! s:vacantdict(dict)
 	retu filter(range(1, max(keys(a:dict))), '!has_key(a:dict, v:val)')
+endf
+
+fu! s:sublist(l, s, e)
+	retu v:version > 701 ? a:l[(a:s):(a:e)] : remove(copy(a:l), a:s, a:e)
 endf
 " Buffers {{{2
 fu! s:buftab(bufnr, md)
