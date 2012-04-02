@@ -23,6 +23,7 @@ let s:dir_var = {
 	\ 'lname': 'dirs',
 	\ 'sname': 'dir',
 	\ 'type': 'path',
+	\ 'specinput': 1,
 	\ }
 
 let g:ctrlp_ext_vars = exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)

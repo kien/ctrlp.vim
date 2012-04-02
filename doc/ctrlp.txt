@@ -58,7 +58,7 @@ default: >
 Can be toggled on/off by pressing <c-d> inside the prompt.
 
                                                              *'g:ctrlp_regexp'*
-Set this to 1 to set |regexp| search as the default: >
+Set this to 1 to set regexp search as the default: >
   let g:ctrlp_regexp = 0
 <
 Can be toggled on/off by pressing <c-r> inside the prompt.
@@ -94,7 +94,7 @@ plugins, help and quickfix. Use this to setup some exceptions: >
   let g:ctrlp_reuse_window = 'netrw'
 <
 Acceptable values are partial name, filetype or buftype of the special buffers.
-Use |regexp| to specify the pattern.
+Use regexp to specify the pattern.
 Example: >
   let g:ctrlp_reuse_window = 'netrw\|help\|quickfix'
 <
@@ -186,7 +186,7 @@ Specify the number of recently opened files you want CtrlP to remember: >
 <
 
                                                        *'g:ctrlp_mruf_exclude'*
-Files you don’t want CtrlP to remember. Use |regexp| to specify the patterns: >
+Files you don’t want CtrlP to remember. Use regexp to specify the patterns: >
   let g:ctrlp_mruf_exclude = ''
 <
 Examples: >
@@ -237,7 +237,7 @@ tools on Windows). So be a little mindful of what you put in your |wildignore|.
 
                                                       *'g:ctrlp_custom_ignore'*
 In addition to |'wildignore'|, use this for files and directories you want only
-CtrlP to not show. Use |regexp| to specify the patterns: >
+CtrlP to not show. Use regexp to specify the patterns: >
   let g:ctrlp_custom_ignore = ''
 <
 Examples: >
@@ -375,7 +375,7 @@ path: >
 
                                                          *'g:ctrlp_use_migemo'*
 Set this to 1 to use Migemo Pattern for Japanese filenames. Migemo Search only
-works in |regexp| mode. To split the pattern, separate words with space: >
+works in regexp mode. To split the pattern, separate words with space: >
   let g:ctrlp_use_migemo = 0
 <
 
@@ -517,8 +517,8 @@ Once inside the prompt:~
     Note: in filename mode, the prompt’s base is '>d>' instead of '>>>'
 
   <c-r>                                                    *'ctrlp-fullregexp'*
-    Toggle between the string mode and full |regexp| mode.
-    Note: in full |regexp| mode, the prompt’s base is 'r>>' instead of '>>>'
+    Toggle between the string mode and full regexp mode.
+    Note: in full regexp mode, the prompt’s base is 'r>>' instead of '>>>'
 
     See also |input-formats| (guide) and |g:ctrlp_regexp_search| (option).
 
@@ -639,12 +639,13 @@ a)  Simple string.
 
     E.g. 'abc' is understood internally as 'a[^a]\{-}b[^b]\{-}c'
 
-b)  Vim |regexp|. If the input string contains '*' or '|', it’ll be treated as
-    a Vim’s |regexp| |pattern| without any modification.
+b)  When in regexp mode, the input string’s treated as a Vim’s regexp |pattern|
+    without any modification.
 
     E.g. 'abc\d*efg' will be read as 'abc\d*efg'.
 
-    See also |ctrlp-fullregexp| (keymap) and |g:ctrlp_regexp_search| (option).
+    See |ctrlp-fullregexp| (keymap) and |g:ctrlp_regexp_search| (option) for
+    how to enable regexp mode.
 
 c)  End the string with a colon ':' followed by a Vim command to execute that
     command after opening the file. If you need to use ':' literally, escape it
@@ -671,6 +672,8 @@ d)  Type exactly two dots '..' at the start of the prompt and press enter to go
 e)  Similarly, submit '/' or '\' to find and go to the project’s root. If the
     project is large, using a VCS listing command to look for files might help
     speeding up the intial scan (see |g:ctrlp_user_command| for more details).
+
+    Note: e) and d) only work in find file mode and directory mode.
 
 f)  Type the name of a non-existent file and press <c-y> to create it. Mark a
     file with <c-z> to create the new file in the same directory as the marked

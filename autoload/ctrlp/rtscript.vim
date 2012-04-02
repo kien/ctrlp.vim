@@ -16,6 +16,7 @@ let s:rtscript_var = {
 	\ 'lname': 'runtime scripts',
 	\ 'sname': 'rts',
 	\ 'type': 'path',
+	\ 'opmul': 1,
 	\ }
 
 let g:ctrlp_ext_vars = exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)
