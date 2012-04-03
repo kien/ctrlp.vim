@@ -477,6 +477,11 @@ COMMANDS                                                       *ctrlp-commands*
 :CtrlPMRU
    Open CtrlP in find Most-Recently-Used file mode.
 
+                                                               *:CtrlPLastMode*
+:CtrlPLastMode
+   Open CtrlP in the last mode used.
+   Works cross-session if you have a ! in your |'viminfo'| option.
+
                                                              *:CtrlPClearCache*
 :CtrlPClearCache
    Flush the cache for the current working directory. The same as pressing <F5>
@@ -904,7 +909,8 @@ Special thanks:~
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
 
-    + New command: |:CtrlPMixed|, search in both files and MRU files.
+    + New commands: |:CtrlPLastMode|, open CtrlP in the last mode used.
+                    |:CtrlPMixed|, search in both files and MRU files.
 
 Before 2012/03/31~
 

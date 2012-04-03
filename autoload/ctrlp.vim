@@ -1347,6 +1347,7 @@ fu! s:setupblank()
 endf
 
 fu! s:leavepre()
+	if exists('s:itemtype') | let g:CTRLP_LAST_MODE = s:itemtype | en
 	if s:clrex && !( has('clientserver') && len(split(serverlist(), "\n")) > 1 )
 		cal ctrlp#clra()
 	en
@@ -1612,7 +1613,9 @@ fu! ctrlp#init(type, ...)
 	if has('syntax') && exists('g:syntax_on')
 		cal ctrlp#syntax()
 	en
-	cal ctrlp#setlines(a:type)
+	let type = a:type < 0 ? exists('s:itemtype') ? s:itemtype
+		\ : exists('g:CTRLP_LAST_MODE') ? g:CTRLP_LAST_MODE : 0 : a:type
+	cal ctrlp#setlines(type)
 	cal s:BuildPrompt(1)
 endf
 " - Autocmds {{{1
