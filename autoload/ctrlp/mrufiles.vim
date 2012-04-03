@@ -64,7 +64,7 @@ fu! s:record(bufnr, ...)
 	cal ctrlp#utils#writecache(mrufs, s:cadir, s:cafile)
 endf
 " Public {{{1
-fu! ctrlp#mrufiles#refresh()
+fu! ctrlp#mrufiles#refresh(...)
 	let mrufs = s:readcache()
 	cal filter(mrufs, '!empty(ctrlp#utils#glob(v:val, 1)) && !s:excl(v:val)')
 	if exists('+ssl')
@@ -72,7 +72,7 @@ fu! ctrlp#mrufiles#refresh()
 		cal filter(mrufs, 'count(mrufs, v:val) == 1')
 	en
 	cal ctrlp#utils#writecache(mrufs, s:cadir, s:cafile)
-	retu s:reformat(mrufs)
+	retu a:0 && a:1 == 'raw' ? [] : s:reformat(mrufs)
 endf
 
 fu! ctrlp#mrufiles#remove(files)
@@ -86,8 +86,8 @@ fu! ctrlp#mrufiles#remove(files)
 endf
 
 fu! ctrlp#mrufiles#list(...)
-	if a:0 | cal s:record(a:1) | retu | en
-	retu s:reformat(s:readcache())
+	if a:0 && a:1 != 'raw' | cal s:record(a:1) | retu | en
+	retu a:0 && a:1 == 'raw' ? s:readcache() : s:reformat(s:readcache())
 endf
 
 fu! ctrlp#mrufiles#bufs()

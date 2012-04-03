@@ -696,7 +696,7 @@ EXTENSIONS                                                 *g:ctrlp-extensions*
 Extensions are optional. To enable an extension, add its name to the variable
 g:ctrlp_extensions: >
   let g:ctrlp_extensions = ['tag', 'buffertag', 'quickfix', 'dir', 'rtscript',
-                            \ 'undo', 'line', 'changes']
+                            \ 'undo', 'line', 'changes', 'mixed']
 <
 The order of the items will be the order they appear on the statusline and when
 using <c-f>, <c-b>.
@@ -765,6 +765,12 @@ Available extensions:~
                 ':CtrlPChangeAll'.
     - Search for and jump to a recent change in the current buffer or in all
       listed buffers.
+
+                                                                  *:CtrlPMixed*
+  * Mixed mode:~
+    - Name: 'mixed'
+    - Command: ':CtrlPMixed'
+    - Search in both files and MRU files.
 
 -------------------------------------------------------------------------------
 Buffer Tag mode options:~
@@ -897,6 +903,8 @@ Special thanks:~
 
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
+
+    + New command: |:CtrlPMixed|, search in both files and MRU files.
 
 Before 2012/03/31~
 
