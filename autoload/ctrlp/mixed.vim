@@ -26,7 +26,7 @@ let g:ctrlp_ext_vars = exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 " Utilities {{{1
 fu! s:newcache(cwd)
-	if !has_key(g:ctrlp_allmixes, 'data') | retu 1 | en
+	if g:ctrlp_newmix || !has_key(g:ctrlp_allmixes, 'data') | retu 1 | en
 	retu g:ctrlp_allmixes['cwd'] != a:cwd
 		\ || g:ctrlp_allmixes['time'] < getftime(ctrlp#utils#cachefile())
 		\ || g:ctrlp_allmixes['bufs'] < len(ctrlp#mrufiles#mrufs())
@@ -65,7 +65,7 @@ endf
 " Public {{{1
 fu! ctrlp#mixed#init(clim)
 	let cwd = getcwd()
-	if g:ctrlp_newmix || s:newcache(cwd)
+	if s:newcache(cwd)
 		cal s:getnewmix(cwd, a:clim)
 	el
 		let g:ctrlp_lines = g:ctrlp_allmixes['data']

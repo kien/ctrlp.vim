@@ -29,13 +29,13 @@ let g:ctrlp_ext_vars = exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 
 fu! ctrlp#buffertag#opts()
-	let opts = {
-		\ 'g:ctrlp_buftag_systemenc': ['s:enc', &enc],
-		\ 'g:ctrlp_buftag_ctags_bin': ['s:bin', ''],
-		\ 'g:ctrlp_buftag_types': ['s:usr_types', ''],
-		\ }
+	let [pref, opts] = ['g:ctrlp_buftag_', {
+		\ 'systemenc': ['s:enc', &enc],
+		\ 'ctags_bin': ['s:bin', ''],
+		\ 'types': ['s:usr_types', ''],
+		\ }]
 	for [ke, va] in items(opts)
-		exe 'let' va[0] '=' string(exists(ke) ? eval(ke) : va[1])
+		exe 'let' va[0] '=' string(exists(pref.ke) ? eval(pref.ke) : va[1])
 	endfo
 endf
 cal ctrlp#buffertag#opts()

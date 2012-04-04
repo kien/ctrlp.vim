@@ -6,15 +6,15 @@
 
 " Static variables {{{1
 fu! ctrlp#mrufiles#opts()
-	let opts = {
-		\ 'g:ctrlp_mruf_max': ['s:max', 250],
-		\ 'g:ctrlp_mruf_include': ['s:in', ''],
-		\ 'g:ctrlp_mruf_exclude': ['s:ex', ''],
-		\ 'g:ctrlp_mruf_case_sensitive': ['s:csen', 1],
-		\ 'g:ctrlp_mruf_relative': ['s:re', 0],
-		\ }
+	let [pref, opts] = ['g:ctrlp_mruf_', {
+		\ 'max': ['s:max', 250],
+		\ 'include': ['s:in', ''],
+		\ 'exclude': ['s:ex', ''],
+		\ 'case_sensitive': ['s:csen', 1],
+		\ 'relative': ['s:re', 0],
+		\ }]
 	for [ke, va] in items(opts)
-		exe 'let' va[0] '=' string(exists(ke) ? eval(ke) : va[1])
+		exe 'let' va[0] '=' string(exists(pref.ke) ? eval(pref.ke) : va[1])
 	endfo
 	let [s:csen, s:mrbs, s:mrufs] = [s:csen ? '#' : '?', [], []]
 	if exists('s:locked') | cal ctrlp#mrufiles#init() | en

@@ -9,49 +9,49 @@
 fu! s:opts()
 	" Options
 	let hst = exists('+hi') ? &hi : 20
-	let opts = {
-		\ 'g:ctrlp_arg_map':               ['s:argmap', 0],
-		\ 'g:ctrlp_by_filename':           ['s:byfname', 0],
-		\ 'g:ctrlp_clear_cache_on_exit':   ['s:clrex', 1],
-		\ 'g:ctrlp_custom_ignore':         ['s:usrign', ''],
-		\ 'g:ctrlp_default_input':         ['s:deftxt', 0],
-		\ 'g:ctrlp_dont_split':            ['s:nosplit', 'netrw'],
-		\ 'g:ctrlp_dotfiles':              ['s:dotfiles', 1],
-		\ 'g:ctrlp_extensions':            ['s:extensions', []],
-		\ 'g:ctrlp_follow_symlinks':       ['s:folsym', 0],
-		\ 'g:ctrlp_highlight_match':       ['s:mathi', [1, 'CtrlPMatch']],
-		\ 'g:ctrlp_jump_to_buffer':        ['s:jmptobuf', 2],
-		\ 'g:ctrlp_lazy_update':           ['s:lazy', 0],
-		\ 'g:ctrlp_match_func':            ['s:matcher', {}],
-		\ 'g:ctrlp_match_window_bottom':   ['s:mwbottom', 1],
-		\ 'g:ctrlp_match_window_reversed': ['s:mwreverse', 1],
-		\ 'g:ctrlp_max_depth':             ['s:maxdepth', 40],
-		\ 'g:ctrlp_max_files':             ['s:maxfiles', 10000],
-		\ 'g:ctrlp_max_height':            ['s:mxheight', 10],
-		\ 'g:ctrlp_max_history':           ['s:maxhst', hst],
-		\ 'g:ctrlp_open_multi':            ['s:opmul', '1v'],
-		\ 'g:ctrlp_open_new_file':         ['s:newfop', 'v'],
-		\ 'g:ctrlp_prompt_mappings':       ['s:urprtmaps', 0],
-		\ 'g:ctrlp_regexp_search':         ['s:regexp', 0],
-		\ 'g:ctrlp_root_markers':          ['s:rmarkers', []],
-		\ 'g:ctrlp_split_window':          ['s:splitwin', 0],
-		\ 'g:ctrlp_status_func':           ['s:status', {}],
-		\ 'g:ctrlp_use_caching':           ['s:caching', 1],
-		\ 'g:ctrlp_use_migemo':            ['s:migemo', 0],
-		\ 'g:ctrlp_user_command':          ['s:usrcmd', ''],
-		\ 'g:ctrlp_working_path_mode':     ['s:pathmode', 2],
-		\ }
+	let [pref, opts] = ['g:ctrlp_', {
+		\ 'arg_map':               ['s:argmap', 0],
+		\ 'by_filename':           ['s:byfname', 0],
+		\ 'clear_cache_on_exit':   ['s:clrex', 1],
+		\ 'custom_ignore':         ['s:usrign', ''],
+		\ 'default_input':         ['s:deftxt', 0],
+		\ 'dont_split':            ['s:nosplit', 'netrw'],
+		\ 'dotfiles':              ['s:dotfiles', 1],
+		\ 'extensions':            ['s:extensions', []],
+		\ 'follow_symlinks':       ['s:folsym', 0],
+		\ 'highlight_match':       ['s:mathi', [1, 'CtrlPMatch']],
+		\ 'jump_to_buffer':        ['s:jmptobuf', 2],
+		\ 'lazy_update':           ['s:lazy', 0],
+		\ 'match_func':            ['s:matcher', {}],
+		\ 'match_window_bottom':   ['s:mwbottom', 1],
+		\ 'match_window_reversed': ['s:mwreverse', 1],
+		\ 'max_depth':             ['s:maxdepth', 40],
+		\ 'max_files':             ['s:maxfiles', 10000],
+		\ 'max_height':            ['s:mxheight', 10],
+		\ 'max_history':           ['s:maxhst', hst],
+		\ 'open_multi':            ['s:opmul', '1v'],
+		\ 'open_new_file':         ['s:newfop', 'v'],
+		\ 'prompt_mappings':       ['s:urprtmaps', 0],
+		\ 'regexp_search':         ['s:regexp', 0],
+		\ 'root_markers':          ['s:rmarkers', []],
+		\ 'split_window':          ['s:splitwin', 0],
+		\ 'status_func':           ['s:status', {}],
+		\ 'use_caching':           ['s:caching', 1],
+		\ 'use_migemo':            ['s:migemo', 0],
+		\ 'user_command':          ['s:usrcmd', ''],
+		\ 'working_path_mode':     ['s:pathmode', 2],
+		\ }]
 	for [ke, va] in items(opts)
-		exe 'let' va[0] '=' string(exists(ke) ? eval(ke) : va[1])
+		exe 'let' va[0] '=' string(exists(pref.ke) ? eval(pref.ke) : va[1])
 	endfo
 	let new_opts = {
-		\ 'g:ctrlp_open_multiple_files': 's:opmul',
-		\ 'g:ctrlp_regexp': 's:regexp',
-		\ 'g:ctrlp_reuse_window': 's:nosplit',
-		\ 'g:ctrlp_switch_buffer': 's:jmptobuf',
+		\ 'open_multiple_files': 's:opmul',
+		\ 'regexp': 's:regexp',
+		\ 'reuse_window': 's:nosplit',
+		\ 'switch_buffer': 's:jmptobuf',
 		\ }
 	for [key, val] in items(new_opts)
-		exe 'let' val '=' string(eval(exists(key) ? key : val))
+		exe 'let' val '=' string(eval(exists(pref.key) ? pref.key : val))
 	endfo
 	if !exists('g:ctrlp_newcache') | let g:ctrlp_newcache = 0 | en
 	let s:maxdepth = min([s:maxdepth, 100])
