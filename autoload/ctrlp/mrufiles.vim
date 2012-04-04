@@ -76,24 +76,24 @@ fu! s:savetofile(mrufs)
 endf
 " Public {{{1
 fu! ctrlp#mrufiles#refresh(...)
-	let s:mrufs = s:mergelists()
-	cal filter(s:mrufs, '!empty(ctrlp#utils#glob(v:val, 1)) && !s:excl(v:val)')
+	let mrufs = s:mergelists()
+	cal filter(mrufs, '!empty(ctrlp#utils#glob(v:val, 1)) && !s:excl(v:val)')
 	if exists('+ssl')
-		cal map(s:mrufs, 'tr(v:val, "/", "\\")')
-		cal filter(s:mrufs, 'count(s:mrufs, v:val) == 1')
+		cal map(mrufs, 'tr(v:val, "/", "\\")')
+		cal filter(mrufs, 'count(mrufs, v:val) == 1')
 	en
-	cal s:savetofile(s:mrufs)
-	retu a:0 && a:1 == 'raw' ? [] : s:reformat(copy(s:mrufs))
+	cal s:savetofile(mrufs)
+	retu a:0 && a:1 == 'raw' ? [] : s:reformat(mrufs)
 endf
 
 fu! ctrlp#mrufiles#remove(files)
-	let s:mrufs = []
+	let mrufs = []
 	if a:files != []
-		let s:mrufs = s:mergelists()
-		cal filter(s:mrufs, 'index(a:files, v:val) < 0')
+		let mrufs = s:mergelists()
+		cal filter(mrufs, 'index(a:files, v:val) < 0')
 	en
-	cal s:savetofile(s:mrufs)
-	retu s:reformat(copy(s:mrufs))
+	cal s:savetofile(mrufs)
+	retu s:reformat(mrufs)
 endf
 
 fu! ctrlp#mrufiles#list(...)
