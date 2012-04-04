@@ -1001,15 +1001,29 @@ fu! s:mixedsort(s1, s2)
 	if s:ispath && s:height < 51
 		let [par, cfn] = [s:comparent(a:s1, a:s2), s:compfnlen(a:s1, a:s2)]
 		if s:height < 21
-			let [muls, ctm] = s:itemtype == 1
-				\ ? [[6, 3, 2, 12], s:compmre(a:s1, a:s2)]
-				\ : [[12, 6, 3, 2], s:comptime(a:s1, a:s2)]
+			if s:itemtype == 1
+				let ctm = s:compmre(a:s1, a:s2)
+				let [mp_2, mp_3, mp_4, mp_1] = s:multipliers(cfn, par, cml, ctm)
+			el
+				let ctm = s:comptime(a:s1, a:s2)
+				let [mp_1, mp_2, mp_3, mp_4] = s:multipliers(ctm, cfn, par, cml)
+			en
 			unl! s:mrbs
-			retu muls[0] * cml + muls[1] * par + muls[2] * cfn + muls[3] * ctm + cln
+			retu cln + ctm * mp_1 + cfn * mp_2 + par * mp_3 + cml * mp_4
 		en
-		retu 6 * cml + 3 * par + 2 * cfn + cln
+		let [mp_1, mp_2, mp_3, mp_4] = s:multiplier(cfn, par, cml, 0)
+		retu cln + cfn * mp_1 + par * mp_2 + cml * mp_3
 	en
-	retu 2 * cml + cln
+	retu cln + cml * 2
+endf
+
+fu! s:multipliers(...)
+	" Dynamic multipliers
+	let mp_1 = !a:1 ? 0 : 2
+	let mp_2 = !a:2 ? 0 : mp_1 + 1
+	let mp_3 = !a:3 ? 0 : ( !mp_2 ? mp_1 + 1 : mp_2 ) * 2
+	let mp_4 = !a:4 ? 0 : ( !mp_3 ? ( !mp_2 ? mp_1 + 1 : mp_2 ) * 2 : mp_3 ) * 2
+	retu [mp_1, mp_2, mp_3, mp_4]
 endf
 
 fu! s:compval(...)
