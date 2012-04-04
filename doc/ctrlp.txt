@@ -213,11 +213,6 @@ MRU entries: >
   let g:ctrlp_mruf_case_sensitive = 1
 <
 
-                                                  *'g:ctrlp_mruf_last_entered'*
-Set to 1 to sort the MRU file list to most-recently-entered-buffer order: >
-  let g:ctrlp_mruf_last_entered = 0
-<
-
                                                            *'g:ctrlp_dotfiles'*
 Set this to 0 if you don’t want CtrlP to scan for dotfiles and dotdirs: >
   let g:ctrlp_dotfiles = 1
@@ -909,6 +904,7 @@ Special thanks:~
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
 
+    + Remove: g:ctrlp_mruf_last_entered, make it the default for MRU mode.
     + New commands: |:CtrlPLastMode|, open CtrlP in the last mode used.
                     |:CtrlPMixed|, search in both files and MRU files.
 

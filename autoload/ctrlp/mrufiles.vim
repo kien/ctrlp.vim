@@ -12,20 +12,30 @@ fu! ctrlp#mrufiles#opts()
 		\ 'g:ctrlp_mruf_exclude': ['s:ex', ''],
 		\ 'g:ctrlp_mruf_case_sensitive': ['s:csen', 1],
 		\ 'g:ctrlp_mruf_relative': ['s:re', 0],
-		\ 'g:ctrlp_mruf_last_entered': ['s:mre', 0],
 		\ }
 	for [ke, va] in items(opts)
 		exe 'let' va[0] '=' string(exists(ke) ? eval(ke) : va[1])
 	endfo
-	let [s:csen, s:mrbs] = [s:csen ? '#' : '?', []]
-	if exists('s:locked')
-		cal ctrlp#mrufiles#init()
-	en
+	let [s:csen, s:mrbs, s:mrufs] = [s:csen ? '#' : '?', [], []]
+	if exists('s:locked') | cal ctrlp#mrufiles#init() | en
 endf
 cal ctrlp#mrufiles#opts()
 " Utilities {{{1
 fu! s:excl(fn)
 	retu !empty(s:ex) && a:fn =~# s:ex
+endf
+
+fu! s:mergelists()
+	let diskmrufs = s:readcache()
+	cal filter(diskmrufs, 'index(s:mrufs, v:val) < 0')
+	let mrufs = s:mrufs + diskmrufs
+	if v:version < 702 | cal filter(mrufs, 'count(mrufs, v:val) == 1') | en
+	retu s:chop(mrufs)
+endf
+
+fu! s:chop(mrufs)
+	if len(a:mrufs) > s:max | cal remove(a:mrufs, s:max, -1) | en
+	retu a:mrufs
 endf
 
 fu! s:readcache()
@@ -41,10 +51,10 @@ fu! s:reformat(mrufs)
 		let cwd = exists('+ssl') ? tr(getcwd(), '/', '\') : getcwd()
 		cal filter(a:mrufs, '!stridx(v:val, cwd)')
 	en
-	retu map(a:mrufs, 'fnamemodify(v:val, '':.'')')
+	retu map(a:mrufs, 'fnamemodify(v:val, ":.")')
 endf
 
-fu! s:record(bufnr, ...)
+fu! s:record(bufnr)
 	if s:locked | retu | en
 	let bufnr = a:bufnr + 0
 	if bufnr <= 0 | retu | en
@@ -54,44 +64,49 @@ fu! s:record(bufnr, ...)
 	cal insert(s:mrbs, fn)
 	if empty(fn) || !empty(&bt) || ( !empty(s:in) && fn !~# s:in )
 		\ || ( !empty(s:ex) && fn =~# s:ex ) || !filereadable(fn)
-		\ || ( a:0 && a:1 == 1 )
 		retu
 	en
-	let mrufs = s:readcache()
-	cal filter(mrufs, 'v:val !='.s:csen.' fn')
-	cal insert(mrufs, fn)
-	if len(mrufs) > s:max | cal remove(mrufs, s:max, -1) | en
-	cal ctrlp#utils#writecache(mrufs, s:cadir, s:cafile)
+	cal filter(s:mrufs, 'v:val !='.s:csen.' fn')
+	cal insert(s:mrufs, fn)
+	let s:mrufs = s:chop(s:mrufs)
+endf
+
+fu! s:savetofile(mrufs)
+	cal ctrlp#utils#writecache(a:mrufs, s:cadir, s:cafile)
 endf
 " Public {{{1
 fu! ctrlp#mrufiles#refresh(...)
-	let mrufs = s:readcache()
-	cal filter(mrufs, '!empty(ctrlp#utils#glob(v:val, 1)) && !s:excl(v:val)')
+	let s:mrufs = s:mergelists()
+	cal filter(s:mrufs, '!empty(ctrlp#utils#glob(v:val, 1)) && !s:excl(v:val)')
 	if exists('+ssl')
-		cal map(mrufs, 'tr(v:val, ''/'', ''\'')')
-		cal filter(mrufs, 'count(mrufs, v:val) == 1')
+		cal map(s:mrufs, 'tr(v:val, "/", "\\")')
+		cal filter(s:mrufs, 'count(s:mrufs, v:val) == 1')
 	en
-	cal ctrlp#utils#writecache(mrufs, s:cadir, s:cafile)
-	retu a:0 && a:1 == 'raw' ? [] : s:reformat(mrufs)
+	cal s:savetofile(s:mrufs)
+	retu a:0 && a:1 == 'raw' ? [] : s:reformat(copy(s:mrufs))
 endf
 
 fu! ctrlp#mrufiles#remove(files)
-	let mrufs = []
+	let s:mrufs = []
 	if a:files != []
-		let mrufs = s:readcache()
-		cal filter(mrufs, 'index(a:files, v:val) < 0')
+		let s:mrufs = s:mergelists()
+		cal filter(s:mrufs, 'index(a:files, v:val) < 0')
 	en
-	cal ctrlp#utils#writecache(mrufs, s:cadir, s:cafile)
-	retu map(mrufs, 'fnamemodify(v:val, '':.'')')
+	cal s:savetofile(s:mrufs)
+	retu s:reformat(copy(s:mrufs))
 endf
 
 fu! ctrlp#mrufiles#list(...)
-	if a:0 && a:1 != 'raw' | cal s:record(a:1) | retu | en
-	retu a:0 && a:1 == 'raw' ? s:readcache() : s:reformat(s:readcache())
+	if a:0 && a:1 != 'raw' | retu | en
+	retu a:0 && a:1 == 'raw' ? s:mergelists() : s:reformat(s:mergelists())
 endf
 
 fu! ctrlp#mrufiles#bufs()
 	retu s:mrbs
+endf
+
+fu! ctrlp#mrufiles#mrufs()
+	retu s:mrufs
 endf
 
 fu! ctrlp#mrufiles#init()
@@ -99,26 +114,11 @@ fu! ctrlp#mrufiles#init()
 	let s:locked = 0
 	aug CtrlPMRUF
 		au!
-		au BufReadPost,BufNewFile,BufWritePost * cal s:record(expand('<abuf>', 1))
+		au BufAdd,BufEnter,BufUnload * cal s:record(expand('<abuf>', 1))
 		au QuickFixCmdPre  *vimgrep* let s:locked = 1
 		au QuickFixCmdPost *vimgrep* let s:locked = 0
+		au VimLeavePre * cal s:savetofile(s:mergelists())
 	aug END
-	aug CtrlPMREB
-		au!
-		au BufEnter,BufUnload * cal s:record(expand('<abuf>', 1), 1)
-	aug END
-	if exists('#CtrlPMREF')
-		au! CtrlPMREF
-	en
-	if s:mre
-		aug CtrlPMREF
-			au!
-			au BufEnter,BufUnload * cal s:record(expand('<abuf>', 1))
-		aug END
-		if exists('#CtrlPMREB')
-			au! CtrlPMREB
-		en
-	en
 endf
 "}}}
 
