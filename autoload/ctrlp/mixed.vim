@@ -38,25 +38,25 @@ fu! s:getnewmix(cwd, clim)
 		cal ctrlp#mrufiles#refresh('raw')
 		let g:ctrlp_newcache = 1
 	en
-	cal ctrlp#files()
+	let g:ctrlp_lines = ctrlp#files()
 	cal ctrlp#progress('Mixing...')
 	let mrufs = ctrlp#mrufiles#list('raw')
 	if exists('+ssl') && &ssl
 		cal map(mrufs, 'tr(v:val, "\\", "/")')
 	en
-	if len(mrufs) > len(g:ctrlp_allfiles) || v:version < 702
+	if len(mrufs) > len(g:ctrlp_lines) || v:version < 702
 		cal filter(mrufs, 'stridx(v:val, a:cwd)')
 	el
 		let cwd_mrufs = filter(copy(mrufs), '!stridx(v:val, a:cwd)')
 		let cwd_mrufs = ctrlp#rmbasedir(cwd_mrufs)
 		for each in cwd_mrufs
-			let id = index(g:ctrlp_allfiles, each)
-			if id >= 0 | cal remove(g:ctrlp_allfiles, id) | en
+			let id = index(g:ctrlp_lines, each)
+			if id >= 0 | cal remove(g:ctrlp_lines, id) | en
 		endfo
 	en
 	cal map(mrufs, 'fnamemodify(v:val, ":.")')
-	let g:ctrlp_lines = len(mrufs) > len(g:ctrlp_allfiles)
-		\ ? g:ctrlp_allfiles + mrufs : mrufs + g:ctrlp_allfiles
+	let g:ctrlp_lines = len(mrufs) > len(g:ctrlp_lines)
+		\ ? g:ctrlp_lines + mrufs : mrufs + g:ctrlp_lines
 	if len(g:ctrlp_lines) <= a:clim
 		cal sort(g:ctrlp_lines, 'ctrlp#complen')
 	en

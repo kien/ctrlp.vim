@@ -233,15 +233,15 @@ fu! ctrlp#reset()
 endf
 " * Files {{{1
 fu! ctrlp#files()
-	let [cwd, cafile, g:ctrlp_allfiles] = [getcwd(), ctrlp#utils#cachefile(), []]
+	let [cafile, g:ctrlp_allfiles] = [ctrlp#utils#cachefile(), []]
 	if g:ctrlp_newcache || !filereadable(cafile) || !s:caching
 		let lscmd = s:lsCmd()
 		" Get the list of files
 		if empty(lscmd)
-			cal s:GlobPath(cwd, 0)
+			cal s:GlobPath(s:dyncwd, 0)
 		el
 			sil! cal ctrlp#progress('Indexing...')
-			try | cal s:UserCmd(cwd, lscmd)
+			try | cal s:UserCmd(lscmd)
 			cat | retu [] | endt
 		en
 		" Remove base directory
@@ -268,8 +268,8 @@ fu! s:GlobPath(dirs, depth)
 	en
 endf
 
-fu! s:UserCmd(path, lscmd)
-	let path = a:path
+fu! s:UserCmd(lscmd)
+	let path = s:dyncwd
 	if exists('+ssl') && &ssl
 		let [ssl, &ssl, path] = [&ssl, 0, tr(path, '/', '\')]
 	en
@@ -290,7 +290,7 @@ fu! s:lsCmd()
 		retu cmd
 	elsei type(cmd) == 3 && len(cmd) >= 2 && cmd[:1] != ['', '']
 		" Find a repo root
-		cal s:findroot(getcwd(), cmd[0], 0, 1)
+		cal s:findroot(s:dyncwd, cmd[0], 0, 1)
 		if !exists('s:vcsroot')
 			" Try the secondary_command
 			retu len(cmd) == 3 ? cmd[2] : ''
@@ -300,7 +300,7 @@ fu! s:lsCmd()
 		retu cmd[1]
 	elsei type(cmd) == 4 && has_key(cmd, 'types')
 		for key in sort(keys(cmd['types']), 's:compval')
-			cal s:findroot(getcwd(), cmd['types'][key][0], 0, 1)
+			cal s:findroot(s:dyncwd, cmd['types'][key][0], 0, 1)
 			if exists('s:vcsroot') | brea | en
 		endfo
 		if !exists('s:vcsroot')
@@ -786,7 +786,7 @@ endf
 fu! s:SpecInputs(str)
 	let spi = !s:itemtype || s:getextvar('specinput') > 0
 	if a:str == '..' && spi
-		cal s:parentdir(getcwd())
+		cal s:parentdir(s:dyncwd)
 		cal ctrlp#setlines()
 		cal s:PrtClear()
 		retu 1
@@ -842,7 +842,7 @@ fu! s:CreateNewFile(...)
 	en
 	if !exists('optyp') | retu | en
 	let [filpath, tail] = [fnamemodify(optyp, ':p'), s:tail()]
-	if !stridx(filpath, getcwd()) | cal s:insertcache(str) | en
+	if !stridx(filpath, s:dyncwd) | cal s:insertcache(str) | en
 	cal s:PrtExit()
 	let cmd = md == 'r' ? ctrlp#normcmd('e') :
 		\ s:newfop =~ '1\|t' || ( a:0 && a:1 == 't' ) || md == 't' ? 'tabe' :
@@ -954,15 +954,14 @@ fu! s:compmre(...)
 	if !exists('s:mrbs')
 		let s:mrbs = ctrlp#mrufiles#bufs()
 	en
-	let cwd = getcwd()
+	let cwd = s:dyncwd
 	retu index(s:mrbs, cwd.s:lash().a:1) - index(s:mrbs, cwd.s:lash().a:2)
 endf
 
 fu! s:comparent(s1, s2)
 	" By same parent dir
-	let cwd = getcwd()
-	if match(s:crfpath, escape(cwd, '.^$*\')) >= 0
-		let [as1, as2] = [cwd.s:lash().a:s1, cwd.s:lash().a:s2]
+	if match(s:crfpath, escape(s:dyncwd, '.^$*\')) >= 0
+		let [as1, as2] = [s:dyncwd.s:lash().a:s1, s:dyncwd.s:lash().a:s2]
 		let [loc1, loc2] = [s:getparent(as1), s:getparent(as2)]
 		if loc1 == s:crfpath && loc2 != s:crfpath | retu -1 | en
 		if loc2 == s:crfpath && loc1 != s:crfpath | retu 1  | en
@@ -1059,7 +1058,7 @@ fu! ctrlp#statusline()
 		let byfname = '%#CtrlPMode1# '.byfname.' %*'
 		let regex   = s:regexp  ? '%#CtrlPMode2# regex %*' : ''
 		let slider  = ' <'.prv.'>={'.item.'}=<'.nxt.'>'
-		let dir     = ' %=%<%#CtrlPMode2# '.getcwd().' %*'
+		let dir     = ' %=%<%#CtrlPMode2# '.s:dyncwd.' %*'
 		let &l:stl  = focus.byfname.regex.slider.marked.dir
 	en
 endf
@@ -1072,7 +1071,7 @@ endf
 fu! ctrlp#progress(enum)
 	if has('macunix') || has('mac') | sl 1m | en
 	let &l:stl = s:status != {} ? call(s:status['prog'], [a:enum])
-		\ : '%#CtrlPStats# '.a:enum.' %* %=%<%#CtrlPMode2# '.getcwd().' %*'
+		\ : '%#CtrlPStats# '.a:enum.' %* %=%<%#CtrlPMode2# '.s:dyncwd.' %*'
 	redraws
 endf
 " Paths {{{2
@@ -1083,7 +1082,7 @@ endf
 
 fu! s:dircompl(be, sd)
 	if a:sd == '' | retu [] | en
-	let [be, sd] = a:be == '' ? [getcwd(), a:sd] : [a:be, a:be.s:lash(a:be).a:sd]
+	let [be, sd] = a:be == '' ? [s:dyncwd, a:sd] : [a:be, a:be.s:lash(a:be).a:sd]
 	let dirs = ctrlp#rmbasedir(split(globpath(be, a:sd.'*/'), "\n"))
 	cal filter(dirs, '!match(v:val, escape(sd, ''~$.\''))'
 		\ . ' && match(v:val, ''\v(^|[\/])\.{1,2}[\/]$'') < 0')
@@ -1110,7 +1109,7 @@ fu! s:headntail(str)
 endf
 
 fu! s:lash(...)
-	retu match(a:0 ? a:1 : getcwd(), '[\/]$') < 0 ? s:lash : ''
+	retu match(a:0 ? a:1 : s:dyncwd, '[\/]$') < 0 ? s:lash : ''
 endf
 
 fu! s:ispathitem()
@@ -1119,7 +1118,7 @@ fu! s:ispathitem()
 endf
 
 fu! ctrlp#dirnfile(entries)
-	let [items, cwd] = [[[], []], getcwd().s:lash()]
+	let [items, cwd] = [[[], []], s:dyncwd.s:lash()]
 	for each in a:entries
 		let etype = getftype(each)
 		if s:igntype >= 0 && s:usrign(each, etype) | con | en
@@ -1156,9 +1155,8 @@ fu! s:samerootsyml(each, isfile, cwd)
 endf
 
 fu! ctrlp#rmbasedir(items)
-	let cwd = getcwd()
-	if a:items != [] && !stridx(a:items[0], cwd)
-		let idx = strlen(cwd) + ( match(cwd, '[\/]$') < 0 )
+	if a:items != [] && !stridx(a:items[0], s:dyncwd)
+		let idx = strlen(s:dyncwd) + ( match(s:dyncwd, '[\/]$') < 0 )
 		retu map(a:items, 'strpart(v:val, idx)')
 	en
 	retu a:items
