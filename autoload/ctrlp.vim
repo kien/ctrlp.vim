@@ -331,11 +331,11 @@ fu! s:MatchIt(items, pat, limit, exc)
 	retu lines
 endf
 
-fu! s:MatchedItems(items, str, pat, limit)
+fu! s:MatchedItems(items, pat, limit)
 	let exc = exists('s:crfilerel') ? s:crfilerel : ''
 	let items = s:narrowable() ? s:matched + s:mdata[3] : a:items
-	if s:matcher != {} && has_key(s:matcher, 'match')
-		let argms = [items, a:str, a:limit, s:mmode(), s:ispath, exc, s:regexp]
+	if s:matcher != {}
+		let argms = [items, a:pat, a:limit, s:mmode(), s:ispath, exc, s:regexp]
 		let lines = call(s:matcher['match'], argms)
 	el
 		let lines = s:MatchIt(items, a:pat, a:limit, exc)
@@ -417,9 +417,9 @@ fu! s:Update(str)
 	let str = s:sanstail(a:str)
 	" Stop if the string's unchanged
 	if str == oldstr && !empty(str) && !exists('s:force') | retu | en
-	let pat = s:SplitPattern(str)
+	let pat = s:matcher == {} ? s:SplitPattern(str) : str
 	let lines = exists('g:ctrlp_nolimit') && empty(str) ? copy(g:ctrlp_lines)
-		\ : s:MatchedItems(g:ctrlp_lines, str, pat, s:winh)
+		\ : s:MatchedItems(g:ctrlp_lines, pat, s:winh)
 	cal s:Render(lines, pat)
 endf
 
@@ -1018,7 +1018,6 @@ fu! s:mixedsort(s1, s2)
 endf
 
 fu! s:multipliers(...)
-	" Dynamic multipliers
 	let mp_1 = !a:1 ? 0 : 2
 	let mp_2 = !a:2 ? 0 : mp_1 + 1
 	let mp_3 = !a:3 ? 0 : ( !mp_2 ? mp_1 + 1 : mp_2 ) * 2
@@ -1051,7 +1050,7 @@ fu! ctrlp#statusline()
 	let byfname = s:byfname ? 'file' : 'path'
 	let marked  = s:opmul != '0' ?
 		\ exists('s:marked') ? ' <'.s:dismrk().'>' : ' <->' : ''
-	if s:status != {} && has_key(s:status, 'main')
+	if s:status != {}
 		let args = [focus, byfname, s:regexp, prv, item, nxt, marked]
 		let &l:stl = call(s:status['main'], args)
 	el
@@ -1072,8 +1071,7 @@ endf
 
 fu! ctrlp#progress(enum)
 	if has('macunix') || has('mac') | sl 1m | en
-	let &l:stl = s:status != {} && has_key(s:status, 'prog')
-		\ ? call(s:status['prog'], [a:enum])
+	let &l:stl = s:status != {} ? call(s:status['prog'], [a:enum])
 		\ : '%#CtrlPStats# '.a:enum.' %* %=%<%#CtrlPMode2# '.getcwd().' %*'
 	redraws
 endf
