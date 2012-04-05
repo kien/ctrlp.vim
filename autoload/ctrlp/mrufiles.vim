@@ -26,7 +26,7 @@ fu! s:excl(fn)
 endf
 
 fu! s:mergelists()
-	let diskmrufs = s:readcache()
+	let diskmrufs = ctrlp#utils#readfile(ctrlp#mrufiles#cachefile())
 	cal filter(diskmrufs, 'index(s:mrufs, v:val) < 0')
 	let mrufs = s:mrufs + diskmrufs
 	if v:version < 702 | cal filter(mrufs, 'count(mrufs, v:val) == 1') | en
@@ -36,14 +36,6 @@ endf
 fu! s:chop(mrufs)
 	if len(a:mrufs) > s:max | cal remove(a:mrufs, s:max, -1) | en
 	retu a:mrufs
-endf
-
-fu! s:readcache()
-	if !exists('s:cadir') || !exists('s:cafile')
-		let s:cadir = ctrlp#utils#cachedir().ctrlp#utils#lash().'mru'
-		let s:cafile = s:cadir.ctrlp#utils#lash().'cache.txt'
-	en
-	retu ctrlp#utils#readfile(s:cafile)
 endf
 
 fu! s:reformat(mrufs)
@@ -107,6 +99,14 @@ endf
 
 fu! ctrlp#mrufiles#mrufs()
 	retu s:mrufs
+endf
+
+fu! ctrlp#mrufiles#cachefile()
+	if !exists('s:cadir') || !exists('s:cafile')
+		let s:cadir = ctrlp#utils#cachedir().ctrlp#utils#lash().'mru'
+		let s:cafile = s:cadir.ctrlp#utils#lash().'cache.txt'
+	en
+	retu s:cafile
 endf
 
 fu! ctrlp#mrufiles#init()

@@ -28,7 +28,8 @@ let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 fu! s:newcache(cwd)
 	if g:ctrlp_newmix || !has_key(g:ctrlp_allmixes, 'data') | retu 1 | en
 	retu g:ctrlp_allmixes['cwd'] != a:cwd
-		\ || g:ctrlp_allmixes['time'] < getftime(ctrlp#utils#cachefile())
+		\ || g:ctrlp_allmixes['filtime'] < getftime(ctrlp#utils#cachefile())
+		\ || g:ctrlp_allmixes['mrutime'] < getftime(ctrlp#mrufiles#cachefile())
 		\ || g:ctrlp_allmixes['bufs'] < len(ctrlp#mrufiles#mrufs())
 endf
 
@@ -59,8 +60,9 @@ fu! s:getnewmix(cwd, clim)
 	if len(g:ctrlp_lines) <= a:clim
 		cal sort(g:ctrlp_lines, 'ctrlp#complen')
 	en
-	let g:ctrlp_allmixes = { 'time': getftime(ctrlp#utils#cachefile()),
-		\ 'cwd': a:cwd, 'bufs': len(ctrlp#mrufiles#mrufs()), 'data': g:ctrlp_lines }
+	let g:ctrlp_allmixes = { 'filtime': getftime(ctrlp#utils#cachefile()),
+		\ 'mrutime': getftime(ctrlp#mrufiles#cachefile()), 'cwd': a:cwd,
+		\ 'bufs': len(ctrlp#mrufiles#mrufs()), 'data': g:ctrlp_lines }
 endf
 " Public {{{1
 fu! ctrlp#mixed#init(clim)
