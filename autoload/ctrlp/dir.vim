@@ -54,20 +54,19 @@ fu! ctrlp#dir#init(...)
 	let cadir = ctrlp#utils#cachedir().ctrlp#utils#lash().s:dir_var['sname']
 	let cafile = cadir.ctrlp#utils#lash().ctrlp#utils#cachefile(s:dir_var['sname'])
 	if g:ctrlp_newdir || !filereadable(cafile)
-		let g:ctrlp_alldirs = []
+		let [s:initcwd, g:ctrlp_alldirs] = [s:cwd, []]
 		cal s:globdirs(s:cwd, 0)
 		cal ctrlp#rmbasedir(g:ctrlp_alldirs)
-		let read_cache = 0
 		if len(g:ctrlp_alldirs) <= s:compare_lim
 			cal sort(g:ctrlp_alldirs, 'ctrlp#complen')
 		en
-	el
-		let g:ctrlp_alldirs = ctrlp#utils#readfile(cafile)
-		let read_cache = 1
-	en
-	if !read_cache
 		cal ctrlp#utils#writecache(g:ctrlp_alldirs, cadir, cafile)
 		let g:ctrlp_newdir = 0
+	el
+		if !( exists('s:initcwd') && s:initcwd == s:cwd )
+			let s:initcwd = s:cwd
+			let g:ctrlp_alldirs = ctrlp#utils#readfile(cafile)
+		en
 	en
 	retu g:ctrlp_alldirs
 endf

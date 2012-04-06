@@ -198,7 +198,7 @@ fu! s:Close()
 		sil! exe 'let &'.key.' = s:glb_'.key
 	en | endfo
 	if exists('s:glb_acd') | let &acd = s:glb_acd | en
-	let [g:ctrlp_lines, g:ctrlp_allfiles] = [[], []]
+	let g:ctrlp_lines = []
 	if s:winres[1] >= &lines && s:winres[2] == winnr('$')
 		exe s:winres[0]
 	en
@@ -233,9 +233,9 @@ fu! ctrlp#reset()
 endf
 " * Files {{{1
 fu! ctrlp#files()
-	let [cafile, g:ctrlp_allfiles] = [ctrlp#utils#cachefile(), []]
+	let cafile = ctrlp#utils#cachefile()
 	if g:ctrlp_newcache || !filereadable(cafile) || !s:caching
-		let lscmd = s:lsCmd()
+		let [lscmd, s:initcwd, g:ctrlp_allfiles] = [s:lsCmd(), s:dyncwd, []]
 		" Get the list of files
 		if empty(lscmd)
 			cal s:GlobPath(s:dyncwd, 0)
@@ -246,15 +246,16 @@ fu! ctrlp#files()
 		en
 		" Remove base directory
 		cal ctrlp#rmbasedir(g:ctrlp_allfiles)
-		let read_cache = 0
 		if len(g:ctrlp_allfiles) <= s:compare_lim
 			cal sort(g:ctrlp_allfiles, 'ctrlp#complen')
 		en
+		cal s:writecache(cafile)
 	el
-		let g:ctrlp_allfiles = ctrlp#utils#readfile(cafile)
-		let read_cache = 1
+		if !( exists('s:initcwd') && s:initcwd == s:dyncwd )
+			let s:initcwd = s:dyncwd
+			let g:ctrlp_allfiles = ctrlp#utils#readfile(cafile)
+		en
 	en
-	cal s:writecache(read_cache, cafile)
 	retu g:ctrlp_allfiles
 endf
 
@@ -1010,7 +1011,7 @@ fu! s:mixedsort(s1, s2)
 			unl! s:mrbs
 			retu cln + ctm * mp_1 + cfn * mp_2 + par * mp_3 + cml * mp_4
 		en
-		let [mp_1, mp_2, mp_3, mp_4] = s:multiplier(cfn, par, cml, 0)
+		let [mp_1, mp_2, mp_3, mp_4] = s:multipliers(cfn, par, cml, 0)
 		retu cln + cfn * mp_1 + par * mp_2 + cml * mp_3
 	en
 	retu cln + cml * 2
@@ -1545,11 +1546,12 @@ fu! s:mmode()
 	retu matchmodes[s:mfunc]
 endf
 " Cache {{{2
-fu! s:writecache(read_cache, cache_file)
-	if !a:read_cache && ( ( g:ctrlp_newcache || !filereadable(a:cache_file) )
-		\ && s:caching || len(g:ctrlp_allfiles) > s:nocache_lim )
+fu! s:writecache(cache_file)
+	if ( g:ctrlp_newcache || !filereadable(a:cache_file) ) && s:caching
+		\ || len(g:ctrlp_allfiles) > s:nocache_lim
 		if len(g:ctrlp_allfiles) > s:nocache_lim | let s:caching = 1 | en
 		cal ctrlp#utils#writecache(g:ctrlp_allfiles)
+		let g:ctrlp_newcache = 0
 	en
 endf
 
@@ -1567,7 +1569,7 @@ fu! s:insertcache(str)
 		endfo
 	en
 	cal insert(data, str, pos)
-	cal s:writecache(0, ctrlp#utils#cachefile())
+	cal s:writecache(ctrlp#utils#cachefile())
 endf
 " Extensions {{{2
 fu! s:mtype()

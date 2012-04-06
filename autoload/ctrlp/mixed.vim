@@ -38,7 +38,7 @@ fu! s:getnewmix(cwd, clim)
 		cal ctrlp#mrufiles#refresh('raw')
 		let g:ctrlp_newcache = 1
 	en
-	let g:ctrlp_lines = ctrlp#files()
+	let g:ctrlp_lines = copy(ctrlp#files())
 	cal ctrlp#progress('Mixing...')
 	let mrufs = ctrlp#mrufiles#list('raw')
 	if exists('+ssl') && &ssl
