@@ -30,7 +30,7 @@ endif
 let g:loaded_ctrlp_sample = 1
 
 
-" The main variable for this extension.
+" Add this extension's settings to g:ctrlp_ext_vars
 "
 " The values are:
 " + init: the name of the input function (including the brackets and arguments)
@@ -46,7 +46,7 @@ let g:loaded_ctrlp_sample = 1
 " + opts: the name of the extension's option handling function which is called
 "   when running :CtrlPReload
 " + sort: enable/disable sorting
-let s:sample_var = {
+cal add(g:ctrlp_ext_vars, {
 	\ 'init': 'ctrlp#sample#init()',
 	\ 'accept': 'ctrlp#sample#accept',
 	\ 'lname': 'long statusline name',
@@ -56,15 +56,7 @@ let s:sample_var = {
 	\ 'exit': 'ctrlp#sample#exit()',
 	\ 'opts': 'ctrlp#sample#opts()',
 	\ 'sort': 0,
-	\ }
-
-
-" Append s:sample_var to g:ctrlp_ext_vars
-if exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)
-	let g:ctrlp_ext_vars = add(g:ctrlp_ext_vars, s:sample_var)
-else
-	let g:ctrlp_ext_vars = [s:sample_var]
-endif
+	\ })
 
 
 " Provide a list of strings to search in
@@ -98,6 +90,7 @@ endfunc
 
 " Give the extension an ID
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
+
 " Allow it to be called later
 func! ctrlp#sample#id()
 	retu s:id
