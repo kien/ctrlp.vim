@@ -12,6 +12,7 @@ fu! s:opts()
 	let [pref, opts] = ['g:ctrlp_', {
 		\ 'arg_map':               ['s:argmap', 0],
 		\ 'by_filename':           ['s:byfname', 0],
+		\ 'buffer_func':           ['s:buffunc', {}],
 		\ 'clear_cache_on_exit':   ['s:clrex', 1],
 		\ 'custom_ignore':         ['s:usrign', ''],
 		\ 'default_input':         ['s:deftxt', 0],
@@ -175,6 +176,7 @@ fu! s:Open()
 	cal s:getenv()
 	cal s:execextvar('enter')
 	sil! exe 'noa keepa' ( s:mwbottom ? 'bo' : 'to' ) '1new ControlP'
+	cal s:buffunc(1)
 	let [s:bufnr, s:prompt, s:winw] = [bufnr('%'), ['', '', ''], winwidth(0)]
 	abc <buffer>
 	if !exists('s:hstry')
@@ -191,6 +193,7 @@ fu! s:Open()
 endf
 
 fu! s:Close()
+	cal s:buffunc(0)
 	try | noa bun!
 	cat | noa clo! | endt
 	cal s:unmarksigns()
@@ -1490,6 +1493,14 @@ fu! s:log(m)
 	el
 		sil! redi END
 	en | en
+endf
+
+fu! s:buffunc(e)
+	if a:e && has_key(s:buffunc, 'enter')
+		cal call(s:buffunc['enter'], [])
+	elsei !a:e && has_key(s:buffunc, 'exit')
+		cal call(s:buffunc['exit'], [])
+	en
 endf
 
 fu! s:openfile(cmd, fid, tail, ...)

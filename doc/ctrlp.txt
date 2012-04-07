@@ -374,6 +374,9 @@ works in regexp mode. To split the pattern, separate words with space: >
   let g:ctrlp_use_migemo = 0
 <
 
+-------------------------------------------------------------------------------
+ADVANCED OPTIONS                                       *ctrlp-advanced-options*
+
                                                         *'g:ctrlp_status_func'*
 Use this to customize the statuslines for the CtrlP window: >
   let g:ctrlp_status_func = {}
@@ -416,6 +419,18 @@ Structure of the functions: >
   endfunction
 <
 See https://gist.github.com/1610859 for a working example.
+
+                                                        *'g:ctrlp_buffer_func'*
+Specify the functions that will be called after entering and before exiting the
+CtrlP buffer: >
+  let g:ctrlp_buffer_func = {}
+<
+Example: >
+  let g:ctrlp_buffer_func = {
+    \ 'enter': 'Function_Name_1',
+    \ 'exit':  'Function_Name_2',
+    \ }
+<
 
                                                          *'g:ctrlp_match_func'*
 Set an external fuzzy matching function for CtrlP to use: >
@@ -904,14 +919,15 @@ Special thanks:~
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
 
+    + New option: |g:ctrlp_buffer_func|, callback functions for CtrlP buffer.
     + Remove: g:ctrlp_mruf_last_entered, make it a default for MRU mode.
     + New commands: |:CtrlPLastMode|, open CtrlP in the last mode used.
                     |:CtrlPMixed|, search in files, buffers and MRU files.
 
 Before 2012/03/31~
 
-    + New option: |g:ctrlp_default_input|, default input when entering CtrlP.
-                  |g:ctrlp_match_func|, allow using a custom fuzzy matcher.
+    + New options: |g:ctrlp_default_input|, default input when entering CtrlP.
+                   |g:ctrlp_match_func|, allow using a custom fuzzy matcher.
     + Rename:
         *ClearCtrlPCache* -> |CtrlPClearCache|
         *ClearAllCtrlPCaches* -> |CtrlPClearAllCaches|
