@@ -770,7 +770,7 @@ Available extensions:~
   * Mixed mode:~
     - Name: 'mixed'
     - Command: ':CtrlPMixed'
-    - Search in both files and MRU files.
+    - Search in files, buffers and MRU files.
 
 -------------------------------------------------------------------------------
 Buffer Tag mode options:~
@@ -904,9 +904,9 @@ Special thanks:~
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
 
-    + Remove: g:ctrlp_mruf_last_entered, make it the default for MRU mode.
+    + Remove: g:ctrlp_mruf_last_entered, make it a default for MRU mode.
     + New commands: |:CtrlPLastMode|, open CtrlP in the last mode used.
-                    |:CtrlPMixed|, search in both files and MRU files.
+                    |:CtrlPMixed|, search in files, buffers and MRU files.
 
 Before 2012/03/31~
 

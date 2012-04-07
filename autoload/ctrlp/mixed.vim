@@ -1,6 +1,6 @@
 " =============================================================================
 " File:          autoload/ctrlp/mixed.vim
-" Description:   Files + MRU
+" Description:   Mixing Files + MRU + Buffers
 " Author:        Kien Nguyen <github.com/kien>
 " =============================================================================
 
@@ -13,7 +13,7 @@ let [g:loaded_ctrlp_mixed, g:ctrlp_newmix] = [1, 0]
 let s:mixed_var = {
 	\ 'init': 'ctrlp#mixed#init(s:compare_lim)',
 	\ 'accept': 'ctrlp#acceptfile',
-	\ 'lname': 'fil + mru',
+	\ 'lname': 'fil + mru + buf',
 	\ 'sname': 'mix',
 	\ 'type': 'path',
 	\ 'opmul': 1,
@@ -40,11 +40,11 @@ fu! s:getnewmix(cwd, clim)
 	en
 	let g:ctrlp_lines = copy(ctrlp#files())
 	cal ctrlp#progress('Mixing...')
-	let mrufs = ctrlp#mrufiles#list('raw')
+	let mrufs = copy(ctrlp#mrufiles#list('raw'))
 	if exists('+ssl') && &ssl
 		cal map(mrufs, 'tr(v:val, "\\", "/")')
 	en
-	if len(mrufs) > len(g:ctrlp_lines) || v:version < 702
+	if len(mrufs) > len(g:ctrlp_lines)
 		cal filter(mrufs, 'stridx(v:val, a:cwd)')
 	el
 		let cwd_mrufs = filter(copy(mrufs), '!stridx(v:val, a:cwd)')
