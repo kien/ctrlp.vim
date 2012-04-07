@@ -316,10 +316,10 @@ fu! s:lsCmd()
 	en
 endf
 " - Buffers {{{1
-fu! ctrlp#buffers()
-	retu map(filter(range(1, bufnr('$')), 'empty(getbufvar(v:val, "&bt"))'
-		\ .' && getbufvar(v:val, "&bl") && strlen(bufname(v:val))'),
-		\ 'fnamemodify(bufname(v:val), ":.")')
+fu! ctrlp#buffers(...)
+	let ids = filter(range(1, bufnr('$')), 'empty(getbufvar(v:val, "&bt"))'
+		\ .' && getbufvar(v:val, "&bl") && strlen(bufname(v:val))')
+	retu a:0 && a:1 == 'id' ? ids : map(ids, 'fnamemodify(bufname(v:val), ":.")')
 endf
 " * MatchedItems() {{{1
 fu! s:MatchIt(items, pat, limit, exc)

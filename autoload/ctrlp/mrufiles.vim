@@ -25,12 +25,11 @@ fu! s:excl(fn)
 	retu !empty(s:ex) && a:fn =~# s:ex
 endf
 
-fu! s:mergelists(...)
+fu! s:mergelists()
 	let diskmrufs = ctrlp#utils#readfile(ctrlp#mrufiles#cachefile())
-	let mrus = a:0 && a:1 == 'raw' ? s:mrbs : s:mrufs
-	cal filter(diskmrufs, 'index(mrus, v:val) < 0')
-	let mrua = mrus + diskmrufs
-	retu a:0 && a:1 == 'raw' ? mrua : s:chop(mrua)
+	cal filter(diskmrufs, 'index(s:mrufs, v:val) < 0')
+	let mrufs = s:mrufs + diskmrufs
+	retu s:chop(mrufs)
 endf
 
 fu! s:chop(mrufs)
@@ -54,15 +53,13 @@ fu! s:record(bufnr)
 	if empty(bufname) | retu | en
 	let fn = fnamemodify(bufname, ':p')
 	let fn = exists('+ssl') ? tr(fn, '/', '\') : fn
-	if empty(fn) || !empty(&bt) | retu | en
 	cal filter(s:mrbs, 'v:val !='.s:csen.' fn')
 	cal insert(s:mrbs, fn)
 	if ( !empty(s:in) && fn !~# s:in ) || ( !empty(s:ex) && fn =~# s:ex )
-		\ || !filereadable(fn) | retu
+		\ || !empty(&bt) || !filereadable(fn) | retu
 	en
 	cal filter(s:mrufs, 'v:val !='.s:csen.' fn')
 	cal insert(s:mrufs, fn)
-	let s:mrufs = s:chop(s:mrufs)
 endf
 
 fu! s:savetofile(mrufs)
@@ -91,15 +88,11 @@ fu! ctrlp#mrufiles#remove(files)
 endf
 
 fu! ctrlp#mrufiles#list(...)
-	retu a:0 ? a:1 == 'raw' ? s:mergelists(a:1) : 0 : s:reformat(s:mergelists())
+	retu a:0 ? a:1 == 'raw' ? s:mergelists() : 0 : s:reformat(s:mergelists())
 endf
 
 fu! ctrlp#mrufiles#bufs()
 	retu s:mrbs
-endf
-
-fu! ctrlp#mrufiles#mrufs()
-	retu s:mrufs
 endf
 
 fu! ctrlp#mrufiles#cachefile()

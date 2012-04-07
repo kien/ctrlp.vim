@@ -27,7 +27,7 @@ fu! s:newcache(cwd)
 	retu g:ctrlp_allmixes['cwd'] != a:cwd
 		\ || g:ctrlp_allmixes['filtime'] < getftime(ctrlp#utils#cachefile())
 		\ || g:ctrlp_allmixes['mrutime'] < getftime(ctrlp#mrufiles#cachefile())
-		\ || g:ctrlp_allmixes['bufs'] < len(ctrlp#mrufiles#mrufs())
+		\ || g:ctrlp_allmixes['bufs'] < len(ctrlp#mrufiles#bufs())
 endf
 
 fu! s:getnewmix(cwd, clim)
@@ -41,6 +41,8 @@ fu! s:getnewmix(cwd, clim)
 	if exists('+ssl') && &ssl
 		cal map(mrufs, 'tr(v:val, "\\", "/")')
 	en
+	let bufs = map(ctrlp#buffers('id'), 'fnamemodify(bufname(v:val), ":p")')
+	let mrufs = bufs + filter(mrufs, 'index(bufs, v:val) < 0')
 	if len(mrufs) > len(g:ctrlp_lines)
 		cal filter(mrufs, 'stridx(v:val, a:cwd)')
 	el
@@ -59,7 +61,7 @@ fu! s:getnewmix(cwd, clim)
 	en
 	let g:ctrlp_allmixes = { 'filtime': getftime(ctrlp#utils#cachefile()),
 		\ 'mrutime': getftime(ctrlp#mrufiles#cachefile()), 'cwd': a:cwd,
-		\ 'bufs': len(ctrlp#mrufiles#mrufs()), 'data': g:ctrlp_lines }
+		\ 'bufs': len(ctrlp#mrufiles#bufs()), 'data': g:ctrlp_lines }
 endf
 " Public {{{1
 fu! ctrlp#mixed#init(clim)

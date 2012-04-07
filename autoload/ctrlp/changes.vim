@@ -52,17 +52,14 @@ fu! s:syntax()
 endf
 " Public {{{1
 fu! ctrlp#changes#init(original_bufnr, fname)
-	let fname = exists('s:bufname') ? s:bufname : a:fname
-	let bufs = exists('s:clmode') && s:clmode
-		\ ? filter(ctrlp#buffers(), 'filereadable(v:val)') : [fname]
+	let bufnr = exists('s:bufnr') ? s:bufnr : bufnr('^'.a:fname.'$')
+	let bufs = exists('s:clmode') && s:clmode ? ctrlp#buffers('id') : [bufnr]
+	cal filter(bufs, 'v:val > 0')
 	let [swb, &swb] = [&swb, '']
 	let lines = []
 	for each in bufs
-		let [bname, fnamet] = [fnamemodify(each, ':p'), fnamemodify(each, ':t')]
-		let bufnr = bufnr('^'.bname.'$')
-		if bufnr > 0
-			cal extend(lines, s:process(s:changelist(bufnr), bufnr, fnamet))
-		en
+		let fnamet = fnamemodify(bufname(each), ':t')
+		cal extend(lines, s:process(s:changelist(each), each, fnamet))
 	endfo
 	sil! exe 'noa hid b' a:original_bufnr
 	let &swb = swb
@@ -85,13 +82,13 @@ endf
 fu! ctrlp#changes#cmd(mode, ...)
 	let s:clmode = a:mode
 	if a:0 && !empty(a:1)
-		let s:bufname = fnamemodify(a:1, ':p')
+		let s:bufnr = bufnr('^'.fnamemodify(a:1, ':p').'$')
 	en
 	retu s:id
 endf
 
 fu! ctrlp#changes#exit()
-	unl! s:clmode s:bufname
+	unl! s:clmode s:bufnr
 endf
 "}}}
 
