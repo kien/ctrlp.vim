@@ -35,9 +35,9 @@ fu! s:globdirs(dirs, depth)
 	let entries = split(globpath(a:dirs, s:glob), "\n")
 	let [dirs, depth] = [ctrlp#dirnfile(entries)[0], a:depth + 1]
 	cal extend(g:ctrlp_alldirs, dirs)
-	if !empty(dirs) && !s:max(len(g:ctrlp_alldirs), s:maxfiles)
-		\ && depth <= s:maxdepth
-		sil! cal ctrlp#progress(len(g:ctrlp_alldirs))
+	let nr = len(g:ctrlp_alldirs)
+	if !empty(dirs) && !s:max(nr, s:maxfiles) && depth <= s:maxdepth
+		sil! cal ctrlp#progress(nr)
 		cal s:globdirs(join(dirs, ','), depth)
 	en
 endf

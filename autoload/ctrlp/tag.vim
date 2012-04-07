@@ -57,6 +57,13 @@ fu! s:filter(tags)
 	endw
 	retu alltags
 endf
+
+fu! s:syntax()
+	if !ctrlp#nosy()
+		cal ctrlp#hicheck('CtrlPTabExtra', 'Comment')
+		sy match CtrlPTabExtra '\zs\t.*\ze$'
+	en
+endf
 " Public {{{1
 fu! ctrlp#tag#init()
 	if empty(s:tagfiles) | retu [] | en
@@ -66,12 +73,7 @@ fu! ctrlp#tag#init()
 		let alltags = s:filter(ctrlp#utils#readfile(each))
 		cal extend(g:ctrlp_alltags, alltags)
 	endfo
-	if has('syntax') && exists('g:syntax_on')
-		if !hlexists('CtrlPTabExtra')
-			hi link CtrlPTabExtra Comment
-		en
-		sy match CtrlPTabExtra '\zs\t.*\ze$'
-	en
+	cal s:syntax()
 	retu g:ctrlp_alltags
 endf
 

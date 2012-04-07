@@ -712,9 +712,7 @@ endf
 fu! s:ToggleType(dir)
 	let ext = exists('g:ctrlp_ext_vars') ? len(g:ctrlp_ext_vars) : 0
 	unl! g:ctrlp_nolimit
-	if has('syntax') && exists('g:syntax_on')
-		cal ctrlp#syntax()
-	en
+	cal ctrlp#syntax()
 	cal ctrlp#setlines(s:walker(2 + ext, s:itemtype, a:dir))
 	cal s:PrtSwitcher()
 endf
@@ -1213,9 +1211,8 @@ fu! ctrlp#setlcdir()
 endf
 " Highlighting {{{2
 fu! ctrlp#syntax()
-	for [ke, va] in items(s:hlgrps) | if !hlexists('CtrlP'.ke)
-		exe 'hi link CtrlP'.ke va
-	en | endfo
+	if ctrlp#nosy() | retu | en
+	for [ke, va] in items(s:hlgrps) | cal ctrlp#hicheck('CtrlP'.ke, va) | endfo
 	if !hlexists('CtrlPLinePre')
 		\ && synIDattr(synIDtrans(hlID('Normal')), 'bg') !~ '^-1$\|^$'
 		sil! exe 'hi CtrlPLinePre '.( has("gui_running") ? 'gui' : 'cterm' ).'fg=bg'
@@ -1510,6 +1507,11 @@ fu! s:openfile(cmd, fid, tail, ...)
 		cal ctrlp#setlcdir()
 	en
 endf
+
+fu! s:settype(type)
+	retu a:type < 0 ? exists('s:itemtype') ? s:itemtype
+		\ : exists('g:CTRLP_LAST_MODE') ? g:CTRLP_LAST_MODE : 0 : a:type
+endf
 " Matching {{{2
 fu! s:matchfname(item, pat)
 	retu match(split(a:item, s:lash)[-1], a:pat)
@@ -1603,6 +1605,16 @@ endf
 fu! ctrlp#switchtype(id)
 	cal s:ToggleType(a:id - s:itemtype)
 endf
+
+fu! ctrlp#nosy()
+	retu !( has('syntax') && exists('g:syntax_on') )
+endf
+
+fu! ctrlp#hicheck(grp, defgrp)
+	if !hlexists(a:grp)
+		exe 'hi link' a:grp a:defgrp
+	en
+endf
 "}}}1
 " * Initialization {{{1
 fu! ctrlp#setlines(...)
@@ -1622,12 +1634,8 @@ fu! ctrlp#init(type, ...)
 	cal s:SetWD(a:0 ? a:1 : '')
 	cal s:SetDefTxt()
 	cal s:MapKeys()
-	if has('syntax') && exists('g:syntax_on')
-		cal ctrlp#syntax()
-	en
-	let type = a:type < 0 ? exists('s:itemtype') ? s:itemtype
-		\ : exists('g:CTRLP_LAST_MODE') ? g:CTRLP_LAST_MODE : 0 : a:type
-	cal ctrlp#setlines(type)
+	cal ctrlp#syntax()
+	cal ctrlp#setlines(s:settype(a:type))
 	cal s:BuildPrompt(1)
 endf
 " - Autocmds {{{1

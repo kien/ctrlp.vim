@@ -82,11 +82,10 @@ fu! s:elapsed(nr)
 endf
 
 fu! s:syntax()
+	if ctrlp#nosy() | retu | en
 	for [ke, va] in items({'T': 'Directory', 'Br': 'Comment', 'Nr': 'String',
 		\ 'Sv': 'Comment', 'Po': 'Title'})
-		if !hlexists('CtrlPUndo'.ke)
-			exe 'hi link CtrlPUndo'.ke va
-		en
+		cal ctrlp#hicheck('CtrlPUndo'.ke, va)
 	endfo
 	sy match CtrlPUndoT '\v\d+ \zs[^ ]+\ze|\d+:\d+:\d+'
 	sy match CtrlPUndoBr '\[\|\]'
@@ -121,9 +120,6 @@ endf
 fu! ctrlp#undo#init()
 	let entries = s:undos[0] ? s:undos[1]['entries'] : s:undos[1]
 	if empty(entries) | retu [] | en
-	if has('syntax') && exists('g:syntax_on')
-		cal s:syntax()
-	en
 	let g:ctrlp_nolimit = 1
 	if !exists('s:lines')
 		if s:undos[0]
@@ -133,6 +129,7 @@ fu! ctrlp#undo#init()
 			let s:lines = map(reverse(entries), 's:formatul(v:val)')
 		en
 	en
+	cal s:syntax()
 	retu s:lines
 endf
 

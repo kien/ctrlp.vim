@@ -199,15 +199,10 @@ fu! s:parseline(line)
 endf
 
 fu! s:syntax()
-	if !hlexists('CtrlPTagKind')
-		hi link CtrlPTagKind Title
-	en
-	if !hlexists('CtrlPBufName')
-		hi link CtrlPBufName Directory
-	en
-	if !hlexists('CtrlPTabExtra')
-		hi link CtrlPTabExtra Comment
-	en
+	if ctrlp#nosy() | retu | en
+	cal ctrlp#hicheck('CtrlPTagKind', 'Title')
+	cal ctrlp#hicheck('CtrlPBufName', 'Directory')
+	cal ctrlp#hicheck('CtrlPTabExtra', 'Comment')
 	sy match CtrlPTagKind '\zs[^\t|]\+\ze|\d\+:[^|]\+|\d\+|'
 	sy match CtrlPBufName '|\d\+:\zs[^|]\+\ze|\d\+|'
 	sy match CtrlPTabExtra '\zs\t.*\ze$' contains=CtrlPBufName,CtrlPTagKind
@@ -223,9 +218,7 @@ fu! ctrlp#buffertag#init(fname)
 		let tftype = get(split(getbufvar(bname, '&ft'), '\.'), 0, '')
 		cal extend(lines, s:process(bname, tftype))
 	endfo
-	if has('syntax') && exists('g:syntax_on')
-		cal s:syntax()
-	en
+	cal s:syntax()
 	retu lines
 endf
 

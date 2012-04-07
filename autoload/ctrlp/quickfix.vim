@@ -28,15 +28,17 @@ fu! s:lineout(dict)
 	retu printf('%s|%d:%d| %s', bufname(a:dict['bufnr']), a:dict['lnum'],
 		\ a:dict['col'], matchstr(a:dict['text'], '\s*\zs.*\S'))
 endf
+" Utilities {{{1
+fu! s:syntax()
+	if !ctrlp#nosy()
+		cal ctrlp#hicheck('CtrlPqfLineCol', 'Search')
+		sy match CtrlPqfLineCol '|\zs\d\+:\d\+\ze|'
+	en
+endf
 " Public {{{1
 fu! ctrlp#quickfix#init()
 	let g:ctrlp_nolimit = 1
-	if has('syntax') && exists('g:syntax_on')
-		if !hlexists('CtrlPqfLineCol')
-			hi link CtrlPqfLineCol Search
-		en
-		sy match CtrlPqfLineCol '|\zs\d\+:\d\+\ze|'
-	en
+	cal s:syntax()
 	retu map(getqflist(), 's:lineout(v:val)')
 endf
 

@@ -24,12 +24,9 @@ let g:ctrlp_ext_vars = exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 " Utilities {{{1
 fu! s:syntax()
-	if !hlexists('CtrlPBufName')
-		hi link CtrlPBufName Directory
-	en
-	if !hlexists('CtrlPTabExtra')
-		hi link CtrlPTabExtra Comment
-	en
+	if ctrlp#nosy() | retu | en
+	cal ctrlp#hicheck('CtrlPBufName', 'Directory')
+	cal ctrlp#hicheck('CtrlPTabExtra', 'Comment')
 	sy match CtrlPBufName '\t|\zs[^|]\+\ze|\d\+:\d\+|$'
 	sy match CtrlPTabExtra '\zs\t.*\ze$' contains=CtrlPBufName
 endf
@@ -48,9 +45,7 @@ fu! ctrlp#line#init()
 		cal filter(from_file, 'v:val !~ ''^\s*\t|[^|]\+|\d\+:\d\+|$''')
 		cal extend(lines, from_file)
 	endfo
-	if has('syntax') && exists('g:syntax_on')
-		cal s:syntax()
-	en
+	cal s:syntax()
 	retu lines
 endf
 
