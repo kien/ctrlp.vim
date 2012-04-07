@@ -10,17 +10,14 @@ if exists('g:loaded_ctrlp_rtscript') && g:loaded_ctrlp_rtscript
 en
 let [g:loaded_ctrlp_rtscript, g:ctrlp_newrts] = [1, 0]
 
-let s:rtscript_var = {
+cal add(g:ctrlp_ext_vars, {
 	\ 'init': 'ctrlp#rtscript#init()',
 	\ 'accept': 'ctrlp#acceptfile',
 	\ 'lname': 'runtime scripts',
 	\ 'sname': 'rts',
 	\ 'type': 'path',
 	\ 'opmul': 1,
-	\ }
-
-let g:ctrlp_ext_vars = exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)
-	\ ? add(g:ctrlp_ext_vars, s:rtscript_var) : [s:rtscript_var]
+	\ })
 
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 " Public {{{1

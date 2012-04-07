@@ -10,17 +10,14 @@ if exists('g:loaded_ctrlp_tag') && g:loaded_ctrlp_tag
 en
 let g:loaded_ctrlp_tag = 1
 
-let s:tag_var = {
+cal add(g:ctrlp_ext_vars, {
 	\ 'init': 'ctrlp#tag#init()',
 	\ 'accept': 'ctrlp#tag#accept',
 	\ 'lname': 'tags',
 	\ 'sname': 'tag',
 	\ 'enter': 'ctrlp#tag#enter()',
 	\ 'type': 'tabs',
-	\ }
-
-let g:ctrlp_ext_vars = exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)
-	\ ? add(g:ctrlp_ext_vars, s:tag_var) : [s:tag_var]
+	\ })
 
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 " Utilities {{{1

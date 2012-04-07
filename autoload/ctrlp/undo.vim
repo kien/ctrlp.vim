@@ -10,7 +10,7 @@ if ( exists('g:loaded_ctrlp_undo') && g:loaded_ctrlp_undo )
 en
 let g:loaded_ctrlp_undo = 1
 
-let s:undo_var = {
+cal add(g:ctrlp_ext_vars, {
 	\ 'init': 'ctrlp#undo#init()',
 	\ 'accept': 'ctrlp#undo#accept',
 	\ 'lname': 'undo',
@@ -19,10 +19,7 @@ let s:undo_var = {
 	\ 'exit': 'ctrlp#undo#exit()',
 	\ 'type': 'line',
 	\ 'sort': 0,
-	\ }
-
-let g:ctrlp_ext_vars = exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)
-	\ ? add(g:ctrlp_ext_vars, s:undo_var) : [s:undo_var]
+	\ })
 
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 

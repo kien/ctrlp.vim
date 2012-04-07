@@ -11,8 +11,8 @@ fu! s:opts()
 	let hst = exists('+hi') ? &hi : 20
 	let [pref, opts] = ['g:ctrlp_', {
 		\ 'arg_map':               ['s:argmap', 0],
-		\ 'by_filename':           ['s:byfname', 0],
 		\ 'buffer_func':           ['s:buffunc', {}],
+		\ 'by_filename':           ['s:byfname', 0],
 		\ 'clear_cache_on_exit':   ['s:clrex', 1],
 		\ 'custom_ignore':         ['s:usrign', ''],
 		\ 'default_input':         ['s:deftxt', 0],
@@ -713,10 +713,11 @@ fu! s:ToggleByFname()
 endf
 
 fu! s:ToggleType(dir)
-	let ext = exists('g:ctrlp_ext_vars') ? len(g:ctrlp_ext_vars) : 0
+	let max = len(g:ctrlp_ext_vars) + 2
+	let next = s:walker(max, s:itemtype, a:dir)
 	unl! g:ctrlp_nolimit
 	cal ctrlp#syntax()
-	cal ctrlp#setlines(s:walker(2 + ext, s:itemtype, a:dir))
+	cal ctrlp#setlines(next)
 	cal s:PrtSwitcher()
 endf
 
@@ -1037,7 +1038,7 @@ fu! ctrlp#statusline()
 			\ ['buffers', 'buf'],
 			\ ['mru files', 'mru'],
 			\ ]
-		if exists('g:ctrlp_ext_vars')
+		if !empty(g:ctrlp_ext_vars)
 			cal map(copy(g:ctrlp_ext_vars),
 				\ 'add(s:statypes, [ v:val["lname"], v:val["sname"] ])')
 		en
@@ -1591,7 +1592,7 @@ fu! s:mtype()
 endf
 
 fu! s:execextvar(key)
-	if exists('g:ctrlp_ext_vars')
+	if !empty(g:ctrlp_ext_vars)
 		cal map(filter(copy(g:ctrlp_ext_vars),
 			\ 'has_key(v:val, a:key)'), 'eval(v:val[a:key])')
 	en
@@ -1632,7 +1633,7 @@ fu! ctrlp#setlines(...)
 	if a:0 | let s:itemtype = a:1 | en
 	cal s:modevar()
 	let types = ['ctrlp#files()', 'ctrlp#buffers()', 'ctrlp#mrufiles#list()']
-	if exists('g:ctrlp_ext_vars')
+	if !empty(g:ctrlp_ext_vars)
 		cal map(copy(g:ctrlp_ext_vars), 'add(types, v:val["init"])')
 	en
 	let g:ctrlp_lines = eval(types[s:itemtype])

@@ -10,7 +10,7 @@ if exists('g:loaded_ctrlp_changes') && g:loaded_ctrlp_changes
 en
 let g:loaded_ctrlp_changes = 1
 
-let s:changes_var = {
+cal add(g:ctrlp_ext_vars, {
 	\ 'init': 'ctrlp#changes#init(s:bufnr, s:crfile)',
 	\ 'accept': 'ctrlp#changes#accept',
 	\ 'lname': 'changes',
@@ -18,10 +18,7 @@ let s:changes_var = {
 	\ 'exit': 'ctrlp#changes#exit()',
 	\ 'type': 'tabe',
 	\ 'sort': 0,
-	\ }
-
-let g:ctrlp_ext_vars = exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)
-	\ ? add(g:ctrlp_ext_vars, s:changes_var) : [s:changes_var]
+	\ })
 
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 " Utilities {{{1
@@ -46,11 +43,12 @@ fu! s:process(clines, ...)
 endf
 
 fu! s:syntax()
-	if ctrlp#nosy() | retu | en
-	cal ctrlp#hicheck('CtrlPBufName', 'Directory')
-	cal ctrlp#hicheck('CtrlPTabExtra', 'Comment')
-	sy match CtrlPBufName '\t|\d\+:\zs[^|]\+\ze|\d\+:\d\+|$'
-	sy match CtrlPTabExtra '\zs\t.*\ze$' contains=CtrlPBufName
+	if !ctrlp#nosy()
+		cal ctrlp#hicheck('CtrlPBufName', 'Directory')
+		cal ctrlp#hicheck('CtrlPTabExtra', 'Comment')
+		sy match CtrlPBufName '\t|\d\+:\zs[^|]\+\ze|\d\+:\d\+|$'
+		sy match CtrlPTabExtra '\zs\t.*\ze$' contains=CtrlPBufName
+	en
 endf
 " Public {{{1
 fu! ctrlp#changes#init(original_bufnr, fname)

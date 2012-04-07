@@ -10,7 +10,7 @@ if exists('g:loaded_ctrlp_mixed') && g:loaded_ctrlp_mixed
 en
 let [g:loaded_ctrlp_mixed, g:ctrlp_newmix] = [1, 0]
 
-let s:mixed_var = {
+cal add(g:ctrlp_ext_vars, {
 	\ 'init': 'ctrlp#mixed#init(s:compare_lim)',
 	\ 'accept': 'ctrlp#acceptfile',
 	\ 'lname': 'fil + mru + buf',
@@ -18,10 +18,7 @@ let s:mixed_var = {
 	\ 'type': 'path',
 	\ 'opmul': 1,
 	\ 'specinput': 1,
-	\ }
-
-let g:ctrlp_ext_vars = exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)
-	\ ? add(g:ctrlp_ext_vars, s:mixed_var) : [s:mixed_var]
+	\ })
 
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 " Utilities {{{1

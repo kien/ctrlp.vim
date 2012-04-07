@@ -17,17 +17,14 @@ let s:ars = [
 	\ 's:glob',
 	\ ]
 
-let s:dir_var = {
+cal add(g:ctrlp_ext_vars, {
 	\ 'init': 'ctrlp#dir#init('.join(s:ars, ', ').')',
 	\ 'accept': 'ctrlp#dir#accept',
 	\ 'lname': 'dirs',
 	\ 'sname': 'dir',
 	\ 'type': 'path',
 	\ 'specinput': 1,
-	\ }
-
-let g:ctrlp_ext_vars = exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)
-	\ ? add(g:ctrlp_ext_vars, s:dir_var) : [s:dir_var]
+	\ })
 
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 " Utilities {{{1
@@ -51,8 +48,8 @@ fu! ctrlp#dir#init(...)
 	for each in range(len(s:ars))
 		exe 'let' s:ars[each] '=' string(eval('a:'.(each + 1)))
 	endfo
-	let cadir = ctrlp#utils#cachedir().ctrlp#utils#lash().s:dir_var['sname']
-	let cafile = cadir.ctrlp#utils#lash().ctrlp#utils#cachefile(s:dir_var['sname'])
+	let cadir = ctrlp#utils#cachedir().ctrlp#utils#lash().'dir'
+	let cafile = cadir.ctrlp#utils#lash().ctrlp#utils#cachefile('dir')
 	if g:ctrlp_newdir || !filereadable(cafile)
 		let [s:initcwd, g:ctrlp_alldirs] = [s:cwd, []]
 		cal s:globdirs(s:cwd, 0)

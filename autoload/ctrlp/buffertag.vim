@@ -13,7 +13,7 @@ if exists('g:loaded_ctrlp_buftag') && g:loaded_ctrlp_buftag
 en
 let g:loaded_ctrlp_buftag = 1
 
-let s:buftag_var = {
+cal add(g:ctrlp_ext_vars, {
 	\ 'init': 'ctrlp#buffertag#init(s:crfile)',
 	\ 'accept': 'ctrlp#buffertag#accept',
 	\ 'lname': 'buffer tags',
@@ -21,10 +21,7 @@ let s:buftag_var = {
 	\ 'exit': 'ctrlp#buffertag#exit()',
 	\ 'type': 'tabs',
 	\ 'opts': 'ctrlp#buffertag#opts()',
-	\ }
-
-let g:ctrlp_ext_vars = exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)
-	\ ? add(g:ctrlp_ext_vars, s:buftag_var) : [s:buftag_var]
+	\ })
 
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 
@@ -199,13 +196,14 @@ fu! s:parseline(line)
 endf
 
 fu! s:syntax()
-	if ctrlp#nosy() | retu | en
-	cal ctrlp#hicheck('CtrlPTagKind', 'Title')
-	cal ctrlp#hicheck('CtrlPBufName', 'Directory')
-	cal ctrlp#hicheck('CtrlPTabExtra', 'Comment')
-	sy match CtrlPTagKind '\zs[^\t|]\+\ze|\d\+:[^|]\+|\d\+|'
-	sy match CtrlPBufName '|\d\+:\zs[^|]\+\ze|\d\+|'
-	sy match CtrlPTabExtra '\zs\t.*\ze$' contains=CtrlPBufName,CtrlPTagKind
+	if !ctrlp#nosy()
+		cal ctrlp#hicheck('CtrlPTagKind', 'Title')
+		cal ctrlp#hicheck('CtrlPBufName', 'Directory')
+		cal ctrlp#hicheck('CtrlPTabExtra', 'Comment')
+		sy match CtrlPTagKind '\zs[^\t|]\+\ze|\d\+:[^|]\+|\d\+|'
+		sy match CtrlPBufName '|\d\+:\zs[^|]\+\ze|\d\+|'
+		sy match CtrlPTabExtra '\zs\t.*\ze$' contains=CtrlPBufName,CtrlPTagKind
+	en
 endf
 " Public {{{1
 fu! ctrlp#buffertag#init(fname)
