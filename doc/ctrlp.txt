@@ -494,7 +494,6 @@ COMMANDS                                                       *ctrlp-commands*
                                                                *:CtrlPLastMode*
 :CtrlPLastMode
    Open CtrlP in the last mode used.
-   Works cross-session if you have a ! in your |'viminfo'| option.
 
                                                              *:CtrlPClearCache*
 :CtrlPClearCache
@@ -789,7 +788,7 @@ Available extensions:~
   * Mixed mode:~
     - Name: 'mixed'
     - Command: ':CtrlPMixed'
-    - Search in files, buffers and MRU files.
+    - Search in files, buffers and MRU files at the same time.
 
 -------------------------------------------------------------------------------
 Buffer Tag mode options:~
@@ -922,6 +921,8 @@ Special thanks:~
 
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
+
+Before 2012/04/15~
 
     + New option: |g:ctrlp_buffer_func|, callback functions for CtrlP buffer.
     + Remove: g:ctrlp_mruf_last_entered, make it a default for MRU mode.

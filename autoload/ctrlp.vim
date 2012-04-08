@@ -1356,7 +1356,6 @@ fu! s:setupblank()
 endf
 
 fu! s:leavepre()
-	if exists('s:itemtype') | let g:CTRLP_LAST_MODE = s:itemtype | en
 	if s:clrex && !( has('clientserver') && len(split(serverlist(), "\n")) > 1 )
 		cal ctrlp#clra()
 	en
@@ -1518,8 +1517,7 @@ fu! s:openfile(cmd, fid, tail, ...)
 endf
 
 fu! s:settype(type)
-	retu a:type < 0 ? exists('s:itemtype') ? s:itemtype
-		\ : exists('g:CTRLP_LAST_MODE') ? g:CTRLP_LAST_MODE : 0 : a:type
+	retu a:type < 0 ? exists('s:itemtype') ? s:itemtype : 0 : a:type
 endf
 " Matching {{{2
 fu! s:matchfname(item, pat)
