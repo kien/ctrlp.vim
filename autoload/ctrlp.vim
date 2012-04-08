@@ -206,7 +206,7 @@ fu! s:Close()
 		exe s:winres[0]
 	en
 	unl! s:focus s:hisidx s:hstgot s:marked s:statypes s:cline s:init s:savestr
-		\ g:ctrlp_nolimit
+		\ s:mrbs g:ctrlp_nolimit
 	cal ctrlp#recordhist()
 	cal s:execextvar('exit')
 	cal s:log(0)
@@ -867,7 +867,7 @@ fu! s:MarkToOpen()
 		" Unmark and remove the file from s:marked
 		let key = s:dictindex(s:marked, filpath)
 		cal remove(s:marked, key)
-		if empty(s:marked) | unl! s:marked | en
+		if empty(s:marked) | unl s:marked | en
 		if has('signs')
 			exe 'sign unplace' key 'buffer='.s:bufnr
 		en
@@ -957,8 +957,8 @@ fu! s:compmre(...)
 	if !exists('s:mrbs')
 		let s:mrbs = ctrlp#mrufiles#bufs()
 	en
-	let cwd = s:dyncwd
-	retu index(s:mrbs, cwd.s:lash().a:1) - index(s:mrbs, cwd.s:lash().a:2)
+	let [b1, b2] = [fnamemodify(a:1, ':p'), fnamemodify(a:2, ':p')]
+	retu index(s:mrbs, b1) - index(s:mrbs, b2)
 endf
 
 fu! s:comparent(s1, s2)
@@ -1010,7 +1010,6 @@ fu! s:mixedsort(s1, s2)
 				let ctm = s:comptime(a:s1, a:s2)
 				let [mp_1, mp_2, mp_3, mp_4] = s:multipliers(ctm, cfn, par, cml)
 			en
-			unl! s:mrbs
 			retu cln + ctm * mp_1 + cfn * mp_2 + par * mp_3 + cml * mp_4
 		en
 		let [mp_1, mp_2, mp_3, mp_4] = s:multipliers(cfn, par, cml, 0)
