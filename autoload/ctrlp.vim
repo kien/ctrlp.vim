@@ -462,7 +462,7 @@ fu! s:BuildPrompt(upd, ...)
 endf
 " - SetDefTxt() {{{1
 fu! s:SetDefTxt()
-	if s:deftxt == '0' || s:pathmode == 1 | retu | en
+	if s:deftxt == '0' || s:pathmode == 1 || !s:ispath | retu | en
 	let txt = s:deftxt
 	if !type(txt)
 		let txt = txt && !stridx(s:crfpath, s:dyncwd)
@@ -1638,10 +1638,10 @@ fu! ctrlp#init(type, ...)
 	let [s:matches, s:init] = [1, 1]
 	cal s:Open()
 	cal s:SetWD(a:0 ? a:1 : '')
-	cal s:SetDefTxt()
 	cal s:MapKeys()
 	cal ctrlp#syntax()
 	cal ctrlp#setlines(s:settype(a:type))
+	cal s:SetDefTxt()
 	cal s:BuildPrompt(1)
 endf
 " - Autocmds {{{1
