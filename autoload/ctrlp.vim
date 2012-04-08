@@ -818,8 +818,7 @@ fu! s:AcceptSelection(mode)
 	en
 	if empty(line) | retu | en
 	" Do something with it
-	let actfunc = s:itemtype < 3 ? 'ctrlp#acceptfile'
-		\ : g:ctrlp_ext_vars[s:itemtype - 3]['accept']
+	let actfunc = s:itemtype < 3 ? 'ctrlp#acceptfile' : s:getextvar('accept')
 	cal call(actfunc, [a:mode, line])
 endf
 " - CreateNewFile() {{{1
@@ -1115,8 +1114,7 @@ fu! s:lash(...)
 endf
 
 fu! s:ispathitem()
-	retu s:itemtype < 3 ||
-		\ ( s:itemtype > 2 && g:ctrlp_ext_vars[s:itemtype - 3]['type'] == 'path' )
+	retu s:itemtype < 3 || ( s:itemtype > 2 && s:getextvar('type') == 'path' )
 endf
 
 fu! ctrlp#dirnfile(entries)
@@ -1586,8 +1584,7 @@ fu! s:insertcache(str)
 endf
 " Extensions {{{2
 fu! s:mtype()
-	retu s:itemtype > 2
-		\ ? g:ctrlp_ext_vars[s:itemtype - 3]['type'] : 'path'
+	retu s:itemtype > 2 ? s:getextvar('type') : 'path'
 endf
 
 fu! s:execextvar(key)
