@@ -11,7 +11,7 @@ en
 let g:loaded_ctrlp_changes = 1
 
 cal add(g:ctrlp_ext_vars, {
-	\ 'init': 'ctrlp#changes#init(s:bufnr, s:crfile)',
+	\ 'init': 'ctrlp#changes#init(s:bufnr, s:crbufnr)',
 	\ 'accept': 'ctrlp#changes#accept',
 	\ 'lname': 'changes',
 	\ 'sname': 'chs',
@@ -51,8 +51,8 @@ fu! s:syntax()
 	en
 endf
 " Public {{{1
-fu! ctrlp#changes#init(original_bufnr, fname)
-	let bufnr = exists('s:bufnr') ? s:bufnr : bufnr('^'.a:fname.'$')
+fu! ctrlp#changes#init(original_bufnr, bufnr)
+	let bufnr = exists('s:bufnr') ? s:bufnr : a:bufnr
 	let bufs = exists('s:clmode') && s:clmode ? ctrlp#buffers('id') : [bufnr]
 	cal filter(bufs, 'v:val > 0')
 	let [swb, &swb] = [&swb, '']
