@@ -41,6 +41,8 @@
 			<ul>
 				<li>Press <code>&lt;c-p&gt;</code> or run <code>:CtrlP</code> or <code>:CtrlP [starting-directory]</code> to invoke CtrlP.</li>
 				<li>Or run <code>:CtrlPBuffer</code> or <code>:CtrlPMRU</code> to start in find buffer or find MRU mode, respectively.</li>
+				<li>Or run <code>:CtrlPMixed</code> to search in Files, Buffers and MRU files at the same time.</li>
+				<li>Check <code>:help ctrlp-extensions</code> for commands provided by extensions.</li>
 			</ul>
 			<h6>Once CtrlP is open:</h6>
 			<ul>
@@ -50,11 +52,13 @@
 				<li>Press <code>&lt;F5&gt;</code> to purge the cache for the current directory and get new files.</li>
 				<li>Submit <code>/</code> or <code>\</code> as the input string to find and go to the project’s root.</li>
 				<li>Submit two dots <code>..</code> to go backward the directory tree by 1 level.</li>
-				<li>End the input string with a colon <code>:</code> followed by a command to execute after opening the file:<br>
-					<code>abc:45</code> will open the selected file and jump to line 45.<br>
-					<code>abc:/my\:function</code> will open the selected file and jump to the first instance of 'my:function'.<br>
-					<code>abc:+setf\ myfiletype|25</code> will open the selected file and set its filetype to 'myfiletype' then jump to line 25.<br>
-					<code>abc:diffthis</code> will open the marked files and run <code>:diffthis</code> on the first 4 files.
+				<li>End the input string with a colon <code>:</code> followed by a command to execute after opening the file:
+					<ul>
+						<li>Use <code>:45</code> to open the selected file and jump to line 45.</li>
+						<li>Use <code>:/any:string</code> to open the selected file and jump to the first instance of 'any:string'.</li>
+						<li>Use <code>:+setf myfiletype|25</code> to open the selected file and set its filetype to 'myfiletype' then jump to line 25.</li>
+						<li>Use <code>:diffthis</code> to open the files marked with <code>&lt;c-z&gt;</code> and run <code>:diffthis</code> on the first 4 files.</li>
+					</ul>
 				</li>
 				<li>Use <code>&lt;c-n&gt;</code>, <code>&lt;c-p&gt;</code> to go to the next/previous string in the prompt’s history.</li>
 				<li>Use <code>&lt;c-y&gt;</code> to create a new file and its parent dirs.</li>
@@ -106,7 +110,7 @@ let g:ctrlp_user_command = ['.hg/', 'hg --cwd %s locate -I .']</code></pre>
 	\ }</code></pre>
 				</li>
 			</ul>
-			<p class="note">Run <code>:help ctrlp</code> or submit <code>?</code> in CtrlP for more mappings, commands, options and extensions.</p>
+			<p class="note">Run <code>:help ctrlp</code> or submit <code>?</code> in CtrlP for more mappings, commands and options.</p>
 			<h3>Get <span>ctrlp.vim</span>:</h3>
 			<a class="download" href="//github.com/kien/ctrlp.vim/zipball/master"><span class="icon"></span>Download Latest</a>
 			<h6>Elsewhere:</h6>

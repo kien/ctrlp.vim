@@ -216,6 +216,11 @@ article ul {
 	padding:0 0 0 1em;
 	list-style:square outside;
 }
+article ul ul {
+	padding:0 0 0 .5em;
+	margin-bottom:0;
+	list-style:circle outside;
+}
 article ul li small,
 article ol li small {
 	font-size:.83em;
