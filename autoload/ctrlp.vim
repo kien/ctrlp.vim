@@ -206,7 +206,7 @@ fu! s:Close()
 		exe s:winres[0]
 	en
 	unl! s:focus s:hisidx s:hstgot s:marked s:statypes s:cline s:init s:savestr
-		\ s:mrbs g:ctrlp_nolimit
+		\ s:mrbs
 	cal ctrlp#recordhist()
 	cal s:execextvar('exit')
 	cal s:log(0)
@@ -405,7 +405,7 @@ fu! s:Render(lines, pat)
 	exe 'keepj norm!' ( s:mwreverse ? 'G' : 'gg' ).'1|'
 	cal s:unmarksigns()
 	cal s:remarksigns()
-	if exists('s:cline') && !exists('g:ctrlp_nolimit')
+	if exists('s:cline') && s:nolim != 1
 		cal cursor(s:cline, 1)
 	en
 	" Highlighting
@@ -422,7 +422,7 @@ fu! s:Update(str)
 	" Stop if the string's unchanged
 	if str == oldstr && !empty(str) && !exists('s:force') | retu | en
 	let pat = s:matcher == {} ? s:SplitPattern(str) : str
-	let lines = exists('g:ctrlp_nolimit') && empty(str) ? copy(g:ctrlp_lines)
+	let lines = s:nolim == 1 && empty(str) ? copy(g:ctrlp_lines)
 		\ : s:MatchedItems(g:ctrlp_lines, pat, s:winh)
 	cal s:Render(lines, pat)
 endf
@@ -570,7 +570,7 @@ fu! s:PrtSelectMove(dir)
 	let wht = winheight(0)
 	let dirs = {'t': 'gg','b': 'G','j': 'j','k': 'k','u': wht.'k','d': wht.'j'}
 	exe 'keepj norm!' dirs[a:dir]
-	if !exists('g:ctrlp_nolimit') | let s:cline = line('.') | en
+	if s:nolim != 1 | let s:cline = line('.') | en
 	if line('$') > winheight(0) | cal s:BuildPrompt(0, s:Focus()) | en
 endf
 
@@ -593,7 +593,7 @@ fu! s:PrtSelectJump(char, ...)
 			let [jmpln, s:jmpchr] = [npos == -1 ? pos : npos, [chr, npos]]
 		en
 		keepj exe jmpln + 1
-		if !exists('g:ctrlp_nolimit') | let s:cline = line('.') | en
+		if s:nolim != 1 | let s:cline = line('.') | en
 		if line('$') > winheight(0) | cal s:BuildPrompt(0, s:Focus()) | en
 	en
 endf
@@ -715,7 +715,6 @@ endf
 fu! s:ToggleType(dir)
 	let max = len(g:ctrlp_ext_vars) + 2
 	let next = s:walker(max, s:itemtype, a:dir)
-	unl! g:ctrlp_nolimit
 	cal ctrlp#syntax()
 	cal ctrlp#setlines(next)
 	cal s:PrtSwitcher()
@@ -1406,11 +1405,13 @@ fu! s:modevar()
 	let s:ispath = s:ispathitem()
 	if !s:ispath | let s:byfname = 0 | en
 	let s:mfunc = s:mfunc()
+	let s:nolim = s:getextvar('nolim')
+	let s:dosort = s:getextvar('sort')
 endf
 
 fu! s:dosort()
-	retu s:matcher == {} && ( ( s:itemtype != 2 && !exists('g:ctrlp_nolimit') )
-		\ || s:prompt != ['', '', ''] ) && s:getextvar('sort')
+	retu s:matcher == {} && ( ( s:itemtype != 2 && s:nolim != 1 )
+		\ || s:prompt != ['', '', ''] ) && s:dosort
 endf
 
 fu! s:narrowable()

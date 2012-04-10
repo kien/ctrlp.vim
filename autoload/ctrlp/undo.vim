@@ -19,6 +19,7 @@ cal add(g:ctrlp_ext_vars, {
 	\ 'exit': 'ctrlp#undo#exit()',
 	\ 'type': 'line',
 	\ 'sort': 0,
+	\ 'nolim': 1,
 	\ })
 
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
@@ -117,7 +118,6 @@ endf
 fu! ctrlp#undo#init()
 	let entries = s:undos[0] ? s:undos[1]['entries'] : s:undos[1]
 	if empty(entries) | retu [] | en
-	let g:ctrlp_nolimit = 1
 	if !exists('s:lines')
 		if s:undos[0]
 			let entries = s:dict2list(s:flatten(entries, s:undos[1]['seq_cur']))

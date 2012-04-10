@@ -17,6 +17,7 @@ cal add(g:ctrlp_ext_vars, {
 	\ 'sname': 'qfx',
 	\ 'type': 'line',
 	\ 'sort': 0,
+	\ 'nolim': 1,
 	\ })
 
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
@@ -34,7 +35,6 @@ fu! s:syntax()
 endf
 " Public {{{1
 fu! ctrlp#quickfix#init()
-	let g:ctrlp_nolimit = 1
 	cal s:syntax()
 	retu map(getqflist(), 's:lineout(v:val)')
 endf
