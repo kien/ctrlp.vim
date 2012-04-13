@@ -1356,14 +1356,14 @@ fu! s:setupblank()
 endf
 
 fu! s:leavepre()
+	if exists('s:bufnr') && s:bufnr == bufnr('%') | bw! | en
 	if s:clrex && !( has('clientserver') && len(split(serverlist(), "\n")) > 1 )
 		cal ctrlp#clra()
 	en
 endf
 
 fu! s:checkbuf()
-	if exists('s:init') | retu | en
-	if exists('s:bufnr') && s:bufnr > 0
+	if !exists('s:init') && exists('s:bufnr') && s:bufnr > 0
 		exe s:bufnr.'bw!'
 	en
 endf
