@@ -42,17 +42,20 @@ en
 
 cal ctrlp#mrufiles#init()
 
-com! CtrlPTag       cal ctrlp#init(ctrlp#tag#id())
-com! CtrlPQuickfix  cal ctrlp#init(ctrlp#quickfix#id())
+com! CtrlPTag         cal ctrlp#init(ctrlp#tag#id())
+com! CtrlPQuickfix    cal ctrlp#init(ctrlp#quickfix#id())
 com! -n=? -com=dir CtrlPDir
 	\ cal ctrlp#init(ctrlp#dir#id(), <q-args>)
 com! -n=? -com=buffer CtrlPBufTag
 	\ cal ctrlp#init(ctrlp#buffertag#cmd(0, <q-args>))
-com! CtrlPBufTagAll cal ctrlp#init(ctrlp#buffertag#cmd(1))
-com! CtrlPRTS       cal ctrlp#init(ctrlp#rtscript#id())
-com! CtrlPUndo      cal ctrlp#init(ctrlp#undo#id())
-com! CtrlPLine      cal ctrlp#init(ctrlp#line#id())
+com! CtrlPBufTagAll   cal ctrlp#init(ctrlp#buffertag#cmd(1))
+com! CtrlPRTS         cal ctrlp#init(ctrlp#rtscript#id())
+com! CtrlPUndo        cal ctrlp#init(ctrlp#undo#id())
+com! CtrlPLine        cal ctrlp#init(ctrlp#line#id())
 com! -n=? -com=buffer CtrlPChange
 	\ cal ctrlp#init(ctrlp#changes#cmd(0, <q-args>))
-com! CtrlPChangeAll cal ctrlp#init(ctrlp#changes#cmd(1))
-com! CtrlPMixed     cal ctrlp#init(ctrlp#mixed#id())
+com! CtrlPChangeAll   cal ctrlp#init(ctrlp#changes#cmd(1))
+com! CtrlPMixed       cal ctrlp#init(ctrlp#mixed#id())
+com! CtrlPBookmarkDir cal ctrlp#init(ctrlp#bookmarkdir#id())
+com! -n=? -com=dir CtrlPBookmarkDirAdd
+	\ cal ctrlp#call('ctrlp#bookmarkdir#add', <q-args>)

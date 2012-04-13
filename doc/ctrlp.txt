@@ -64,12 +64,14 @@ Overview:~
   |ctrlp_default_input|         Seed the prompt with an initial string.
   |ctrlp_use_migemo|            Use Migemo patterns for Japanese filenames.
   |ctrlp_prompt_mappings|       Change the mappings in the prompt.
+
   MRU mode:
   |ctrlp_mruf_max|              Max MRU entries to remember.
   |ctrlp_mruf_exclude|          Files that shouldn’t be remembered.
   |ctrlp_mruf_include|          Files to be remembered.
   |ctrlp_mruf_relative|         Show only MRU files in the working directory.
   |ctrlp_mruf_case_sensitive|   MRU files are case sensitive or not.
+
   Advanced options:
   |ctrlp_status_func|           Change CtrlP’s two statuslines.
   |ctrlp_buffer_func|           Call custom functions in the CtrlP buffer.
@@ -763,7 +765,7 @@ EXTENSIONS                                                   *ctrlp-extensions*
 Extensions are optional. To enable an extension, add its name to the variable
 g:ctrlp_extensions: >
   let g:ctrlp_extensions = ['tag', 'buffertag', 'quickfix', 'dir', 'rtscript',
-                            \ 'undo', 'line', 'changes', 'mixed']
+                          \ 'undo', 'line', 'changes', 'mixed', 'bookmarkdir']
 <
 The order of the items will be the order they appear on the statusline and when
 using <c-f>, <c-b>.
@@ -783,7 +785,7 @@ Available extensions:~
                                                               *:CtrlPBufTagAll*
   * Buffer Tag mode:~
     - Name: 'buffertag'
-    - Commands: ':CtrlPBufTag [buffer-name]',
+    - Commands: ':CtrlPBufTag [buffer]',
                 ':CtrlPBufTagAll'.
     - Search for a tag within the current buffer or all listed buffers and jump
       to the definition. Requires |exuberant_ctags| or compatible programs.
@@ -828,7 +830,7 @@ Available extensions:~
                                                               *:CtrlPChangeAll*
   * Change list mode:~
     - Name: 'changes'
-    - Commands: ':CtrlPChange [buffer-name]',
+    - Commands: ':CtrlPChange [buffer]',
                 ':CtrlPChangeAll'.
     - Search for and jump to a recent change in the current buffer or in all
       listed buffers.
@@ -838,6 +840,22 @@ Available extensions:~
     - Name: 'mixed'
     - Command: ':CtrlPMixed'
     - Search in files, buffers and MRU files at the same time.
+
+                                                            *:CtrlPBookmarkDir*
+                                                         *:CtrlPBookmarkDirAdd*
+  * BookmarkDir mode:~
+    - Name: 'bookmarkdir'
+    - Commands: ':CtrlPBookmarkDir',
+                ':CtrlPBookmarkDirAdd [directory]'.
+    - Search for a bookmarked directory and change the working directory to it.
+    - Mappings:
+      + <cr> change the local working directory for CtrlP, keep it open and
+        switch to find file mode.
+      + <c-x> change the global working directory (exit).
+      + <c-v> change the local working directory for the current window (exit).
+      + <F7>
+        - Wipe bookmark list.
+        - Or delete entries marked by <c-z>.
 
 -------------------------------------------------------------------------------
 Buffer Tag mode options:~
@@ -889,6 +907,7 @@ Highlighting:~
     CtrlPUndoNr    : the undo number inside [] in undo mode (String)
     CtrlPUndoSv    : the point where the file was saved (Comment)
     CtrlPUndoPo    : the current position in the undo tree (|hl-Title|)
+    CtrlPBookmark  : the name of the bookmark (Identifier)
 
 Statuslines:~
   * Highlight groups:
@@ -970,6 +989,10 @@ Special thanks:~
 
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
+
+    + New feature: Bookmarked directories extension.
+    + New commands: |:CtrlPBookmarkDir|
+                    |:CtrlPBookmarkDirAdd|
 
 Before 2012/04/15~
 

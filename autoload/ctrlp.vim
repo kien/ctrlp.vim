@@ -1642,6 +1642,10 @@ fu! ctrlp#hicheck(grp, defgrp)
 		exe 'hi link' a:grp a:defgrp
 	en
 endf
+
+fu! ctrlp#call(func, ...)
+	cal call(a:func, a:000)
+endf
 "}}}1
 " * Initialization {{{1
 fu! ctrlp#setlines(...)
