@@ -10,13 +10,13 @@ fu! ctrlp#mrufiles#opts()
 		\ 'max': ['s:max', 250],
 		\ 'include': ['s:in', ''],
 		\ 'exclude': ['s:ex', ''],
-		\ 'case_sensitive': ['s:csen', 1],
+		\ 'case_sensitive': ['s:cseno', 1],
 		\ 'relative': ['s:re', 0],
 		\ }]
 	for [ke, va] in items(opts)
 		exe 'let' va[0] '=' string(exists(pref.ke) ? eval(pref.ke) : va[1])
 	endfo
-	let [s:csen, s:mrbs, s:mrufs] = [s:csen ? '#' : '?', [], []]
+	let [s:csen, s:mrbs, s:mrufs] = [s:cseno ? '#' : '?', [], []]
 	if exists('s:locked') | cal ctrlp#mrufiles#init() | en
 endf
 cal ctrlp#mrufiles#opts()
@@ -81,7 +81,7 @@ fu! ctrlp#mrufiles#remove(files)
 	let s:mrufs = []
 	if a:files != []
 		let s:mrufs = s:mergelists()
-		cal filter(s:mrufs, 'index(a:files, v:val) < 0')
+		cal filter(s:mrufs, 'index(a:files, v:val, 0, '.(!s:cseno).') < 0')
 	en
 	cal s:savetofile(s:mrufs)
 	retu s:reformat(copy(s:mrufs))
