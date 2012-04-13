@@ -1007,7 +1007,11 @@ fu! s:mixedsort(s1, s2)
 				let [mp_2, mp_3, mp_4, mp_1] = s:multipliers(cfn, par, cml, ctm)
 			el
 				let ctm = s:comptime(a:s1, a:s2)
-				let [mp_1, mp_2, mp_3, mp_4] = s:multipliers(ctm, cfn, par, cml)
+				if s:itemtype == 2
+					let [mp_2, mp_3, mp_4, mp_1] = s:multipliers(cfn, par, cml, ctm)
+				el
+					let [mp_1, mp_2, mp_3, mp_4] = s:multipliers(ctm, cfn, par, cml)
+				en
 			en
 			retu cln + ctm * mp_1 + cfn * mp_2 + par * mp_3 + cml * mp_4
 		en
