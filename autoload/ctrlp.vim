@@ -96,7 +96,7 @@ fu! s:opts()
 		\ 'PrtCurLeft()':         ['<c-h>', '<left>', '<c-^>'],
 		\ 'PrtCurRight()':        ['<c-l>', '<right>'],
 		\ 'PrtClearCache()':      ['<F5>'],
-		\ 'PrtDeleteMRU()':       ['<F7>'],
+		\ 'PrtDeleteEnt()':       ['<F7>'],
 		\ 'CreateNewFile()':      ['<c-y>'],
 		\ 'MarkToOpen()':         ['<c-z>'],
 		\ 'OpenMulti()':          ['<c-o>'],
@@ -615,17 +615,18 @@ fu! s:PrtClearCache()
 	unl s:force
 endf
 
-fu! s:PrtDeleteMRU()
-	if s:itemtype != 2 | retu | en
-	let [s:force, tbrem] = [1, []]
-	if exists('s:marked')
-		let tbrem = values(s:marked)
-		cal s:unmarksigns()
-		unl s:marked
+fu! s:PrtDeleteEnt()
+	if s:itemtype == 2
+		cal s:PrtDeleteMRU()
+	elsei type(s:getextvar('wipe')) == 1
+		cal s:delent(s:getextvar('wipe'))
 	en
-	let g:ctrlp_lines = ctrlp#mrufiles#remove(tbrem)
-	cal s:BuildPrompt(1)
-	unl s:force
+endf
+
+fu! s:PrtDeleteMRU()
+	if s:itemtype == 2
+		cal s:delent('ctrlp#mrufiles#remove')
+	en
 endf
 
 fu! s:PrtExit()
@@ -860,7 +861,7 @@ fu! s:MarkToOpen()
 	en
 	let line = !empty(s:lines) ? s:lines[line('.') - 1] : ''
 	if empty(line) | retu | en
-	let filpath = fnamemodify(line, ':p')
+	let filpath = s:ispath ? fnamemodify(line, ':p') : line
 	if exists('s:marked') && s:dictindex(s:marked, filpath) > 0
 		" Unmark and remove the file from s:marked
 		let key = s:dictindex(s:marked, filpath)
@@ -886,7 +887,7 @@ fu! s:MarkToOpen()
 endf
 
 fu! s:OpenMulti()
-	if !exists('s:marked') || s:opmul == '0' | retu | en
+	if !exists('s:marked') || s:opmul == '0' || !s:ispath | retu | en
 	" Get the options
 	let [nr, md, ucr] = matchlist(s:opmul, '\v^(\d+)=(\w)=(\w)=$')[1:3]
 	if s:argmap
@@ -1459,6 +1460,25 @@ endf
 
 fu! s:walker(m, p, d)
 	retu a:d > 0 ? a:p < a:m ? a:p + a:d : 0 : a:p > 0 ? a:p + a:d : a:m
+endf
+
+fu! s:delent(rfunc)
+	if a:rfunc == '' | retu | en
+	let [s:force, tbrem] = [1, []]
+	if exists('s:marked')
+		let tbrem = values(s:marked)
+		cal s:unmarksigns()
+		unl s:marked
+	en
+	if tbrem == [] && ( has('dialog_gui') || has('dialog_con') ) &&
+		\ confirm("Wipe all entries?", "&OK\n&Cancel") != 1
+		unl s:force
+		cal s:BuildPrompt(0)
+		retu
+	en
+	let g:ctrlp_lines = call(a:rfunc, [tbrem])
+	cal s:BuildPrompt(1)
+	unl s:force
 endf
 " Entering & Exiting {{{2
 fu! s:getenv()

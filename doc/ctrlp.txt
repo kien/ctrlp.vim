@@ -374,7 +374,7 @@ only need to keep the lines that you’ve changed the values (inside []): >
     \ 'PrtCurLeft()':         ['<c-h>', '<left>', '<c-^>'],
     \ 'PrtCurRight()':        ['<c-l>', '<right>'],
     \ 'PrtClearCache()':      ['<F5>'],
-    \ 'PrtDeleteMRU()':       ['<F7>'],
+    \ 'PrtDeleteEnt()':       ['<F7>'],
     \ 'CreateNewFile()':      ['<c-y>'],
     \ 'MarkToOpen()':         ['<c-z>'],
     \ 'OpenMulti()':          ['<c-o>'],
