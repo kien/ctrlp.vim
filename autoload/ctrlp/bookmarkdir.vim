@@ -34,8 +34,8 @@ endf
 
 fu! s:cachefile()
 	if !exists('s:cadir') || !exists('s:cafile')
-		let s:cadir = ctrlp#utils#cachedir().ctrlp#utils#lash().'bookmark'
-		let s:cafile = s:cadir.ctrlp#utils#lash().'dir.txt'
+		let s:cadir = ctrlp#utils#cachedir().ctrlp#utils#lash().'bkd'
+		let s:cafile = s:cadir.ctrlp#utils#lash().'cache.txt'
 	en
 	retu s:cafile
 endf

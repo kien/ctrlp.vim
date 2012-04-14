@@ -221,7 +221,8 @@ fu! ctrlp#clra()
 	let cache_dir = ctrlp#utils#cachedir()
 	if isdirectory(cache_dir)
 		let cache_files = split(s:glbpath(cache_dir, '**', 1), "\n")
-		let eval = '!isdirectory(v:val) && v:val !~ ''\<cache\.txt$\|\.log$'''
+		let eval = '!isdirectory(v:val) && fnamemodify(v:val, ":t") !~'
+			\ . ' ''\v^<cache>[.a-z]+$|\.log$'''
 		sil! cal map(filter(cache_files, eval), 'delete(v:val)')
 	en
 	cal ctrlp#clr()
