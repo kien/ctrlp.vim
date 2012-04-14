@@ -41,6 +41,7 @@ endf
 
 fu! ctrlp#quickfix#accept(mode, str)
 	let items = matchlist(a:str, '^\([^|]\+\ze\)|\(\d\+\):\(\d\+\)|')
+	if items == [] | retu | en
 	let [md, filpath] = [a:mode, fnamemodify(items[1], ':p')]
 	if empty(filpath) | retu | en
 	cal ctrlp#exit()

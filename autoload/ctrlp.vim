@@ -889,7 +889,9 @@ endf
 fu! s:OpenMulti()
 	if !exists('s:marked') || s:opmul == '0' || !s:ispath | retu | en
 	" Get the options
-	let [nr, md, ucr] = matchlist(s:opmul, '\v^(\d+)=(\w)=(\w)=$')[1:3]
+	let opts = matchlist(s:opmul, '\v^(\d+)=(\w)=(\w)=$')
+	if opts == [] | retu | en
+	let [nr, md, ucr] = opts[1:3]
 	if s:argmap
 		let md = s:argmaps(md)
 		if md == 'cancel' | retu | en

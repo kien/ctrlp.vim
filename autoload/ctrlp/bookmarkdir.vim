@@ -61,7 +61,8 @@ fu! s:setentries()
 endf
 
 fu! s:parts(str)
-	retu matchlist(a:str, '\v([^\t]+)\t(.*)$')[1:2]
+	let mlist = matchlist(a:str, '\v([^\t]+)\t(.*)$')
+	retu mlist != [] ? mlist[1:2] : ['', '']
 endf
 
 fu! s:process(entries, type)

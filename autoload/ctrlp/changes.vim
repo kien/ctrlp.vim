@@ -71,6 +71,7 @@ endf
 
 fu! ctrlp#changes#accept(mode, str)
 	let info = matchlist(a:str, '\t|\(\d\+\):[^|]\+|\(\d\+\):\(\d\+\)|$')
+	if info == [] | retu | en
 	let bufnr = str2nr(get(info, 1))
 	if bufnr
 		cal ctrlp#acceptfile(a:mode, fnamemodify(bufname(bufnr), ':p'))

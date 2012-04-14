@@ -112,7 +112,8 @@ endf
 fu! s:formatul(...)
 	let parts = matchlist(a:1,
 		\ '\v^\s+(\d+)\s+\d+\s+([^ ]+\s?[^ ]+|\d+\s\w+\s\w+)(\s*\d*)$')
-	retu parts[2].' ['.parts[1].']'.( parts[3] != '' ? ' saved' : '' )
+	retu parts == [] ? '----'
+		\ : parts[2].' ['.parts[1].']'.( parts[3] != '' ? ' saved' : '' )
 endf
 " Public {{{1
 fu! ctrlp#undo#init()
