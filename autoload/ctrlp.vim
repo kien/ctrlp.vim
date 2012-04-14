@@ -951,12 +951,12 @@ fu! s:comptime(s1, s2)
 	retu time1 == time2 ? 0 : time1 < time2 ? 1 : -1
 endf
 
-fu! s:compmre(...)
+fu! s:compmre(b1, b2)
 	" By last entered time (buffer only)
 	if !exists('s:mrbs')
 		let s:mrbs = ctrlp#mrufiles#bufs()
 	en
-	let [b1, b2] = [fnamemodify(a:1, ':p'), fnamemodify(a:2, ':p')]
+	let [b1, b2] = [fnamemodify(a:b1, ':p'), fnamemodify(a:b2, ':p')]
 	retu index(s:mrbs, b1) - index(s:mrbs, b2)
 endf
 
@@ -998,35 +998,28 @@ fu! s:shortest(lens)
 endf
 
 fu! s:mixedsort(s1, s2)
-	let [cml, cln] = [s:compmatlen(a:s1, a:s2), ctrlp#complen(a:s1, a:s2)]
+	let [cln, cml] = [ctrlp#complen(a:s1, a:s2), s:compmatlen(a:s1, a:s2)]
 	if s:ispath && s:height < 51
-		let [par, cfn] = [s:comparent(a:s1, a:s2), s:compfnlen(a:s1, a:s2)]
+		let ms = [cln]
 		if s:height < 21
-			if s:itemtype == 1
-				let ctm = s:compmre(a:s1, a:s2)
-				let [mp_2, mp_3, mp_4, mp_1] = s:multipliers(cfn, par, cml, ctm)
-			el
-				let ctm = s:comptime(a:s1, a:s2)
-				if s:itemtype == 2
-					let [mp_2, mp_3, mp_4, mp_1] = s:multipliers(cfn, par, cml, ctm)
-				el
-					let [mp_1, mp_2, mp_3, mp_4] = s:multipliers(ctm, cfn, par, cml)
-				en
-			en
-			retu cln + ctm * mp_1 + cfn * mp_2 + par * mp_3 + cml * mp_4
+			if s:itemtype !~ '\v^(1|2)$' | let ms += [s:comptime(a:s1, a:s2)] | en
+			let ms += [s:compfnlen(a:s1, a:s2), s:comparent(a:s1, a:s2)]
 		en
-		let [mp_1, mp_2, mp_3, mp_4] = s:multipliers(cfn, par, cml, 0)
-		retu cln + cfn * mp_1 + par * mp_2 + cml * mp_3
+		let time = s:itemtype == 1 ? [s:compmre(a:s1, a:s2)]
+			\ : s:itemtype == 2 ? [s:comptime(a:s1, a:s2)] : []
+		let ms += [cml] + time + [0, 0, 0, 0]
+		let mp = call('s:multipliers', ms[1:4])
+		retu ms[0] + ms[1] * mp[0] + ms[2] * mp[1] + ms[3] * mp[2] + ms[4] * mp[3]
 	en
 	retu cln + cml * 2
 endf
 
 fu! s:multipliers(...)
-	let mp_1 = !a:1 ? 0 : 2
-	let mp_2 = !a:2 ? 0 : mp_1 + 1
-	let mp_3 = !a:3 ? 0 : ( !mp_2 ? mp_1 + 1 : mp_2 ) * 2
-	let mp_4 = !a:4 ? 0 : ( !mp_3 ? ( !mp_2 ? mp_1 + 1 : mp_2 ) * 2 : mp_3 ) * 2
-	retu [mp_1, mp_2, mp_3, mp_4]
+	let mp0 = !a:1 ? 0 : 2
+	let mp1 = !a:2 ? 0 : mp0 + 1
+	let mp2 = !a:3 ? 0 : ( !mp1 ? mp0 + 1 : mp1 ) * 2
+	let mp3 = !a:4 ? 0 : ( !mp2 ? ( !mp1 ? mp0 + 1 : mp1 ) * 2 : mp2 ) * 2
+	retu [mp0, mp1, mp2, mp3]
 endf
 
 fu! s:compval(...)
