@@ -1272,7 +1272,8 @@ endf
 fu! s:remarksigns()
 	if !s:dosigns() | retu | en
 	for ic in range(1, len(s:lines))
-		let key = s:dictindex(s:marked, fnamemodify(s:lines[ic - 1], ':p'))
+		let line = s:ispath ? fnamemodify(s:lines[ic - 1], ':p') : s:lines[ic - 1]
+		let key = s:dictindex(s:marked, line)
 		if key > 0
 			exe 'sign place' key 'line='.ic.' name=ctrlpmark buffer='.s:bufnr
 		en
