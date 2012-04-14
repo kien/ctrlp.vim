@@ -912,6 +912,7 @@ fu! s:OpenMulti()
 	" Open the files
 	for va in mkd
 		let bufnr = bufnr('^'.va.'$')
+		if bufnr < 0 && getftype(va) == '' | con | en
 		let useb = bufnr > 0 && buflisted(bufnr) && emptytail
 		let snd = md != '' && has_key(cmds, md) ?
 			\ ( useb ? cmds[md][0] : cmds[md][1] ) : ( useb ? 'vert sb' : 'vne' )
