@@ -937,38 +937,46 @@ fu! s:OpenMulti()
 endf
 " ** Helper functions {{{1
 " Sorting {{{2
-fu! ctrlp#complen(s1, s2)
+fu! ctrlp#complen(...)
 	" By length
-	let [len1, len2] = [strlen(a:s1), strlen(a:s2)]
+	let [len1, len2] = [strlen(a:1), strlen(a:2)]
 	retu len1 == len2 ? 0 : len1 > len2 ? 1 : -1
 endf
 
-fu! s:compmatlen(s1, s2)
+fu! s:compmatlen(...)
 	" By match length
-	let mln1 = s:shortest(s:matchlens(a:s1, s:compat))
-	let mln2 = s:shortest(s:matchlens(a:s2, s:compat))
+	let mln1 = s:shortest(s:matchlens(a:1, s:compat))
+	let mln2 = s:shortest(s:matchlens(a:2, s:compat))
 	retu mln1 == mln2 ? 0 : mln1 > mln2 ? 1 : -1
 endf
 
-fu! s:comptime(s1, s2)
+fu! s:comptime(...)
 	" By last modified time
-	let [time1, time2] = [getftime(a:s1), getftime(a:s2)]
+	let [time1, time2] = [getftime(a:1), getftime(a:2)]
 	retu time1 == time2 ? 0 : time1 < time2 ? 1 : -1
 endf
 
-fu! s:compmre(b1, b2)
-	" By last entered time (buffer only)
+fu! s:compmreb(...)
+	" By last entered time (buffer)
 	if !exists('s:mrbs')
 		let s:mrbs = ctrlp#mrufiles#bufs()
 	en
-	let [b1, b2] = [fnamemodify(a:b1, ':p'), fnamemodify(a:b2, ':p')]
-	retu index(s:mrbs, b1) - index(s:mrbs, b2)
+	let id1 = index(s:mrbs, fnamemodify(a:1, ':p'))
+	let id2 = index(s:mrbs, fnamemodify(a:2, ':p'))
+	retu id1 == id2 ? 0 : id1 > id2 ? 1 : -1
 endf
 
-fu! s:comparent(s1, s2)
+fu! s:compmref(...)
+	" By last entered time (MRU)
+	let id1 = index(g:ctrlp_lines, a:1)
+	let id2 = index(g:ctrlp_lines, a:2)
+	retu id1 == id2 ? 0 : id1 > id2 ? 1 : -1
+endf
+
+fu! s:comparent(...)
 	" By same parent dir
 	if match(s:crfpath, escape(s:dyncwd, '.^$*\')) >= 0
-		let [as1, as2] = [s:dyncwd.s:lash().a:s1, s:dyncwd.s:lash().a:s2]
+		let [as1, as2] = [s:dyncwd.s:lash().a:1, s:dyncwd.s:lash().a:2]
 		let [loc1, loc2] = [s:getparent(as1), s:getparent(as2)]
 		if loc1 == s:crfpath && loc2 != s:crfpath | retu -1 | en
 		if loc2 == s:crfpath && loc1 != s:crfpath | retu 1  | en
@@ -977,10 +985,10 @@ fu! s:comparent(s1, s2)
 	retu 0
 endf
 
-fu! s:compfnlen(s1, s2)
+fu! s:compfnlen(...)
 	" By filename length
-	let len1 = strlen(split(a:s1, s:lash)[-1])
-	let len2 = strlen(split(a:s2, s:lash)[-1])
+	let len1 = strlen(split(a:1, s:lash)[-1])
+	let len2 = strlen(split(a:2, s:lash)[-1])
 	retu len1 == len2 ? 0 : len1 > len2 ? 1 : -1
 endf
 
@@ -1002,28 +1010,28 @@ fu! s:shortest(lens)
 	retu min(map(values(a:lens), 'v:val[0]'))
 endf
 
-fu! s:mixedsort(s1, s2)
-	let [cln, cml] = [ctrlp#complen(a:s1, a:s2), s:compmatlen(a:s1, a:s2)]
+fu! s:mixedsort(...)
+	let [cln, cml] = [ctrlp#complen(a:1, a:2), s:compmatlen(a:1, a:2)]
 	if s:ispath && s:height < 51
-		let ms = [cln]
+		let ms = []
 		if s:height < 21
-			if s:itemtype !~ '\v^(1|2)$' | let ms += [s:comptime(a:s1, a:s2)] | en
-			let ms += [s:compfnlen(a:s1, a:s2), s:comparent(a:s1, a:s2)]
+			if s:itemtype !~ '\v^(1|2)$' | let ms += [s:comptime(a:1, a:2)] | en
+			let ms += [s:compfnlen(a:1, a:2), s:comparent(a:1, a:2)]
 		en
-		let time = s:itemtype == 1 ? [s:compmre(a:s1, a:s2)]
-			\ : s:itemtype == 2 ? [s:comptime(a:s1, a:s2)] : []
-		let ms += [cml] + time + [0, 0, 0, 0]
-		let mp = call('s:multipliers', ms[1:4])
-		retu ms[0] + ms[1] * mp[0] + ms[2] * mp[1] + ms[3] * mp[2] + ms[4] * mp[3]
+		let time = s:itemtype == 1 ? [s:compmreb(a:1, a:2)]
+			\ : s:itemtype == 2 ? [s:compmref(a:1, a:2)] : []
+		let ms += time + [cml] + [0, 0, 0, 0]
+		let mp = call('s:multipliers', ms[:3])
+		retu cln + ms[0] * mp[0] + ms[1] * mp[1] + ms[2] * mp[2] + ms[3] * mp[3]
 	en
 	retu cln + cml * 2
 endf
 
 fu! s:multipliers(...)
 	let mp0 = !a:1 ? 0 : 2
-	let mp1 = !a:2 ? 0 : mp0 + 1
-	let mp2 = !a:3 ? 0 : ( !mp1 ? mp0 + 1 : mp1 ) * 2
-	let mp3 = !a:4 ? 0 : ( !mp2 ? ( !mp1 ? mp0 + 1 : mp1 ) * 2 : mp2 ) * 2
+	let mp1 = !a:2 ? 0 : 1 + ( !mp0 ? 1 : mp0 )
+	let mp2 = !a:3 ? 0 : 1 + ( !( mp0 + mp1 ) ? 1 : ( mp0 + mp1 ) )
+	let mp3 = !a:4 ? 0 : 1 + ( !( mp0 + mp1 + mp2 ) ? 1 : ( mp0 + mp1 + mp2 ) )
 	retu [mp0, mp1, mp2, mp3]
 endf
 
