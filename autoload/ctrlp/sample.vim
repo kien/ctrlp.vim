@@ -3,58 +3,63 @@
 " Description:   Example extension for ctrlp.vim
 " =============================================================================
 
-" You can rename anything that has 'sample' in it.
-" ctrlp only looks for g:ctrlp_ext_vars
-"
-"
 " To load this extension into ctrlp, add this to your vimrc:
 "
 "     let g:ctrlp_extensions = ['sample']
 "
-" 'sample' is the name of the file 'sample.vim'
+" Where 'sample' is the name of the file 'sample.vim'
 "
 " For multiple extensions:
 "
 "     let g:ctrlp_extensions = [
 "         \ 'my_extension',
 "         \ 'my_other_extension',
-"         \ 'someone_elses_extension',
 "         \ ]
 
+" Get the script's filename, in this case s:n is 'sample'
+let s:n = exists('s:n') ? s:n : fnamemodify(expand('<sfile>', 1), ':t:r')
 
-" Change the name of the g:loaded_ variable to make it unique
-if ( exists('g:loaded_ctrlp_sample') && g:loaded_ctrlp_sample )
+" Load guard
+if ( exists('g:loaded_ctrlp_'.s:n) && g:loaded_ctrlp_{s:n} )
 	\ || v:version < 700 || &cp
-	fini
+	finish
 endif
-let g:loaded_ctrlp_sample = 1
+let g:loaded_ctrlp_{s:n} = 1
 
 
 " Add this extension's settings to g:ctrlp_ext_vars
 "
-" The values are:
-" + init: the name of the input function (including the brackets and arguments)
+" + init: the name of the input function including the brackets and any
+"         arguments
+"
 " + accept: the name of the action function (only the name)
+"
 " + lname & sname: the long and short names to use for the statusline
+"
 " + type: the matching type
 "   - line : match full line
-"   - path : match full line like a file or a dir path
-"   - tabs : match until first tab
-"   - tabe : match until last tab
+"   - path : match full line like a file or a directory path
+"   - tabs : match until first tab character
+"   - tabe : match until last tab character
+"
 " + enter: the name of the function to be called before starting ctrlp
+"
 " + exit: the name of the function to be called after closing ctrlp
-" + opts: the name of the extension's option handling function which is called
-"   when running :CtrlPReload
+"
+" + opts: the name of the option handling function which is called when
+"         running :CtrlPReload
+"
 " + sort: enable/disable sorting
-cal add(g:ctrlp_ext_vars, {
-	\ 'init': 'ctrlp#sample#init()',
-	\ 'accept': 'ctrlp#sample#accept',
+"
+call add(g:ctrlp_ext_vars, {
+	\ 'init': 'ctrlp#'.s:n.'#init()',
+	\ 'accept': 'ctrlp#'.s:n.'#accept',
 	\ 'lname': 'long statusline name',
 	\ 'sname': 'shortname',
 	\ 'type': 'line',
-	\ 'enter': 'ctrlp#sample#enter()',
-	\ 'exit': 'ctrlp#sample#exit()',
-	\ 'opts': 'ctrlp#sample#opts()',
+	\ 'enter': 'ctrlp#'.s:n.'#enter()',
+	\ 'exit': 'ctrlp#'.s:n.'#exit()',
+	\ 'opts': 'ctrlp#'.s:n.'#opts()',
 	\ 'sort': 0,
 	\ })
 
@@ -62,7 +67,8 @@ cal add(g:ctrlp_ext_vars, {
 " Provide a list of strings to search in
 "
 " Return: a Vim's List
-func! ctrlp#sample#init()
+"
+function! ctrlp#{s:n}#init()
 	let input = [
 		\ 'Sed sodales fri magna, non egestas ante consequat nec.',
 		\ 'Aenean vel enim mattis ultricies erat.',
@@ -71,36 +77,47 @@ func! ctrlp#sample#init()
 		\ 'Maecenas luctuss ipsum, vitae accumsan magna adipiscing sit amet.',
 		\ 'Nulla placerat  ante, feugiat egestas ligula fringilla vel.',
 		\ ]
-	retu input
-endfunc
+	return input
+endfunction
 
 
-" The action to perform on the selected string.
+" The action to perform on the selected string
 "
 " Arguments:
 "  a:mode   the mode that has been chosen by pressing <cr> <c-v> <c-t> or <c-x>
 "           the values are 'e', 'v', 't' and 'h', respectively
 "  a:str    the selected string
-func! ctrlp#sample#accept(mode, str)
+"
+function! ctrlp#{s:n}#accept(mode, str)
 	" For this example, just exit ctrlp and run help
-	cal ctrlp#exit()
-	help ctrlp-extending
-endfunc
+	call ctrlp#exit()
+	help ctrlp-extensions
+endfunction
+
+
+" Do something before enterting ctrlp
+function! ctrlp#{s:n}#enter()
+endfunction
+
+
+" Do something after exiting ctrlp
+function! ctrlp#{s:n}#exit()
+endfunction
 
 
 " Give the extension an ID
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 
 " Allow it to be called later
-func! ctrlp#sample#id()
-	retu s:id
-endfunc
+function! ctrlp#{s:n}#id()
+	return s:id
+endfunction
 
 
-" Create a command to directly call the new search type.
+" Create a command to directly call the new search type
 "
-" Put something like this in vimrc or plugin/sample.vim
-" com! CtrlPSample cal ctrlp#init(ctrlp#sample#id())
+" Put this in vimrc or plugin/sample.vim
+" command! CtrlPSample call ctrlp#init(ctrlp#sample#id())
 
 
 " vim:fen:fdl=0:ts=2:sw=2:sts=2
