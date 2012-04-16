@@ -14,7 +14,7 @@ fu! ctrlp#mrufiles#opts()
 		\ 'relative': ['s:re', 0],
 		\ }]
 	for [ke, va] in items(opts)
-		exe 'let' va[0] '=' string(exists(pref.ke) ? eval(pref.ke) : va[1])
+		let {va[0]} = exists(pref.ke) ? {pref.ke} : va[1]
 	endfo
 	let [s:csen, s:mrbs, s:mrufs] = [s:cseno ? '#' : '?', [], []]
 	if exists('s:locked') | cal ctrlp#mrufiles#init() | en

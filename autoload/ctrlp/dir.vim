@@ -46,7 +46,7 @@ endf
 fu! ctrlp#dir#init(...)
 	let s:cwd = getcwd()
 	for each in range(len(s:ars))
-		exe 'let' s:ars[each] '=' string(eval('a:'.(each + 1)))
+		let {s:ars[each]} = a:{each + 1}
 	endfo
 	let cadir = ctrlp#utils#cachedir().ctrlp#utils#lash().'dir'
 	let cafile = cadir.ctrlp#utils#lash().ctrlp#utils#cachefile('dir')

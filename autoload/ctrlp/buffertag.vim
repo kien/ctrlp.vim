@@ -32,7 +32,7 @@ fu! ctrlp#buffertag#opts()
 		\ 'types': ['s:usr_types', ''],
 		\ }]
 	for [ke, va] in items(opts)
-		exe 'let' va[0] '=' string(exists(pref.ke) ? eval(pref.ke) : va[1])
+		let {va[0]} = exists(pref.ke) ? {pref.ke} : va[1]
 	endfo
 endf
 cal ctrlp#buffertag#opts()
@@ -190,7 +190,7 @@ endf
 fu! s:parseline(line)
 	let eval = '\v^([^\t]+)\t(.+)\t\/\^(.+)\$\/\;\"\t(.+)\tline(no)?\:(\d+)'
 	let vals = matchlist(a:line, eval)
-	if empty(vals) | retu '' | en
+	if vals == [] | retu '' | en
 	let [bufnr, bufname] = [bufnr('^'.vals[2].'$'), fnamemodify(vals[2], ':p:t')]
 	retu vals[1].'	'.vals[4].'|'.bufnr.':'.bufname.'|'.vals[6].'| '.vals[3]
 endf

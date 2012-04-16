@@ -43,16 +43,17 @@ fu! s:opts()
 		\ 'working_path_mode':     ['s:pathmode', 2],
 		\ }]
 	for [ke, va] in items(opts)
-		exe 'let' va[0] '=' string(exists(pref.ke) ? eval(pref.ke) : va[1])
+		let {va[0]} = exists(pref.ke) ? {pref.ke} : va[1]
 	endfo
+	unl va
 	let new_opts = {
 		\ 'open_multiple_files': 's:opmul',
 		\ 'regexp': 's:regexp',
 		\ 'reuse_window': 's:nosplit',
 		\ 'switch_buffer': 's:jmptobuf',
 		\ }
-	for [key, val] in items(new_opts)
-		exe 'let' val '=' string(eval(exists(pref.key) ? pref.key : val))
+	for [ke, va] in items(new_opts)
+		let {va} = {exists(pref.ke) ? pref.ke : va}
 	endfo
 	if !exists('g:ctrlp_newcache') | let g:ctrlp_newcache = 0 | en
 	let s:maxdepth = min([s:maxdepth, 100])
@@ -214,7 +215,7 @@ fu! s:Close()
 endf
 " * Clear caches {{{1
 fu! ctrlp#clr(...)
-	exe 'let g:ctrlp_new'.( a:0 ? a:1 : 'cache' ).' = 1'
+	let g:ctrlp_new{ a:0 ? a:1 : 'cache' } = 1
 endf
 
 fu! ctrlp#clra()
@@ -674,7 +675,7 @@ endf
 fu! s:MapSpecs(...)
 	" Correct arrow keys in terminal
 	if ( has('termresponse') && match(v:termresponse, "\<ESC>") >= 0 )
-		\ || &term =~? 'xterm\|\<k\?vt\|gnome\|screen\|linux'
+		\ || &term =~? '\vxterm|<k?vt|gnome|screen|linux'
 		for each in ['\A <up>','\B <down>','\C <right>','\D <left>']
 			exe s:lcmap.' <esc>['.each
 		endfo
