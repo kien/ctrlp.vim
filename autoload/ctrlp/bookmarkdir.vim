@@ -98,11 +98,11 @@ fu! ctrlp#bookmarkdir#init()
 endf
 
 fu! ctrlp#bookmarkdir#accept(mode, str)
+	let parts = s:parts(s:modify(a:str, ':p'))
+	cal call('s:savebookmark', parts)
 	if a:mode =~ 't\|v\|h'
 		cal ctrlp#exit()
 	en
-	let parts = s:parts(s:modify(a:str, ':p'))
-	cal call('s:savebookmark', parts)
 	cal ctrlp#setdir(parts[1], a:mode =~ 't\|h' ? 'chd!' : 'lc!')
 	if a:mode == 'e'
 		cal ctrlp#switchtype(0)
