@@ -30,6 +30,7 @@ fu! s:opts()
 		\ 'max_files':             ['s:maxfiles', 10000],
 		\ 'max_height':            ['s:mxheight', 10],
 		\ 'max_history':           ['s:maxhst', hst],
+		\ 'mruf_default_order':    ['s:mrudef', 0],
 		\ 'open_multi':            ['s:opmul', '1v'],
 		\ 'open_new_file':         ['s:newfop', 'v'],
 		\ 'prompt_mappings':       ['s:urprtmaps', 0],
@@ -1423,7 +1424,8 @@ endf
 
 fu! s:dosort()
 	retu s:matcher == {} && ( ( s:itemtype != 2 && s:nolim != 1 )
-		\ || s:prompt != ['', '', ''] ) && s:dosort
+		\ || s:prompt != ['', '', ''] ) && !( s:itemtype == 2 && s:mrudef )
+		\ && s:dosort
 endf
 
 fu! s:narrowable()

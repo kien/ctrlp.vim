@@ -70,6 +70,7 @@ Overview:~
   |ctrlp_mruf_exclude|          Files that shouldn’t be remembered.
   |ctrlp_mruf_include|          Files to be remembered.
   |ctrlp_mruf_relative|         Show only MRU files in the working directory.
+  |ctrlp_mruf_default_order|    Disable sorting.
   |ctrlp_mruf_case_sensitive|   MRU files are case sensitive or not.
 
   Advanced options:
@@ -418,6 +419,11 @@ Example: >
                                                       *'g:ctrlp_mruf_relative'*
 Set this to 1 to show only MRU files in the current working directory: >
   let g:ctrlp_mruf_relative = 0
+<
+
+                                                 *'g:ctrlp_mruf_default_order'*
+Set this to 1 to disable sorting when searching in MRU mode: >
+  let g:ctrlp_mruf_default_order = 0
 <
 
                                                 *'g:ctrlp_mruf_case_sensitive'*
@@ -983,6 +989,7 @@ Special thanks:~
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
 
+    + New option: |g:ctrlp_mruf_default_order|
     + New feature: Bookmarked directories extension.
     + New commands: |:CtrlPBookmarkDir|
                     |:CtrlPBookmarkDirAdd|
