@@ -372,6 +372,7 @@ only need to keep the lines that you’ve changed the values (inside []): >
     \ 'PrtInsert("s")':       ['<F3>'],
     \ 'PrtInsert("v")':       ['<F4>'],
     \ 'PrtInsert("+")':       ['<F6>', '<MiddleMouse>'],
+    \ 'PrtInsert("gf")':      ['<c-\>'],
     \ 'PrtCurStart()':        ['<c-a>'],
     \ 'PrtCurEnd()':          ['<c-e>'],
     \ 'PrtCurLeft()':         ['<c-h>', '<left>', '<c-^>'],

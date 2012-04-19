@@ -93,6 +93,7 @@ fu! s:opts()
 		\ 'PrtInsert("s")':       ['<F3>'],
 		\ 'PrtInsert("v")':       ['<F4>'],
 		\ 'PrtInsert("+")':       ['<F6>', '<MiddleMouse>'],
+		\ 'PrtInsert("gf")':      ['<c-\>'],
 		\ 'PrtCurStart()':        ['<c-a>'],
 		\ 'PrtCurEnd()':          ['<c-e>'],
 		\ 'PrtCurLeft()':         ['<c-h>', '<left>', '<c-^>'],
@@ -150,6 +151,7 @@ let s:prtunmaps = [
 	\ 'PrtInsert("s")',
 	\ 'PrtInsert("v")',
 	\ 'PrtInsert("+")',
+	\ 'PrtInsert("gf")',
 	\ ]
 
 " Keypad
@@ -466,7 +468,7 @@ endf
 " - SetDefTxt() {{{1
 fu! s:SetDefTxt()
 	if s:deftxt == '0' || !s:ispath | retu | en
-	let txt = s:deftxt
+	let txt = expand(s:deftxt, 1)
 	if !type(txt)
 		let txt = txt && !stridx(s:crfpath, s:dyncwd)
 			\ ? ctrlp#rmbasedir([s:crfpath])[0] : ''
@@ -521,7 +523,8 @@ fu! s:PrtInsert(type)
 	let s:prompt[0] .= a:type == 'w' ? s:crword
 		\ : a:type == 's' ? getreg('/')
 		\ : a:type == 'v' ? s:crvisual
-		\ : a:type == '+' ? substitute(getreg('+'), '\n', '\\n', 'g') : s:prompt[0]
+		\ : a:type == '+' ? substitute(getreg('+'), '\n', '\\n', 'g')
+		\ : a:type == 'gf' ? s:crgfile : s:prompt[0]
 	cal s:BuildPrompt(1)
 	unl s:act_add
 endf
@@ -1490,13 +1493,13 @@ endf
 fu! s:getenv()
 	let [s:cwd, s:winres] = [getcwd(), [winrestcmd(), &lines, winnr('$')]]
 	let [s:crfile, s:crfpath] = [expand('%:p', 1), expand('%:p:h', 1)]
-	let [s:crword, s:crline] = [expand('<cword>'), getline('.')]
+	let [s:crword, s:crline] = [expand('<cword>', 1), getline('.')]
 	let [s:winh, s:crcursor] = [min([s:mxheight, &lines]), getpos('.')]
 	let [s:crbufnr, s:crvisual] = [bufnr('%'), s:lastvisual()]
 	let s:currwin = s:mwbottom ? winnr() : winnr() + has('autocmd')
 	let s:wpmode = exists('b:ctrlp_working_path_mode')
 		\ ? b:ctrlp_working_path_mode : s:pathmode
-	let s:mrbs = ctrlp#mrufiles#bufs()
+	let [s:mrbs, s:crgfile] = [ctrlp#mrufiles#bufs(), expand('<cfile>', 1)]
 endf
 
 fu! s:lastvisual()
