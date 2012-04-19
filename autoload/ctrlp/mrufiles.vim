@@ -53,8 +53,8 @@ fu! s:record(bufnr)
 	if empty(bufname) | retu | en
 	let fn = fnamemodify(bufname, ':p')
 	let fn = exists('+ssl') ? tr(fn, '/', '\') : fn
-	cal filter(s:mrbs, 'v:val !='.s:csen.' fn')
-	cal insert(s:mrbs, fn)
+	cal filter(s:mrbs, 'v:val != bufnr')
+	cal insert(s:mrbs, bufnr)
 	if ( !empty(s:in) && fn !~# s:in ) || ( !empty(s:ex) && fn =~# s:ex )
 		\ || !empty(&bt) || !filereadable(fn) | retu
 	en
@@ -108,7 +108,7 @@ fu! ctrlp#mrufiles#init()
 	let s:locked = 0
 	aug CtrlPMRUF
 		au!
-		au BufAdd,BufEnter,BufUnload * cal s:record(expand('<abuf>', 1))
+		au BufAdd,BufEnter,BufLeave,BufUnload * cal s:record(expand('<abuf>', 1))
 		au QuickFixCmdPre  *vimgrep* let s:locked = 1
 		au QuickFixCmdPost *vimgrep* let s:locked = 0
 		au VimLeavePre * cal s:savetofile(s:mergelists())

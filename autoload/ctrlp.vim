@@ -320,8 +320,8 @@ fu! s:lsCmd()
 endf
 " - Buffers {{{1
 fu! ctrlp#buffers(...)
-	let ids = filter(range(1, bufnr('$')), 'empty(getbufvar(v:val, "&bt"))'
-		\ .' && getbufvar(v:val, "&bl") && strlen(bufname(v:val))')
+	let ids = sort(filter(range(1, bufnr('$')), 'empty(getbufvar(v:val, "&bt"))'
+		\ .' && getbufvar(v:val, "&bl") && strlen(bufname(v:val))'), 's:compmreb')
 	retu a:0 && a:1 == 'id' ? ids : map(ids, 'fnamemodify(bufname(v:val), ":.")')
 endf
 " * MatchedItems() {{{1
@@ -394,7 +394,7 @@ fu! s:Render(lines, pat)
 		retu
 	en
 	" Sorting
-	if s:dosort()
+	if !s:nosort()
 		let s:compat = a:pat
 		cal sort(lines, 's:mixedsort')
 		unl s:compat
@@ -958,19 +958,14 @@ fu! s:comptime(...)
 endf
 
 fu! s:compmreb(...)
-	" By last entered time (buffer)
-	if !exists('s:mrbs')
-		let s:mrbs = ctrlp#mrufiles#bufs()
-	en
-	let id1 = index(s:mrbs, fnamemodify(a:1, ':p'))
-	let id2 = index(s:mrbs, fnamemodify(a:2, ':p'))
+	" By last entered time (bufnr)
+	let [id1, id2] = [index(s:mrbs, a:1), index(s:mrbs, a:2)]
 	retu id1 == id2 ? 0 : id1 > id2 ? 1 : -1
 endf
 
 fu! s:compmref(...)
 	" By last entered time (MRU)
-	let id1 = index(g:ctrlp_lines, a:1)
-	let id2 = index(g:ctrlp_lines, a:2)
+	let [id1, id2] = [index(g:ctrlp_lines, a:1), index(g:ctrlp_lines, a:2)]
 	retu id1 == id2 ? 0 : id1 > id2 ? 1 : -1
 endf
 
@@ -1013,14 +1008,13 @@ endf
 
 fu! s:mixedsort(...)
 	let [cln, cml] = [ctrlp#complen(a:1, a:2), s:compmatlen(a:1, a:2)]
-	if s:ispath && s:height < 51
+	if s:ispath
 		let ms = []
 		if s:height < 21
 			if s:itemtype !~ '\v^(1|2)$' | let ms += [s:comptime(a:1, a:2)] | en
 			let ms += [s:compfnlen(a:1, a:2), s:comparent(a:1, a:2)]
 		en
-		let time = s:itemtype == 1 ? [s:compmreb(a:1, a:2)]
-			\ : s:itemtype == 2 ? [s:compmref(a:1, a:2)] : []
+		let time = s:itemtype =~ '\v^(1|2)$' ? [s:compmref(a:1, a:2)] : []
 		let ms += time + [cml] + [0, 0, 0, 0]
 		let mp = call('s:multipliers', ms[:3])
 		retu cln + ms[0] * mp[0] + ms[1] * mp[1] + ms[2] * mp[2] + ms[3] * mp[3]
@@ -1422,10 +1416,9 @@ fu! s:modevar()
 	let s:dosort = s:getextvar('sort')
 endf
 
-fu! s:dosort()
-	retu s:matcher == {} && ( ( s:itemtype != 2 && s:nolim != 1 )
-		\ || s:prompt != ['', '', ''] ) && !( s:itemtype == 2 && s:mrudef )
-		\ && s:dosort
+fu! s:nosort()
+	retu s:matcher != {} || s:nolim == 1 || s:prompt == ['', '', ''] || !s:dosort
+		\ || ( s:itemtype == 2 && s:mrudef )
 endf
 
 fu! s:narrowable()
@@ -1503,6 +1496,7 @@ fu! s:getenv()
 	let s:currwin = s:mwbottom ? winnr() : winnr() + has('autocmd')
 	let s:wpmode = exists('b:ctrlp_working_path_mode')
 		\ ? b:ctrlp_working_path_mode : s:pathmode
+	let s:mrbs = ctrlp#mrufiles#bufs()
 endf
 
 fu! s:lastvisual()
