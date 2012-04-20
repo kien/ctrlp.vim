@@ -1016,11 +1016,13 @@ fu! s:mixedsort(...)
 	if s:ispath
 		let ms = []
 		if s:height < 21
-			if s:itemtype !~ '\v^(1|2)$' | let ms += [s:comptime(a:1, a:2)] | en
 			let ms += [s:compfnlen(a:1, a:2)]
+			if s:itemtype !~ '\v^(1|2)$' | let ms += [s:comptime(a:1, a:2)] | en
 			if !s:itemtype | let ms += [s:comparent(a:1, a:2)] | en
 		en
-		if s:itemtype =~ '\v^(1|2)$' | let ms += [s:compmref(a:1, a:2)] | en
+		if s:itemtype =~ '\v^(1|2)$'
+			let ms += [s:compmref(a:1, a:2)] | let cln = 0
+		en
 		let ms += [cml, 0, 0, 0]
 		let mp = call('s:multipliers', ms[:3])
 		retu cln + ms[0] * mp[0] + ms[1] * mp[1] + ms[2] * mp[2] + ms[3] * mp[3]
