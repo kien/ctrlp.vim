@@ -468,11 +468,13 @@ endf
 " - SetDefTxt() {{{1
 fu! s:SetDefTxt()
 	if s:deftxt == '0' || !s:ispath | retu | en
-	let txt = expand(s:deftxt, 1)
+	let txt = s:deftxt
 	if !type(txt)
 		let txt = txt && !stridx(s:crfpath, s:dyncwd)
 			\ ? ctrlp#rmbasedir([s:crfpath])[0] : ''
 		let txt = txt != '' ? txt.s:lash(s:crfpath) : ''
+	el
+		let txt = expand(txt, 1)
 	en
 	let s:prompt[0] = txt
 endf
