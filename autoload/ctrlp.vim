@@ -6,6 +6,42 @@
 " =============================================================================
 
 " * Static variables {{{1
+fu! s:ignore() "{{{2
+	let igdirs = [
+		\ '\.git$',
+		\ '\.hg$',
+		\ '\.svn$',
+		\ '_darcs$',
+		\ '\.bzr$',
+		\ '\.cdv$',
+		\ '\~\.dep$',
+		\ '\~\.dot$',
+		\ '\~\.nib$',
+		\ '\~\.plst$',
+		\ '\.pc$',
+		\ '_MTN$',
+		\ '<blib$',
+		\ '<CVS$',
+		\ '<RCS$',
+		\ '<SCCS$',
+		\ '_sgbak$',
+		\ '<autom4te\.cache$',
+		\ '<cover_db$',
+		\ '_build$',
+		\ ]
+	let igfiles = [
+		\ '[.]bak$',
+		\ '\~$',
+		\ '#.+#$',
+		\ '[._].*\.swp$',
+		\ 'core\.\d+$',
+		\ ]
+	retu {
+		\ 'dir': '\v'.join(igdirs, '|'),
+		\ 'file': '\v'.join(igfiles, '|'),
+		\ }
+endf
+"}}}
 fu! s:opts()
 	" Options
 	let hst = exists('+hi') ? &hi : 20
@@ -14,7 +50,7 @@ fu! s:opts()
 		\ 'buffer_func':           ['s:buffunc', {}],
 		\ 'by_filename':           ['s:byfname', 0],
 		\ 'clear_cache_on_exit':   ['s:clrex', 1],
-		\ 'custom_ignore':         ['s:usrign', ''],
+		\ 'custom_ignore':         ['s:usrign', s:ignore()],
 		\ 'default_input':         ['s:deftxt', 0],
 		\ 'dont_split':            ['s:nosplit', 'netrw'],
 		\ 'dotfiles':              ['s:dotfiles', 1],
@@ -607,7 +643,6 @@ fu! s:PrtSelectJump(char, ...)
 endf
 " Misc {{{2
 fu! s:PrtClearCache()
-	if s:itemtype == 1 | retu | en
 	if s:itemtype == 0
 		cal ctrlp#clr()
 	elsei s:itemtype > 2
@@ -639,7 +674,7 @@ endf
 
 fu! s:PrtExit()
 	if !has('autocmd') | cal s:Close() | en
-	exe s:currwin.'winc w'
+	winc p
 endf
 
 fu! s:PrtHistory(...)
@@ -1017,10 +1052,10 @@ fu! s:mixedsort(...)
 		let ms = []
 		if s:height < 21
 			let ms += [s:compfnlen(a:1, a:2)]
-			if s:itemtype !~ '\v^(1|2)$' | let ms += [s:comptime(a:1, a:2)] | en
+			if s:itemtype !~ '^[12]$' | let ms += [s:comptime(a:1, a:2)] | en
 			if !s:itemtype | let ms += [s:comparent(a:1, a:2)] | en
 		en
-		if s:itemtype =~ '\v^(1|2)$'
+		if s:itemtype =~ '^[12]$'
 			let ms += [s:compmref(a:1, a:2)] | let cln = 0
 		en
 		let ms += [cml, 0, 0, 0]
@@ -1084,8 +1119,9 @@ endf
 
 fu! ctrlp#progress(enum)
 	if has('macunix') || has('mac') | sl 1m | en
+	let txt = ' (press ctrl-c to abort)'
 	let &l:stl = s:status != {} ? call(s:status['prog'], [a:enum])
-		\ : '%#CtrlPStats# '.a:enum.' %* %=%<%#CtrlPMode2# '.s:dyncwd.' %*'
+		\ : '%#CtrlPStats# '.a:enum.' %*'.txt.'%=%<%#CtrlPMode2# '.s:dyncwd.' %*'
 	redraws
 endf
 " Paths {{{2
@@ -1501,7 +1537,6 @@ fu! s:getenv()
 	let [s:crword, s:crline] = [expand('<cword>', 1), getline('.')]
 	let [s:winh, s:crcursor] = [min([s:mxheight, &lines]), getpos('.')]
 	let [s:crbufnr, s:crvisual] = [bufnr('%'), s:lastvisual()]
-	let s:currwin = s:mwbottom ? winnr() : winnr() + has('autocmd')
 	let s:wpmode = exists('b:ctrlp_working_path_mode')
 		\ ? b:ctrlp_working_path_mode : s:pathmode
 	let [s:mrbs, s:crgfile] = [ctrlp#mrufiles#bufs(), expand('<cfile>', 1)]
