@@ -1017,7 +1017,7 @@ fu! s:mixedsort(...)
 		let ms = []
 		if s:height < 21
 			if s:itemtype !~ '\v^(1|2)$' | let ms += [s:comptime(a:1, a:2)] | en
-			let ms += s:compfnlen(a:1, a:2)
+			let ms += [s:compfnlen(a:1, a:2)]
 			if !s:itemtype | let ms += [s:comparent(a:1, a:2)] | en
 		en
 		if s:itemtype =~ '\v^(1|2)$' | let ms += [s:compmref(a:1, a:2)] | en
