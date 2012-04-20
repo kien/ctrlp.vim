@@ -395,13 +395,13 @@ fu! s:Render(lines, pat)
 		if s:dohighlight() | cal clearmatches() | en
 		retu
 	en
+	let s:matched = copy(lines)
 	" Sorting
 	if !s:nosort()
 		let s:compat = a:pat
 		cal sort(lines, 's:mixedsort')
 		unl s:compat
 	en
-	let s:matched = copy(lines)
 	if s:mwreverse | cal reverse(lines) | en
 	let s:lines = copy(lines)
 	cal map(lines, 's:formatline(v:val)')
@@ -974,7 +974,7 @@ endf
 
 fu! s:comparent(...)
 	" By same parent dir
-	if match(s:crfpath, escape(s:dyncwd, '.^$*\')) >= 0
+	if !stridx(s:crfpath, s:dyncwd)
 		let [as1, as2] = [s:dyncwd.s:lash().a:1, s:dyncwd.s:lash().a:2]
 		let [loc1, loc2] = [s:getparent(as1), s:getparent(as2)]
 		if loc1 == s:crfpath && loc2 != s:crfpath | retu -1 | en
@@ -1015,10 +1015,11 @@ fu! s:mixedsort(...)
 		let ms = []
 		if s:height < 21
 			if s:itemtype !~ '\v^(1|2)$' | let ms += [s:comptime(a:1, a:2)] | en
-			let ms += [s:compfnlen(a:1, a:2), s:comparent(a:1, a:2)]
+			let ms += s:compfnlen(a:1, a:2)
+			if !s:itemtype | let ms += [s:comparent(a:1, a:2)] | en
 		en
-		let time = s:itemtype =~ '\v^(1|2)$' ? [s:compmref(a:1, a:2)] : []
-		let ms += time + [cml] + [0, 0, 0, 0]
+		if s:itemtype =~ '\v^(1|2)$' | let ms += [s:compmref(a:1, a:2)] | en
+		let ms += [cml, 0, 0, 0]
 		let mp = call('s:multipliers', ms[:3])
 		retu cln + ms[0] * mp[0] + ms[1] * mp[1] + ms[2] * mp[2] + ms[3] * mp[3]
 	en
@@ -1420,8 +1421,8 @@ fu! s:modevar()
 endf
 
 fu! s:nosort()
-	retu s:matcher != {} || s:nolim == 1 || s:prompt == ['', '', ''] || !s:dosort
-		\ || ( s:itemtype == 2 && s:mrudef )
+	retu s:matcher != {} || s:nolim == 1 || ( s:itemtype == 2 && s:mrudef )
+		\ || ( s:itemtype =~ '\v^(1|2)$' && s:prompt == ['', '', ''] ) || !s:dosort
 endf
 
 fu! s:narrowable()
