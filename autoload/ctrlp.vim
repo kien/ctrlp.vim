@@ -941,6 +941,9 @@ fu! s:OpenMulti()
 	let mkd = values(s:marked)
 	cal s:sanstail(join(s:prompt, ''))
 	cal s:PrtExit()
+	if !nr || md == 'i'
+		retu map(mkd, "s:openfile('bad', fnamemodify(v:val, ':.'), '')")
+	en
 	" Move the cursor to a reusable window
 	let [tail, fnesc] = [s:tail(), exists('*fnameescape') && v:version > 701]
 	let [emptytail, nwpt] = [empty(tail), exists('g:ctrlp_open_multiple_files')]
@@ -1436,9 +1439,10 @@ fu! s:sanstail(str)
 endf
 
 fu! s:argmaps(md, ...)
-	let str = '[t]ab/[v]ertical/[h]orizontal'.( a:0 ? '/[r]eplace' : '' ).'? '
+	let roh = a:0 ? ['/[r]eplace', 'r'] : ['/h[i]dden', 'i']
+	let str = '[t]ab/[v]ertical/[h]orizontal'.roh[0].'? '
 	let args = [a:md] + ( a:0 ? [a:1] : [] )
-	retu s:choices(str, ['r', 'h', 't', 'v'], 's:argmaps', args)
+	retu s:choices(str, ['t', 'v', 'h', roh[1]], 's:argmaps', args)
 endf
 
 fu! s:insertstr()
