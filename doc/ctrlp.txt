@@ -313,6 +313,8 @@ Pressing <c-o> or <c-y> will then prompt for a keypress. The key can be:
   v - open in vertical split(s)
   r - open in current window (for <c-y> only)
   <esc>, <c-c>, <c-g> - cancel and go back to the prompt.
+  <cr> - use the default behavior specified with |g:ctrlp_open_new_file| and
+  |g:ctrlp_open_multiple_files|.
 
                                                     *'g:ctrlp_follow_symlinks'*
 Set this to 1 to follow symbolic links when listing files: >

@@ -1471,6 +1471,8 @@ fu! s:choices(str, choices, func, args)
 	elsei char =~# "\\v\<Esc>|\<C-c>|\<C-g>|\<C-u>|\<C-w>|\<C-[>"
 		cal s:BuildPrompt(0)
 		retu 'cancel'
+	elsei char =~# "\<CR>" && a:args != []
+		retu a:args[0]
 	en
 	retu call(a:func, a:args)
 endf
