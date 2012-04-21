@@ -302,7 +302,7 @@ fu! s:GlobPath(dirs, depth)
 	let [dnf, depth] = [ctrlp#dirnfile(entries), a:depth + 1]
 	cal extend(g:ctrlp_allfiles, dnf[1])
 	if !empty(dnf[0]) && !s:maxf(len(g:ctrlp_allfiles)) && depth <= s:maxdepth
-		sil! cal ctrlp#progress(len(g:ctrlp_allfiles))
+		sil! cal ctrlp#progress(len(g:ctrlp_allfiles), 1)
 		cal s:GlobPath(join(dnf[0], ','), depth)
 	en
 endf
@@ -1116,11 +1116,11 @@ fu! s:dismrk()
 		\ '%<'.join(values(map(copy(s:marked), 'split(v:val, "[\\/]")[-1]')), ', ')
 endf
 
-fu! ctrlp#progress(enum)
+fu! ctrlp#progress(enum, ...)
 	if has('macunix') || has('mac') | sl 1m | en
-	let txt = ' (press ctrl-c to abort)'
+	let txt = a:0 ? '(press ctrl-c to abort)' : ''
 	let &l:stl = s:status != {} ? call(s:status['prog'], [a:enum])
-		\ : '%#CtrlPStats# '.a:enum.' %*'.txt.'%=%<%#CtrlPMode2# '.s:dyncwd.' %*'
+		\ : '%#CtrlPStats# '.a:enum.' %* '.txt.'%=%<%#CtrlPMode2# '.s:dyncwd.' %*'
 	redraws
 endf
 " Paths {{{2
