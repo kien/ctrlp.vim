@@ -5,6 +5,8 @@
 " =============================================================================
 
 " Static variables {{{1
+let [s:mrbs, s:mrufs] = [[], []]
+
 fu! ctrlp#mrufiles#opts()
 	let [pref, opts] = ['g:ctrlp_mruf_', {
 		\ 'max': ['s:max', 250],
@@ -14,15 +16,13 @@ fu! ctrlp#mrufiles#opts()
 		\ 'relative': ['s:re', 0],
 		\ }]
 	for [ke, va] in items(opts)
-		let {va[0]} = exists(pref.ke) ? {pref.ke} : va[1]
+		let [{va[0]}, {pref.ke}] = [pref.ke, exists(pref.ke) ? {pref.ke} : va[1]]
 	endfo
-	let [s:csen, s:mrbs, s:mrufs] = [s:cseno ? '#' : '?', [], []]
-	if exists('s:locked') | cal ctrlp#mrufiles#init() | en
 endf
 cal ctrlp#mrufiles#opts()
 " Utilities {{{1
 fu! s:excl(fn)
-	retu !empty(s:ex) && a:fn =~# s:ex
+	retu !empty({s:ex}) && a:fn =~# {s:ex}
 endf
 
 fu! s:mergelists()
@@ -33,12 +33,12 @@ fu! s:mergelists()
 endf
 
 fu! s:chop(mrufs)
-	if len(a:mrufs) > s:max | cal remove(a:mrufs, s:max, -1) | en
+	if len(a:mrufs) > {s:max} | cal remove(a:mrufs, {s:max}, -1) | en
 	retu a:mrufs
 endf
 
 fu! s:reformat(mrufs)
-	if s:re
+	if {s:re}
 		let cwd = exists('+ssl') ? tr(getcwd(), '/', '\') : getcwd()
 		cal filter(a:mrufs, '!stridx(v:val, cwd)')
 	en
@@ -55,10 +55,10 @@ fu! s:record(bufnr)
 	let fn = exists('+ssl') ? tr(fn, '/', '\') : fn
 	cal filter(s:mrbs, 'v:val != bufnr')
 	cal insert(s:mrbs, bufnr)
-	if ( !empty(s:in) && fn !~# s:in ) || ( !empty(s:ex) && fn =~# s:ex )
+	if ( !empty({s:in}) && fn !~# {s:in} ) || ( !empty({s:ex}) && fn =~# {s:ex} )
 		\ || !empty(&bt) || !filereadable(fn) | retu
 	en
-	cal filter(s:mrufs, 'v:val !='.s:csen.' fn')
+	cal filter(s:mrufs, 'v:val !='.( {s:cseno} ? '#' : '?' ).' fn')
 	cal insert(s:mrufs, fn)
 endf
 
@@ -81,7 +81,7 @@ fu! ctrlp#mrufiles#remove(files)
 	let s:mrufs = []
 	if a:files != []
 		let s:mrufs = s:mergelists()
-		cal filter(s:mrufs, 'index(a:files, v:val, 0, '.(!s:cseno).') < 0')
+		cal filter(s:mrufs, 'index(a:files, v:val, 0, '.(!{s:cseno}).') < 0')
 	en
 	cal s:savetofile(s:mrufs)
 	retu s:reformat(copy(s:mrufs))

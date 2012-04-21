@@ -25,41 +25,17 @@ cal add(g:ctrlp_ext_vars, {
 
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 
-fu! ctrlp#buffertag#opts()
-	let [pref, opts] = ['g:ctrlp_buftag_', {
-		\ 'systemenc': ['s:enc', &enc],
-		\ 'ctags_bin': ['s:bin', ''],
-		\ 'types': ['s:usr_types', ''],
-		\ }]
-	for [ke, va] in items(opts)
-		let {va[0]} = exists(pref.ke) ? {pref.ke} : va[1]
-	endfo
-endf
-cal ctrlp#buffertag#opts()
+let s:bins = [
+	\ 'ctags-exuberant',
+	\ 'exuberant-ctags',
+	\ 'exctags',
+	\ '/usr/local/bin/ctags',
+	\ '/opt/local/bin/ctags',
+	\ 'ctags',
+	\ 'ctags.exe',
+	\ 'tags',
+	\ ]
 
-fu! s:bins()
-	let bins = [
-		\ 'ctags-exuberant',
-		\ 'exuberant-ctags',
-		\ 'exctags',
-		\ '/usr/local/bin/ctags',
-		\ '/opt/local/bin/ctags',
-		\ 'ctags',
-		\ 'ctags.exe',
-		\ 'tags',
-		\ ]
-	if empty(s:bin)
-		for bin in bins | if executable(bin)
-			let s:bin = bin
-			brea
-		en | endfo
-	el
-		let s:bin = expand(s:bin, 1)
-	en
-endf
-cal s:bins()
-
-" s:types {{{2
 let s:types = {
 	\ 'asm'    : '%sasm%sasm%sdlmt',
 	\ 'aspperl': '%sasp%sasp%sfsv',
@@ -106,9 +82,28 @@ if executable('jsctags')
 	cal extend(s:types, { 'javascript': { 'args': '-f -', 'bin': 'jsctags' } })
 en
 
-if type(s:usr_types) == 4
+fu! ctrlp#buffertag#opts()
+	let [pref, opts] = ['g:ctrlp_buftag_', {
+		\ 'systemenc': ['s:enc', &enc],
+		\ 'ctags_bin': ['s:bin', ''],
+		\ 'types': ['s:usr_types', {}],
+		\ }]
+	for [ke, va] in items(opts)
+		let {va[0]} = exists(pref.ke) ? {pref.ke} : va[1]
+	endfo
+	" Ctags bin
+	if empty(s:bin)
+		for bin in s:bins | if executable(bin)
+			let s:bin = bin
+			brea
+		en | endfo
+	el
+		let s:bin = expand(s:bin, 1)
+	en
+	" Types
 	cal extend(s:types, s:usr_types)
-en
+endf
+cal ctrlp#buffertag#opts()
 " Utilities {{{1
 fu! s:validfile(fname, ftype)
 	if ( !empty(a:fname) || !empty(a:ftype) ) && filereadable(a:fname)

@@ -560,10 +560,6 @@ COMMANDS                                                       *ctrlp-commands*
 :CtrlPClearAllCaches
    Delete all the cache files saved in |g:ctrlp_cache_dir|.
 
-                                                                 *:CtrlPReload*
-:CtrlPReload
-   Load new values for the option variables.
-
 -------------------------------------------------------------------------------
 For commands provided by bundled extensions, see |ctrlp-extensions|.
 
