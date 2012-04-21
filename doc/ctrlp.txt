@@ -312,9 +312,7 @@ Pressing <c-o> or <c-y> will then prompt for a keypress. The key can be:
   h - open in horizontal split(s)
   v - open in vertical split(s)
   r - open in current window (for <c-y> only)
-  <esc>, <c-c> - cancel and go back to the prompt.
-  Any other key - use the behavior specified with |g:ctrlp_open_new_file| and
-  |g:ctrlp_open_multiple_files|.
+  <esc>, <c-c>, <c-g> - cancel and go back to the prompt.
 
                                                     *'g:ctrlp_follow_symlinks'*
 Set this to 1 to follow symbolic links when listing files: >
@@ -368,11 +366,8 @@ only need to keep the lines that you’ve changed the values (inside []): >
     \ 'ToggleType(1)':        ['<c-f>', '<c-up>'],
     \ 'ToggleType(-1)':       ['<c-b>', '<c-down>'],
     \ 'PrtExpandDir()':       ['<tab>'],
-    \ 'PrtInsert("w")':       ['<F2>', '<insert>'],
-    \ 'PrtInsert("s")':       ['<F3>'],
-    \ 'PrtInsert("v")':       ['<F4>'],
-    \ 'PrtInsert("+")':       ['<F6>', '<MiddleMouse>'],
-    \ 'PrtInsert("gf")':      ['<c-\>'],
+    \ 'PrtInsert("c")':       ['<MiddleMouse>', '<insert>'],
+    \ 'PrtInsert()':          ['<c-\>'],
     \ 'PrtCurStart()':        ['<c-a>'],
     \ 'PrtCurEnd()':          ['<c-e>'],
     \ 'PrtCurLeft()':         ['<c-h>', '<left>', '<c-^>'],

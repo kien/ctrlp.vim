@@ -125,11 +125,8 @@ fu! s:opts()
 		\ 'ToggleType(1)':        ['<c-f>', '<c-up>'],
 		\ 'ToggleType(-1)':       ['<c-b>', '<c-down>'],
 		\ 'PrtExpandDir()':       ['<tab>'],
-		\ 'PrtInsert("w")':       ['<F2>', '<insert>'],
-		\ 'PrtInsert("s")':       ['<F3>'],
-		\ 'PrtInsert("v")':       ['<F4>'],
-		\ 'PrtInsert("+")':       ['<F6>', '<MiddleMouse>'],
-		\ 'PrtInsert("gf")':      ['<c-\>'],
+		\ 'PrtInsert("c")':       ['<MiddleMouse>', '<insert>'],
+		\ 'PrtInsert()':          ['<c-\>'],
 		\ 'PrtCurStart()':        ['<c-a>'],
 		\ 'PrtCurEnd()':          ['<c-e>'],
 		\ 'PrtCurLeft()':         ['<c-h>', '<left>', '<c-^>'],
@@ -183,11 +180,8 @@ let s:prtunmaps = [
 	\ 'PrtCurRight()',
 	\ 'PrtHistory(-1)',
 	\ 'PrtHistory(1)',
-	\ 'PrtInsert("w")',
-	\ 'PrtInsert("s")',
-	\ 'PrtInsert("v")',
-	\ 'PrtInsert("+")',
-	\ 'PrtInsert("gf")',
+	\ 'PrtInsert("c")',
+	\ 'PrtInsert()',
 	\ ]
 
 " Keypad
@@ -555,14 +549,19 @@ fu! s:PrtDeleteWord()
 	cal s:BuildPrompt(1)
 endf
 
-fu! s:PrtInsert(type)
+fu! s:PrtInsert(...)
+	let type = !a:0 ? '' : a:1
+	if !a:0
+		let type = s:insertstr()
+		if type == 'cancel' | retu | en
+	en
 	unl! s:hstgot
 	let s:act_add = 1
-	let s:prompt[0] .= a:type == 'w' ? s:crword
-		\ : a:type == 's' ? getreg('/')
-		\ : a:type == 'v' ? s:crvisual
-		\ : a:type == '+' ? substitute(getreg('+'), '\n', '\\n', 'g')
-		\ : a:type == 'gf' ? s:crgfile : s:prompt[0]
+	let s:prompt[0] .= type == 'w' ? s:crword
+		\ : type == 's' ? getreg('/')
+		\ : type == 'v' ? s:crvisual
+		\ : type == 'c' ? substitute(getreg('+'), '\n', '\\n', 'g')
+		\ : type == 'f' ? s:crgfile : s:prompt[0]
 	cal s:BuildPrompt(1)
 	unl s:act_add
 endf
@@ -1437,18 +1436,29 @@ fu! s:sanstail(str)
 endf
 
 fu! s:argmaps(md, ...)
+	let str = '[t]ab/[v]ertical/[h]orizontal'.( a:0 ? '/[r]eplace' : '' ).'? '
+	let args = [a:md] + ( a:0 ? [a:1] : [] )
+	retu s:choices(str, ['r', 'h', 't', 'v'], 's:argmaps', args)
+endf
+
+fu! s:insertstr()
+	let str = 'Insert: c[w]ord/c[f]ile/[s]earch/[v]isual/[c]lipboard? '
+	retu s:choices(str, ['w', 'f', 's', 'v', 'c'], 's:insertstr', [])
+endf
+
+fu! s:choices(str, choices, func, args)
 	redr
 	echoh MoreMsg
-	echon '[t]ab/[v]ertical/[h]orizontal'.( a:0 ? '/[r]eplace' : '' ).'? '
+	echon a:str
 	echoh None
 	let char = nr2char(getchar())
-	if index(['r', 'h', 't', 'v'], char) >= 0
+	if index(a:choices, char) >= 0
 		retu char
-	elsei char =~# "\\v\<Esc>|\<C-c>|\<C-[>"
+	elsei char =~# "\\v\<Esc>|\<C-c>|\<C-g>|\<C-u>|\<C-w>|\<C-[>"
 		cal s:BuildPrompt(0)
 		retu 'cancel'
 	en
-	retu a:md
+	retu call(a:func, a:args)
 endf
 " Misc {{{2
 fu! s:modevar()
