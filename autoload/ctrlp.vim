@@ -215,7 +215,6 @@ fu! s:opts() "{{{2
 		cal extend(s:prtmaps, s:urprtmaps)
 	en
 endf
-cal s:opts()
 "}}}1
 " * Open & Close {{{1
 fu! s:Open()
@@ -1653,9 +1652,9 @@ fu! s:mmode()
 endf
 " Cache {{{2
 fu! s:writecache(cache_file)
-	if ( g:ctrlp_newcache || !filereadable(a:cache_file) ) && s:caching
-		\ || len(g:ctrlp_allfiles) > s:nocache_lim
-		if len(g:ctrlp_allfiles) > s:nocache_lim | let s:caching = 1 | en
+	let fwrite = len(g:ctrlp_allfiles) > s:nocache_lim
+	if ( g:ctrlp_newcache || !filereadable(a:cache_file) ) && s:caching || fwrite
+		if fwrite | let s:caching = 1 | en
 		cal ctrlp#utils#writecache(g:ctrlp_allfiles)
 		let g:ctrlp_newcache = 0
 	en
@@ -1768,8 +1767,6 @@ fu! s:autocmds()
 		aug END
 	en
 endf
-
-cal s:autocmds()
 "}}}
 
 " vim:fen:fdm=marker:fmr={{{,}}}:fdl=0:fdc=1:ts=2:sw=2:sts=2

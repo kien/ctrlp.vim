@@ -25,6 +25,12 @@ cal add(g:ctrlp_ext_vars, {
 
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 
+let [s:pref, s:opts] = ['g:ctrlp_buftag_', {
+	\ 'systemenc': ['s:enc', &enc],
+	\ 'ctags_bin': ['s:bin', ''],
+	\ 'types': ['s:usr_types', {}],
+	\ }]
+
 let s:bins = [
 	\ 'ctags-exuberant',
 	\ 'exuberant-ctags',
@@ -83,13 +89,8 @@ if executable('jsctags')
 en
 
 fu! ctrlp#buffertag#opts()
-	let [pref, opts] = ['g:ctrlp_buftag_', {
-		\ 'systemenc': ['s:enc', &enc],
-		\ 'ctags_bin': ['s:bin', ''],
-		\ 'types': ['s:usr_types', {}],
-		\ }]
-	for [ke, va] in items(opts)
-		let {va[0]} = exists(pref.ke) ? {pref.ke} : va[1]
+	for [ke, va] in items(s:opts)
+		let {va[0]} = exists(s:pref.ke) ? {s:pref.ke} : va[1]
 	endfo
 	" Ctags bin
 	if empty(s:bin)
@@ -103,7 +104,6 @@ fu! ctrlp#buffertag#opts()
 	" Types
 	cal extend(s:types, s:usr_types)
 endf
-cal ctrlp#buffertag#opts()
 " Utilities {{{1
 fu! s:validfile(fname, ftype)
 	if ( !empty(a:fname) || !empty(a:ftype) ) && filereadable(a:fname)
