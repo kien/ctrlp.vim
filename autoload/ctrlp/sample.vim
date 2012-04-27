@@ -16,7 +16,7 @@
 "         \ 'my_other_extension',
 "         \ ]
 
-" Get the script's filename, in this case s:n is 'sample'
+" Get the script's filename, in this example s:n is 'sample'
 let s:n = exists('s:n') ? s:n : fnamemodify(expand('<sfile>', 1), ':t:r')
 
 " Load guard
@@ -28,6 +28,8 @@ let g:loaded_ctrlp_{s:n} = 1
 
 
 " Add this extension's settings to g:ctrlp_ext_vars
+"
+" Required:
 "
 " + init: the name of the input function including the brackets and any
 "         arguments
@@ -42,14 +44,15 @@ let g:loaded_ctrlp_{s:n} = 1
 "   - tabs : match until first tab character
 "   - tabe : match until last tab character
 "
+" Optional:
+"
 " + enter: the name of the function to be called before starting ctrlp
 "
 " + exit: the name of the function to be called after closing ctrlp
 "
-" + opts: the name of the option handling function which is called when
-"         running :CtrlPReload
+" + opts: the name of the option handling function called when initialize
 "
-" + sort: enable/disable sorting
+" + sort: disable sorting (enabled by default when omitted)
 "
 call add(g:ctrlp_ext_vars, {
 	\ 'init': 'ctrlp#'.s:n.'#init()',
