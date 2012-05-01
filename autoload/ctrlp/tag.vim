@@ -42,6 +42,7 @@ endf
 fu! s:filter(tags)
 	let [nr, alltags] = [0, a:tags]
 	wh 0 < 1
+		if empty(alltags) | brea | en
 		if alltags[nr] =~ '^!' && alltags[nr] !~ '^!_TAG_'
 			let nr += 1
 			con
