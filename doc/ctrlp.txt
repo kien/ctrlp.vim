@@ -673,12 +673,16 @@ Once inside the prompt:~
     - Wipe the MRU list.
     - Or delete MRU entries marked by <c-z>.
 
-  <insert>
-    Insert the word under the cursor (in the current buffer) into the prompt.
+  <Insert>,
+  <MiddleMouse>
+    Insert clipboard content into the prompt.
+
+  <c-\>
+    Open a dialog to insert <cword>, <cfile>, content of the search register,
+    the last visual selection or the clipboard into the prompt.
 
   <esc>,
-  <c-c>,
-  <c-g>
+  <c-c>
     Exit CtrlP.
     Note: <c-c> can also be used to stop the scan if it’s taking too long.
 
@@ -979,6 +983,7 @@ Special thanks:~
     * Kent Sibilev <github.com/datanoise>
     * Tacahiroy <github.com/tacahiroy>
     * Luca Pette <github.com/lucapette>
+    * Seth Fowler <github.com/sfowler>
 
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
