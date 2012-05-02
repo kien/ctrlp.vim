@@ -519,6 +519,15 @@ fu! s:SetDefTxt()
 	en
 	let s:prompt[0] = txt
 endf
+" - IsCmdWin() {{{1
+fu! s:IsCmdWin()
+  silent! verbose noautocmd wincmd p
+  if v:errmsg =~ '^E11:'
+    return 1
+  endif
+  silent! noautocmd wincmd p
+	return 0
+endf
 " ** Prt Actions {{{1
 " Editing {{{2
 fu! s:PrtClear()
@@ -1735,6 +1744,7 @@ endf
 
 fu! ctrlp#init(type, ...)
 	if exists('s:init') | retu | en
+	if s:IsCmdWin() | retu | en
 	let [s:matches, s:init] = [1, 1]
 	cal ctrlp#reset()
 	cal s:Open()
