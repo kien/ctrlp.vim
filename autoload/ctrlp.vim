@@ -569,12 +569,12 @@ fu! s:PrtInsert(...)
 	unl! s:hstgot
 	let s:act_add = 1
 	let s:prompt[0] .= type == 'w' ? s:crword
-		\ : type == 's' ? getreg('/')
-		\ : type == 'v' ? s:crvisual
-		\ : type == 'c' ? substitute(getreg('+'), '\n', '\\n', 'g')
-		\ : type == 'f' ? s:crgfile
-		\ : type == 'F' ? s:lines[line('.') - 1]
-		\ : type == 'D' ? fnamemodify(s:lines[line('.') - 1], ':h') : s:prompt[0]
+		\ : type ==# 's' ? getreg('/')
+		\ : type ==# 'v' ? s:crvisual
+		\ : type ==# 'c' ? substitute(getreg('+'), '\n', '\\n', 'g')
+		\ : type ==# 'f' ? s:crgfile
+		\ : type ==# 'F' ? s:lines[line('.') - 1]
+		\ : type ==# 'D' ? fnamemodify(s:lines[line('.') - 1], ':h') : s:prompt[0]
 	cal s:BuildPrompt(1)
 	unl s:act_add
 endf
