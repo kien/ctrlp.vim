@@ -572,7 +572,9 @@ fu! s:PrtInsert(...)
 		\ : type == 's' ? getreg('/')
 		\ : type == 'v' ? s:crvisual
 		\ : type == 'c' ? substitute(getreg('+'), '\n', '\\n', 'g')
-		\ : type == 'f' ? s:crgfile : s:prompt[0]
+		\ : type == 'f' ? s:crgfile
+		\ : type == 'F' ? s:lines[line('.') - 1]
+		\ : type == 'D' ? fnamemodify(s:lines[line('.') - 1], ':h') : s:prompt[0]
 	cal s:BuildPrompt(1)
 	unl s:act_add
 endf
@@ -1455,8 +1457,8 @@ fu! s:argmaps(md, ...)
 endf
 
 fu! s:insertstr()
-	let str = 'Insert: c[w]ord/c[f]ile/[s]earch/[v]isual/[c]lipboard? '
-	retu s:choices(str, ['w', 'f', 's', 'v', 'c'], 's:insertstr', [])
+	let str = 'Insert: c[w]ord/c[f]ile/[s]earch/[v]isual/[c]lipboard/[F][D]? '
+	retu s:choices(str, ['w', 'f', 's', 'v', 'c', 'F', 'D'], 's:insertstr', [])
 endf
 
 fu! s:choices(str, choices, func, args)
