@@ -218,10 +218,11 @@ endf
 "}}}1
 " * Open & Close {{{1
 fu! s:Open()
+	let s:ermsg = v:errmsg
 	cal s:log(1)
 	cal s:getenv()
 	cal s:execextvar('enter')
-	sil! exe 'noa keepa' ( s:mwbottom ? 'bo' : 'to' ) '1new ControlP'
+	sil! exe 'noa keepa' ( s:mwbottom ? 'bo' : 'to' ) '1new +setl\ nobl ControlP'
 	cal s:buffunc(1)
 	let [s:bufnr, s:prompt, s:winw] = [bufnr('%'), ['', '', ''], winwidth(0)]
 	abc <buffer>
@@ -256,6 +257,7 @@ fu! s:Close()
 	cal ctrlp#recordhist()
 	cal s:execextvar('exit')
 	cal s:log(0)
+	let v:errmsg = s:ermsg
 	ec
 endf
 " * Clear caches {{{1
@@ -518,15 +520,6 @@ fu! s:SetDefTxt()
 		let txt = expand(txt, 1)
 	en
 	let s:prompt[0] = txt
-endf
-" - IsCmdWin() {{{1
-fu! s:IsCmdWin()
-  silent! verbose noautocmd wincmd p
-  if v:errmsg =~ '^E11:'
-    return 1
-  endif
-  silent! noautocmd wincmd p
-	return 0
 endf
 " ** Prt Actions {{{1
 " Editing {{{2
@@ -855,7 +848,7 @@ fu! s:SpecInputs(str)
 		cal ctrlp#setlines()
 		cal s:PrtClear()
 		retu 1
-	elsei a:str =~ '^[\/]$' && spi
+	elsei a:str == s:lash && spi
 		cal s:SetWD(2, 0)
 		cal ctrlp#setlines()
 		cal s:PrtClear()
@@ -1418,7 +1411,7 @@ fu! s:nosplit()
 endf
 
 fu! s:setupblank()
-	setl noswf nobl nonu nowrap nolist nospell nocuc wfh
+	setl noswf nonu nowrap nolist nospell nocuc wfh
 	setl fdc=0 fdl=99 tw=0 bt=nofile bh=unload
 	if v:version > 702
 		setl nornu noudf cc=0
@@ -1436,6 +1429,14 @@ fu! s:checkbuf()
 	if !exists('s:init') && exists('s:bufnr') && s:bufnr > 0
 		exe s:bufnr.'bw!'
 	en
+endf
+
+fu! s:iscmdwin()
+	let ermsg = v:errmsg
+	sil! noa winc p
+	sil! noa winc p
+	let [v:errmsg, ermsg] = [ermsg, v:errmsg]
+	retu ermsg =~ '^E11:'
 endf
 " Arguments {{{2
 fu! s:tail()
@@ -1743,8 +1744,7 @@ fu! ctrlp#setlines(...)
 endf
 
 fu! ctrlp#init(type, ...)
-	if exists('s:init') | retu | en
-	if s:IsCmdWin() | retu | en
+	if exists('s:init') || s:iscmdwin() | retu | en
 	let [s:matches, s:init] = [1, 1]
 	cal ctrlp#reset()
 	cal s:Open()
