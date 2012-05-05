@@ -572,6 +572,7 @@ MAPPINGS                                                       *ctrlp-mappings*
 <c-p>
    Default |Normal| mode mapping to open the CtrlP prompt in find file mode.
 
+----------------------------------------
 Once inside the prompt:~
 
   <c-d>
@@ -592,12 +593,18 @@ Once inside the prompt:~
   <c-down>
     Scroll to the 'previous' search mode in the sequence.
 
-  <tab>
+  <tab>                                                *'ctrlp-autocompletion'*
     Auto-complete directory names under the current working directory inside
     the prompt.
 
   <s-tab>
     Toggle the focus between the match window and the prompt.
+
+  <esc>,
+  <c-c>
+    Exit CtrlP.
+
+Movement:~
 
   <c-j>,
   <down>
@@ -622,6 +629,8 @@ Once inside the prompt:~
   <right>
     Move the cursor one character to the 'right'.
 
+Editing:~
+
   <c-]>,
   <bs>
     Delete the preceding character.
@@ -634,6 +643,16 @@ Once inside the prompt:~
 
   <c-u>
     Clear the input field.
+
+Input history:~
+
+  <c-n>
+    Next string in the prompt’s history.
+
+  <c-p>
+    Previous string in the prompt’s history.
+
+Open a file:~
 
   <cr>
     Open selected file in the active window if possible.
@@ -652,42 +671,38 @@ Once inside the prompt:~
   <c-y>
     Create a new file and its parent directories.
 
-  <c-n>
-    Next string in the prompt’s history.
-
-  <c-p>
-    Previous string in the prompt’s history.
+Open multiple files:~
 
   <c-z>
     - Mark/unmark a file to be opened with <c-o>.
-    - Or mark/unmark a file to create a new file in its directory using <c-y>.
+    - Mark/unmark a file to create a new file in its directory using <c-y>.
 
   <c-o>
     Open files marked by <c-z>.
 
+Function keys:~
+
   <F5>
     - Refresh the match window and purge the cache for the current directory.
-    - Or remove deleted files from the MRU list.
+    - Remove deleted files from the MRU list.
 
   <F7>
     - Wipe the MRU list.
-    - Or delete MRU entries marked by <c-z>.
+    - Delete MRU entries marked by <c-z>.
 
-  <Insert>,
+Pasting:~
+
+  <Insert>,                                                   *'ctrlp-pasting'*
   <MiddleMouse>
-    Insert clipboard content into the prompt.
+    Paste the clipboard content into the prompt.
 
   <c-\>
-    Open a dialog to insert <cword>, <cfile>, content of the search register,
-    the last visual selection or the clipboard into the prompt.
-
-  <esc>,
-  <c-c>
-    Exit CtrlP.
-    Note: <c-c> can also be used to stop the scan if it’s taking too long.
+    Open a text dialog to paste <cword>, <cfile>, the content of the search
+    register, the last visual selection or the clipboard into the prompt.
 
 Choose your own mappings with |g:ctrlp_prompt_mappings|.
 
+----------------------------------------
 When inside the match window (press <s-tab> to switch):~
 
   a-z
@@ -987,6 +1002,8 @@ Special thanks:~
 
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
+
+Before 2012/04/30~
 
     + New option: |g:ctrlp_mruf_default_order|
     + New feature: Bookmarked directories extension.

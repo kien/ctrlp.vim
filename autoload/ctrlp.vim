@@ -30,11 +30,19 @@ fu! s:ignore() "{{{2
 		\ '_build$',
 		\ ]
 	let igfiles = [
-		\ '[.]bak$',
 		\ '\~$',
 		\ '#.+#$',
 		\ '[._].*\.swp$',
 		\ 'core\.\d+$',
+		\ '\.exe$',
+		\ '\.so$',
+		\ '\.bak$',
+		\ '\.png$',
+		\ '\.jpg$',
+		\ '\.gif$',
+		\ '\.zip$',
+		\ '\.rar$',
+		\ '\.tar\.gz$',
 		\ ]
 	retu {
 		\ 'dir': '\v'.join(igdirs, '|'),
@@ -46,7 +54,6 @@ let [s:pref, s:opts, s:new_opts] = ['g:ctrlp_', {
 	\ 'arg_map':               ['s:argmap', 0],
 	\ 'buffer_func':           ['s:buffunc', {}],
 	\ 'by_filename':           ['s:byfname', 0],
-	\ 'clear_cache_on_exit':   ['s:clrex', 1],
 	\ 'custom_ignore':         ['s:usrign', s:ignore()],
 	\ 'default_input':         ['s:deftxt', 0],
 	\ 'dont_split':            ['s:nosplit', 'netrw'],
@@ -262,7 +269,7 @@ fu! s:Close()
 endf
 " * Clear caches {{{1
 fu! ctrlp#clr(...)
-	let g:ctrlp_new{ a:0 ? a:1 : 'cache' } = 1
+	let [s:matches, g:ctrlp_new{ a:0 ? a:1 : 'cache' }] = [1, 1]
 endf
 
 fu! ctrlp#clra()
@@ -321,12 +328,15 @@ fu! s:GlobPath(dirs, depth)
 endf
 
 fu! s:UserCmd(lscmd)
-	let path = s:dyncwd
+	let [path, lscmd] = [s:dyncwd, a:lscmd]
 	if exists('+ssl') && &ssl
 		let [ssl, &ssl, path] = [&ssl, 0, tr(path, '/', '\')]
 	en
+	if has('win32') || has('win64')
+		let lscmd = substitute(lscmd, '\v(^|&&\s*)\zscd (/d)@!', 'cd /d ', '')
+	en
 	let path = exists('*shellescape') ? shellescape(path) : path
-	let g:ctrlp_allfiles = split(system(printf(a:lscmd, path)), "\n")
+	let g:ctrlp_allfiles = split(system(printf(lscmd, path)), "\n")
 	if exists('+ssl') && exists('ssl')
 		let &ssl = ssl
 		cal map(g:ctrlp_allfiles, 'tr(v:val, "\\", "/")')
@@ -1420,7 +1430,8 @@ endf
 
 fu! s:leavepre()
 	if exists('s:bufnr') && s:bufnr == bufnr('%') | bw! | en
-	if s:clrex && !( has('clientserver') && len(split(serverlist(), "\n")) > 1 )
+	if exists('g:ctrlp_clear_cache_on_exit') && g:ctrlp_clear_cache_on_exit
+		\ && !( has('clientserver') && len(split(serverlist(), "\n")) > 1 )
 		cal ctrlp#clra()
 	en
 endf
@@ -1627,7 +1638,7 @@ fu! s:settype(type)
 endf
 " Matching {{{2
 fu! s:matchfname(item, pat)
-	retu match(split(a:item, s:lash)[-1], a:pat)
+	retu match(split(a:item, '[\/]')[-1], a:pat)
 endf
 
 fu! s:matchtabs(item, pat)
