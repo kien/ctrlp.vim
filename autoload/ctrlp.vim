@@ -1430,7 +1430,7 @@ endf
 
 fu! s:leavepre()
 	if exists('s:bufnr') && s:bufnr == bufnr('%') | bw! | en
-	if exists('g:ctrlp_clear_cache_on_exit') && g:ctrlp_clear_cache_on_exit
+	if !( exists('g:ctrlp_clear_cache_on_exit') && !g:ctrlp_clear_cache_on_exit )
 		\ && !( has('clientserver') && len(split(serverlist(), "\n")) > 1 )
 		cal ctrlp#clra()
 	en
