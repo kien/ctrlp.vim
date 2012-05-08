@@ -583,7 +583,7 @@ Once inside the prompt:~
     Toggle between the string mode and full regexp mode.
     Note: in full regexp mode, the prompt's base is 'r>>' instead of '>>>'
 
-    See also |input-formats| (guide) and |g:ctrlp_regexp_search| (option).
+    See also: |input-formats| (guide) and |g:ctrlp_regexp_search| (option).
 
   <c-f>, 'forward'
   <c-up>
@@ -647,10 +647,10 @@ Editing:~
 Input history:~
 
   <c-n>
-    Next string in the prompt’s history.
+    Next string in the prompt's history.
 
   <c-p>
-    Previous string in the prompt’s history.
+    Previous string in the prompt's history.
 
 Open a file:~
 
@@ -733,41 +733,40 @@ c)  End the string with a colon ':' followed by a Vim command to execute that
     with a backslash: '\:'. When opening multiple files, the command will be
     executed on each opening file.
 
-    E.g. 'abc:45' will open the selected file and jump to line 45.
+    E.g. Use 'abc:45' to open the selected file and jump to line 45.
 
-         'abc:/any\:string' will open the selected file and jump to the first
+         Use 'abc:/any\:string' to open the selected file and jump to the first
          instance of 'any:string'.
 
-         'abc:+setf\ myfiletype|50' will open the selected file and set its
+         Use 'abc:+setf\ myfiletype|50' to open the selected file and set its
          filetype to 'myfiletype', then jump to line 50.
 
-         'abc:diffthis' will open the selected files and run |:diffthis| on the
-         first 4 files (if marked).
+         Use 'abc:diffthis' to open the selected files and run |:diffthis| on
+         the first 4 files (if they have been marked).
 
-    See also Vim's |++opt| and |+cmd|.
+    See also: Vim's |++opt| and |+cmd|.
 
-d)  Type exactly two dots '..' at the start of the prompt and press enter to go
-    backward in the directory tree by 1 level. If the parent directory is
-    large, this might be slow.
+d)  Submit two dots '..' to go backward the directory tree by 1 level. If the
+    parent directory is large and uncached, this can be slow.
 
 e)  Similarly, submit '/' or '\' to find and go to the project's root. If the
     project is large, using a VCS listing command to look for files might help
     speeding up the intial scan (see |g:ctrlp_user_command| for more details).
 
-    Note: e) and d) only work in find file mode and directory mode.
+    Note: e) and d) only work in file, directory and mixed modes.
 
 f)  Type the name of a non-existent file and press <c-y> to create it. Mark a
     file with <c-z> to create the new file in the same directory as the marked
     file.
 
-    E.g. 'parentdir/newfile.txt' will create a directory named 'parentdir' as
-         well as 'newfile.txt'.
+    E.g. Using 'newdir/newfile.txt' will create a directory named 'newdir' as
+         well as a file named 'newfile.txt'.
 
-         If 'some/old/dirs/oldfile.txt' is marked with <c-z>, then 'parentdir'
-         and 'newfile.txt' will be created in 'some/old/dirs'. The final path
-         will then be 'some/old/dirs/parentdir/newfile.txt'.
+         If an entry 'some/old/dirs/oldfile.txt' is marked with <c-z>, then
+         'newdir' and 'newfile.txt' will be created under 'some/old/dirs'. The
+         final path will then be 'some/old/dirs/newdir/newfile.txt'.
 
-         Use '\' in place of '/' on Windows (if |'ssl'| is not set).
+    Note: use '\' in place of '/' on Windows (if |'shellslash'| is not set).
 
 g)  Submit ? to open this help file.
 
