@@ -382,9 +382,10 @@ endf
 " * MatchedItems() {{{1
 fu! s:MatchIt(items, pat, limit, exc)
 	let [lines, id] = [[], 0]
+	let pat = s:byfname ? split(a:pat, '^[^;]\+\zs;', 1) : a:pat
 	for item in a:items
 		let id += 1
-		try | if !( s:ispath && item == a:exc ) && call(s:mfunc, [item, a:pat]) >= 0
+		try | if !( s:ispath && item == a:exc ) && call(s:mfunc, [item, pat]) >= 0
 			cal add(lines, item)
 		en | cat | brea | endt
 		if a:limit > 0 && len(lines) >= a:limit | brea | en
@@ -426,10 +427,14 @@ fu! s:SplitPattern(str)
 	if exists('lst')
 		let pat = ''
 		if !empty(lst)
-			let pat = lst[0]
-			for item in range(1, len(lst) - 1)
-				let pat .= '[^'.lst[item - 1].']\{-}'.lst[item]
-			endfo
+			if s:byfname && index(lst, ';') > 0
+				let fbar = index(lst, ';')
+				let lst_1 = s:sublist(lst, 0, fbar - 1)
+				let lst_2 = len(lst) - 1 > fbar ? s:sublist(lst, fbar + 1, -1) : ['']
+				let pat = s:buildpat(lst_1).';'.s:buildpat(lst_2)
+			el
+				let pat = s:buildpat(lst)
+			en
 		en
 	en
 	retu escape(pat, '~')
@@ -437,6 +442,7 @@ endf
 " * BuildPrompt() {{{1
 fu! s:Render(lines, pat)
 	let [&ma, lines, s:height] = [1, a:lines, min([len(a:lines), s:winh])]
+	let pat = s:byfname ? split(a:pat, '^[^;]\+\zs;', 1)[0] : a:pat
 	" Setup the match window
 	sil! exe '%d _ | res' s:height
 	" Print the new items
@@ -451,7 +457,7 @@ fu! s:Render(lines, pat)
 	let s:matched = copy(lines)
 	" Sorting
 	if !s:nosort()
-		let s:compat = a:pat
+		let s:compat = pat
 		cal sort(lines, 's:mixedsort')
 		unl s:compat
 	en
@@ -468,7 +474,7 @@ fu! s:Render(lines, pat)
 	en
 	" Highlighting
 	if s:dohighlight()
-		cal s:highlight(a:pat, s:mathi[1])
+		cal s:highlight(pat, s:mathi[1])
 	en
 endf
 
@@ -1304,7 +1310,6 @@ fu! s:highlight(pat, grp)
 	if !empty(a:pat) && s:ispath
 		let pat = s:regexp ? substitute(a:pat, '\\\@<!\^', '^> \\zs', 'g') : a:pat
 		if s:byfname
-			" Match only filename
 			let pat = substitute(pat, '\[\^\(.\{-}\)\]\\{-}', '[^\\/\1]\\{-}', 'g')
 			let pat = substitute(pat, '\$\@<!$', '\\ze[^\\/]*$', 'g')
 		en
@@ -1638,7 +1643,12 @@ fu! s:settype(type)
 endf
 " Matching {{{2
 fu! s:matchfname(item, pat)
-	retu match(split(a:item, '[\/]')[-1], a:pat)
+	let parts = split(a:item, '[\/]\ze[^\/]\+$')
+	let mfn = match(parts[-1], a:pat[0])
+	retu len(a:pat) == 1 ? mfn : len(a:pat) == 2 ?
+		\ ( mfn >= 0 && ( len(parts) == 2 ? match(parts[0], a:pat[1]) : -1 ) >= 0
+		\ ? 0 : -1 ) : -1
+	en
 endf
 
 fu! s:matchtabs(item, pat)
@@ -1647,6 +1657,14 @@ endf
 
 fu! s:matchtabe(item, pat)
 	retu match(split(a:item, '\t\+[^\t]\+$')[0], a:pat)
+endf
+
+fu! s:buildpat(lst)
+	let pat = a:lst[0]
+	for item in range(1, len(a:lst) - 1)
+		let pat .= '[^'.a:lst[item - 1].']\{-}'.a:lst[item]
+	endfo
+	retu pat
 endf
 
 fu! s:mfunc()
