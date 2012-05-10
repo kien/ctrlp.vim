@@ -2,7 +2,7 @@
 " File:          autoload/ctrlp.vim
 " Description:   Fuzzy file, buffer, mru and tag finder.
 " Author:        Kien Nguyen <github.com/kien>
-" Version:       1.7.6
+" Version:       1.7.7
 " =============================================================================
 
 " ** Static variables {{{1
