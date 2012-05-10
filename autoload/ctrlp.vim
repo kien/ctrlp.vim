@@ -584,13 +584,18 @@ fu! s:PrtInsert(...)
 		let type = s:insertstr()
 		if type == 'cancel' | retu | en
 	en
+	if type ==# 'r'
+		let regcont = s:getregs()
+		if regcont < 0 | retu | en
+	en
 	unl! s:hstgot
 	let s:act_add = 1
-	let s:prompt[0] .= type == 'w' ? s:crword
-		\ : type == 's' ? getreg('/')
-		\ : type == 'v' ? s:crvisual
-		\ : type == 'c' ? substitute(getreg('+'), '\n', '\\n', 'g')
-		\ : type == 'f' ? s:crgfile : s:prompt[0]
+	let s:prompt[0] .= type ==# 'w' ? s:crword
+		\ : type ==# 'f' ? s:crgfile
+		\ : type ==# 's' ? s:regisfilter('/')
+		\ : type ==# 'v' ? s:crvisual
+		\ : type ==# 'c' ? s:regisfilter('+')
+		\ : type ==# 'r' ? regcont : ''
 	cal s:BuildPrompt(1)
 	unl s:act_add
 endf
@@ -1503,16 +1508,17 @@ fu! s:argmaps(md, ...)
 endf
 
 fu! s:insertstr()
-	let str = 'Insert: c[w]ord/c[f]ile/[s]earch/[v]isual/[c]lipboard? '
-	retu s:choices(str, ['w', 'f', 's', 'v', 'c'], 's:insertstr', [])
+	let str = 'Insert: c[w]ord/c[f]ile/[s]earch/[v]isual/[c]lipboard/[r]egister? '
+	retu s:choices(str, ['w', 'f', 's', 'v', 'c', 'r'], 's:insertstr', [])
+endf
+
+fu! s:textdialog(str)
+	redr | echoh MoreMsg | echon a:str | echoh None
+	retu nr2char(getchar())
 endf
 
 fu! s:choices(str, choices, func, args)
-	redr
-	echoh MoreMsg
-	echon a:str
-	echoh None
-	let char = nr2char(getchar())
+	let char = s:textdialog(a:str)
 	if index(a:choices, char) >= 0
 		retu char
 	elsei char =~# "\\v\<Esc>|\<C-c>|\<C-g>|\<C-u>|\<C-w>|\<C-[>"
@@ -1522,6 +1528,21 @@ fu! s:choices(str, choices, func, args)
 		retu a:args[0]
 	en
 	retu call(a:func, a:args)
+endf
+
+fu! s:getregs()
+	let char = s:textdialog('Insert from register: ')
+	if char =~# "\\v\<Esc>|\<C-c>|\<C-g>|\<C-u>|\<C-w>|\<C-[>"
+		cal s:BuildPrompt(0)
+		retu -1
+	elsei char =~# "\<CR>"
+		retu s:getregs()
+	en
+	retu s:regisfilter(char)
+endf
+
+fu! s:regisfilter(reg)
+	retu substitute(getreg(a:reg), "[\t\n]", ' ', 'g')
 endf
 " Misc {{{2
 fu! s:modevar()
@@ -1621,7 +1642,7 @@ fu! s:lastvisual()
 	let [ovreg, ovtype] = [getreg('v'), getregtype('v')]
 	let [oureg, outype] = [getreg('"'), getregtype('"')]
 	sil! norm! gv"vy
-	let selected = substitute(getreg('v'), '\n', '\\n', 'g')
+	let selected = s:regisfilter('v')
 	cal setreg('v', ovreg, ovtype)
 	cal setreg('"', oureg, outype)
 	cal winrestview(cview)

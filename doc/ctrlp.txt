@@ -698,7 +698,8 @@ Pasting:~
 
   <c-\>
     Open a text dialog to paste <cword>, <cfile>, the content of the search
-    register, the last visual selection or the clipboard into the prompt.
+    register, the last visual selection, the clipboard or any register into the
+    prompt.
 
 Choose your own mappings with |g:ctrlp_prompt_mappings|.
 
