@@ -733,16 +733,16 @@ c)  End the string with a colon ':' followed by a Vim command to execute that
     with a backslash: '\:'. When opening multiple files, the command will be
     executed on each opening file.
 
-    E.g. Use 'abc:45' to open the selected file and jump to line 45.
+    E.g. Use ':45' to open the selected file and jump to line 45.
 
-         Use 'abc:/any\:string' to open the selected file and jump to the first
+         Use ':/any\:string' to open the selected file and jump to the first
          instance of 'any:string'.
 
-         Use 'abc:+setf\ myfiletype|50' to open the selected file and set its
+         Use ':+setf\ myfiletype|50' to open the selected file and set its
          filetype to 'myfiletype', then jump to line 50.
 
-         Use 'abc:diffthis' to open the selected files and run |:diffthis| on
-         the first 4 files (if they have been marked).
+         Use ':diffthis' to open the selected files and run |:diffthis| on the
+         first 4 files (if they have been marked).
 
     See also: Vim's |++opt| and |+cmd|.
 
@@ -773,7 +773,11 @@ f)  Type the name of a non-existent file and press <c-y> to create it. Mark a
 
     Note: use '\' in place of '/' on Windows (if |'shellslash'| is not set).
 
-g)  Submit ? to open this help file.
+g)  In filename mode (toggle with <c-d>), you can use one primary pattern and
+    one refining pattern separated by a semicolon. Both patterns work like (a),
+    or (b) when in regexp mode.
+
+h)  Submit ? to open this help file.
 
 ===============================================================================
 EXTENSIONS                                                   *ctrlp-extensions*
@@ -871,7 +875,7 @@ Available extensions:~
       + <c-v> change the local working directory for the current window (exit).
       + <F7>
         - Wipe bookmark list.
-        - Or delete entries marked by <c-z>.
+        - Delete entries marked by <c-z>.
 
 ----------------------------------------
 Buffer Tag mode options:~
