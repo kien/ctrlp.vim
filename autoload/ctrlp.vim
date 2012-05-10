@@ -596,17 +596,22 @@ fu! s:PrtInsert(...)
 endf
 
 fu! s:PrtExpandDir()
-	let prt = s:prompt
-	if prt[0] == '' | retu | en
+	let str = s:prompt[0]
+	if str =~ '\v^\@(cd|lc[hd]?|chd)\s.+' && s:spi
+		let hasat = split(str, '\v^\@(cd|lc[hd]?|chd)\s*\zs')
+		let str = get(hasat, 1, '')
+	en
+	if str == '' | retu | en
 	unl! s:hstgot
 	let s:act_add = 1
-	let [base, seed] = s:headntail(prt[0])
+	let [base, seed] = s:headntail(str)
 	let dirs = s:dircompl(base, seed)
 	if len(dirs) == 1
-		let prt[0] = dirs[0]
+		let str = dirs[0]
 	elsei len(dirs) > 1
-		let prt[0] .= s:findcommon(dirs, prt[0])
+		let str .= s:findcommon(dirs, str)
 	en
+	let s:prompt[0] = exists('hasat') ? hasat[0].str : str
 	cal s:BuildPrompt(1)
 	unl s:act_add
 endf
@@ -858,17 +863,18 @@ fu! ctrlp#acceptfile(mode, line, ...)
 endf
 
 fu! s:SpecInputs(str)
-	let spi = !s:itemtype || s:getextvar('specinput') > 0
-	if a:str == '..' && spi
+	if a:str == '..' && s:spi
 		cal s:parentdir(s:dyncwd)
 		cal ctrlp#setlines()
 		cal s:PrtClear()
 		retu 1
-	elsei a:str == s:lash && spi
+	elsei a:str == s:lash && s:spi
 		cal s:SetWD(2, 0)
 		cal ctrlp#setlines()
 		cal s:PrtClear()
 		retu 1
+	elsei a:str =~ '^@.\+' && s:spi
+		retu s:at(a:str)
 	elsei a:str == '?'
 		cal s:PrtExit()
 		let hlpwin = &columns > 159 ? '| vert res 80' : ''
@@ -883,8 +889,8 @@ fu! s:AcceptSelection(mode)
 	if a:mode == 'e' | if s:SpecInputs(str) | retu | en | en
 	" Get the selected line
 	let line = !empty(s:lines) ? s:lines[line('.') - 1] : ''
-	if a:mode != 'e' && s:itemtype < 3 && line == ''
-		\ && str !~ '\v^(\.\.|/|\\|\?)$'
+	if a:mode != 'e' && !s:itemtype && line == ''
+		\ && str !~ '\v^(\.\.|/|\\|\?|\@.+)$'
 		cal s:CreateNewFile(a:mode) | retu
 	en
 	if empty(line) | retu | en
@@ -1455,6 +1461,25 @@ fu! s:iscmdwin()
 	retu ermsg =~ '^E11:'
 endf
 " Arguments {{{2
+fu! s:at(str)
+	if a:str =~ '\v^\@(cd|lc[hd]?|chd).*'
+		let str = substitute(a:str, '\v^\@(cd|lc[hd]?|chd)\s*', '', '')
+		if str == '' | retu 1 | en
+		let str = str =~ '^%:.\+' ? fnamemodify(s:crfile, str[1:]) : str
+		let path = fnamemodify(expand(str, 1), ':p')
+		if isdirectory(path)
+			if path != s:dyncwd
+				cal ctrlp#setdir(path)
+				cal ctrlp#setlines()
+			en
+			cal ctrlp#recordhist()
+			cal s:PrtClear()
+		en
+		retu 1
+	en
+	retu 0
+endf
+
 fu! s:tail()
 	if exists('s:optail') && !empty('s:optail')
 		let tailpref = match(s:optail, '^\s*+') < 0 ? ' +' : ' '
@@ -1464,7 +1489,8 @@ fu! s:tail()
 endf
 
 fu! s:sanstail(str)
-	let [str, pat] = [substitute(a:str, '\\\\', '\', 'g'), '\([^:]\|\\:\)*$']
+	let str = s:spi ? substitute(a:str, '^\(@.*$\|\\\\\ze@\)', '', 'g') : a:str
+	let [str, pat] = [substitute(str, '\\\\', '\', 'g'), '\([^:]\|\\:\)*$']
 	unl! s:optail
 	if match(str, '\\\@<!:'.pat) >= 0
 		let s:optail = matchstr(str, '\\\@<!:\zs'.pat)
@@ -1509,6 +1535,7 @@ fu! s:modevar()
 	let s:mfunc = s:mfunc()
 	let s:nolim = s:getextvar('nolim')
 	let s:dosort = s:getextvar('sort')
+	let s:spi = !s:itemtype || s:getextvar('specinput') > 0
 endf
 
 fu! s:nosort()

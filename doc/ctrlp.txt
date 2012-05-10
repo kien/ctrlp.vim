@@ -150,7 +150,7 @@ When starting up, CtrlP sets its local working directory according to this
 variable: >
   let g:ctrlp_working_path_mode = 2
 <
-  1 - the parent directory of the current file.
+  1 - the directory of the current file.
   2 - the nearest ancestor that contains one of these directories or files:
       .git/ .hg/ .svn/ .bzr/ _darcs/
   0 - don't manage working directory.
@@ -749,9 +749,14 @@ c)  End the string with a colon ':' followed by a Vim command to execute that
 d)  Submit two dots '..' to go backward the directory tree by 1 level. If the
     parent directory is large and uncached, this can be slow.
 
-e)  Similarly, submit '/' or '\' to find and go to the project's root. If the
-    project is large, using a VCS listing command to look for files might help
-    speeding up the intial scan (see |g:ctrlp_user_command| for more details).
+    You can also use '@cd path/' to change CtrlP's local working directory.
+    Use '@cd %:h' to change to the directory of the current file.
+
+e)  Similarly, submit '/' or '\' to find and go to the project's root.
+
+    If the project is large, using a VCS listing command to look for files
+    might help speeding up the intial scan (see |g:ctrlp_user_command| for more
+    details).
 
     Note: e) and d) only work in file, directory and mixed modes.
 
@@ -1001,6 +1006,8 @@ Special thanks:~
 
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
+
+    + New input format: '@cd' (|ctrlp-input-formats| (d))
 
 Before 2012/04/30~
 
