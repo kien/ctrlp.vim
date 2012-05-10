@@ -863,9 +863,10 @@ fu! ctrlp#acceptfile(mode, line, ...)
 endf
 
 fu! s:SpecInputs(str)
-	if a:str == '..' && s:spi
-		cal s:parentdir(s:dyncwd)
-		cal ctrlp#setlines()
+	if a:str =~ '^\.\.\.*$' && s:spi
+		let cwd = s:dyncwd
+		cal ctrlp#setdir('../'.repeat('../', strlen(a:str) - 2))
+		if cwd != s:dyncwd | cal ctrlp#setlines() | en
 		cal s:PrtClear()
 		retu 1
 	elsei a:str == s:lash && s:spi
@@ -890,7 +891,7 @@ fu! s:AcceptSelection(mode)
 	" Get the selected line
 	let line = !empty(s:lines) ? s:lines[line('.') - 1] : ''
 	if a:mode != 'e' && !s:itemtype && line == ''
-		\ && str !~ '\v^(\.\.|/|\\|\?|\@.+)$'
+		\ && str !~ '\v^(\.\.\.*|/|\\|\?|\@.+)$'
 		cal s:CreateNewFile(a:mode) | retu
 	en
 	if empty(line) | retu | en
@@ -1246,11 +1247,6 @@ fu! ctrlp#rmbasedir(items)
 		retu map(a:items, 'strpart(v:val, idx)')
 	en
 	retu a:items
-endf
-
-fu! s:parentdir(curr)
-	let parent = s:getparent(a:curr)
-	if parent != a:curr | cal ctrlp#setdir(parent) | en
 endf
 
 fu! s:getparent(item)

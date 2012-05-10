@@ -746,8 +746,15 @@ c)  End the string with a colon ':' followed by a Vim command to execute that
 
     See also: Vim's |++opt| and |+cmd|.
 
-d)  Submit two dots '..' to go backward the directory tree by 1 level. If the
-    parent directory is large and uncached, this can be slow.
+d)  Submit two dots '..' to go backward the directory tree by 1 level. To go
+    backward multiple levels, use one extra dot for each extra level:
+>
+         Raw input    Interpreted as
+         ..           ../
+         ...          ../../
+         ....         ../../../
+<
+    Note: if the parent directories are large and uncached, this can be slow.
 
     You can also use '@cd path/' to change CtrlP's local working directory.
     Use '@cd %:h' to change to the directory of the current file.
@@ -1011,6 +1018,9 @@ Special thanks:~
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
 
+Before 2012/05/15~
+
+    + Extend '..' (|ctrlp-input-formats| (d))
     + New input format: '@cd' (|ctrlp-input-formats| (d))
 
 Before 2012/04/30~
