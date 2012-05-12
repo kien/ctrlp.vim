@@ -46,23 +46,23 @@
 			</ul>
 			<h6>Once CtrlP is open:</h6>
 			<ul>
-				<li>Press <code>&lt;c-r&gt;</code> to switch to regexp mode.</li>
+				<li>Press <code>&lt;c-f&gt;</code> and <code>&lt;c-b&gt;</code> to cycle between modes.</li>
 				<li>Press <code>&lt;c-d&gt;</code> to switch to filename search instead of full path.</li>
-				<li>Press <code>&lt;c-f&gt;</code> and <code>&lt;c-b&gt;</code> to switch between find file, buffer, and MRU file modes.</li>
+				<li>Press <code>&lt;c-r&gt;</code> to switch to regexp mode.</li>
 				<li>Press <code>&lt;F5&gt;</code> to purge the cache for the current directory and get new files.</li>
 				<li>Submit <code>/</code> or <code>\</code> as the input string to find and go to the project’s root.</li>
-				<li>Submit two dots <code>..</code> to go backward the directory tree by 1 level.</li>
-				<li>End the input string with a colon <code>:</code> followed by a command to execute after opening the file:
+				<li>Submit two or more dots <code>.</code> to go backward the directory tree by one or multiple levels.</li>
+				<li>End the input with a colon <code>:</code> followed by a command to execute it after opening the file:
 					<ul>
-						<li>Use <code>:45</code> to open the selected file and jump to line 45.</li>
-						<li>Use <code>:/any:string</code> to open the selected file and jump to the first instance of 'any:string'.</li>
-						<li>Use <code>:+setf myfiletype|25</code> to open the selected file and set its filetype to 'myfiletype' then jump to line 25.</li>
-						<li>Use <code>:diffthis</code> to open the files marked with <code>&lt;c-z&gt;</code> and run <code>:diffthis</code> on the first 4 files.</li>
+						<li>Use <code>:45</code> to jump to line 45.</li>
+						<li>Use <code>:/any\:string</code> to jump to the first instance of <code>any:string</code>.</li>
+						<li>Use <code>:+setf\ myfiletype|25</code> to set the filetype to <code>myfiletype</code> then jump to line 25.</li>
+						<li>Use <code>:difft</code> when opening files marked by <code>&lt;c-z&gt;</code> to run <code>:difft</code> on the first 4 files.</li>
 					</ul>
 				</li>
 				<li>Use <code>&lt;c-n&gt;</code>, <code>&lt;c-p&gt;</code> to go to the next/previous string in the prompt’s history.</li>
-				<li>Use <code>&lt;c-y&gt;</code> to create a new file and its parent dirs.</li>
-				<li>Use <code>&lt;c-z&gt;</code> to mark/unmark files and <code>&lt;c-o&gt;</code> to open marked files.</li>
+				<li>Use <code>&lt;c-y&gt;</code> to create a new file and its parent directories.</li>
+				<li>Use <code>&lt;c-z&gt;</code> to mark/unmark multiple files and <code>&lt;c-o&gt;</code> to open them.</li>
 			</ul>
 			<h3>Basic Options:</h3>
 			<ul>
@@ -72,15 +72,15 @@
 let g:ctrlp_cmd = 'CtrlP'</code></pre>
 				</li>
 				<li>
-					When CtrlP is invoked, it sets its local working directory according to this variable:
+					When invoked, unless a starting directory is specified, CtrlP will automatically set its local working directory according to this variable:
 						<pre><code>let g:ctrlp_working_path_mode = 2</code></pre>
 					0 - don’t manage working directory.<br>
-					1 - the parent directory of the current file.<br>
+					1 - the directory of the current file.<br>
 					2 - the nearest ancestor that contains one of these directories or files:<br>
 					<code>.git/</code> <code>.hg/</code> <code>.svn/</code> <code>.bzr/</code> <code>_darcs/</code> or your own <code>marker_dir/</code> <code>marker_file</code>
 				</li>
 				<li>
-					If you want to exclude directories or files from the search, you can use the Vim’s option <code>wildignore</code>:
+					To exclude files or directories from the listing, use the Vim’s option <code>wildignore</code>:
 					<pre><code>set wildignore+=*/tmp/*,*.so,*.swp,*.zip   " Linux/MacOSX
 set wildignore+=tmp\*,*.swp,*.zip,*.exe    " Windows</code></pre>
 					And/Or the built-in option <code>g:ctrlp_custom_ignore</code>:
