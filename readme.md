@@ -22,12 +22,13 @@ Once CtrlP is open:
 * Press `<c-d>` to switch to filename only search instead of full path.
 * Press `<c-r>` to switch to regexp mode.
 * Press `<F5>` to purge the cache for the current directory and get new files.
-* End the input string with a colon `:` followed by a command to execute it after
-opening the file:  
-Use `:45` to open selected file and jump to line 45.  
-Use `:difft` to open the marked files and run `:difft` on the first 4 files.
-* Submit two dots `..` as the input string to go backward the directory tree by
-1 level.
+* End the input string with a colon `:` followed by a command to execute it
+after opening the file:  
+Use `:45` to jump to line 45.  
+Use `:/any\:string` to jump to the first instance of `any:string`.  
+Use `:difft` when opening multiple files to run `:difft` on the first 4 files.
+* Submit two or more dots `.` as the input string to go backward the directory
+tree by one or multiple levels.
 * Use `<c-y>` to create a new file and its parent dirs.
 * Use `<c-z>` to mark/unmark multiple files and `<c-o>` to open them.
 
@@ -38,8 +39,8 @@ Use `:difft` to open the marked files and run `:difft` on the first 4 files.
     let g:ctrlp_map = '<c-p>'
     ```
 
-* When invoked, unless a path is specified, CtrlP will automatically set its
-local working directory according to this variable:
+* When invoked, unless a starting directory is specified, CtrlP will
+automatically set its local working directory according to this variable:
 
     ```vim
     let g:ctrlp_working_path_mode = 2
@@ -50,8 +51,8 @@ local working directory according to this variable:
     2 - the nearest ancestor that contains one of these directories or files:
     `.git/` `.hg/` `.svn/` `.bzr/` `_darcs/`
 
-* If you want to exclude directories or files from the search, use the Vim’s
-option `wildignore` and/or the option `g:ctrlp_custom_ignore`. Examples:
+* To exclude files or directories from the search, use the Vim’s option
+`wildignore` and/or the option `g:ctrlp_custom_ignore`:
 
     ```vim
     set wildignore+=*/tmp/*,*.so,*.swp,*.zip  " MacOSX/Linux

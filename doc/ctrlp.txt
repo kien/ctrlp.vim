@@ -734,16 +734,15 @@ c)  End the string with a colon ':' followed by a Vim command to execute that
     with a backslash: '\:'. When opening multiple files, the command will be
     executed on each opening file.
 
-    E.g. Use ':45' to open the selected file and jump to line 45.
+    E.g. Use ':45' to jump to line 45.
 
-         Use ':/any\:string' to open the selected file and jump to the first
-         instance of 'any:string'.
+         Use ':/any\:string' to jump to the first instance of 'any:string'.
 
-         Use ':+setf\ myfiletype|50' to open the selected file and set its
-         filetype to 'myfiletype', then jump to line 50.
+         Use ':+setf\ myfiletype|50' to set the filetype to 'myfiletype', then
+         jump to line 50.
 
-         Use ':diffthis' to open the selected files and run |:diffthis| on the
-         first 4 files (if they have been marked).
+         Use ':diffthis' when opening multiple files to run |:diffthis| on the
+         first 4 files.
 
     See also: Vim's |++opt| and |+cmd|.
 
