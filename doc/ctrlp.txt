@@ -948,7 +948,7 @@ Statuslines:~
 ===============================================================================
 MISCELLANEOUS CONFIGS                             *ctrlp-miscellaneous-configs*
 
-* Use |wildignore| for |g:ctrlp_user_command|:
+* Using |wildignore| for |g:ctrlp_user_command|:
 >
   function! s:wig2cmd()
     " Change wildignore into space or | separated groups
@@ -986,6 +986,12 @@ MISCELLANEOUS CONFIGS                             *ctrlp-miscellaneous-configs*
   autocmd BufEnter * call s:setcwd()
 <
 (requires Vim 7.1.299+)
+
+* Using a |count| to invoke different commands using the same mapping:
+>
+  let g:ctrlp_map = '<leader>f'
+  let g:ctrlp_cmd = 'exe "CtrlP".get(["", "Buffer", "MRU"], v:count)'
+<
 
 ===============================================================================
 CREDITS                                                         *ctrlp-credits*
