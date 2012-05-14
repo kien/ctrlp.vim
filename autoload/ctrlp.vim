@@ -982,7 +982,7 @@ fu! s:OpenMulti()
 	let mkd = values(s:marked)
 	cal s:sanstail(join(s:prompt, ''))
 	cal s:PrtExit()
-	if !nr || md == 'i'
+	if nr == '0' || md == 'i'
 		retu map(mkd, "s:openfile('bad', fnamemodify(v:val, ':.'), '')")
 	en
 	" Move the cursor to a reusable window
