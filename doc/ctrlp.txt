@@ -296,6 +296,7 @@ For the letters:
   t - each file in a new tab.
   h - each file in a new horizontal split.
   v - each file in a new vertical split.
+  i - all files as hidden buffers.
   Reuse the current window:
   tr,
   hr,

@@ -975,9 +975,11 @@ fu! s:OpenMulti()
 	let opts = matchlist(s:opmul, '\v^(\d+)=(\w)=(\w)=$')
 	if opts == [] | retu | en
 	let [nr, md, ucr] = opts[1:3]
+	let nopt = exists('g:ctrlp_open_multiple_files')
 	if s:argmap
 		let md = s:argmaps(md)
 		if md == 'cancel' | retu | en
+		let nr = nr == '0' ? ( nopt ? '' : '1' ) : nr
 	en
 	let mkd = values(s:marked)
 	cal s:sanstail(join(s:prompt, ''))
@@ -985,13 +987,11 @@ fu! s:OpenMulti()
 	if nr == '0' || md == 'i'
 		retu map(mkd, "s:openfile('bad', fnamemodify(v:val, ':.'), '')")
 	en
-	" Move the cursor to a reusable window
 	let [tail, fnesc] = [s:tail(), exists('*fnameescape') && v:version > 701]
-	let [emptytail, nwpt] = [empty(tail), exists('g:ctrlp_open_multiple_files')]
-	let bufnr = bufnr('^'.mkd[0].'$')
+	let [emptytail, bufnr] = [empty(tail), bufnr('^'.mkd[0].'$')]
 	let useb = bufnr > 0 && buflisted(bufnr) && emptytail
 	let fst = call('ctrlp#normcmd', useb ? ['b', 'bo vert sb'] : ['e'])
-	" Check if it's a replaceable buffer
+	" Check if the current window has a replaceable buffer
 	let repabl = ( empty(bufname('%')) && empty(&l:ft) ) || s:nosplit()
 	" Commands for the rest of the files
 	let [ic, cmds] = [1, { 'v': ['vert sb', 'vne'], 'h': ['sb', 'new'],
@@ -1007,7 +1007,7 @@ fu! s:OpenMulti()
 		let cmd = ic == 1 && ( ucr == 'r' || repabl ) ? fst : snd
 		let conds = [( nr != '' && nr > 1 && nr < ic ) || ( nr == '' && ic > 1 ),
 			\ nr != '' && nr < ic]
-		if conds[nwpt]
+		if conds[nopt]
 			if bufnr <= 0 | if fnesc
 				cal s:openfile('bad', fnamemodify(va, ':.'), '')
 			el
