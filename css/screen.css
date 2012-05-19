@@ -101,6 +101,10 @@ a:focus {
 a.external:after {
 	content:'✜';
 }
+header {
+	width:760px;
+	margin:0 auto;
+}
 .menu:after {
 	content:"\0020";
 	display:block;
@@ -111,8 +115,7 @@ a.external:after {
 }
 .menu {
 	font-size:1.1em;
-	width:760px;
-	margin:0 auto;
+	width:100%;
 	border-bottom:1px solid #8bad3e;
 	background:#1d1d1d;
 }
@@ -122,6 +125,10 @@ a.external:after {
 .menu .issues {
 	float:right;
 }
+.menu .download {
+	float:right;
+	display:none;
+}
 .menu li a {
 	float:left;
 	padding:0 10px;
@@ -130,12 +137,12 @@ a.external:after {
 	border-bottom:1px solid #8bad3e;
 	background:#1d1d1d;
 }
-.menu li a, h1 {
-	-webkit-transition:.5s;
-	-moz-transition:.5s;
-	-o-transition:.5s;
-	-ms-transition:.5s;
-	transition:.5s;
+.menu li a {
+	-webkit-transition:.15s;
+	-moz-transition:.15s;
+	-o-transition:.15s;
+	-ms-transition:.15s;
+	transition:.15s;
 }
 .menu li a:hover,
 .menu li a:focus {
@@ -157,12 +164,7 @@ h1 {
 	color:#2099af;
 	text-shadow:0 1px 0 #222,0 2px 0 #444,0 3px 0 #444,0 4px 0 #444,0 5px 0 #444;
 	clear:both;
-	width:760px;
-	margin:0 auto;
-}
-h1:hover {
-	color:#a7b8ff;
-	text-shadow:0 1px 0 #444,0 2px 0 #666,0 3px 0 #666,0 4px 0 #666,0 5px 0 #666;
+	width:100%;
 }
 article {
 	border-top:2px solid #8bad3e;
@@ -176,7 +178,6 @@ article {
 	height:1%;
 	padding:1em 15px 0;
 	position:relative;
-	overflow:hidden;
 }
 article h2 {
 	font-size:1.25em;
@@ -299,74 +300,14 @@ footer {
 footer small {
 	float:right;
 }
-/* ============================================================{
-	Media queries:
-}============================================================ */
-@media all and (max-width:780px) {
-	.menu,article,footer {
-		width:90%;
-	}
-	article img {
-		width:95%;
-		height:auto;
-	}
-	.forkme {
-		display:none;
-	}
-}
-@media all and (max-width:600px) {
-	.menu {
-		border:none;
-	}
-	.menu .issues {
-		float:left;
-	}
-	.menu li a {
-		padding:0 5px;
-		border:none;
-		-webkit-transition:none;
-		-moz-transition:none;
-		-o-transition:none;
-		-ms-transition:none;
-		transition:none;
-	}
-	.menu li a:hover,
-	.menu li a:focus {
-		padding-top:0;
-		padding-bottom:0;
-		margin:0 0 -1px;
-		border:none;
-		-webkit-border-radius:0;
-		-moz-border-radius:0;
-		border-radius:0;
-	}
-	article img {
-		width:94%;
-	}
-}
-@media all and (max-width:400px) {
-	body {
-		font-size:.83em;
-	}
-	h1 {
-		font-size:48px;
-		line-height:1.25;
-		padding-bottom:.5em;
-	}
-	article small {
-		font-style:normal;
-	}
-	article img {
-		width:91%;
-	}
-}
 /* ==========================================================={
 	Download button:
 }=========================================================== */
 a.download {
-	display:block;
 	width:180px;
-	margin:30px auto;
+	position:absolute;
+	top:-79px;
+	right:0;
 	background:#fff;
 	background-image:-webkit-gradient(linear, left top, left bottom, from(#ECECEC), to(#F4F4F4));
 	background:-webkit-linear-gradient(90deg, #ECECEC, #F4F4F4);
@@ -425,4 +366,79 @@ a.download .icon {
 a.download:hover .icon,
 a.download:active .icon {
 	background-position:-21px 52%;
+}
+/* ============================================================{
+	Media queries:
+}============================================================ */
+@media all and (max-width:780px) {
+	header {
+		width:90%;
+		padding:0 15px;
+	}
+	.menu,h1 {
+		margin:0 -15px;
+		width:auto;
+	}
+	article,footer {
+		width:90%;
+	}
+	article img {
+		width:95%;
+		height:auto;
+	}
+	.forkme {
+		display:none;
+	}
+	a.download {
+		display:none;
+	}
+	.menu .download {
+		display:block;
+	}
+}
+@media all and (max-width:600px) {
+	.menu {
+		border:none;
+	}
+	.menu .issues {
+		float:left;
+	}
+	.menu li a {
+		padding:0 5px;
+		border:none;
+		-webkit-transition:none;
+		-moz-transition:none;
+		-o-transition:none;
+		-ms-transition:none;
+		transition:none;
+	}
+	.menu li a:hover,
+	.menu li a:focus {
+		padding-top:0;
+		padding-bottom:0;
+		margin:0 0 -1px;
+		border:none;
+		-webkit-border-radius:0;
+		-moz-border-radius:0;
+		border-radius:0;
+	}
+	article img {
+		width:94%;
+	}
+}
+@media all and (max-width:400px) {
+	body {
+		font-size:62.5%;
+	}
+	h1 {
+		font-size:48px;
+		line-height:1.25;
+		padding-bottom:.5em;
+	}
+	article small {
+		font-style:normal;
+	}
+	article img {
+		width:91%;
+	}
 }
