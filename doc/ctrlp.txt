@@ -462,7 +462,7 @@ Structure of the functions: >
     " +- a:next    : The next search mode.
     " |
     " +- a:marked  : The number of marked files, or a comma separated list of
-    "                the filenames.
+    "                the marked filenames.
 
     return full_statusline
   endfunction
@@ -513,8 +513,8 @@ Structure of the function: >
     " |             + "first-non-tab": match until the first tab char.
     " |             + "until-last-tab": match until the last tab char.
     " |
-    " +- a:ispath : Is 1 when searching in file, buffer, mru, dir, and rtscript
-    " |             modes. Is 0 otherwise.
+    " +- a:ispath : Is 1 when searching in file, buffer, mru, mixed, dir, and
+    " |             rtscript modes. Is 0 otherwise.
     " |
     " +- a:crfile : The file in the current window. Should be excluded from the
     " |             results when a:ispath == 1.
@@ -534,6 +534,7 @@ COMMANDS                                                       *ctrlp-commands*
 
    If no argument is given, the value of |g:ctrlp_working_path_mode| will be
    used to determine the starting directory.
+
    You can use <tab> to auto-complete the [starting-directory] when typing it.
 
                                                                  *:CtrlPBuffer*
@@ -550,8 +551,8 @@ COMMANDS                                                       *ctrlp-commands*
 
                                                                    *:CtrlPRoot*
 :CtrlPRoot
-    This acts like |:CtrlP| with |g:ctrlp_working_path_mode| = 2 (ignores its
-    current value).
+    This acts like |:CtrlP| with |g:ctrlp_working_path_mode| = 2 (ignores the
+    variable's current value).
 
                                                              *:CtrlPClearCache*
 :CtrlPClearCache
@@ -561,7 +562,7 @@ COMMANDS                                                       *ctrlp-commands*
 
                                                          *:CtrlPClearAllCaches*
 :CtrlPClearAllCaches
-   Delete all the cache files saved in |g:ctrlp_cache_dir|.
+   Delete all the cache files saved in |g:ctrlp_cache_dir| location.
 
 -------------------------------------------------------------------------------
 For commands provided by bundled extensions, see |ctrlp-extensions|.
@@ -605,7 +606,7 @@ Once inside the prompt:~
   <c-c>
     Exit CtrlP.
 
-Movement:~
+Moving:~
 
   <c-j>,
   <down>
@@ -645,7 +646,7 @@ Editing:~
   <c-u>
     Clear the input field.
 
-Input history:~
+Browsing input history:~
 
   <c-n>
     Next string in the prompt's history.
@@ -653,26 +654,26 @@ Input history:~
   <c-p>
     Previous string in the prompt's history.
 
-Open a file:~
+Opening/Creating a file:~
 
   <cr>
-    Open selected file in the active window if possible.
+    Open the selected file in the 'current' window if possible.
 
   <c-t>
-    Open selected file in a new 'tab' after the last tabpage.
+    Open the selected file in a new 'tab' after the last tabpage.
 
   <c-v>
-    Open selected file in a 'vertical' split.
+    Open the selected file in a 'vertical' split.
 
   <c-x>,
   <c-cr>,
   <c-s>
-    Open selected file in a 'horizontal' split.
+    Open the selected file in a 'horizontal' split.
 
   <c-y>
     Create a new file and its parent directories.
 
-Open multiple files:~
+Opening multiple files:~
 
   <c-z>
     - Mark/unmark a file to be opened with <c-o>.
@@ -766,7 +767,7 @@ e)  Similarly, submit '/' or '\' to find and go to the project's root.
     might help speeding up the intial scan (see |g:ctrlp_user_command| for more
     details).
 
-    Note: e) and d) only work in file, directory and mixed modes.
+    Note: d) and e) only work in file, directory and mixed modes.
 
 f)  Type the name of a non-existent file and press <c-y> to create it. Mark a
     file with <c-z> to create the new file in the same directory as the marked
@@ -989,7 +990,6 @@ MISCELLANEOUS CONFIGS                             *ctrlp-miscellaneous-configs*
 
 * Using a |count| to invoke different commands using the same mapping:
 >
-  let g:ctrlp_map = '<leader>f'
   let g:ctrlp_cmd = 'exe "CtrlP".get(["", "Buffer", "MRU"], v:count)'
 <
 
