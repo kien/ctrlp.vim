@@ -229,7 +229,7 @@ fu! s:Open()
 	cal s:log(1)
 	cal s:getenv()
 	cal s:execextvar('enter')
-	sil! exe 'noa keepa' ( s:mwbottom ? 'bo' : 'to' ) '1new +setl\ nobl ControlP'
+	sil! exe 'keepa' ( s:mwbottom ? 'bo' : 'to' ) '1new ControlP'
 	cal s:buffunc(1)
 	let [s:bufnr, s:prompt, s:winw] = [bufnr('%'), ['', '', ''], winwidth(0)]
 	abc <buffer>
@@ -248,8 +248,8 @@ endf
 
 fu! s:Close()
 	cal s:buffunc(0)
-	try | noa bun!
-	cat | noa clo! | endt
+	try | bun!
+	cat | clo! | endt
 	cal s:unmarksigns()
 	for key in keys(s:glbs) | if exists('+'.key)
 		sil! exe 'let &'.key.' = s:glb_'.key
@@ -712,7 +712,7 @@ endf
 
 fu! s:PrtExit()
 	if !has('autocmd') | cal s:Close() | en
-	winc p
+	exe ( winnr('$') == 1 ? 'bw!' : 'winc p' )
 endf
 
 fu! s:PrtHistory(...)
@@ -1433,7 +1433,7 @@ fu! s:nosplit()
 endf
 
 fu! s:setupblank()
-	setl noswf nonu nowrap nolist nospell nocuc wfh
+	setl noswf nonu nobl nowrap nolist nospell nocuc wfh
 	setl fdc=0 fdl=99 tw=0 bt=nofile bh=unload
 	if v:version > 702
 		setl nornu noudf cc=0
@@ -1820,7 +1820,7 @@ fu! ctrlp#init(type, ...)
 	if exists('s:init') || s:iscmdwin() | retu | en
 	let [s:matches, s:init] = [1, 1]
 	cal ctrlp#reset()
-	cal s:Open()
+	noa cal s:Open()
 	cal s:SetWD(a:0 ? a:1 : '')
 	cal s:MapKeys()
 	cal ctrlp#syntax()
@@ -1833,7 +1833,7 @@ if has('autocmd')
 	aug CtrlPAug
 		au!
 		au BufEnter ControlP cal s:checkbuf()
-		au BufLeave ControlP cal s:Close()
+		au BufLeave ControlP noa cal s:Close()
 		au VimLeavePre * cal s:leavepre()
 	aug END
 en
