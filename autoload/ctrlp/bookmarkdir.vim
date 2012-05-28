@@ -49,7 +49,8 @@ fu! s:getbookmarks()
 endf
 
 fu! s:savebookmark(name, cwd)
-	let entries = filter(s:getbookmarks(), 's:parts(v:val)[1] != a:cwd')
+	let cwds = exists('+ssl') ? [tr(a:cwd, '\', '/'), tr(a:cwd, '/', '\')] : [a:cwd]
+	let entries = filter(s:getbookmarks(), 'index(cwds, s:parts(v:val)[1]) < 0')
 	cal s:writecache(insert(entries, a:name.'	'.a:cwd))
 endf
 
