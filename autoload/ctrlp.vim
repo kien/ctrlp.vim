@@ -1170,14 +1170,19 @@ fu! ctrlp#progress(enum, ...)
 endf
 " Paths {{{2
 fu! s:formatline(str)
-	let cond = s:ispath && ( s:winw - 4 ) < s:strwidth(a:str)
-	retu '> '.( cond ? s:pathshorten(a:str) : a:str )
+	let newstr = ( exists("*MyPathFilter") ? MyPathFilter(a:str) : a:str )
+	let cond = s:ispath && ( s:winw - 4 ) < s:strwidth(newstr)
+	retu '> '. ( cond ? s:pathshorten(newstr) : newstr )
 endf
 
 fu! s:pathshorten(str)
-  retu ( s:spmethod == 0
-        \ ? pathshorten(a:str)
-        \ : '...' . a:str[-(s:winw - 7):] )
+	if s:spmethod
+		retu ( exists("*MyPathShorten") ?
+			\ MyPathShorten(a:str,s:winw) :
+			\ '...' . a:str[-(s:winw - 7):] )
+	else
+		retu pathshorten(a:str)
+	endif
 endf
 
 fu! s:dircompl(be, sd)
