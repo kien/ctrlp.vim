@@ -70,6 +70,7 @@ let [s:pref, s:opts, s:new_opts] = ['g:ctrlp_', {
 	\ 'regexp_search':         ['s:regexp', 0],
 	\ 'root_markers':          ['s:rmarkers', []],
 	\ 'split_window':          ['s:splitwin', 0],
+	\ 'shorten_path_method':   ['s:spmethod', 0],
 	\ 'status_func':           ['s:status', {}],
 	\ 'use_caching':           ['s:caching', 1],
 	\ 'use_migemo':            ['s:migemo', 0],
@@ -1142,7 +1143,13 @@ endf
 " Paths {{{2
 fu! s:formatline(str)
 	let cond = s:ispath && ( s:winw - 4 ) < s:strwidth(a:str)
-	retu '> '.( cond ? pathshorten(a:str) : a:str )
+	retu '> '.( cond ? s:pathshorten(a:str) : a:str )
+endf
+
+fu! s:pathshorten(str)
+  retu ( s:spmethod == 0
+        \ ? pathshorten(a:str)
+        \ : '...' . a:str[-(s:winw - 7):] )
 endf
 
 fu! s:dircompl(be, sd)
