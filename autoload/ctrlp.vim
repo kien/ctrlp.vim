@@ -55,6 +55,7 @@ let [s:pref, s:opts, s:new_opts] = ['g:ctrlp_', {
 	\ 'buffer_func':           ['s:buffunc', {}],
 	\ 'by_filename':           ['s:byfname', 0],
 	\ 'custom_ignore':         ['s:usrign', s:ignore()],
+	\ 'custom_formatline':     ['s:usrfrmtline', 's:formatline'],
 	\ 'default_input':         ['s:deftxt', 0],
 	\ 'dont_split':            ['s:nosplit', 'netrw'],
 	\ 'dotfiles':              ['s:dotfiles', 1],
@@ -463,7 +464,8 @@ fu! s:Render(lines, pat)
 	en
 	if s:mwreverse | cal reverse(lines) | en
 	let s:lines = copy(lines)
-	cal map(lines, 's:formatline(v:val)')
+	let FormatFunc = function(s:usrfrmtline)
+	cal map(lines, 'FormatFunc(v:val, s:ispath, s:winw)')
 	cal setline(1, lines)
 	setl noma cul
 	exe 'keepj norm!' ( s:mwreverse ? 'G' : 'gg' ).'1|'
@@ -1168,9 +1170,9 @@ fu! ctrlp#progress(enum, ...)
 	redraws
 endf
 " Paths {{{2
-fu! s:formatline(str)
-	let cond = s:ispath && ( s:winw - 4 ) < s:strwidth(a:str)
-	retu '> '.( cond ? pathshorten(a:str) : a:str )
+fu! s:formatline(str, ispath, winw)
+	let cond = a:ispath && ( a:winw - 4 ) < s:strwidth(a:str)
+	retu '> '. ( cond ? pathshorten(a:str) : a:str )
 endf
 
 fu! s:dircompl(be, sd)
