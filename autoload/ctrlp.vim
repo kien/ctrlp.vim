@@ -1170,7 +1170,12 @@ endf
 " Paths {{{2
 fu! s:formatline(str)
 	let cond = s:ispath && ( s:winw - 4 ) < s:strwidth(a:str)
-	retu '> '.( cond ? pathshorten(a:str) : a:str )
+	retu '> '.( cond ? s:pathshorten(a:str) : a:str )
+endf
+
+fu! s:pathshorten(str)
+	retu matchstr(a:str, '^.\{9}').'...'
+		\ .matchstr(a:str, '.\{'.( s:winw - 16 ).'}$')
 endf
 
 fu! s:dircompl(be, sd)
