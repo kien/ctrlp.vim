@@ -868,9 +868,10 @@ fu! ctrlp#acceptfile(mode, line, ...)
 endf
 
 fu! s:SpecInputs(str)
-	if a:str =~ '^\.\.\.*$' && s:spi
+	if a:str =~ '\v^(\.\.([\/]\.\.)*[\/]?[.\/]*)$' && s:spi
 		let cwd = s:dyncwd
-		cal ctrlp#setdir('../'.repeat('../', strlen(a:str) - 2))
+		cal ctrlp#setdir(a:str =~ '^\.\.\.*$' ?
+			\ '../'.repeat('../', strlen(a:str) - 2) : a:str)
 		if cwd != s:dyncwd | cal ctrlp#setlines() | en
 		cal s:PrtClear()
 		retu 1
@@ -896,7 +897,7 @@ fu! s:AcceptSelection(mode)
 	" Get the selected line
 	let line = !empty(s:lines) ? s:lines[line('.') - 1] : ''
 	if a:mode != 'e' && !s:itemtype && line == ''
-		\ && str !~ '\v^(\.\.\.*|/|\\|\?|\@.+)$'
+		\ && str !~ '\v^(\.\.([\/]\.\.)*[\/]?[.\/]*|/|\\|\?|\@.+)$'
 		cal s:CreateNewFile(a:mode) | retu
 	en
 	if empty(line) | retu | en
@@ -1495,7 +1496,8 @@ fu! s:tail()
 endf
 
 fu! s:sanstail(str)
-	let str = s:spi ? substitute(a:str, '^\(@.*$\|\\\\\ze@\)', '', 'g') : a:str
+	let str = s:spi ?
+		\ substitute(a:str, '^\(@.*$\|\\\\\ze@\|\.\.\zs[.\/]\+$\)', '', 'g') : a:str
 	let [str, pat] = [substitute(str, '\\\\', '\', 'g'), '\([^:]\|\\:\)*$']
 	unl! s:optail
 	if match(str, '\\\@<!:'.pat) >= 0
