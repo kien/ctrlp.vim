@@ -286,7 +286,7 @@ If non-zero, this will enable opening multiple files with <c-z> and <c-o>: >
   let g:ctrlp_open_multiple_files = 'v'
 <
 Example: >
-  let g:ctrlp_open_multiple_files = '2vr'
+  let g:ctrlp_open_multiple_files = '2vjr'
 <
 For the number:
   - If given, it'll be used as the maximum number of windows or tabs to create
@@ -297,6 +297,7 @@ For the letters:
   h - each file in a new horizontal split.
   v - each file in a new vertical split.
   i - all files as hidden buffers.
+  j - after opening, jump to the first opened tab or window.
   Reuse the current window:
   tr,
   hr,
@@ -1025,6 +1026,7 @@ Special thanks:~
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
 
+    + New value for |g:ctrlp_open_multiple_files|: 'j'.
     + Allow using <c-t>, <c-x>, <c-v> to open files marked by <c-z>.
 
 Before 2012/05/15~

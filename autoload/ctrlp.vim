@@ -974,10 +974,10 @@ endf
 fu! s:OpenMulti(...)
 	if !exists('s:marked') || s:opmul == '0' || !s:ispath | retu -1 | en
 	" Get the options
-	let opts = matchlist(s:opmul, '\v^(\d+)=(\w)=(\w)=$')
+	let [nr, md] = [matchstr(s:opmul, '\d\+'), matchstr(s:opmul, '[thvi]')]
+	let [ur, jf] = [matchstr(s:opmul, 'r') == 'r', matchstr(s:opmul, 'j') == 'j']
+	let md = a:0 ? a:1 : ( md == '' ? 'v' : md )
 	let nopt = exists('g:ctrlp_open_multiple_files')
-	let [nr, md, ucr] = [get(opts, 1, nopt ? '' : '1'),
-		\ a:0 ? a:1 : get(opts, 2, 'v'), get(opts, 3, '')]
 	if s:argmap && !a:0
 		let md = s:argmaps(md)
 		if md == 'cancel' | retu | en
@@ -994,7 +994,7 @@ fu! s:OpenMulti(...)
 	let useb = bufnr > 0 && buflisted(bufnr) && emptytail
 	" Move to a replaceable window
 	let ncmd = ( useb ? ['b', 'bo vert sb'] : ['e', 'bo vne'] )
-		\ + ( ucr == 'r' ? [] : ['ignruw'] )
+		\ + ( ur ? [] : ['ignruw'] )
 	let fst = call('ctrlp#normcmd', ncmd)
 	" Check if the current window has a replaceable buffer
 	let repabl = empty(bufname('%')) && empty(&l:ft)
@@ -1009,8 +1009,7 @@ fu! s:OpenMulti(...)
 		let useb = bufnr > 0 && buflisted(bufnr) && emptytail
 		let snd = md != '' && has_key(cmds, md) ?
 			\ ( useb ? cmds[md][0] : cmds[md][1] ) : ( useb ? 'vert sb' : 'vne' )
-		let cmd = ic == 1 && ( !( ucr != 'r' && fst =~ '^[eb]$' ) || repabl )
-			\ ? fst : snd
+		let cmd = ic == 1 && ( !( !ur && fst =~ '^[eb]$' ) || repabl ) ? fst : snd
 		let conds = [( nr != '' && nr > 1 && nr < ic ) || ( nr == '' && ic > 1 ),
 			\ nr != '' && nr < ic]
 		if conds[nopt]
@@ -1021,8 +1020,17 @@ fu! s:OpenMulti(...)
 			en | en
 		el
 			cal s:openfile(cmd, useb ? bufnr : va, tail) | let ic += 1
+			if jf | if ic == 2
+				let crpos = [tabpagenr(), winnr()]
+			el
+				let crpos[0] += tabpagenr() == crpos[0]
+				let crpos[1] += winnr() == crpos[1]
+			en | en
 		en
 	endfo
+	if jf && exists('crpos') && ic > 2
+		exe ( md == 't' ? 'tabn '.crpos[0] : crpos[1].'winc w' )
+	en
 	let &swb = swb
 endf
 " ** Helper functions {{{1
