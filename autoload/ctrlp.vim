@@ -991,9 +991,12 @@ fu! s:OpenMulti()
 	let [tail, fnesc] = [s:tail(), exists('*fnameescape') && v:version > 701]
 	let [emptytail, bufnr] = [empty(tail), bufnr('^'.mkd[0].'$')]
 	let useb = bufnr > 0 && buflisted(bufnr) && emptytail
-	let fst = call('ctrlp#normcmd', useb ? ['b', 'bo vert sb'] : ['e'])
+	" Move to a replaceable window
+	let ncmd = ( useb ? ['b', 'bo vert sb'] : ['e', 'bo vne'] )
+		\ + ( ucr == 'r' ? [] : ['ignruw'] )
+	let fst = call('ctrlp#normcmd', ncmd)
 	" Check if the current window has a replaceable buffer
-	let repabl = ( empty(bufname('%')) && empty(&l:ft) ) || s:nosplit()
+	let repabl = empty(bufname('%')) && empty(&l:ft)
 	" Commands for the rest of the files
 	let [ic, cmds] = [1, { 'v': ['vert sb', 'vne'], 'h': ['sb', 'new'],
 		\ 't': ['tab sb', 'tabe'] }]
@@ -1005,7 +1008,8 @@ fu! s:OpenMulti()
 		let useb = bufnr > 0 && buflisted(bufnr) && emptytail
 		let snd = md != '' && has_key(cmds, md) ?
 			\ ( useb ? cmds[md][0] : cmds[md][1] ) : ( useb ? 'vert sb' : 'vne' )
-		let cmd = ic == 1 && ( ucr == 'r' || repabl ) ? fst : snd
+		let cmd = ic == 1 && ( !( ucr != 'r' && fst =~ '^[eb]$' ) || repabl )
+			\ ? fst : snd
 		let conds = [( nr != '' && nr > 1 && nr < ic ) || ( nr == '' && ic > 1 ),
 			\ nr != '' && nr < ic]
 		if conds[nopt]
@@ -1415,7 +1419,7 @@ fu! s:buftab(bufnr, md)
 endf
 
 fu! ctrlp#normcmd(cmd, ...)
-	if s:nosplit() | retu a:cmd | en
+	if a:0 < 2 && s:nosplit() | retu a:cmd | en
 	let norwins = filter(range(1, winnr('$')),
 		\ 'empty(getbufvar(winbufnr(v:val), "&bt"))')
 	for each in norwins
