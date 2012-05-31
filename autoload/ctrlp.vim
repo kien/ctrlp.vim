@@ -892,6 +892,7 @@ fu! s:SpecInputs(str)
 endf
 
 fu! s:AcceptSelection(mode)
+	if a:mode != 'e' && s:OpenMulti(a:mode) != -1 | retu | en
 	let str = join(s:prompt, '')
 	if a:mode == 'e' | if s:SpecInputs(str) | retu | en | en
 	" Get the selected line
@@ -970,14 +971,14 @@ fu! s:MarkToOpen()
 	sil! cal ctrlp#statusline()
 endf
 
-fu! s:OpenMulti()
-	if !exists('s:marked') || s:opmul == '0' || !s:ispath | retu | en
+fu! s:OpenMulti(...)
+	if !exists('s:marked') || s:opmul == '0' || !s:ispath | retu -1 | en
 	" Get the options
 	let opts = matchlist(s:opmul, '\v^(\d+)=(\w)=(\w)=$')
-	if opts == [] | retu | en
-	let [nr, md, ucr] = opts[1:3]
 	let nopt = exists('g:ctrlp_open_multiple_files')
-	if s:argmap
+	let [nr, md, ucr] = [get(opts, 1, nopt ? '' : '1'),
+		\ a:0 ? a:1 : get(opts, 2, 'v'), get(opts, 3, '')]
+	if s:argmap && !a:0
 		let md = s:argmaps(md)
 		if md == 'cancel' | retu | en
 		let nr = nr == '0' ? ( nopt ? '' : '1' ) : nr
