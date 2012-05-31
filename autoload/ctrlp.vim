@@ -979,8 +979,13 @@ fu! s:OpenMulti(...)
 	let md = a:0 ? a:1 : ( md == '' ? 'v' : md )
 	let nopt = exists('g:ctrlp_open_multiple_files')
 	if s:argmap && !a:0
-		let md = s:argmaps(md)
-		if md == 'cancel' | retu | en
+		let md = s:argmaps(md, 0)
+		if md == 'c'
+			cal s:unmarksigns()
+			unl! s:marked
+			cal s:BuildPrompt(0)
+		en
+		if md =~ '\v^c(ancel)?$' | retu | en
 		let nr = nr == '0' ? ( nopt ? '' : '1' ) : nr
 	en
 	let mkd = values(s:marked)
@@ -1520,11 +1525,13 @@ fu! s:sanstail(str)
 	retu substitute(str, '\\\ze:', '', 'g')
 endf
 
-fu! s:argmaps(md, ...)
-	let roh = a:0 ? ['/[r]eplace', 'r'] : ['/h[i]dden', 'i']
-	let str = '[t]ab/[v]ertical/[h]orizontal'.roh[0].'? '
-	let args = [a:md] + ( a:0 ? [a:1] : [] )
-	retu s:choices(str, ['t', 'v', 'h', roh[1]], 's:argmaps', args)
+fu! s:argmaps(md, i)
+	let roh = [
+		\ ['OpenMulti', '/h[i]dden/[c]lear', ['i', 'c']],
+		\ ['CreateNewFile', '/[r]eplace', ['r']],
+		\ ]
+	let str = roh[a:i][0].': [t]ab/[v]ertical/[h]orizontal'.roh[a:i][1].'? '
+	retu s:choices(str, ['t', 'v', 'h'] + roh[a:i][2], 's:argmaps', [a:md, a:i])
 endf
 
 fu! s:insertstr()
