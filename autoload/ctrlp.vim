@@ -504,7 +504,7 @@ fu! s:BuildPrompt(upd, ...)
 	let str = join(prt, '')
 	let lazy = empty(str) || exists('s:force') || !has('autocmd') ? 0 : s:lazy
 	if a:upd && !lazy && ( s:matches || s:regexp
-		\ || match(str, '\(\\\(<\|>\)\|[*|]\)\|\(\\\:\([^:]\|\\:\)*$\)') >= 0 )
+		\ || str =~ '\(\\\(<\|>\)\|[*|]\)\|\(\\\:\([^:]\|\\:\)*$\)' )
 		sil! cal s:Update(str)
 	en
 	sil! cal ctrlp#statusline()
@@ -570,10 +570,10 @@ endf
 fu! s:PrtDeleteWord()
 	unl! s:hstgot
 	let [str, s:matches] = [s:prompt[0], 1]
-	let str = match(str, '\W\w\+$') >= 0 ? matchstr(str, '^.\+\W\ze\w\+$')
-		\ : match(str, '\w\W\+$') >= 0 ? matchstr(str, '^.\+\w\ze\W\+$')
-		\ : match(str, '\s\+$') >= 0 ? matchstr(str, '^.*[^ \t]\+\ze\s\+$')
-		\ : match(str, ' ') <= 0 ? '' : str
+	let str = str =~ '\W\w\+$' ? matchstr(str, '^.\+\W\ze\w\+$')
+		\ : str =~ '\w\W\+$' ? matchstr(str, '^.\+\w\ze\W\+$')
+		\ : str =~ '\s\+$' ? matchstr(str, '^.*\S\ze\s\+$')
+		\ : str =~ '\v^(\S+|\s+)$' ? '' : str
 	let s:prompt[0] = str
 	cal s:BuildPrompt(1)
 endf
@@ -753,7 +753,7 @@ endf
 
 fu! s:MapSpecs(...)
 	" Correct arrow keys in terminal
-	if ( has('termresponse') && match(v:termresponse, "\<ESC>") >= 0 )
+	if ( has('termresponse') && v:termresponse =~ "\<ESC>" )
 		\ || &term =~? '\vxterm|<k?vt|gnome|screen|linux'
 		for each in ['\A <up>','\B <down>','\C <right>','\D <left>']
 			exe s:lcmap.' <esc>['.each
@@ -817,7 +817,7 @@ fu! s:SetWD(...)
 		let pathmode = a:1
 	en | en
 	if a:0 < 2
-		if match(s:crfile, '\v^<.+>://') >= 0 || !pathmode | retu | en
+		if s:crfile =~ '^.\+://' || !pathmode | retu | en
 		if exists('+acd') | let [s:glb_acd, &acd] = [&acd, 0] | en
 		cal ctrlp#setdir(s:crfpath)
 	en
@@ -1184,7 +1184,7 @@ fu! s:dircompl(be, sd)
 	let [be, sd] = a:be == '' ? [s:dyncwd, a:sd] : [a:be, a:be.s:lash(a:be).a:sd]
 	let dirs = ctrlp#rmbasedir(split(globpath(be, a:sd.'*/'), "\n"))
 	cal filter(dirs, '!match(v:val, escape(sd, ''~$.\''))'
-		\ . ' && match(v:val, ''\v(^|[\/])\.{1,2}[\/]$'') < 0')
+		\ . ' && v:val !~ ''\v(^|[\/])\.{1,2}[\/]$''')
 	retu dirs
 endf
 
@@ -1208,7 +1208,7 @@ fu! s:headntail(str)
 endf
 
 fu! s:lash(...)
-	retu match(a:0 ? a:1 : s:dyncwd, '[\/]$') < 0 ? s:lash : ''
+	retu ( a:0 ? a:1 : s:dyncwd ) !~ '[\/]$' ? s:lash : ''
 endf
 
 fu! s:ispathitem()
@@ -1221,7 +1221,7 @@ fu! ctrlp#dirnfile(entries)
 		let etype = getftype(each)
 		if s:igntype >= 0 && s:usrign(each, etype) | con | en
 		if etype == 'dir'
-			if s:dotfiles | if match(each, '[\/]\.\{1,2}$') < 0
+			if s:dotfiles | if each !~ '[\/]\.\{1,2}$'
 				cal add(items[0], each)
 			en | el
 				cal add(items[0], each)
@@ -1254,7 +1254,7 @@ endf
 
 fu! ctrlp#rmbasedir(items)
 	if a:items != [] && !stridx(a:items[0], s:dyncwd)
-		let idx = strlen(s:dyncwd) + ( match(s:dyncwd, '[\/]$') < 0 )
+		let idx = strlen(s:dyncwd) + ( s:dyncwd !~ '[\/]$' )
 		retu map(a:items, 'strpart(v:val, idx)')
 	en
 	retu a:items
@@ -1262,7 +1262,7 @@ endf
 
 fu! s:getparent(item)
 	let parent = substitute(a:item, '[\/][^\/]\+[\/:]\?$', '', '')
-	if parent == '' || match(parent, '[\/]') < 0
+	if parent == '' || parent !~ '[\/]'
 		let parent .= s:lash
 	en
 	retu parent
@@ -1489,7 +1489,7 @@ endf
 
 fu! s:tail()
 	if exists('s:optail') && !empty('s:optail')
-		let tailpref = match(s:optail, '^\s*+') < 0 ? ' +' : ' '
+		let tailpref = s:optail !~ '^\s*+' ? ' +' : ' '
 		retu tailpref.s:optail
 	en
 	retu ''
@@ -1500,7 +1500,7 @@ fu! s:sanstail(str)
 		\ substitute(a:str, '^\(@.*$\|\\\\\ze@\|\.\.\zs[.\/]\+$\)', '', 'g') : a:str
 	let [str, pat] = [substitute(str, '\\\\', '\', 'g'), '\([^:]\|\\:\)*$']
 	unl! s:optail
-	if match(str, '\\\@<!:'.pat) >= 0
+	if str =~ '\\\@<!:'.pat
 		let s:optail = matchstr(str, '\\\@<!:\zs'.pat)
 		let str = substitute(str, '\\\@<!:'.pat, '', '')
 	en
@@ -1604,7 +1604,7 @@ endf
 
 fu! s:regexfilter(str)
 	let str = a:str
-	for key in keys(s:fpats) | if match(str, key) >= 0
+	for key in keys(s:fpats) | if str =~ key
 		let str = substitute(str, s:fpats[key], '', 'g')
 	en | endfo
 	retu str
