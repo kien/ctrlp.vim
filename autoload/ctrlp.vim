@@ -754,7 +754,7 @@ endf
 fu! s:MapSpecs(...)
 	" Correct arrow keys in terminal
 	if ( has('termresponse') && v:termresponse =~ "\<ESC>" )
-		\ || &term =~? '\vxterm|<k?vt|gnome|screen|linux'
+		\ || &term =~? '\vxterm|<k?vt|gnome|screen|linux|ansi'
 		for each in ['\A <up>','\B <down>','\C <right>','\D <left>']
 			exe s:lcmap.' <esc>['.each
 		endfo
