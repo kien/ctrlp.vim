@@ -394,14 +394,49 @@ fu! s:MatchIt(items, pat, limit, exc)
 	retu lines
 endf
 
-fu! s:MatchedItems(items, pat, limit)
+fu! s:MatchItPy(lines,pat,input,limit)
+python << EOF
+import vim
+import re
+import fuzzycomt 
+lines = vim.eval('a:lines')
+pat = vim.eval('a:pat')
+searchinp = vim.eval('a:input')
+limit = vim.eval('a:limit')
+
+if searchinp == "":
+  matchlist = lines[0:10]
+else:
+  matchlist = fuzzycomt.match(lines,searchinp)
+
+#newlist = list(sorted(matchlist, key=lambda k: k['value']))
+#newlist.reverse()
+#linelist = []
+#count = 0
+#if searchinp == "":
+#	vim.command('let array = %s' % matchlist)
+#else:
+linelist = []
+for line in matchlist:
+#TODO rework this. Silly way to replace \\ in path. Better to do this in C module, but python screws it later
+  if type(line) is str:
+    linelist.append(line.replace('\\','/'))
+  else:
+  	linelist.append(line['line'].replace('\\','/'))
+vim.command('let array = %s' % linelist)
+EOF
+retu array
+endf
+
+fu! s:MatchedItems(items, pat, limit,str)
+	let str = a:str
 	let exc = exists('s:crfilerel') ? s:crfilerel : ''
 	let items = s:narrowable() ? s:matched + s:mdata[3] : a:items
 	if s:matcher != {}
 		let argms = [items, a:pat, a:limit, s:mmode(), s:ispath, exc, s:regexp]
 		let lines = call(s:matcher['match'], argms)
 	el
-		let lines = s:MatchIt(items, a:pat, a:limit, exc)
+		let lines = s:MatchItPy(items, a:pat, str,a:limit)
 	en
 	let s:matches = len(lines)
 	retu lines
@@ -440,7 +475,7 @@ fu! s:SplitPattern(str)
 	retu escape(pat, '~')
 endf
 " * BuildPrompt() {{{1
-fu! s:Render(lines, pat)
+fu! s:Render(lines, pat,str)
 	let [&ma, lines, s:height] = [1, a:lines, min([len(a:lines), s:winh])]
 	let pat = s:byfname ? split(a:pat, '^[^;]\+\zs;', 1)[0] : a:pat
 	" Setup the match window
@@ -474,7 +509,7 @@ fu! s:Render(lines, pat)
 	en
 	" Highlighting
 	if s:dohighlight()
-		cal s:highlight(pat, s:mathi[1])
+		cal s:highlight(pat, s:mathi[1],a:str)
 	en
 endf
 
@@ -487,8 +522,8 @@ fu! s:Update(str)
 	if str == oldstr && !empty(str) && !exists('s:force') | retu | en
 	let pat = s:matcher == {} ? s:SplitPattern(str) : str
 	let lines = s:nolim == 1 && empty(str) ? copy(g:ctrlp_lines)
-		\ : s:MatchedItems(g:ctrlp_lines, pat, s:winh)
-	cal s:Render(lines, pat)
+		\ : s:MatchedItems(g:ctrlp_lines, pat, s:winh,str)
+	cal s:Render(lines, pat,a:str)
 endf
 
 fu! s:ForceUpdate()
@@ -1316,8 +1351,9 @@ fu! ctrlp#syntax()
 	en
 endf
 
-fu! s:highlight(pat, grp)
+fu! s:highlight(pat, grp,str)
 	if s:matcher != {} | retu | en
+	let strinp = a:str
 	cal clearmatches()
 	if !empty(a:pat) && s:ispath
 		let pat = s:regexp ? substitute(a:pat, '\\\@<!\^', '^> \\zs', 'g') : a:pat
@@ -1325,7 +1361,10 @@ fu! s:highlight(pat, grp)
 			let pat = substitute(pat, '\[\^\(.\{-}\)\]\\{-}', '[^\\/\1]\\{-}', 'g')
 			let pat = substitute(pat, '\$\@<!$', '\\ze[^\\/]*$', 'g')
 		en
-		cal matchadd(a:grp, '\c'.pat)
+"		cal matchadd(a:grp, '\c'.pat)
+		for i in range(len(strinp))
+			cal matchadd(a:grp, '\M'.strinp[i])
+		endfor
 		cal matchadd('CtrlPLinePre', '^>')
 	en
 endf
