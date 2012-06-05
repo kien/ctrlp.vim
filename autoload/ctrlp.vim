@@ -394,37 +394,33 @@ fu! s:MatchIt(items, pat, limit, exc)
 	retu lines
 endf
 
-fu! s:MatchItPy(lines,pat,input,limit)
+fu! s:MatchItPy(lines,input,limit,mmode, ispath, crfile, regex)
+  "TODO BUG: If using external matcher: after deleting search string in input it keeps remembering it
+  if a:input == ''
+    let array = a:lines[0:a:limit]
+  el
 python << EOF
 import vim
 import re
 import fuzzycomt 
 lines = vim.eval('a:lines')
-pat = vim.eval('a:pat')
 searchinp = vim.eval('a:input')
 limit = vim.eval('a:limit')
+mmode = vim.eval('a:mmode')
+ispath = vim.eval('a:ispath')
+crfile = vim.eval('a:crfile')
+regex = vim.eval('a:regex')
 
-if searchinp == "":
-  matchlist = lines[0:10]
-else:
-  matchlist = fuzzycomt.match(lines,searchinp)
+matchlist = fuzzycomt.match(lines,searchinp)
 
-#newlist = list(sorted(matchlist, key=lambda k: k['value']))
-#newlist.reverse()
-#linelist = []
-#count = 0
-#if searchinp == "":
-#	vim.command('let array = %s' % matchlist)
-#else:
 linelist = []
 for line in matchlist:
 #TODO rework this. Silly way to replace \\ in path. Better to do this in C module, but python screws it later
-  if type(line) is str:
-    linelist.append(line.replace('\\','/'))
-  else:
-  	linelist.append(line['line'].replace('\\','/'))
+#TODO rework go get single \ . This seems complicated...
+  linelist.append(line['line'].replace('\\','/'))
 vim.command('let array = %s' % linelist)
 EOF
+en
 retu array
 endf
 
@@ -436,7 +432,7 @@ fu! s:MatchedItems(items, pat, limit,str)
 		let argms = [items, a:pat, a:limit, s:mmode(), s:ispath, exc, s:regexp]
 		let lines = call(s:matcher['match'], argms)
 	el
-		let lines = s:MatchItPy(items, a:pat, str,a:limit)
+		let lines = s:MatchIt(items, a:pat, str,a:limit)
 	en
 	let s:matches = len(lines)
 	retu lines
