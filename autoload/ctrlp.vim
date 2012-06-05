@@ -822,7 +822,7 @@ fu! s:SetWD(...)
 		cal ctrlp#setdir(s:crfpath)
 	en
 	if pathmode == 1 | retu | en
-	let markers = ['root.dir', '.git/', '.hg/', '.svn/', '.bzr/', '_darcs/']
+	let markers = ['root.dir', '.git', '.hg/', '.svn/', '.bzr/', '_darcs/']
 	if type(s:rmarkers) == 3 && !empty(s:rmarkers)
 		cal extend(markers, s:rmarkers, 0)
 	en
