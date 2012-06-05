@@ -1354,8 +1354,15 @@ fu! ctrlp#syntax()
 endf
 
 fu! s:highlight(pat, grp,str)
-	if s:matcher != {} | retu | en
 	let strinp = a:str
+
+	if s:matcher != {}
+		for i in range(len(strinp))
+			cal matchadd(a:grp, '\M'.strinp[i])
+		endfor
+		cal matchadd('CtrlPLinePre', '^>')
+		retu
+	en
 	cal clearmatches()
 	if !empty(a:pat) && s:ispath
 		let pat = s:regexp ? substitute(a:pat, '\\\@<!\^', '^> \\zs', 'g') : a:pat
@@ -1363,10 +1370,7 @@ fu! s:highlight(pat, grp,str)
 			let pat = substitute(pat, '\[\^\(.\{-}\)\]\\{-}', '[^\\/\1]\\{-}', 'g')
 			let pat = substitute(pat, '\$\@<!$', '\\ze[^\\/]*$', 'g')
 		en
-"		cal matchadd(a:grp, '\c'.pat)
-		for i in range(len(strinp))
-			cal matchadd(a:grp, '\M'.strinp[i])
-		endfor
+		cal matchadd(a:grp, '\c'.pat)
 		cal matchadd('CtrlPLinePre', '^>')
 	en
 endf
