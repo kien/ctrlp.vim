@@ -491,11 +491,13 @@ fu! s:Render(lines, pat,str)
 	en
 	let s:matched = copy(lines)
 	" Sorting
-	if !s:nosort()
-		let s:compat = pat
-		cal sort(lines, 's:mixedsort')
-		unl s:compat
-	en
+	" TODO need to disable it because it breaks C extension sorting, by trying
+	" to sort what already sorted
+"	if !s:nosort()
+"		let s:compat = pat
+"		cal sort(lines, 's:mixedsort')
+"		unl s:compat
+"	en
 	if s:mwreverse | cal reverse(lines) | en
 	let s:lines = copy(lines)
 	cal map(lines, 's:formatline(v:val)')
