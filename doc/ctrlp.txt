@@ -1024,6 +1024,7 @@ Special thanks:~
     * Tacahiroy <github.com/tacahiroy>
     * Luca Pette <github.com/lucapette>
     * Seth Fowler <github.com/sfowler>
+    * Lowe Thiderman <github.com/daethorian>
 
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
