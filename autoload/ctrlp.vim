@@ -822,9 +822,10 @@ fu! s:SetWD(...)
 		cal ctrlp#setdir(s:crfpath)
 	en
 	if pathmode == 1 | retu | en
-	let markers = ['root.dir', '.git', '.hg/', '.svn/', '.bzr/', '_darcs/']
+	let markers = ['.git', '.hg', '.svn', '.bzr', '_darcs']
 	if type(s:rmarkers) == 3 && !empty(s:rmarkers)
 		cal extend(markers, s:rmarkers, 0)
+		let markers = reverse(filter(reverse(markers), 'count(markers, v:val) == 1'))
 	en
 	for marker in markers
 		cal s:findroot(s:dyncwd, marker, 0, 0)
