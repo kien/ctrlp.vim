@@ -1119,7 +1119,8 @@ fu! s:mixedsort(...)
 			if !s:itemtype | let ms += [s:comparent(a:1, a:2)] | en
 		en
 		if s:itemtype =~ '^[12]$'
-			let ms += [s:compmref(a:1, a:2)] | let cln = 0
+			let ms += [s:compmref(a:1, a:2)]
+			let cln = cml ? cln : 0
 		en
 		let ms += [cml, 0, 0, 0]
 		let mp = call('s:multipliers', ms[:3])
