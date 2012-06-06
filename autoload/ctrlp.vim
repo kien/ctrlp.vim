@@ -486,6 +486,7 @@ fu! s:Render(lines, pat,str)
 	en
 	let s:matched = copy(lines)
 	" Sorting
+	" TODO need to introduce global option here
 	" TODO need to disable it because it breaks C extension sorting, by trying
 	" to sort what already sorted
 "	if !s:nosort()
