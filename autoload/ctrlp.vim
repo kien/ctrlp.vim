@@ -395,7 +395,6 @@ fu! s:MatchIt(items, pat, limit, exc)
 endf
 
 fu! s:MatchItPy(lines,input,limit,mmode, ispath, crfile, regex)
-  "TODO BUG: If using external matcher: after deleting search string in input it keeps remembering it
   if a:input == ''
     let array = a:lines[0:a:limit]
   el
@@ -1353,6 +1352,7 @@ fu! s:highlight(pat, grp,str)
 	let strinp = a:str
 
 	if s:matcher != {}
+	  cal clearmatches()
 		for i in range(len(strinp))
 			cal matchadd(a:grp, '\M'.strinp[i])
 		endfor
