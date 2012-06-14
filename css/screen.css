@@ -125,10 +125,6 @@ header {
 .menu .issues {
 	float:right;
 }
-.menu .download {
-	float:right;
-	display:none;
-}
 .menu li a {
 	float:left;
 	padding:0 10px;
@@ -300,73 +296,6 @@ footer {
 footer small {
 	float:right;
 }
-/* ==========================================================={
-	Download button:
-}=========================================================== */
-a.download {
-	width:180px;
-	position:absolute;
-	top:-79px;
-	right:0;
-	background:#fff;
-	background-image:-webkit-gradient(linear, left top, left bottom, from(#ECECEC), to(#F4F4F4));
-	background:-webkit-linear-gradient(90deg, #ECECEC, #F4F4F4);
-	background:-moz-linear-gradient(90deg, #ECECEC, #F4F4F4);
-	background:-o-linear-gradient(90deg, #ECECEC, #F4F4F4);
-	background:-ms-linear-gradient(90deg, #ECECEC, #F4F4F4);
-	background:linear-gradient(90deg, #ECECEC, #F4F4F4);
-	border:1px solid #D4D4D4;
-	border-radius:5px 5px 5px 5px;
-	box-shadow:0 1px 0 #151515;
-	color:#666;
-	font-size:15px;
-	font-weight:bold;
-	line-height:15px;
-	padding:12px 0 10px 16px;
-	text-shadow:1px 1px 0 rgba(255, 255, 255, 0.7);
-}
-a.noicon {
-	width:160px;
-}
-a.download:hover,
-a.download:active {
-	background:#5E9AE2;
-	background-image:-webkit-gradient(linear, left top, left bottom, from(#3570B8), to(#5E9AE2));
-	background:-webkit-linear-gradient(90deg, #3570B8, #5E9AE2);
-	background:-moz-linear-gradient(90deg, #3570B8, #5E9AE2);
-	background:-o-linear-gradient(90deg, #3570B8, #5E9AE2);
-	background:-ms-linear-gradient(90deg, #3570B8, #5E9AE2);
-	background:linear-gradient(90deg, #3570B8, #5E9AE2);
-	border:1px solid #2E63A5;
-	color:#FFF;
-	text-decoration:none;
-	text-shadow:0 -1px 0 #2E63A5;
-}
-a.download:active {
-	background:#336FB7;
-	background-image:-webkit-gradient(linear, left top, left bottom, from(#558BCB), to(#336FB7));
-	background:-webkit-linear-gradient(90deg, #558BCB, #336FB7);
-	background:-moz-linear-gradient(90deg, #558BCB, #336FB7);
-	background:-o-linear-gradient(90deg, #558BCB, #336FB7);
-	background:-ms-linear-gradient(90deg, #558BCB, #336FB7);
-	background:linear-gradient(90deg, #558BCB, #336FB7);
-}
-a.download .icon {
-	background:url(../images/download.png) no-repeat 0 52%;
-	line-height:15px;
-	margin:0 4px 0 0;
-	padding:0 0 0 20px;
-}
-* html a.download .icon {
-	display:inline-block;
-}
-*:first-child+html a.download .icon {
-	display:inline-block;
-}
-a.download:hover .icon,
-a.download:active .icon {
-	background-position:-21px 52%;
-}
 /* ============================================================{
 	Media queries:
 }============================================================ */
@@ -388,12 +317,6 @@ a.download:active .icon {
 	}
 	.forkme {
 		display:none;
-	}
-	a.download {
-		display:none;
-	}
-	.menu .download {
-		display:block;
 	}
 }
 @media all and (max-width:600px) {

@@ -3,7 +3,7 @@
 	<head>
 		<title>ctrlp.vim &divide; home</title>
 		<meta charset="utf-8">
-		<meta name="description" content="Full path fuzzy file, buffer, mru and tag finder for Vim.">
+		<meta name="description" content="Fuzzy file, buffer, mru, tag, ... finder for Vim">
 		<link href="css/screen.css" rel="stylesheet" media="all">
 		<!--[if lt IE 9]> <script src="js/html5.js"></script> <![endif]-->
 		<!--[if lte IE 6.0]> <script src="js/DD_belatedPNG_0.0.8a-min.js"></script>
@@ -11,119 +11,65 @@
 	</head>
 
 	<body>
+
 		<header>
 			<ul class="menu">
 				<li><a href="//github.com/kien/ctrlp.vim">Github</a></li>
 				<li><a href="//bitbucket.org/kien/ctrlp.vim">Bitbucket</a></li>
-				<li class="issues"><a href="//github.com/kien/ctrlp.vim/issues">Issue Tracker</a></li>
-				<li class="download"><a href="//github.com/kien/ctrlp.vim/zipball/master">Download</a></li>
+				<li class="issues"><a href="//github.com/kien/ctrlp.vim/issues?state=open">Issue Tracker</a></li>
 			</ul>
 			<h1>ctrlp.vim</h1>
 		</header>
 
 		<article>
-			<h2>Full path fuzzy file, buffer, mru and tag finder for Vim.</h2>
+			<h2>Fuzzy file, buffer, mru, tag, ... finder for Vim.</h2>
 			<ul class="special">
-				<li>Written in pure Vimscript for MacVim and Vim 7.0+.</li>
-				<li>Full support for Vim’s regexp as search pattern.</li>
+				<li>Written in pure Vimscript for MacVim, gVim and Vim 7.0+.</li>
+				<li>Full support for Vim's regexp as search patterns.</li>
 				<li>Built-in Most Recently Used (MRU) files monitoring and search.</li>
 				<li>Built-in root directory finder.</li>
 				<li>Open multiple files at once.</li>
 				<li>Create new files and directories.</li>
 				<li>Execute Ex commands on an opening file (jump to a line, a string or do anything).</li>
 				<li>Optional cross-sessions caching and history allow for fast initialization.</li>
-				<li>Mappings and usage conform to Vim’s conventions.</li>
+				<li>Mappings and usage conform to Vim's conventions.</li>
 			</ul>
 			<p class="note">
 				Screenshot: CtrlP in regex and full path mode with 3 files selected to open.<br>
 				<a href="images/ctrlp.png"><img src="images/ctrlp.png" alt="screenshot"></a>
 			</p>
-			<h3>Basic Usage:</h3>
-			<ul>
-				<li>Press <code>&lt;c-p&gt;</code> or run <code>:CtrlP</code> or <code>:CtrlP [starting-directory]</code> to invoke CtrlP.</li>
-				<li>Or run <code>:CtrlPBuffer</code> or <code>:CtrlPMRU</code> to start in find buffer or find MRU mode, respectively.</li>
-				<li>Or run <code>:CtrlPMixed</code> to search in Files, Buffers and MRU files at the same time.</li>
-				<li>Check <code>:help ctrlp-extensions</code> for commands provided by extensions.</li>
-			</ul>
-			<h6>Once CtrlP is open:</h6>
-			<ul>
-				<li>Press <code>&lt;c-f&gt;</code> and <code>&lt;c-b&gt;</code> to cycle between modes.</li>
-				<li>Press <code>&lt;c-d&gt;</code> to switch to filename search instead of full path.</li>
-				<li>Press <code>&lt;c-r&gt;</code> to switch to regexp mode.</li>
-				<li>Press <code>&lt;F5&gt;</code> to purge the cache for the current directory and get new files.</li>
-				<li>Submit <code>/</code> or <code>\</code> as the input string to find and go to the project’s root.</li>
-				<li>Submit two or more dots <code>.</code> to go backward the directory tree by one or multiple levels.</li>
-				<li>End the input with a colon <code>:</code> followed by a command to execute it after opening the file:
-					<ul>
-						<li>Use <code>:45</code> to jump to line 45.</li>
-						<li>Use <code>:/any\:string</code> to jump to the first instance of <code>any:string</code>.</li>
-						<li>Use <code>:+setf\ myfiletype|25</code> to set the filetype to <code>myfiletype</code> then jump to line 25.</li>
-						<li>Use <code>:difft</code> when opening files marked by <code>&lt;c-z&gt;</code> to run <code>:difft</code> on the first 4 files.</li>
-					</ul>
-				</li>
-				<li>Use <code>&lt;c-n&gt;</code>, <code>&lt;c-p&gt;</code> to go to the next/previous string in the prompt’s history.</li>
-				<li>Use <code>&lt;c-y&gt;</code> to create a new file and its parent directories.</li>
-				<li>Use <code>&lt;c-z&gt;</code> to mark/unmark multiple files and <code>&lt;c-o&gt;</code> to open them.</li>
-			</ul>
-			<h3>Basic Options:</h3>
-			<ul>
+			<h3>Installation</h3>
+			<ol>
 				<li>
-					Change the mapping to invoke CtrlP and the default command it uses:
-					<pre><code>let g:ctrlp_map = '&lt;c-p&gt;'  " Leave this empty to disable the default mapping
-let g:ctrlp_cmd = 'CtrlP'</code></pre>
+					Clone the plugin into a separate directory:
+					<pre><code>$ cd ~/.vim
+$ git clone https://github.com/kien/ctrlp.vim.git bundle/ctrlp.vim</code></pre>
+					Or if you prefer Mercurial:
+					<pre><code>$ hg clone https://bitbucket.org/kien/ctrlp.vim bundle/ctrlp.vim</code></pre>
 				</li>
 				<li>
-					When invoked, unless a starting directory is specified, CtrlP will automatically set its local working directory according to this variable:
-						<pre><code>let g:ctrlp_working_path_mode = 2</code></pre>
-					0 - don’t manage working directory.<br>
-					1 - the directory of the current file.<br>
-					2 - the nearest ancestor that contains one of these directories or files:<br>
-					<code>.git/</code> <code>.hg/</code> <code>.svn/</code> <code>.bzr/</code> <code>_darcs/</code> or your own <code>marker_dir/</code> <code>marker_file</code>
+					Add to your <code>~/.vimrc</code>:
+					<pre><code>set runtimepath^=~/.vim/bundle/ctrlp.vim</code></pre>
 				</li>
 				<li>
-					To exclude files or directories from the listing, use the Vim’s option <code>wildignore</code>:
-					<pre><code>set wildignore+=*/tmp/*,*.so,*.swp,*.zip   " Linux/MacOSX
-set wildignore+=tmp\*,*.swp,*.zip,*.exe    " Windows</code></pre>
-					And/Or the built-in option <code>g:ctrlp_custom_ignore</code>:
-					<pre><code>let g:ctrlp_custom_ignore = '\.git$\|\.hg$\|\.svn$'
-let g:ctrlp_custom_ignore = {
-	\ 'dir':  '\.git$\|\.hg$\|\.svn$',
-	\ 'file': '\.exe$\|\.so$\|\.dll$',
-	\ 'link': 'SOME_BAD_SYMBOLIC_LINKS',
-	\ }</code></pre>
+					Run at Vim's command line:
+					<pre><code>:helptags ~/.vim/bundle/ctrlp.vim/doc</code></pre>
 				</li>
 				<li>
-					Specify an external tool to use for listing files instead of using Vim’s globpath().
-					Use <code>%s</code> in place of the target directory:
-					<pre><code>let g:ctrlp_user_command = 'find %s -type f'        " MacOSX/Linux
-let g:ctrlp_user_command = 'dir %s /-n /b /s /a-d'  " Windows</code></pre>
-					Single VCS listing command:
-					<pre><code>let g:ctrlp_user_command = ['.git/', 'cd %s &amp;&amp; git ls-files']
-let g:ctrlp_user_command = ['.git/', 'cd %s &amp;&amp; git ls-files', 'find %s -type f']
-let g:ctrlp_user_command = ['.hg/', 'hg --cwd %s locate -I .']</code></pre>
-					Multiple VCS listing commands:
-					<pre><code>let g:ctrlp_user_command = {
-	\ 'types': {
-		\ 1: ['.git/', 'cd %s &amp;&amp; git ls-files'],
-		\ 2: ['.hg/', 'hg --cwd %s locate -I .'],
-		\ },
-	\ 'fallback': 'find %s -type f'
-	\ }</code></pre>
+					Restart Vim and check <code>:help ctrlp.txt</code> for usage and configuration details.
 				</li>
-			</ul>
-			<p class="note">Run <code>:help ctrlp</code> or submit <code>?</code> in CtrlP for more mappings, commands and options.</p>
-			<h3>Get <span>ctrlp.vim</span>:</h3>
+			</ol>
+			<h3>Direct Downloads:</h3>
 			<ul>
-				<li><code>$ git clone https://github.com/kien/ctrlp.vim.git</code></li>
-				<li><code>$ hg clone https://bitbucket.org/kien/ctrlp.vim</code></li>
-				<li><a href="//www.vim.org/scripts/script.php?script_id=3736">ctrlp.vim on vim.org</a></li>
+				<li>Latest source from Github: [<a href="//github.com/kien/ctrlp.vim/zipball/master">.zip</a>] [<a href="//github.com/kien/ctrlp.vim/tarball/master">.tar.gz</a>]</li>
+				<li><a href="//www.vim.org/scripts/script.php?script_id=3736">Script page on vim.org</a></li>
 			</ul>
-			<a class="download" href="//github.com/kien/ctrlp.vim/zipball/master"><span class="icon"></span>Download Latest</a>
 			<a class="forkme" href="//github.com/kien/ctrlp.vim">Fork me on Github</a>
 		</article>
 
 		<footer>
 			<small>by <a href="//github.com/kien">kien</a></small>
 		</footer>
+
 	</body>
 </html>
