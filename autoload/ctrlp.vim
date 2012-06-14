@@ -1249,7 +1249,7 @@ fu! ctrlp#dirnfile(entries)
 		elsei etype == 'link'
 			if s:folsym
 				let isfile = !isdirectory(each)
-				if !s:samerootsyml(each, isfile, cwd)
+				if s:folsym == 2 || !s:samerootsyml(each, isfile, cwd)
 					cal add(items[isfile], each)
 				en
 			en

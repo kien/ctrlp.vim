@@ -321,10 +321,12 @@ Pressing <c-o> or <c-y> will then prompt for a keypress. The key can be:
   |g:ctrlp_open_multiple_files|.
 
                                                     *'g:ctrlp_follow_symlinks'*
-Set this to 1 to follow symbolic links when listing files: >
+If non-zero, CtrlP will follow symbolic links when listing files: >
   let g:ctrlp_follow_symlinks = 0
 <
-When enabled, looped internal symlinks will be ignored to avoid duplicates.
+  0 - don't follow symbolic links.
+  1 - follow but ignore looped internal symlinks to avoid duplicates.
+  2 - follow all symlinks indiscriminately.
 
                                                         *'g:ctrlp_lazy_update'*
 Set this to 1 to enable the lazy-update feature: only update the match window
@@ -1031,6 +1033,7 @@ CHANGELOG                                                     *ctrlp-changelog*
 
 Before 2012/06/15~
 
+    + New value for |g:ctrlp_follow_symlinks|: 2.
     + New value for |g:ctrlp_open_multiple_files|: 'j'.
     + Allow using <c-t>, <c-x>, <c-v> to open files marked by <c-z>.
     + Extend '..' (|ctrlp-input-formats| (d))
