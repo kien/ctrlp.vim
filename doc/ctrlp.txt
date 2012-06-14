@@ -1,4 +1,4 @@
-*ctrlp.txt*       Fuzzy file, buffer, mru and tag finder. v1.7.7
+*ctrlp.txt*       Fuzzy file, buffer, mru, tag, ... finder. v1.7.7
 *CtrlP* *ControlP* *'ctrlp'* *'ctrl-p'*
 ===============================================================================
 #                                                                             #
@@ -23,10 +23,10 @@ CONTENTS                                                       *ctrlp-contents*
 ===============================================================================
 INTRO                                                             *ctrlp-intro*
 
-Full path fuzzy file, buffer, mru and tag finder with an intuitive interface.
-Written in pure Vimscript for MacVim and Vim version 7.0+. Has full support for
-Vim's |regexp| as search pattern, built-in MRU files monitoring, project's root
-finder, and more.
+Full path fuzzy file, buffer, mru, tag, ... finder with an intuitive interface.
+Written in pure Vimscript for MacVim, gVim and Vim version 7.0+. Has full
+support for Vim's |regexp| as search pattern, built-in MRU files monitoring,
+project's root finder, and more.
 
 To enable optional extensions (tag, dir, rtscript...), see |ctrlp-extensions|.
 
@@ -152,14 +152,14 @@ variable: >
 <
   1 - the directory of the current file.
   2 - the nearest ancestor that contains one of these directories or files:
-      .git/ .hg/ .svn/ .bzr/ _darcs/
+      .git .hg .svn .bzr _darcs
   0 - don't manage working directory.
 Note: you can use b:ctrlp_working_path_mode (a |b:var|) to set this option on a
 per buffer basis.
 
                                                        *'g:ctrlp_root_markers'*
-Use this to set your own root markers in addition to the default ones (.git/,
-.hg/, .svn/, .bzr/, and _darcs/). Your markers will take precedence: >
+Use this to set your own root markers in addition to the default ones (.git,
+.hg, .svn, .bzr, and _darcs). Your markers will take precedence: >
   let g:ctrlp_root_markers = ['']
 <
 
@@ -751,8 +751,8 @@ c)  End the string with a colon ':' followed by a Vim command to execute that
 
     See also: Vim's |++opt| and |+cmd|.
 
-d)  Submit two dots '..' to go backward the directory tree by 1 level. To go
-    backward multiple levels, use one extra dot for each extra level:
+d)  Submit two dots '..' to go upward the directory tree by 1 level. To go up
+    multiple levels, use one extra dot for each extra level:
 >
          Raw input    Interpreted as
          ..           ../
@@ -1029,11 +1029,10 @@ Special thanks:~
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
 
+Before 2012/06/15~
+
     + New value for |g:ctrlp_open_multiple_files|: 'j'.
     + Allow using <c-t>, <c-x>, <c-v> to open files marked by <c-z>.
-
-Before 2012/05/15~
-
     + Extend '..' (|ctrlp-input-formats| (d))
     + New input format: '@cd' (|ctrlp-input-formats| (d))
 
