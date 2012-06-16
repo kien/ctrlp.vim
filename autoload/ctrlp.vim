@@ -470,7 +470,7 @@ fu! s:SplitPattern(str)
 	retu escape(pat, '~')
 endf
 " * BuildPrompt() {{{1
-fu! s:Render(lines, pat,str)
+fu! s:Render(lines, pat)
 	let [&ma, lines, s:height] = [1, a:lines, min([len(a:lines), s:winh])]
 	let pat = s:byfname ? split(a:pat, '^[^;]\+\zs;', 1)[0] : a:pat
 	" Setup the match window
@@ -507,7 +507,7 @@ fu! s:Render(lines, pat,str)
 	en
 	" Highlighting
 	if s:dohighlight()
-		cal s:highlight(pat, s:mathi[1],a:str)
+		cal s:highlight(pat, s:mathi[1])
 	en
 endf
 
@@ -521,7 +521,7 @@ fu! s:Update(str)
 	let pat = s:matcher == {} ? s:SplitPattern(str) : str
 	let lines = s:nolim == 1 && empty(str) ? copy(g:ctrlp_lines)
 		\ : s:MatchedItems(g:ctrlp_lines, pat, s:winh,str)
-	cal s:Render(lines, pat,a:str)
+	cal s:Render(lines, pat)
 endf
 
 fu! s:ForceUpdate()
