@@ -64,6 +64,7 @@ let [s:pref, s:opts, s:new_opts] = ['g:ctrlp_', {
 	\ 'jump_to_buffer':        ['s:jmptobuf', 2],
 	\ 'lazy_update':           ['s:lazy', 0],
 	\ 'match_func':            ['s:matcher', {}],
+  \ 'highlight_func':        ['s:exthighlight', {}],
 	\ 'match_window_bottom':   ['s:mwbottom', 1],
 	\ 'match_window_reversed': ['s:mwreverse', 1],
 	\ 'max_depth':             ['s:maxdepth', 40],
@@ -486,7 +487,6 @@ fu! s:Render(lines, pat)
 	en
 	let s:matched = copy(lines)
 	" Sorting
-	" TODO need to introduce global option here
 	" TODO need to disable it because it breaks C extension sorting, by trying
 	" to sort what already sorted
 "	if !s:nosort()
@@ -1349,17 +1349,12 @@ fu! ctrlp#syntax()
 	en
 endf
 
-fu! s:highlight(pat, grp,str)
-	let strinp = a:str
-  "TODO add uppercase letters
-	if s:matcher != {}
-	  cal clearmatches()
-		for i in range(len(strinp))
-			cal matchadd(a:grp, '\M'.strinp[i])
-		endfor
-		cal matchadd('CtrlPLinePre', '^>')
-		retu
-	en
+fu! s:highlight(pat, grp)
+  if s:matcher != {}
+		let argms = [a:pat, a:grp]
+    cal call(s:exthighlight['highlight'], argms)
+    retu
+  en
 	cal clearmatches()
 	if !empty(a:pat) && s:ispath
 		let pat = s:regexp ? substitute(a:pat, '\\\@<!\^', '^> \\zs', 'g') : a:pat
