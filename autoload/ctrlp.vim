@@ -138,8 +138,9 @@ en
 
 let s:lash = ctrlp#utils#lash()
 
-" Limiters
-let [s:compare_lim, s:nocache_lim] = [3000, 4000]
+let s:compare_lim = 3000
+
+let s:ficounts = {}
 
 " Regexp
 let s:fpats = {
@@ -291,7 +292,7 @@ endf
 " * Files {{{1
 fu! ctrlp#files()
 	let cafile = ctrlp#utils#cachefile()
-	if g:ctrlp_newcache || !filereadable(cafile) || !s:caching
+	if g:ctrlp_newcache || !filereadable(cafile) || s:nocache()
 		let [lscmd, s:initcwd, g:ctrlp_allfiles] = [s:lsCmd(), s:dyncwd, []]
 		" Get the list of files
 		if empty(lscmd)
@@ -313,6 +314,7 @@ fu! ctrlp#files()
 			let g:ctrlp_allfiles = ctrlp#utils#readfile(cafile)
 		en
 	en
+	cal extend(s:ficounts, { s:dyncwd : len(g:ctrlp_allfiles) })
 	retu g:ctrlp_allfiles
 endf
 
@@ -1765,12 +1767,14 @@ fu! s:mmode()
 endf
 " Cache {{{2
 fu! s:writecache(cache_file)
-	let fwrite = len(g:ctrlp_allfiles) > s:nocache_lim
-	if ( g:ctrlp_newcache || !filereadable(a:cache_file) ) && s:caching || fwrite
-		if fwrite | let s:caching = 1 | en
+	if ( g:ctrlp_newcache || !filereadable(a:cache_file) ) && !s:nocache()
 		cal ctrlp#utils#writecache(g:ctrlp_allfiles)
 		let g:ctrlp_newcache = 0
 	en
+endf
+
+fu! s:nocache()
+	retu !s:caching || ( s:caching > 1 && get(s:ficounts, s:dyncwd) < s:caching )
 endf
 
 fu! s:insertcache(str)

@@ -10,12 +10,7 @@ if exists('g:loaded_ctrlp_dir') && g:loaded_ctrlp_dir
 en
 let [g:loaded_ctrlp_dir, g:ctrlp_newdir] = [1, 0]
 
-let s:ars = [
-	\ 's:maxdepth',
-	\ 's:maxfiles',
-	\ 's:compare_lim',
-	\ 's:glob',
-	\ ]
+let s:ars = ['s:maxdepth', 's:maxfiles', 's:compare_lim', 's:glob', 's:caching']
 
 cal add(g:ctrlp_ext_vars, {
 	\ 'init': 'ctrlp#dir#init('.join(s:ars, ', ').')',
@@ -27,6 +22,8 @@ cal add(g:ctrlp_ext_vars, {
 	\ })
 
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
+
+let s:dircounts = {}
 " Utilities {{{1
 fu! s:globdirs(dirs, depth)
 	let entries = split(globpath(a:dirs, s:glob), "\n")
@@ -42,6 +39,10 @@ endf
 fu! s:max(len, max)
 	retu a:max && a:len > a:max ? 1 : 0
 endf
+
+fu! s:nocache()
+	retu !s:caching || ( s:caching > 1 && get(s:dircounts, s:cwd) < s:caching )
+endf
 " Public {{{1
 fu! ctrlp#dir#init(...)
 	let s:cwd = getcwd()
@@ -50,7 +51,7 @@ fu! ctrlp#dir#init(...)
 	endfo
 	let cadir = ctrlp#utils#cachedir().ctrlp#utils#lash().'dir'
 	let cafile = cadir.ctrlp#utils#lash().ctrlp#utils#cachefile('dir')
-	if g:ctrlp_newdir || !filereadable(cafile)
+	if g:ctrlp_newdir || s:nocache() || !filereadable(cafile)
 		let [s:initcwd, g:ctrlp_alldirs] = [s:cwd, []]
 		cal s:globdirs(s:cwd, 0)
 		cal ctrlp#rmbasedir(g:ctrlp_alldirs)
@@ -65,6 +66,7 @@ fu! ctrlp#dir#init(...)
 			let g:ctrlp_alldirs = ctrlp#utils#readfile(cafile)
 		en
 	en
+	cal extend(s:dircounts, { s:cwd : len(g:ctrlp_alldirs) })
 	retu g:ctrlp_alldirs
 endf
 

@@ -164,10 +164,13 @@ Use this to set your own root markers in addition to the default ones (.git,
 <
 
                                                         *'g:ctrlp_use_caching'*
-Set this to 0 to disable per-session caching. When disabled, caching will still
-be enabled for directories that have more than 4000 files: >
+Enable/Disable per-session caching: >
   let g:ctrlp_use_caching = 1
 <
+  0 - Disable caching.
+  1 - Enable caching.
+  n - When bigger than 1, disable caching and use the number as the limit to
+      enable caching again.
 Note: you can quickly purge the cache by pressing <F5> while inside CtrlP.
 
                                                 *'g:ctrlp_clear_cache_on_exit'*
