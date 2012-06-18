@@ -35,36 +35,17 @@ q:before,q:after {
 	content:'';
 	content:none;
 }
-table {
-	border-collapse:collapse;
-	border-spacing:0;
-}
 /* ============================================================{
 	Default:
 }============================================================ */
 img {
 	vertical-align:bottom;
 }
-textarea {
-	overflow:auto;
-}
 a:focus {
 	outline:0;
 }
 a:link,a:visited {
 	text-decoration:none;
-}
-legend {
-	font:0/0 serif;
-	height:0;
-	overflow:hidden;
-	text-indent:-100em;
-}
-caption,th,td {
-	text-align:left;
-}
-dd {
-	margin-left:40px;
 }
 @font-face {
   font-family:'Amaranth';
@@ -193,9 +174,8 @@ article h3 span {
 	color:#a7b8ff;
 	text-shadow:0 1px 0 #444,0 2px 0 #666;
 }
-article h6 {
+article h5 {
 	font-size:1em;
-	font-weight:400;
 	margin:0 0 .5em;
 }
 article p {
