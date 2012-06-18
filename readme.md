@@ -1,5 +1,5 @@
 # ctrlp.vim
-Fuzzy __file__, __buffer__, __mru__, __tag__, ... finder for Vim.
+Full path fuzzy __file__, __buffer__, __mru__, __tag__, __...__ finder for Vim.
 
 * Written in pure Vimscript for MacVim, gVim and Vim 7.0+.
 * Full support for Vim's regexp as search patterns.
@@ -12,45 +12,34 @@ Fuzzy __file__, __buffer__, __mru__, __tag__, ... finder for Vim.
 ![ctrlp][1]
 
 ## Installation
-1. Clone the plugin into a separate directory:
+Use your favorite method or check the homepage for a [quick installation guide][3].
 
-    ```
-    $ cd ~/.vim
-    $ git clone https://github.com/kien/ctrlp.vim.git bundle/ctrlp.vim
-    ```
+## Basic Usage
+* Run `:CtrlP` or `:CtrlP [starting-directory]` to invoke CtrlP in find file mode.
+* Run `:CtrlPBuffer` or `:CtrlPMRU` to invoke CtrlP in buffer or MRU mode.
+* Run `:CtrlPMixed` to search in a mix of files, buffers and MRU files.
 
-2. Add to your `~/.vimrc`:
+More at `:help ctrlp-commands` and `:help ctrlp-extensions`.
 
-    ```vim
-    set runtimepath^=~/.vim/bundle/ctrlp.vim
-    ```
+##### Once CtrlP is open:
+* Press `<c-f>` and `<c-b>` to cycle between modes.
+* Press `<c-d>` to switch to filename only search instead of full path.
+* Press `<c-r>` to switch to regexp mode.
+* Press `<F5>` to purge the cache for the current directory and get new files.
+* Use `<c-n>`, `<c-p>` to select the next/previous string in the prompt's history.
+* Use `<c-y>` to create a new file and its parent directories.
+* Use `<c-z>` to mark/unmark multiple files and `<c-o>` to open them.
 
-3. Run at Vim's command line:
+More at `:help ctrlp-mappings`.
 
-    ```
-    :helptags ~/.vim/bundle/ctrlp.vim/doc
-    ```
+* Submit two or more dots `..` to go up the directory tree by one or multiple levels.
+* End the input string with a colon `:` followed by a command to execute it on the opening file(s):  
+Use `:45` to jump to line 45.  
+Use `:/any\:\ string` to jump to the first instance of `any: string`.  
+Use `:diffthis` when opening multiple files to run `:diffthis` on the first 4 files.
 
-4. Restart Vim and start reading `:help ctrlp.txt` for usage and configuration details.
-
-On Windows, use the `$HOME/vimfiles` or the `$VIM/vimfiles` directory instead of the `~/.vim` directory.
-
-## Usage
-1. See `:help ctrlp-commands` and `:help ctrlp-extensions`.
-2. Once the prompt's open:
-    * Press `<c-f>` and `<c-b>` to cycle between modes.
-    * Press `<c-d>` to switch to filename only search instead of full path.
-    * Press `<F5>` to purge the cache for the current directory and get new files.
-    * Submit two or more dots `..` to go up the directory tree by one or multiple levels.
-    * Use `<c-n>`, `<c-p>` to go to the next/previous string in the prompt's history.
-    * Use `<c-y>` to create a new file and its parent dirs.
-    * Use `<c-z>` to mark/unmark multiple files and `<c-o>` to open them.
-    * End the input string with a colon `:` followed by a command to execute it on the opening file(s).
-
-    More at `:help ctrlp-mappings`.
-
-## Configuration
-* Unless a starting directory is specified, the local working directory will be set according to this variable:
+## Basic Options
+* When invoked, unless a starting directory is specified, CtrlP will set its local working directory according to this variable:
 
     ```vim
     let g:ctrlp_working_path_mode = 2
@@ -63,13 +52,12 @@ On Windows, use the `$HOME/vimfiles` or the `$VIM/vimfiles` directory instead of
 
     Define additional root markers with the `g:ctrlp_root_markers` option.
 
-* Exclude files and directories:
+* Exclude files and directories using Vim's `wildignore` or CtrlP's own `g:ctrlp_custom_ignore` option:
 
     ```vim
     set wildignore+=*/tmp/*,*.so,*.swp,*.zip  " MacOSX/Linux
     set wildignore+=tmp\*,*.swp,*.zip,*.exe   " Windows
 
-    let g:ctrlp_custom_ignore = '\.git$\|\.hg$\|\.svn$'
     let g:ctrlp_custom_ignore = {
       \ 'dir':  '\.git$\|\.hg$\|\.svn$',
       \ 'file': '\.exe$\|\.so$\|\.dll$',
@@ -88,3 +76,4 @@ More at `:help ctrlp-options`.
 
 [1]: http://i.imgur.com/yIynr.png
 [2]: https://github.com/kien/ctrlp.vim/tree/extensions
+[3]: http://kien.github.com/ctrlp.vim
