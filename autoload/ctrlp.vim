@@ -92,8 +92,7 @@ let [s:pref, s:opts, s:new_opts] = ['g:ctrlp_', {
 " Global options
 let s:glbs = { 'magic': 1, 'to': 1, 'tm': 0, 'sb': 1, 'hls': 0, 'im': 0,
 	\ 'report': 9999, 'sc': 0, 'ss': 0, 'siso': 0, 'mfd': 200, 'mouse': 'n',
-	\ 'gcr': 'a:blinkon0', 'ic': 1, 'scs': 1, 'lmap': '', 'mousef': 0,
-	\ 'imd': 1 }
+	\ 'gcr': 'a:blinkon0', 'ic': 1, 'lmap': '', 'mousef': 0, 'imd': 1 }
 
 " Keymaps
 let [s:lcmap, s:prtmaps] = ['nn <buffer> <silent>', {
@@ -382,7 +381,8 @@ endf
 " * MatchedItems() {{{1
 fu! s:MatchIt(items, pat, limit, exc)
 	let [lines, id] = [[], 0]
-	let pat = s:byfname ? split(a:pat, '^[^;]\+\zs;', 1) : a:pat
+	let pat = s:byfname ?
+		\ map(split(a:pat, '^[^;]\+\zs;', 1), 's:martcs.v:val') : s:martcs.a:pat
 	for item in a:items
 		let id += 1
 		try | if !( s:ispath && item == a:exc ) && call(s:mfunc, [item, pat]) >= 0
@@ -457,7 +457,7 @@ fu! s:Render(lines, pat)
 	let s:matched = copy(lines)
 	" Sorting
 	if !s:nosort()
-		let s:compat = pat
+		let s:compat = s:martcs.pat
 		cal sort(lines, 's:mixedsort')
 		unl s:compat
 	en
@@ -485,6 +485,7 @@ fu! s:Update(str)
 	let str = s:sanstail(a:str)
 	" Stop if the string's unchanged
 	if str == oldstr && !empty(str) && !exists('s:force') | retu | en
+	let s:martcs = &scs && str =~ '\u' ? '\C' : ''
 	let pat = s:matcher == {} ? s:SplitPattern(str) : str
 	let lines = s:nolim == 1 && empty(str) ? copy(g:ctrlp_lines)
 		\ : s:MatchedItems(g:ctrlp_lines, pat, s:winh)
@@ -1346,7 +1347,7 @@ fu! s:highlight(pat, grp)
 			let pat = substitute(pat, '\[\^\(.\{-}\)\]\\{-}', '[^\\/\1]\\{-}', 'g')
 			let pat = substitute(pat, '\$\@<!$', '\\ze[^\\/]*$', 'g')
 		en
-		cal matchadd(a:grp, '\c'.pat)
+		cal matchadd(a:grp, ( s:martcs == '' ? '\c' : '\C' ).pat)
 		cal matchadd('CtrlPLinePre', '^>')
 	en
 endf
