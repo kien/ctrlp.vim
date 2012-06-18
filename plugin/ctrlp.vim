@@ -1,6 +1,6 @@
 " =============================================================================
 " File:          plugin/ctrlp.vim
-" Description:   Fuzzy file, buffer, mru and tag finder.
+" Description:   Fuzzy file, buffer, mru, tag, etc finder.
 " Author:        Kien Nguyen <github.com/kien>
 " =============================================================================
 " GetLatestVimScripts: 3736 1 :AutoInstall: ctrlp.zip

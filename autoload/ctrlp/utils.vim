@@ -11,7 +11,7 @@ endf
 let s:lash = ctrlp#utils#lash()
 
 fu! s:lash(...)
-	retu match(a:0 ? a:1 : getcwd(), '[\/]$') < 0 ? s:lash : ''
+	retu ( a:0 ? a:1 : getcwd() ) !~ '[\/]$' ? s:lash : ''
 endf
 
 fu! ctrlp#utils#opts()

@@ -1,4 +1,4 @@
-*ctrlp.txt*       Fuzzy file, buffer, mru and tag finder. v1.7.7
+*ctrlp.txt*       Fuzzy file, buffer, mru, tag, ... finder. v1.7.7
 *CtrlP* *ControlP* *'ctrlp'* *'ctrl-p'*
 ===============================================================================
 #                                                                             #
@@ -23,10 +23,10 @@ CONTENTS                                                       *ctrlp-contents*
 ===============================================================================
 INTRO                                                             *ctrlp-intro*
 
-Full path fuzzy file, buffer, mru and tag finder with an intuitive interface.
-Written in pure Vimscript for MacVim and Vim version 7.0+. Has full support for
-Vim's |regexp| as search pattern, built-in MRU files monitoring, project's root
-finder, and more.
+Full path fuzzy file, buffer, mru, tag, ... finder with an intuitive interface.
+Written in pure Vimscript for MacVim, gVim and Vim version 7.0+. Has full
+support for Vim's |regexp| as search pattern, built-in MRU files monitoring,
+project's root finder, and more.
 
 To enable optional extensions (tag, dir, rtscript...), see |ctrlp-extensions|.
 
@@ -152,14 +152,14 @@ variable: >
 <
   1 - the directory of the current file.
   2 - the nearest ancestor that contains one of these directories or files:
-      .git/ .hg/ .svn/ .bzr/ _darcs/
+      .git .hg .svn .bzr _darcs
   0 - don't manage working directory.
 Note: you can use b:ctrlp_working_path_mode (a |b:var|) to set this option on a
 per buffer basis.
 
                                                        *'g:ctrlp_root_markers'*
-Use this to set your own root markers in addition to the default ones (.git/,
-.hg/, .svn/, .bzr/, and _darcs/). Your markers will take precedence: >
+Use this to set your own root markers in addition to the default ones (.git,
+.hg, .svn, .bzr, and _darcs). Your markers will take precedence: >
   let g:ctrlp_root_markers = ['']
 <
 
@@ -286,7 +286,7 @@ If non-zero, this will enable opening multiple files with <c-z> and <c-o>: >
   let g:ctrlp_open_multiple_files = 'v'
 <
 Example: >
-  let g:ctrlp_open_multiple_files = '2vr'
+  let g:ctrlp_open_multiple_files = '2vjr'
 <
 For the number:
   - If given, it'll be used as the maximum number of windows or tabs to create
@@ -297,6 +297,7 @@ For the letters:
   h - each file in a new horizontal split.
   v - each file in a new vertical split.
   i - all files as hidden buffers.
+  j - after opening, jump to the first opened tab or window.
   Reuse the current window:
   tr,
   hr,
@@ -312,16 +313,20 @@ Pressing <c-o> or <c-y> will then prompt for a keypress. The key can be:
   t - open in tab(s)
   h - open in horizontal split(s)
   v - open in vertical split(s)
-  r - open in current window (for <c-y> only)
-  <esc>, <c-c>, <c-g> - cancel and go back to the prompt.
+  i - open as hidden buffers (for <c-o> only)
+  c - clear the marked files (for <c-o> only)
+  r - open in the current window (for <c-y> only)
+  <esc>, <c-c>, <c-u> - cancel and go back to the prompt.
   <cr> - use the default behavior specified with |g:ctrlp_open_new_file| and
   |g:ctrlp_open_multiple_files|.
 
                                                     *'g:ctrlp_follow_symlinks'*
-Set this to 1 to follow symbolic links when listing files: >
+If non-zero, CtrlP will follow symbolic links when listing files: >
   let g:ctrlp_follow_symlinks = 0
 <
-When enabled, looped internal symlinks will be ignored to avoid duplicates.
+  0 - don't follow symbolic links.
+  1 - follow but ignore looped internal symlinks to avoid duplicates.
+  2 - follow all symlinks indiscriminately.
 
                                                         *'g:ctrlp_lazy_update'*
 Set this to 1 to enable the lazy-update feature: only update the match window
@@ -748,8 +753,8 @@ c)  End the string with a colon ':' followed by a Vim command to execute that
 
     See also: Vim's |++opt| and |+cmd|.
 
-d)  Submit two dots '..' to go backward the directory tree by 1 level. To go
-    backward multiple levels, use one extra dot for each extra level:
+d)  Submit two dots '..' to go upward the directory tree by 1 level. To go up
+    multiple levels, use one extra dot for each extra level:
 >
          Raw input    Interpreted as
          ..           ../
@@ -976,7 +981,7 @@ MISCELLANEOUS CONFIGS                             *ctrlp-miscellaneous-configs*
 >
   function! s:setcwd()
     let cph = expand('%:p:h', 1)
-    if match(cph, '\v^<.+>://') >= 0 | retu | en
+    if cph =~ '^.\+://' | retu | en
     for mkr in ['.git/', '.hg/', '.svn/', '.bzr/', '_darcs/', '.vimprojects']
       let wd = call('find'.(mkr =~ '/$' ? 'dir' : 'file'), [mkr, cph.';'])
       if wd != '' | let &acd = 0 | brea | en
@@ -1021,12 +1026,16 @@ Special thanks:~
     * Tacahiroy <github.com/tacahiroy>
     * Luca Pette <github.com/lucapette>
     * Seth Fowler <github.com/sfowler>
+    * Lowe Thiderman <github.com/daethorian>
 
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
 
-Before 2012/05/15~
+Before 2012/06/15~
 
+    + New value for |g:ctrlp_follow_symlinks|: 2.
+    + New value for |g:ctrlp_open_multiple_files|: 'j'.
+    + Allow using <c-t>, <c-x>, <c-v> to open files marked by <c-z>.
     + Extend '..' (|ctrlp-input-formats| (d))
     + New input format: '@cd' (|ctrlp-input-formats| (d))
 
