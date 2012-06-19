@@ -253,12 +253,12 @@ when scanning large projects: >
     \ }
 <
 Examples: >
-  let g:ctrlp_user_command = ['.git/', 'cd %s && git ls-files']
-  let g:ctrlp_user_command = ['.hg/', 'hg --cwd %s locate -I .']
+  let g:ctrlp_user_command = ['.git', 'cd %s && git ls-files']
+  let g:ctrlp_user_command = ['.hg', 'hg --cwd %s locate -I .']
   let g:ctrlp_user_command = {
     \ 'types': {
-      \ 1: ['.git/', 'cd %s && git ls-files'],
-      \ 2: ['.hg/', 'hg --cwd %s locate -I .'],
+      \ 1: ['.git', 'cd %s && git ls-files'],
+      \ 2: ['.hg', 'hg --cwd %s locate -I .'],
       \ },
     \ 'fallback': 'find %s -type f'
     \ }

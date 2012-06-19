@@ -11,15 +11,12 @@ Full path fuzzy __file__, __buffer__, __mru__, __tag__, __...__ finder for Vim.
 
 ![ctrlp][1]
 
-## Installation
-Use your favorite method or check the homepage for a [quick installation guide][3].
-
 ## Basic Usage
 * Run `:CtrlP` or `:CtrlP [starting-directory]` to invoke CtrlP in find file mode.
-* Run `:CtrlPBuffer` or `:CtrlPMRU` to invoke CtrlP in buffer or MRU mode.
-* Run `:CtrlPMixed` to search in a mix of files, buffers and MRU files.
+* Run `:CtrlPBuffer` or `:CtrlPMRU` to invoke CtrlP in find buffer or find MRU file mode.
+* Run `:CtrlPMixed` to search in Files, Buffers and MRU files at the same time.
 
-More at `:help ctrlp-commands` and `:help ctrlp-extensions`.
+Check `:help ctrlp-commands` and `:help ctrlp-extensions` for other commands.
 
 ##### Once CtrlP is open:
 * Press `<c-f>` and `<c-b>` to cycle between modes.
@@ -30,15 +27,22 @@ More at `:help ctrlp-commands` and `:help ctrlp-extensions`.
 * Use `<c-y>` to create a new file and its parent directories.
 * Use `<c-z>` to mark/unmark multiple files and `<c-o>` to open them.
 
-More at `:help ctrlp-mappings`.
+Run `:help ctrlp-mappings` or submit `?` in CtrlP for more mapping help.
 
 * Submit two or more dots `..` to go up the directory tree by one or multiple levels.
 * End the input string with a colon `:` followed by a command to execute it on the opening file(s):  
-Use `:45` to jump to line 45.  
+Use `:25` to jump to line 25.  
 Use `:/any\:\ string` to jump to the first instance of `any: string`.  
-Use `:diffthis` when opening multiple files to run `:diffthis` on the first 4 files.
+Use `:difft` when opening multiple files to run `:difft` on the first 4 files.
 
 ## Basic Options
+* Change the default mapping and the default command to invoke CtrlP:
+
+    ```vim
+    let g:ctrlp_map = '<c-p>'
+    let g:ctrlp_cmd = 'CtrlP'
+    ```
+
 * When invoked, unless a starting directory is specified, CtrlP will set its local working directory according to this variable:
 
     ```vim
@@ -52,12 +56,13 @@ Use `:diffthis` when opening multiple files to run `:diffthis` on the first 4 fi
 
     Define additional root markers with the `g:ctrlp_root_markers` option.
 
-* Exclude files and directories using Vim's `wildignore` or CtrlP's own `g:ctrlp_custom_ignore` option:
+* Exclude files and directories using Vim's `wildignore` and CtrlP's own `g:ctrlp_custom_ignore`:
 
     ```vim
     set wildignore+=*/tmp/*,*.so,*.swp,*.zip  " MacOSX/Linux
     set wildignore+=tmp\*,*.swp,*.zip,*.exe   " Windows
 
+    let g:ctrlp_custom_ignore = '\.git$\|\.hg$\|\.svn$'
     let g:ctrlp_custom_ignore = {
       \ 'dir':  '\.git$\|\.hg$\|\.svn$',
       \ 'file': '\.exe$\|\.so$\|\.dll$',
@@ -72,7 +77,10 @@ Use `:diffthis` when opening multiple files to run `:diffthis` on the first 4 fi
     let g:ctrlp_user_command = 'dir %s /-n /b /s /a-d'  " Windows
     ```
 
-More at `:help ctrlp-options`.
+Check `:help ctrlp-options` for other options.
+
+## Installation
+Use your favorite method or check the homepage for a [quick installation guide][3].
 
 [1]: http://i.imgur.com/yIynr.png
 [2]: https://github.com/kien/ctrlp.vim/tree/extensions
