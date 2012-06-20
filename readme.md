@@ -43,7 +43,8 @@ Use `:difft` when opening multiple files to run `:difft` on the first 4 files.
     let g:ctrlp_cmd = 'CtrlP'
     ```
 
-* When invoked, unless a starting directory is specified, CtrlP will set its local working directory according to this variable:
+* When invoked, unless a starting directory is specified, CtrlP will set its local working directory
+according to this variable:
 
     ```vim
     let g:ctrlp_working_path_mode = 2
@@ -84,4 +85,4 @@ Use your favorite method or check the homepage for a [quick installation guide][
 
 [1]: http://i.imgur.com/yIynr.png
 [2]: https://github.com/kien/ctrlp.vim/tree/extensions
-[3]: http://kien.github.com/ctrlp.vim
+[3]: http://kien.github.com/ctrlp.vim#installation
