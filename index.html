@@ -41,8 +41,8 @@
 			<h3>Basic Usage:</h3>
 			<ul>
 				<li>Run <code>:CtrlP</code> or <code>:CtrlP [starting-directory]</code> to invoke CtrlP in find file mode.</li>
-				<li>Or run <code>:CtrlPBuffer</code> or <code>:CtrlPMRU</code> to start CtrlP in find buffer or find MRU file mode.</li>
-				<li>Or run <code>:CtrlPMixed</code> to search in Files, Buffers and MRU files at the same time.</li>
+				<li>Run <code>:CtrlPBuffer</code> or <code>:CtrlPMRU</code> to start CtrlP in find buffer or find MRU file mode.</li>
+				<li>Run <code>:CtrlPMixed</code> to search in Files, Buffers and MRU files at the same time.</li>
 			</ul>
 			<p class="note">Check <code>:help ctrlp-commands</code> and <code>:help ctrlp-extensions</code> for other commands.</p>
 			<h5>Once CtrlP is open:</h5>
@@ -57,8 +57,7 @@
 			</ul>
 			<p class="note">Run <code>:help ctrlp-mappings</code> or submit <code>?</code> in CtrlP for more mapping help.</p>
 			<ul>
-				<li>Submit two or more dots <code>.</code> to go up the directory tree by one or multiple levels.</li>
-				<li>Submit <code>/</code> or <code>\</code> as the input string to find and go to the project's root.</li>
+				<li>Submit two or more dots <code>..</code> to go up the directory tree by one or multiple levels.</li>
 				<li>End the input with a colon <code>:</code> followed by a command to execute it after opening the file:
 					<ul>
 						<li>Use <code>:25</code> to jump to line 25.</li>
@@ -80,8 +79,8 @@ let g:ctrlp_cmd = 'CtrlP'</code></pre>
 					<pre><code>let g:ctrlp_working_path_mode = 2</code></pre>
 					0 - don't manage working directory.<br>
 					1 - the directory of the current file.<br>
-					2 - the nearest ancestor that contains one of these directories or files: <code>.git</code> <code>.hg</code> <code>.svn</code> <code>.bzr</code> <code>_darcs</code>
-					or your own root markers defined with the <code>g:ctrlp_root_markers</code> options.
+					2 - the nearest ancestor that contains one of these directories or files: <code>.git</code> <code>.hg</code> <code>.svn</code> <code>.bzr</code> <code>_darcs</code>,
+					and your own root markers defined with the <code>g:ctrlp_root_markers</code> option.
 				</li>
 				<li>
 					Exclude files or directories using Vim's <code>wildignore</code>:
@@ -115,7 +114,7 @@ let g:ctrlp_user_command = ['.hg', 'hg --cwd %s locate -I .']</code></pre>
 				</li>
 			</ul>
 			<p class="note">Check <code>:help ctrlp-options</code> for other options.</p>
-			<h3>Get <span>ctrlp.vim</span>:</h3>
+			<h3 id="installation">Get <span>ctrlp.vim</span>:</h3>
 			<ol>
 				<li>
 					Clone the plugin into a separate directory:
@@ -139,9 +138,7 @@ $ git clone https://github.com/kien/ctrlp.vim.git bundle/ctrlp.vim</code></pre>
 			<h3>Direct downloads:</h3>
 			<ul>
 				<li>
-					Latest source from Github:
-					[<a href="//github.com/kien/ctrlp.vim/zipball/master">.zip</a>]
-					[<a href="//github.com/kien/ctrlp.vim/tarball/master">.tar.gz</a>]
+					Latest source from Github: (<a href="//github.com/kien/ctrlp.vim/zipball/master">.zip</a>) (<a href="//github.com/kien/ctrlp.vim/tarball/master">.tar.gz</a>)
 				</li>
 				<li><a href="//www.vim.org/scripts/script.php?script_id=3736">Old releases on vim.org</a></li>
 			</ul>
