@@ -301,11 +301,8 @@ For the letters:
   v - each file in a new vertical split.
   i - all files as hidden buffers.
   j - after opening, jump to the first opened tab or window.
-  Reuse the current window:
-  tr,
-  hr,
-  vr - open the first file in the current window, then the remaining files in
-       new splits or new tabs just like with t, h, v.
+  r - open the first file in the current window, then the remaining files in
+      new splits or new tabs depending on which of h, v and t is also present.
 
                                                             *'g:ctrlp_arg_map'*
 When this is set to 1, the <c-o> and <c-y> mappings will accept one extra key
