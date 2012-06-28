@@ -341,6 +341,10 @@ Set this to 1 to enable seeding the prompt with the current file's relative
 path: >
   let g:ctrlp_default_input = 0
 <
+Instead of 1 or 0, if the value of the option is a string, it'll be used as-is
+as the default input: >
+  let g:ctrlp_default_input = 'anystring'
+<
 
                                                          *'g:ctrlp_use_migemo'*
 Set this to 1 to use Migemo Pattern for Japanese filenames. Migemo Search only

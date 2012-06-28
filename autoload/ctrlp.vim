@@ -529,7 +529,7 @@ fu! s:BuildPrompt(upd, ...)
 endf
 " - SetDefTxt() {{{1
 fu! s:SetDefTxt()
-	if s:deftxt == '0' || !s:ispath | retu | en
+	if s:deftxt == '0' || ( s:deftxt == 1 && !s:ispath ) | retu | en
 	let txt = s:deftxt
 	if !type(txt)
 		let txt = txt && !stridx(s:crfpath, s:dyncwd)
