@@ -976,14 +976,24 @@ fu! s:MarkToOpen()
 endf
 
 fu! s:OpenMulti(...)
-	if !exists('s:marked') || s:opmul == '0' || !s:ispath | retu -1 | en
+	let has_marked = exists('s:marked')
+	if ( !has_marked && a:0 ) || s:opmul == '0' || !s:ispath
+		\ || ( s:itemtype > 2 && s:getextvar('opmul') != 1 )
+		retu -1
+	en
 	" Get the options
 	let [nr, md] = [matchstr(s:opmul, '\d\+'), matchstr(s:opmul, '[thvi]')]
-	let [ur, jf] = [matchstr(s:opmul, 'r') == 'r', matchstr(s:opmul, 'j') == 'j']
+	let [ur, jf] = [s:opmul =~ 'r', s:opmul =~ 'j']
 	let md = a:0 ? a:1 : ( md == '' ? 'v' : md )
 	let nopt = exists('g:ctrlp_open_multiple_files')
-	if s:argmap && !a:0
-		let md = s:argmaps(md, 0)
+	if !has_marked
+		let line = !empty(s:lines) ? s:lines[line('.') - 1] : ''
+		if line == '' | retu | en
+		let marked = { 1 : fnamemodify(line, ':p') }
+		let [nr, ur, jf, nopt] = ['1', 0, 0, 1]
+	en
+	if ( s:argmap || !has_marked ) && !a:0
+		let md = s:argmaps(md, !has_marked ? 2 : 0)
 		if md == 'c'
 			cal s:unmarksigns()
 			unl! s:marked
@@ -991,8 +1001,9 @@ fu! s:OpenMulti(...)
 		en
 		if md =~ '\v^c(ancel)?$' | retu | en
 		let nr = nr == '0' ? ( nopt ? '' : '1' ) : nr
+		let ur = !has_marked && md == 'r' ? 1 : ur
 	en
-	let mkd = values(s:marked)
+	let mkd = values(has_marked ? s:marked : marked)
 	cal s:sanstail(join(s:prompt, ''))
 	cal s:PrtExit()
 	if nr == '0' || md == 'i'
@@ -1534,6 +1545,7 @@ fu! s:argmaps(md, i)
 	let roh = [
 		\ ['OpenMulti', '/h[i]dden/[c]lear', ['i', 'c']],
 		\ ['CreateNewFile', '/[r]eplace', ['r']],
+		\ ['OpenSeleted', '/[r]eplace/h[i]dden', ['r', 'i']],
 		\ ]
 	let str = roh[a:i][0].': [t]ab/[v]ertical/[h]orizontal'.roh[a:i][1].'? '
 	retu s:choices(str, ['t', 'v', 'h'] + roh[a:i][2], 's:argmaps', [a:md, a:i])
