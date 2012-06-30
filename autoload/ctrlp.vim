@@ -1545,7 +1545,7 @@ fu! s:argmaps(md, i)
 	let roh = [
 		\ ['OpenMulti', '/h[i]dden/[c]lear', ['i', 'c']],
 		\ ['CreateNewFile', '/[r]eplace', ['r']],
-		\ ['OpenSeleted', '/[r]eplace/h[i]dden', ['r', 'i']],
+		\ ['OpenSelected', '/[r]eplace/h[i]dden', ['r', 'i']],
 		\ ]
 	let str = roh[a:i][0].': [t]ab/[v]ertical/[h]orizontal'.roh[a:i][1].'? '
 	retu s:choices(str, ['t', 'v', 'h'] + roh[a:i][2], 's:argmaps', [a:md, a:i])
