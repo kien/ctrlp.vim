@@ -45,6 +45,7 @@ Overview:~
   |ctrlp_max_height|            Max height of the match window.
   |ctrlp_switch_buffer|         Jump to an open buffer if already opened.
   |ctrlp_reuse_window|          Reuse special windows (help, quickfix, etc).
+  |ctrlp_tabpage_position|      Where to put the new tab page.
   |ctrlp_working_path_mode|     How to set CtrlP's local working directory.
   |ctrlp_root_markers|          Additional, high priority root markers.
   |ctrlp_use_caching|           Use per-session caching or not.
@@ -144,6 +145,13 @@ Use regexp to specify the pattern.
 Example: >
   let g:ctrlp_reuse_window = 'netrw\|help\|quickfix'
 <
+
+                                                   *'g:ctrlp_tabpage_position'*
+Where to put the new tab page when opening one: >
+  let g:ctrlp_tabpage_position = 'ac'
+<
+  al - after the last tab page.
+  ac - after the current tab page.
 
                                                   *'g:ctrlp_working_path_mode'*
 When starting up, CtrlP sets its local working directory according to this
@@ -669,7 +677,7 @@ Opening/Creating a file:~
     Open the selected file in the 'current' window if possible.
 
   <c-t>
-    Open the selected file in a new 'tab' after the last tabpage.
+    Open the selected file in a new 'tab'.
 
   <c-v>
     Open the selected file in a 'vertical' split.
@@ -1034,6 +1042,8 @@ Special thanks:~
 
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
+
+    + New option: |g:ctrlp_tabpage_position|.
 
 Before 2012/06/15~
 

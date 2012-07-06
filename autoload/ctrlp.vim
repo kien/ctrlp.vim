@@ -78,6 +78,7 @@ let [s:pref, s:opts, s:new_opts] = ['g:ctrlp_', {
 	\ 'root_markers':          ['s:rmarkers', []],
 	\ 'split_window':          ['s:splitwin', 0],
 	\ 'status_func':           ['s:status', {}],
+	\ 'tabpage_position':      ['s:tabpage', 'ac'],
 	\ 'use_caching':           ['s:caching', 1],
 	\ 'use_migemo':            ['s:migemo', 0],
 	\ 'user_command':          ['s:usrcmd', ''],
@@ -1017,7 +1018,7 @@ fu! s:OpenMulti(...)
 		\ + ( ur ? [] : ['ignruw'] )
 	let fst = call('ctrlp#normcmd', ncmd)
 	" Check if the current window has a replaceable buffer
-	let repabl = empty(bufname('%')) && empty(&l:ft)
+	let repabl = !( md == 't' && !ur ) && empty(bufname('%')) && empty(&l:ft)
 	" Commands for the rest of the files
 	let [ic, cmds] = [1, { 'v': ['vert sb', 'vne'], 'h': ['sb', 'new'],
 		\ 't': ['tab sb', 'tabe'] }]
@@ -1712,7 +1713,7 @@ endf
 
 fu! s:openfile(cmd, fid, tail, ...)
 	let cmd = a:cmd =~ '^[eb]$' && &modified ? 'hid '.a:cmd : a:cmd
-	let cmd = cmd =~ '^tab' ? tabpagenr('$').cmd : cmd
+	let cmd = cmd =~ '^tab' ? ctrlp#tabcount().cmd : cmd
 	let j2l = a:0 && a:1 ? a:2 : 0
 	exe cmd.( a:0 && a:1 ? '' : a:tail ) ctrlp#fnesc(a:fid)
 	if j2l
@@ -1724,6 +1725,12 @@ fu! s:openfile(cmd, fid, tail, ...)
 	if cmd != 'bad'
 		cal ctrlp#setlcdir()
 	en
+endf
+
+fu! ctrlp#tabcount()
+	retu
+		\ s:tabpage == 'al' ? tabpagenr('$') :
+		\ s:tabpage == 'ac' ? '' : ''
 endf
 
 fu! s:settype(type)

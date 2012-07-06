@@ -87,7 +87,7 @@ fu! ctrlp#tag#accept(mode, str)
 		\ }
 	let cmd = fnd[0] == 1 ? cmds[a:mode][0] : cmds[a:mode][1]
 	let cmd = cmd == 'tj' && &modified ? 'hid '.cmd : cmd
-	let cmd = cmd =~ '^tab' ? tabpagenr('$').cmd : cmd
+	let cmd = cmd =~ '^tab' ? ctrlp#tabcount().cmd : cmd
 	if fnd[0] == 1
 		if cmd != ''
 			exe cmd
