@@ -1023,6 +1023,9 @@ fu! s:OpenMulti(...)
 	let [ic, cmds] = [1, { 'v': ['vert sb', 'vne'], 'h': ['sb', 'new'],
 		\ 't': ['tab sb', 'tabe'] }]
 	let [swb, &swb] = [&swb, '']
+	if md == 't' && ctrlp#tabcount() < tabpagenr()
+		let s:tabct = ctrlp#tabcount()
+	en
 	" Open the files
 	for va in mkd
 		let bufnr = bufnr('^'.va.'$')
@@ -1044,7 +1047,7 @@ fu! s:OpenMulti(...)
 			if jf | if ic == 2
 				let crpos = [tabpagenr(), winnr()]
 			el
-				let crpos[0] += tabpagenr() == crpos[0]
+				let crpos[0] += tabpagenr() <= crpos[0]
 				let crpos[1] += winnr() == crpos[1]
 			en | en
 		en
@@ -1053,6 +1056,7 @@ fu! s:OpenMulti(...)
 		exe ( md == 't' ? 'tabn '.crpos[0] : crpos[1].'winc w' )
 	en
 	let &swb = swb
+	unl! s:tabct
 endf
 " ** Helper functions {{{1
 " Sorting {{{2
@@ -1728,9 +1732,23 @@ fu! s:openfile(cmd, fid, tail, ...)
 endf
 
 fu! ctrlp#tabcount()
-	retu
-		\ s:tabpage == 'al' ? tabpagenr('$') :
-		\ s:tabpage == 'ac' ? '' : ''
+	if exists('s:tabct')
+		let tabct = s:tabct
+		let s:tabct += 1
+	elsei !type(s:tabpage)
+		let tabct = s:tabpage
+	elsei type(s:tabpage) == 1
+		let tabpos =
+			\ s:tabpage =~ 'c' ? tabpagenr() :
+			\ s:tabpage =~ 'f' ? 1 :
+			\ s:tabpage =~ 'l' ? tabpagenr('$') :
+			\ tabpagenr()
+		let tabct =
+			\ s:tabpage =~ 'a' ? tabpos :
+			\ s:tabpage =~ 'b' ? tabpos - 1 :
+			\ tabpos
+	en
+	retu tabct < 0 ? 0 : tabct
 endf
 
 fu! s:settype(type)

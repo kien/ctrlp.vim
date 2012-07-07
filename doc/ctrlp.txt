@@ -150,8 +150,11 @@ Example: >
 Where to put the new tab page when opening one: >
   let g:ctrlp_tabpage_position = 'ac'
 <
-  al - after the last tab page.
-  ac - after the current tab page.
+  a - after.
+  b - before.
+  c - the current tab page.
+  l - the last tab page.
+  f - the first tab page.
 
                                                   *'g:ctrlp_working_path_mode'*
 When starting up, CtrlP sets its local working directory according to this
