@@ -1,4 +1,4 @@
-*ctrlp.txt*       Fuzzy file, buffer, mru, tag, ... finder. v1.77
+*ctrlp.txt*       Fuzzy file, buffer, mru, tag, ... finder. v1.78
 *CtrlP* *ControlP* *'ctrlp'* *'ctrl-p'*
 ===============================================================================
 #                                                                             #
