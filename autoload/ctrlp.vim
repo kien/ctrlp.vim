@@ -1190,7 +1190,7 @@ fu! ctrlp#statusline()
 		let byfname = '%#CtrlPMode1# '.byfname.' %*'
 		let regex   = s:regexp  ? '%#CtrlPMode2# regex %*' : ''
 		let slider  = ' <'.prv.'>={'.item.'}=<'.nxt.'>'
-		let dir     = ' %=%<%#CtrlPMode2# '.s:dyncwd.' %*'
+		let dir     = ' %=%<%#CtrlPMode2# %{getcwd()} %*'
 		let &l:stl  = focus.byfname.regex.slider.marked.dir
 	en
 endf
@@ -1204,7 +1204,7 @@ fu! ctrlp#progress(enum, ...)
 	if has('macunix') || has('mac') | sl 1m | en
 	let txt = a:0 ? '(press ctrl-c to abort)' : ''
 	let &l:stl = s:status != {} ? call(s:status['prog'], [a:enum])
-		\ : '%#CtrlPStats# '.a:enum.' %* '.txt.'%=%<%#CtrlPMode2# '.s:dyncwd.' %*'
+		\ : '%#CtrlPStats# '.a:enum.' %* '.txt.'%=%<%#CtrlPMode2# %{getcwd()} %*'
 	redraws
 endf
 " Paths {{{2
