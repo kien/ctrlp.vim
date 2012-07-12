@@ -999,6 +999,14 @@ fu! s:OpenMulti(...)
 			cal s:unmarksigns()
 			unl! s:marked
 			cal s:BuildPrompt(0)
+		elsei !has_marked && md == 'a'
+			let [s:marked, key] = [{}, 1]
+			for line in s:lines
+				let s:marked = extend(s:marked, { key : fnamemodify(line, ':p') })
+				let key += 1
+			endfo
+			cal s:remarksigns()
+			retu s:BuildPrompt(0)
 		en
 		if md =~ '\v^c(ancel)?$' | retu | en
 		let nr = nr == '0' ? ( nopt ? '' : '1' ) : nr
@@ -1548,9 +1556,9 @@ endf
 
 fu! s:argmaps(md, i)
 	let roh = [
-		\ ['OpenMulti', '/h[i]dden/[c]lear', ['i', 'c']],
-		\ ['CreateNewFile', '/[r]eplace', ['r']],
-		\ ['OpenSelected', '/[r]eplace/h[i]dden', ['r', 'i']],
+		\ ['Open Multiple Files', '/h[i]dden/[c]lear', ['i', 'c']],
+		\ ['Create a New File', '/[r]eplace', ['r']],
+		\ ['Open Selected', '/[r]eplace/h[i]dden? Mark [a]ll', ['r', 'i', 'a']],
 		\ ]
 	let str = roh[a:i][0].': [t]ab/[v]ertical/[h]orizontal'.roh[a:i][1].'? '
 	retu s:choices(str, ['t', 'v', 'h'] + roh[a:i][2], 's:argmaps', [a:md, a:i])
