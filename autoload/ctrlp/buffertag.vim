@@ -217,9 +217,10 @@ endf
 
 fu! ctrlp#buffertag#accept(mode, str)
 	let vals = matchlist(a:str, '\v^[^\t]+\t+[^\t|]+\|(\d+)\:[^\t|]+\|(\d+)\|')
-	if vals == [] | retu | en
-	let [bufnm, linenr] = [fnamemodify(bufname(str2nr(vals[1])), ':p'), vals[2]]
-	cal ctrlp#acceptfile(a:mode, bufnm, linenr)
+	let bufnr = str2nr(get(vals, 1))
+	if bufnr
+		cal ctrlp#acceptfile(a:mode, bufname(bufnr), get(vals, 2))
+	en
 endf
 
 fu! ctrlp#buffertag#cmd(mode, ...)
