@@ -23,9 +23,20 @@ let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 " Utilities {{{1
 fu! s:findcount(str)
 	let [tg, fname] = split(a:str, '\t\+\ze[^\t]\+$')
-	let [fname, tgs] = [expand(fname, 1), taglist('^'.tg.'$')]
-	if empty(tgs) | retu [1, 1] | en
-	let [fnd, ct, pos] = [0, 0, 0]
+	let tgs = taglist('^'.tg.'$')
+	if len(tgs) < 2
+		retu [1, 1]
+	en
+	let bname = fnamemodify(bufname('%'), ':p')
+	let fname = expand(fnamemodify(simplify(fname), ':s?^[.\/]\+??:p:.'), 1)
+	let [fnd, ct, pos, idx] = [0, 0, 0, 0]
+	wh idx < len(tgs)
+		if bname == fnamemodify(tgs[idx]["filename"], ':p')
+			cal insert(tgs, remove(tgs, idx))
+			brea
+		en
+		let idx += 1
+	endw
 	for each in tgs
 		let ct += 1
 		let fulname = fnamemodify(each["filename"], ':p')
@@ -86,8 +97,8 @@ fu! ctrlp#tag#accept(mode, str)
 		\ 'e': ['', 'tj'],
 		\ }
 	let cmd = fnd[0] == 1 ? cmds[a:mode][0] : cmds[a:mode][1]
-	let cmd = cmd == 'tj' && &modified ? 'hid '.cmd : cmd
-	let cmd = cmd =~ '^tab' ? ctrlp#tabcount().cmd : cmd
+	let cmd = cmd == 'tj' && &mod ? 'hid '.cmd : cmd
+	let cmd = a:mode == 't' ? ctrlp#tabcount().cmd : cmd
 	if fnd[0] == 1
 		if cmd != ''
 			exe cmd
