@@ -844,6 +844,7 @@ fu! ctrlp#acceptfile(mode, line, ...)
 	let [bufnr, tail] = [bufnr('^'.filpath.'$'), s:tail()]
 	let j2l = a:0 ? a:1 : str2nr(matchstr(tail, '^ +\D*\zs\d\+\ze\D*'))
 	if s:jmptobuf && bufnr > 0 && md =~ 'e\|t'
+		\ && !( bufnr == bufnr('%') && md == 'e' )
 		let [jmpb, bufwinnr] = [1, bufwinnr(bufnr)]
 		let buftab = s:jmptobuf > 1 ? s:buftab(bufnr, md) : [0, 0]
 	en
