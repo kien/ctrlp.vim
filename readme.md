@@ -1,5 +1,6 @@
 # ctrlp.vim
-Full path fuzzy __file__, __buffer__, __mru__, __tag__, __...__ finder for Vim.
+Full path fuzzy __file__, __buffer__, __mru__, __tag__, __...__ finder for Vim.  
+Version: 1.78.
 
 * Written in pure Vimscript for MacVim, gVim and Vim 7.0+.
 * Full support for Vim's regexp as search patterns.
@@ -79,6 +80,30 @@ according to this variable:
     ```
 
 Check `:help ctrlp-options` for other options.
+
+## FAQs
+__Q:__ Why aren't recently created files listed?  
+__Q:__ Why do ignored files show up in the results?  
+__A:__ After changing some options like `wildignore, g:ctrlp_custom_ignore, g:ctrlp_max_files, ...`, or having
+new files added to the relevant working directory independently of CtrlP, you need to clear the old cache by
+pressing `<F5>` in the prompt, or if you want to be sure, run `:CtrlPClearAllCaches` from Vim's command line.
+
+__Q:__ How to open the selected file in a new split or in a new tab?  
+__Q:__ How to _always_ open the selected file in a new split or in a new tab with `<cr>`?  
+__Q:__ How to use _this_ key to do _that_ action in the prompt?  
+__A:__ Take a look at `:help ctrlp-mappings` and the corresponding option `:help g:ctrlp_prompt_mappings`.
+
+__Q:__ Instead of `:lcd` into a parent directory, typing `..`, `...`, `../../`, etc just shows the files or
+directories containing dots in its name, is this a known bug on Windows/Linux/MacOSX?  
+__A:__ Just press `<cr>` to submit the dots.
+
+__Q:__ Why are some deep directories/files under the current working directory not being indexed?  
+__A:__ This is most likely because one or both of the limits set by `g:ctrlp_max_files` and `g:ctrlp_max_depth`
+have been reached.
+
+Invest a few minutes to skim through the documentation at `:help ctrlp.txt`. If you can't find the answer to
+your question there nor in the old issues here on Github, open a new issue and let me know. For a bug report,
+make sure to include some informations like steps to reproduce and any related configurations.
 
 ## Installation
 Use your favorite method or check the homepage for a [quick installation guide][3].
