@@ -75,6 +75,7 @@ Overview:~
   |ctrlp_mruf_case_sensitive|   MRU files are case sensitive or not.
 
   Advanced options:
+  |ctrlp_open_func|             Use custom file opening functions.
   |ctrlp_status_func|           Change CtrlP's two statuslines.
   |ctrlp_buffer_func|           Call custom functions in the CtrlP buffer.
   |ctrlp_match_func|            Replace the built-in matching algorithm.
@@ -453,6 +454,64 @@ MRU entries: >
 
 ----------------------------------------
 Advanced options:~
+
+                                                          *'g:ctrlp_open_func'*
+Define a custom function to open the selected file: >
+  let g:ctrlp_open_func = {}
+<
+Example: >
+  let g:ctrlp_open_func = {
+    \ 'files'     : 'Function_Name_1',
+    \ 'buffers'   : 'Function_Name_2',
+    \ 'mru files' : 'Function_Name_3',
+    \ }
+<
+Structure of the functions: >
+  function! Function_Name(action, line)
+    " Arguments:
+    " |
+    " +- a:action : The opening action:
+    " |             + 'e' : user pressed <cr>  (default)
+    " |             + 'h' : user pressed <c-x> (default)
+    " |             + 'v' : user pressed <c-v> (default)
+    " |             + 't' : user pressed <c-t> (default)
+    " |             + 'x' : user used the <c-o> dialog (default) and chose
+    " |                     "e[x]ternal".
+    " |
+    " +- a:line   : The selected line.
+
+  endfunction
+<
+Linux example: open HTML files in the default web browser when <c-t> is pressed
+and in Vim otherwise >
+  function! HTMLOpenFunc(action, line)
+    if a:action == 't' && fnamemodify(a:line, ':e') =~? '^html\?$'
+
+      " Get the filename
+      let filename = fnameescape(fnamemodify(a:line, ':p'))
+
+      " Close CtrlP
+      call ctrlp#exit()
+
+      " Open the file
+      silent! execute '!xdg-open' filename
+
+    elseif a:action == 'x' && fnamemodify(a:line, ':e') !~? '^html\?$'
+
+      " Not a HTML file, simulate pressing <c-o> again
+      call feedkeys("\<c-o>")
+
+    else
+
+      " Use CtrlP's default file opening function
+      call call('ctrlp#acceptfile', [a:action, a:line])
+
+    endif
+  endfunction
+
+  let g:ctrlp_open_func = { 'files': 'HTMLOpenFunc' }
+<
+Note: this option does not apply when opening multiple files with <c-z>, <c-o>.
 
                                                         *'g:ctrlp_status_func'*
 Use this to customize the statuslines for the CtrlP window: >
@@ -1046,7 +1105,8 @@ Special thanks:~
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
 
-    + New option: |g:ctrlp_tabpage_position|.
+    + New options: |g:ctrlp_open_func|.
+                   |g:ctrlp_tabpage_position|.
 
 Before 2012/06/15~
 

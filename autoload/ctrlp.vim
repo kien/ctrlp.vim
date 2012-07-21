@@ -71,6 +71,7 @@ let [s:pref, s:opts, s:new_opts] = ['g:ctrlp_', {
 	\ 'max_height':            ['s:mxheight', 10],
 	\ 'max_history':           ['s:maxhst', exists('+hi') ? &hi : 20],
 	\ 'mruf_default_order':    ['s:mrudef', 0],
+	\ 'open_func':             ['s:openfunc', {}],
 	\ 'open_multi':            ['s:opmul', '1v'],
 	\ 'open_new_file':         ['s:newfop', 'v'],
 	\ 'prompt_mappings':       ['s:urprtmaps', 0],
@@ -909,7 +910,11 @@ fu! s:AcceptSelection(mode)
 	en
 	if empty(line) | retu | en
 	" Do something with it
-	let actfunc = s:itemtype < 3 ? 'ctrlp#acceptfile' : s:getextvar('accept')
+	if s:openfunc != {} && has_key(s:openfunc, s:ctype)
+		let actfunc = s:openfunc[s:ctype]
+	el
+		let actfunc = s:itemtype < 3 ? 'ctrlp#acceptfile' : s:getextvar('accept')
+	en
 	cal call(actfunc, [a:mode, line])
 endf
 " - CreateNewFile() {{{1
@@ -1008,6 +1013,8 @@ fu! s:OpenMulti(...)
 			endfo
 			cal s:remarksigns()
 			retu s:BuildPrompt(0)
+		elsei !has_marked && md == 'x'
+			retu call(s:openfunc[s:ctype], [md, line])
 		en
 		if md =~ '\v^c(ancel)?$' | retu | en
 		let nr = nr == '0' ? ( nopt ? '' : '1' ) : nr
@@ -1185,16 +1192,16 @@ fu! ctrlp#statusline()
 	let max = len(tps) - 1
 	let nxt = tps[s:walker(max, s:itemtype,  1)][1]
 	let prv = tps[s:walker(max, s:itemtype, -1)][1]
-	let item = tps[s:itemtype][0]
+	let s:ctype = tps[s:itemtype][0]
 	let focus   = s:Focus() ? 'prt'  : 'win'
 	let byfname = s:byfname ? 'file' : 'path'
 	let marked  = s:opmul != '0' ?
 		\ exists('s:marked') ? ' <'.s:dismrk().'>' : ' <->' : ''
 	if s:status != {}
-		let args = [focus, byfname, s:regexp, prv, item, nxt, marked]
+		let args = [focus, byfname, s:regexp, prv, s:ctype, nxt, marked]
 		let &l:stl = call(s:status['main'], args)
 	el
-		let item    = '%#CtrlPMode1# '.item.' %*'
+		let item    = '%#CtrlPMode1# '.s:ctype.' %*'
 		let focus   = '%#CtrlPMode2# '.focus.' %*'
 		let byfname = '%#CtrlPMode1# '.byfname.' %*'
 		let regex   = s:regexp  ? '%#CtrlPMode2# regex %*' : ''
@@ -1561,6 +1568,10 @@ fu! s:argmaps(md, i)
 		\ ['Create a New File', '/[r]eplace', ['r']],
 		\ ['Open Selected', '/[r]eplace/h[i]dden? Mark [a]ll', ['r', 'i', 'a']],
 		\ ]
+	if a:i == 2 && s:openfunc != {} && has_key(s:openfunc, s:ctype)
+		let roh[2][1] = '/[r]eplace/h[i]dden/e[x]ternal? Mark [a]ll'
+		let roh[2][2] = ['r', 'i', 'x', 'a']
+	en
 	let str = roh[a:i][0].': [t]ab/[v]ertical/[h]orizontal'.roh[a:i][1].'? '
 	retu s:choices(str, ['t', 'v', 'h'] + roh[a:i][2], 's:argmaps', [a:md, a:i])
 endf
