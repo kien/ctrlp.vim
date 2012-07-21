@@ -47,10 +47,10 @@
 			<p class="note">Check <code>:help ctrlp-commands</code> and <code>:help ctrlp-extensions</code> for other commands.</p>
 			<h5>Once CtrlP is open:</h5>
 			<ul>
+				<li>Press <code>&lt;F5&gt;</code> to purge the cache for the current directory to get new files, remove deleted files and apply new ignore options.</li>
 				<li>Press <code>&lt;c-f&gt;</code> and <code>&lt;c-b&gt;</code> to cycle between modes.</li>
 				<li>Press <code>&lt;c-d&gt;</code> to switch to filename search instead of full path.</li>
 				<li>Press <code>&lt;c-r&gt;</code> to switch to regexp mode.</li>
-				<li>Press <code>&lt;F5&gt;</code> to purge the cache for the current directory and get new files.</li>
 				<li>Use <code>&lt;c-n&gt;</code>, <code>&lt;c-p&gt;</code> to select the next/previous string in the prompt's history.</li>
 				<li>Use <code>&lt;c-y&gt;</code> to create a new file and its parent directories.</li>
 				<li>Use <code>&lt;c-z&gt;</code> to mark/unmark multiple files and <code>&lt;c-o&gt;</code> to open them.</li>
@@ -76,10 +76,10 @@ let g:ctrlp_cmd = 'CtrlP'</code></pre>
 				</li>
 				<li>
 					When invoked, unless a starting directory is specified, CtrlP will set its local working directory according to this variable:
-					<pre><code>let g:ctrlp_working_path_mode = 2</code></pre>
-					0 - don't manage working directory.<br>
-					1 - the directory of the current file.<br>
-					2 - the nearest ancestor that contains one of these directories or files: <code>.git</code> <code>.hg</code> <code>.svn</code> <code>.bzr</code> <code>_darcs</code>,
+					<pre><code>let g:ctrlp_working_path_mode = 'rc'</code></pre>
+					<code>{empty-string}</code> - don't manage working directory.<br>
+					<code>c</code> - the directory of the current file.<br>
+					<code>r</code> - the nearest ancestor that contains one of these directories or files: <code>.git</code> <code>.hg</code> <code>.svn</code> <code>.bzr</code> <code>_darcs</code>,
 					and your own root markers defined with the <code>g:ctrlp_root_markers</code> option.
 				</li>
 				<li>

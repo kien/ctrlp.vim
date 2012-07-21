@@ -1,6 +1,5 @@
-.hgignore
 *.markdown
 *.zip
 note.txt
-.hg/*
+.hg*
 tmp/*
