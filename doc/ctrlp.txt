@@ -160,14 +160,18 @@ Where to put the new tab page when opening one: >
                                                   *'g:ctrlp_working_path_mode'*
 When starting up, CtrlP sets its local working directory according to this
 variable: >
-  let g:ctrlp_working_path_mode = 2
+  let g:ctrlp_working_path_mode = 'rc'
 <
-  1 - the directory of the current file.
-  2 - the nearest ancestor that contains one of these directories or files:
+  c - the directory of the current file.
+  r - the nearest ancestor that contains one of these directories or files:
       .git .hg .svn .bzr _darcs
-  0 - don't manage working directory.
-Note: you can use b:ctrlp_working_path_mode (a |b:var|) to set this option on a
-per buffer basis.
+  {empty-string} - don't manage working directory.
+
+Note #1: you can use b:ctrlp_working_path_mode (a |b:var|) to set this option
+on a per buffer basis.
+
+Note #2: with both 'r' and 'c' in the option, when a root isn't found, use the
+directory of the current file.
 
                                                        *'g:ctrlp_root_markers'*
 Use this to set your own root markers in addition to the default ones (.git,
@@ -200,7 +204,10 @@ Set the directory to store the cache files: >
 Set this to 0 if you don't want CtrlP to scan for dotfiles and dotdirs: >
   let g:ctrlp_dotfiles = 1
 <
-You can use |'wildignore'| to exclude anything from the search.
+
+                                                           *'ctrlp-wildignore'*
+You can use Vim's |'wildignore'| to exclude files and directories from the
+results.
 Examples: >
   " Excluding version control directories
   set wildignore+=*/.git/*,*/.hg/*,*/.svn/*  " Linux/MacOSX
@@ -226,7 +233,7 @@ Examples: >
     \ 'link': 'SOME_BAD_SYMBOLIC_LINKS',
     \ }
 <
-Note: ignoring only works when |globpath()| is used to scan for files.
+Note: ignoring only applies when |globpath()| is used to scan for files.
 
                                                           *'g:ctrlp_max_files'*
 The maximum number of files to scan, set to 0 for no limit: >
@@ -307,6 +314,7 @@ For the number:
   - If given, it'll be used as the maximum number of windows or tabs to create
     when opening the files (the rest will be opened as hidden buffers).
   - If not given, <c-o> will open all files, each in a new window or new tab.
+
 For the letters:
   t - each file in a new tab.
   h - each file in a new horizontal split.
@@ -475,17 +483,19 @@ Structure of the functions: >
     " |             + 'h' : user pressed <c-x> (default)
     " |             + 'v' : user pressed <c-v> (default)
     " |             + 't' : user pressed <c-t> (default)
-    " |             + 'x' : user used the <c-o> dialog (default) and chose
-    " |                     "e[x]ternal".
+    " |             + 'x' : user used the <c-o> console dialog (default) and
+    " |                     chose "e[x]ternal".
     " |
     " +- a:line   : The selected line.
 
   endfunction
 <
-Linux example: open HTML files in the default web browser when <c-t> is pressed
-and in Vim otherwise >
+Note: does not apply when opening multiple files with <c-z> and <c-o>.
+
+Example: open HTML files in the default web browser when <c-t> is pressed and
+in Vim otherwise >
   function! HTMLOpenFunc(action, line)
-    if a:action == 't' && fnamemodify(a:line, ':e') =~? '^html\?$'
+    if a:action =~ '^[tx]$' && fnamemodify(a:line, ':e') =~? '^html\?$'
 
       " Get the filename
       let filename = fnameescape(fnamemodify(a:line, ':p'))
@@ -498,7 +508,7 @@ and in Vim otherwise >
 
     elseif a:action == 'x' && fnamemodify(a:line, ':e') !~? '^html\?$'
 
-      " Not a HTML file, simulate pressing <c-o> again
+      " Not a HTML file, simulate pressing <c-o> again and wait for new input
       call feedkeys("\<c-o>")
 
     else
@@ -511,7 +521,6 @@ and in Vim otherwise >
 
   let g:ctrlp_open_func = { 'files': 'HTMLOpenFunc' }
 <
-Note: this option does not apply when opening multiple files with <c-z>, <c-o>.
 
                                                         *'g:ctrlp_status_func'*
 Use this to customize the statuslines for the CtrlP window: >
@@ -630,8 +639,8 @@ COMMANDS                                                       *ctrlp-commands*
 
                                                                    *:CtrlPRoot*
 :CtrlPRoot
-    This acts like |:CtrlP| with |g:ctrlp_working_path_mode| = 2 (ignores the
-    variable's current value).
+    This acts like |:CtrlP| with |g:ctrlp_working_path_mode| = 'rc' and ignores
+    the variable's current value.
 
                                                              *:CtrlPClearCache*
 :CtrlPClearCache
@@ -778,7 +787,7 @@ Pasting:~
     Paste the clipboard content into the prompt.
 
   <c-\>
-    Open a text dialog to paste <cword>, <cfile>, the content of the search
+    Open a console dialog to paste <cword>, <cfile>, the content of the search
     register, the last visual selection, the clipboard or any register into the
     prompt.
 
@@ -790,8 +799,7 @@ When inside the match window (press <s-tab> to switch):~
   a-z
   0-9
   ~^-=;`',.+!@#$%&_(){}[]
-    Cycle through the lines with the first letter (of paths or filenames) that
-    matches that key.
+    Cycle through the lines which have the matching first character.
 
 ===============================================================================
 INPUT FORMATS                                             *ctrlp-input-formats*

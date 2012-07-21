@@ -46,12 +46,12 @@ Use `:difft` when opening multiple files to run `:difft` on the first 4 files.
 * When invoked, unless a starting directory is specified, CtrlP will set its local working directory according to this variable:
 
     ```vim
-    let g:ctrlp_working_path_mode = 2
+    let g:ctrlp_working_path_mode = 'rc'
     ```
 
-    0 - don't manage working directory.  
-    1 - the directory of the current file.  
-    2 - the nearest ancestor that contains one of these directories or files:
+    `{empty-string}` - don't manage working directory.  
+    `c` - the directory of the current file.  
+    `r` - the nearest ancestor that contains one of these directories or files:
     `.git` `.hg` `.svn` `.bzr` `_darcs`
 
     Define additional root markers with the `g:ctrlp_root_markers` option.
