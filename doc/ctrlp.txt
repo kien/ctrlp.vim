@@ -226,14 +226,22 @@ CtrlP to not show. Use regexp to specify the patterns: >
   let g:ctrlp_custom_ignore = ''
 <
 Examples: >
-  let g:ctrlp_custom_ignore = '\.git$\|\.hg$\|\.svn$'
+  let g:ctrlp_custom_ignore = '\v(\.git|\.hg|\.svn)($|[\/])'
   let g:ctrlp_custom_ignore = {
-    \ 'dir':  '\.git$\|\.hg$\|\.svn$',
+    \ 'dir':  '\v(\.git|\.hg|\.svn)($|[\/])',
     \ 'file': '\.exe$\|\.so$\|\.dll$',
     \ 'link': 'SOME_BAD_SYMBOLIC_LINKS',
     \ }
+  let g:ctrlp_custom_ignore = {
+    \ 'file': '\v(\.cpp|\.h|\.hh|\.cxx)@<!$'
+    \ }
 <
-Note: ignoring only applies when |globpath()| is used to scan for files.
+Note #1: by default, |wildignore| and |g:ctrlp_custom_ignore| only apply when
+|globpath()| is used to scan for files, thus these options do not apply when a
+command defined with |g:ctrlp_user_command| is being used.
+
+Note #2: when changing the option's variable type, remember to |:unlet| it
+first or restart Vim to avoid the "E706: Variable type mismatch" error.
 
                                                           *'g:ctrlp_max_files'*
 The maximum number of files to scan, set to 0 for no limit: >
@@ -268,7 +276,8 @@ when scanning large projects: >
       \ 1: [root_marker_1, listing_command_1],
       \ n: [root_marker_n, listing_command_n],
       \ },
-    \ 'fallback': fallback_command
+    \ 'fallback': fallback_command,
+    \ 'ignore': 0 or 1
     \ }
 <
 Examples: >
@@ -279,11 +288,20 @@ Examples: >
       \ 1: ['.git', 'cd %s && git ls-files'],
       \ 2: ['.hg', 'hg --cwd %s locate -I .'],
       \ },
-    \ 'fallback': 'find %s -type f'
+    \ 'fallback': 'find %s -type f',
+    \ 'ignore': 0
     \ }
 <
-If the fallback_command is empty or not defined, |globpath()| will then be used
-when searching outside a repo.
+Note #1: if the fallback_command is empty or not defined, |globpath()| will
+then be used when searching outside a repo.
+
+Note #2: unless the |Dictionary| format is used and 'ignore' is defined and set
+to 1, the |wildignore| and |g:ctrlp_custom_ignore| options do not apply when
+these custom commands are being used. When not defined, 'ignore' is set to 0 by
+default to retain the performance advantage of using external commands.
+
+Note #3: when changing the option's variable type, remember to |:unlet| it
+first or restart Vim to avoid the "E706: Variable type mismatch" error.
 
                                                         *'g:ctrlp_max_history'*
 The maximum number of input strings you want CtrlP to remember. The default
@@ -1113,6 +1131,7 @@ Special thanks:~
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
 
+    + New key for |g:ctrlp_user_command| when it's a Dictionary: 'ignore'.
     + New options: |g:ctrlp_open_func|.
                    |g:ctrlp_tabpage_position|.
 

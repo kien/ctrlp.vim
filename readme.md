@@ -62,9 +62,9 @@ Use `:difft` when opening multiple files to run `:difft` on the first 4 files.
     set wildignore+=*/tmp/*,*.so,*.swp,*.zip  " MacOSX/Linux
     set wildignore+=tmp\*,*.swp,*.zip,*.exe   " Windows
 
-    let g:ctrlp_custom_ignore = '\.git$\|\.hg$\|\.svn$'
+    let g:ctrlp_custom_ignore = '\v(\.git|\.hg|\.svn)($|[\/])'
     let g:ctrlp_custom_ignore = {
-      \ 'dir':  '\.git$\|\.hg$\|\.svn$',
+      \ 'dir':  '\v(\.git|\.hg|\.svn)($|[\/])',
       \ 'file': '\.exe$\|\.so$\|\.dll$',
       \ 'link': 'some_bad_symbolic_links',
       \ }

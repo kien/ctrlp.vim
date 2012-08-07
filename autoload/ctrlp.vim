@@ -8,26 +8,26 @@
 " ** Static variables {{{1
 fu! s:ignore() "{{{2
 	let igdirs = [
-		\ '\.git$',
-		\ '\.hg$',
-		\ '\.svn$',
-		\ '_darcs$',
-		\ '\.bzr$',
-		\ '\.cdv$',
-		\ '\~\.dep$',
-		\ '\~\.dot$',
-		\ '\~\.nib$',
-		\ '\~\.plst$',
-		\ '\.pc$',
-		\ '_MTN$',
-		\ '<blib$',
-		\ '<CVS$',
-		\ '<RCS$',
-		\ '<SCCS$',
-		\ '_sgbak$',
-		\ '<autom4te\.cache$',
-		\ '<cover_db$',
-		\ '_build$',
+		\ '\.git',
+		\ '\.hg',
+		\ '\.svn',
+		\ '_darcs',
+		\ '\.bzr',
+		\ '\.cdv',
+		\ '\~\.dep',
+		\ '\~\.dot',
+		\ '\~\.nib',
+		\ '\~\.plst',
+		\ '\.pc',
+		\ '_MTN',
+		\ '<blib',
+		\ '<CVS',
+		\ '<RCS',
+		\ '<SCCS',
+		\ '_sgbak',
+		\ '<autom4te\.cache',
+		\ '<cover_db',
+		\ '_build',
 		\ ]
 	let igfiles = [
 		\ '\~$',
@@ -45,7 +45,7 @@ fu! s:ignore() "{{{2
 		\ '\.tar\.gz$',
 		\ ]
 	retu {
-		\ 'dir': '\v'.join(igdirs, '|'),
+		\ 'dir': '\v('.join(igdirs, '|').')($|[\/])',
 		\ 'file': '\v'.join(igfiles, '|'),
 		\ }
 endf "}}}2
@@ -347,6 +347,14 @@ fu! s:UserCmd(lscmd)
 	if exists('s:vcscmd') && s:vcscmd
 		cal map(g:ctrlp_allfiles, 'tr(v:val, "/", "\\")')
 	en
+	if type(s:usrcmd) == 4 && has_key(s:usrcmd, 'ignore') && s:usrcmd['ignore']
+		if !empty(s:usrign)
+			let g:ctrlp_allfiles = ctrlp#dirnfile(g:ctrlp_allfiles)[1]
+		en
+		if &wig != ''
+			cal filter(g:ctrlp_allfiles, 'glob(v:val) != ""')
+		en
+	en
 endf
 
 fu! s:lsCmd()
@@ -359,12 +367,15 @@ fu! s:lsCmd()
 		en
 		let s:vcscmd = s:lash == '\' ? 1 : 0
 		retu cmd[1]
-	elsei type(cmd) == 4 && has_key(cmd, 'types')
-		let [markrs, cmdtypes] = [[], values(cmd['types'])]
-		for pair in cmdtypes
-			cal add(markrs, pair[0])
-		endfo
-		let fndroot = s:findroot(s:dyncwd, markrs, 0, 1)
+	elsei type(cmd) == 4 && ( has_key(cmd, 'types') || has_key(cmd, 'fallback') )
+		let fndroot = []
+		if has_key(cmd, 'types') && cmd['types'] != {}
+			let [markrs, cmdtypes] = [[], values(cmd['types'])]
+			for pair in cmdtypes
+				cal add(markrs, pair[0])
+			endfo
+			let fndroot = s:findroot(s:dyncwd, markrs, 0, 1)
+		en
 		if fndroot == []
 			retu has_key(cmd, 'fallback') ? cmd['fallback'] : ''
 		en
