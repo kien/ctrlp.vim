@@ -310,13 +310,16 @@ fu! ctrlp#files()
 			cal sort(g:ctrlp_allfiles, 'ctrlp#complen')
 		en
 		cal s:writecache(cafile)
+		let catime = getftime(cafile)
 	el
+		let catime = getftime(cafile)
 		if !( exists('s:initcwd') && s:initcwd == s:dyncwd )
+			\ || get(s:ficounts, s:dyncwd, [0, catime])[1] != catime
 			let s:initcwd = s:dyncwd
 			let g:ctrlp_allfiles = ctrlp#utils#readfile(cafile)
 		en
 	en
-	cal extend(s:ficounts, { s:dyncwd : len(g:ctrlp_allfiles) })
+	cal extend(s:ficounts, { s:dyncwd : [len(g:ctrlp_allfiles), catime] })
 	retu g:ctrlp_allfiles
 endf
 
@@ -1846,7 +1849,8 @@ fu! s:writecache(cache_file)
 endf
 
 fu! s:nocache()
-	retu !s:caching || ( s:caching > 1 && get(s:ficounts, s:dyncwd) < s:caching )
+	retu !s:caching ||
+		\ ( s:caching > 1 && get(s:ficounts, s:dyncwd, [0, 0])[0] < s:caching )
 endf
 
 fu! s:insertcache(str)
