@@ -165,7 +165,7 @@ variable: >
   c - the directory of the current file.
   r - the nearest ancestor that contains one of these directories or files:
       .git .hg .svn .bzr _darcs
-  {empty-string} - don't manage working directory.
+  0 or [empty-string] - don't manage working directory.
 
 Note #1: you can use b:ctrlp_working_path_mode (a |b:var|) to set this option
 on a per buffer basis.

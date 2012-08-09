@@ -33,6 +33,7 @@ Run `:help ctrlp-mappings` or submit `?` in CtrlP for more mapping help.
 * End the input string with a colon `:` followed by a command to execute it on the opening file(s):  
 Use `:25` to jump to line 25.  
 Use `:/any\:\ string` to jump to the first instance of `any: string`.  
+Use `:+setf\ myfiletype|25` to set the filetype to myfiletype, then jump to line 25.  
 Use `:difft` when opening multiple files to run `:difft` on the first 4 files.
 
 ## Basic Options
@@ -49,10 +50,10 @@ Use `:difft` when opening multiple files to run `:difft` on the first 4 files.
     let g:ctrlp_working_path_mode = 'rc'
     ```
 
-    `{empty-string}` - don't manage working directory.  
-    `c` - the directory of the current file.  
-    `r` - the nearest ancestor that contains one of these directories or files:
-    `.git` `.hg` `.svn` `.bzr` `_darcs`
+    `'c'` - the directory of the current file.  
+    `'r'` - the nearest ancestor that contains one of these directories or files:
+    `.git` `.hg` `.svn` `.bzr` `_darcs`  
+    `0` or `''` (empty string) - don't manage working directory.
 
     Define additional root markers with the `g:ctrlp_root_markers` option.
 
