@@ -26,6 +26,7 @@ Check `:help ctrlp-commands` and `:help ctrlp-extensions` for other commands.
 * Use `<c-n>`, `<c-p>` to select the next/previous string in the prompt's history.
 * Use `<c-y>` to create a new file and its parent directories.
 * Use `<c-z>` to mark/unmark multiple files and `<c-o>` to open them.
+* Use `<c-k>` and `<c-j>` to move up and down the file list.
 
 Run `:help ctrlp-mappings` or submit `?` in CtrlP for more mapping help.
 
