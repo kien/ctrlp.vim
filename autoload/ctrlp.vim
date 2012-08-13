@@ -134,7 +134,7 @@ let [s:lcmap, s:prtmaps] = ['nn <buffer> <silent>', {
 	\ 'PrtExit()':            ['<esc>', '<c-c>', '<c-g>'],
 	\ }]
 
-if !has('gui_running') && ( has('win32') || has('win64') )
+if !has('gui_running')
 	cal add(s:prtmaps['PrtBS()'], remove(s:prtmaps['PrtCurLeft()'], 0))
 en
 

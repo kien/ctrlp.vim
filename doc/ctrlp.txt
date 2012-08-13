@@ -430,9 +430,8 @@ only need to keep the lines that you've changed the values (inside []): >
     \ 'PrtExit()':            ['<esc>', '<c-c>', '<c-g>'],
     \ }
 <
-Note: In some terminals, it's not possible to remap <c-h> without also changing
-<bs> (|keycodes|). So if pressing <bs> moves the cursor to the left instead of
-deleting a char for you, add this to your |.vimrc| to disable the plugin's
+Note: if pressing <bs> moves the cursor one character to the left instead of
+deleting a character for you, add this to your |.vimrc| to disable the plugin's
 default <c-h> mapping: >
   let g:ctrlp_prompt_mappings = { 'PrtCurLeft()': ['<left>', '<c-^>'] }
 <
