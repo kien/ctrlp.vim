@@ -144,6 +144,8 @@ let s:compare_lim = 3000
 
 let s:ficounts = {}
 
+let s:ccex = s:pref.'clear_cache_on_exit'
+
 " Regexp
 let s:fpats = {
 	\ '^\(\\|\)\|\(\\|\)$': '\\|',
@@ -294,7 +296,7 @@ endf
 " * Files {{{1
 fu! ctrlp#files()
 	let cafile = ctrlp#utils#cachefile()
-	if g:ctrlp_newcache || !filereadable(cafile) || s:nocache()
+	if g:ctrlp_newcache || !filereadable(cafile) || s:nocache(cafile)
 		let [lscmd, s:initcwd, g:ctrlp_allfiles] = [s:lsCmd(), s:dyncwd, []]
 		" Get the list of files
 		if empty(lscmd)
@@ -1521,7 +1523,7 @@ endf
 
 fu! s:leavepre()
 	if exists('s:bufnr') && s:bufnr == bufnr('%') | bw! | en
-	if !( exists('g:ctrlp_clear_cache_on_exit') && !g:ctrlp_clear_cache_on_exit )
+	if !( exists(s:ccex) && !{s:ccex} )
 		\ && !( has('clientserver') && len(split(serverlist(), "\n")) > 1 )
 		cal ctrlp#clra()
 	en
@@ -1841,16 +1843,25 @@ fu! s:mmode()
 	retu matchmodes[s:mfunc]
 endf
 " Cache {{{2
-fu! s:writecache(cache_file)
-	if ( g:ctrlp_newcache || !filereadable(a:cache_file) ) && !s:nocache()
+fu! s:writecache(cafile)
+	if ( g:ctrlp_newcache || !filereadable(a:cafile) ) && !s:nocache()
 		cal ctrlp#utils#writecache(g:ctrlp_allfiles)
 		let g:ctrlp_newcache = 0
 	en
 endf
 
-fu! s:nocache()
-	retu !s:caching ||
-		\ ( s:caching > 1 && get(s:ficounts, s:dyncwd, [0, 0])[0] < s:caching )
+fu! s:nocache(...)
+	if !s:caching
+		retu 1
+	elsei s:caching > 1
+		if !( exists(s:ccex) && !{s:ccex} ) || has_key(s:ficounts, s:dyncwd)
+			retu get(s:ficounts, s:dyncwd, [0, 0])[0] < s:caching
+		elsei a:0 && filereadable(a:1)
+			retu len(ctrlp#utils#readfile(a:1)) < s:caching
+		en
+		retu 1
+	en
+	retu 0
 endf
 
 fu! s:insertcache(str)
