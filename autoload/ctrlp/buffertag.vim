@@ -208,7 +208,7 @@ fu! ctrlp#buffertag#init(fname)
 	let lines = []
 	for each in bufs
 		let bname = fnamemodify(each, ':p')
-		let tftype = get(split(getbufvar(bname, '&ft'), '\.'), 0, '')
+		let tftype = get(split(getbufvar('^'.bname.'$', '&ft'), '\.'), 0, '')
 		cal extend(lines, s:process(bname, tftype))
 	endfo
 	cal s:syntax()

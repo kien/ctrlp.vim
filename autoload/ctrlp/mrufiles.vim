@@ -48,15 +48,19 @@ endf
 fu! s:record(bufnr)
 	if s:locked | retu | en
 	let bufnr = a:bufnr + 0
-	if bufnr <= 0 | retu | en
 	let bufname = bufname(bufnr)
-	if empty(bufname) | retu | en
-	let fn = fnamemodify(bufname, ':p')
+	if bufnr > 0 && !empty(bufname)
+		cal filter(s:mrbs, 'v:val != bufnr')
+		cal insert(s:mrbs, bufnr)
+		cal s:addtomrufs(bufname)
+	en
+endf
+
+fu! s:addtomrufs(fname)
+	let fn = fnamemodify(a:fname, ':p')
 	let fn = exists('+ssl') ? tr(fn, '/', '\') : fn
-	cal filter(s:mrbs, 'v:val != bufnr')
-	cal insert(s:mrbs, bufnr)
 	if ( !empty({s:in}) && fn !~# {s:in} ) || ( !empty({s:ex}) && fn =~# {s:ex} )
-		\ || !empty(&bt) || !filereadable(fn) | retu
+		\ || !empty(getbufvar('^'.fn.'$', '&bt')) || !filereadable(fn) | retu
 	en
 	cal filter(s:mrufs, 'v:val !='.( {s:cseno} ? '#' : '?' ).' fn')
 	cal insert(s:mrufs, fn)
@@ -85,6 +89,12 @@ fu! ctrlp#mrufiles#remove(files)
 	en
 	cal s:savetofile(s:mrufs)
 	retu s:reformat(copy(s:mrufs))
+endf
+
+fu! ctrlp#mrufiles#add(fn)
+	if !empty(a:fn)
+		cal s:addtomrufs(a:fn)
+	en
 endf
 
 fu! ctrlp#mrufiles#list(...)
