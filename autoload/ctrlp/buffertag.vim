@@ -183,7 +183,7 @@ fu! s:process(fname, ftype)
 endf
 
 fu! s:parseline(line)
-	let eval = '\v^([^\t]+)\t(.+)\t\/\^(.+)\$\/\;\"\t(.+)\tline(no)?\:(\d+)'
+	let eval = '\v^([^\t]+)\t(.+)\t\/\^?(.+)\$?\/\;\"\t(.+)\tline(no)?\:(\d+)'
 	let vals = matchlist(a:line, eval)
 	if vals == [] | retu '' | en
 	let [bufnr, bufname] = [bufnr('^'.vals[2].'$'), fnamemodify(vals[2], ':p:t')]
