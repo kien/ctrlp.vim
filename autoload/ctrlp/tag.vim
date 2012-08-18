@@ -54,11 +54,11 @@ fu! s:filter(tags)
 	let nr = 0
 	wh 0 < 1
 		if a:tags == [] | brea | en
-		if a:tags[nr] =~ '^!' && a:tags[nr] !~ '^!_TAG_'
+		if a:tags[nr] =~ '^!' && a:tags[nr] !~# '^!_TAG_'
 			let nr += 1
 			con
 		en
-		if a:tags[nr] =~ '^!_TAG_' && len(a:tags) > nr
+		if a:tags[nr] =~# '^!_TAG_' && len(a:tags) > nr
 			cal remove(a:tags, nr)
 		el
 			brea
