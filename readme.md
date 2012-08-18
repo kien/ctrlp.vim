@@ -33,8 +33,8 @@ Run `:help ctrlp-mappings` or submit `?` in CtrlP for more mapping help.
 * End the input string with a colon `:` followed by a command to execute it on the opening file(s):  
 Use `:25` to jump to line 25.  
 Use `:/any\:\ string` to jump to the first instance of `any: string`.  
-Use `:+setf\ myfiletype|25` to set the filetype to myfiletype, then jump to line 25.  
-Use `:difft` when opening multiple files to run `:difft` on the first 4 files.
+Use `:+setfiletype\ myfiletype|25` to set the filetype to myfiletype, then jump to line 25.  
+Use `:diffthis` when opening multiple files to run `:diffthis` on the first 4 files.
 
 ## Basic Options
 * Change the default mapping and the default command to invoke CtrlP:
@@ -60,8 +60,8 @@ Use `:difft` when opening multiple files to run `:difft` on the first 4 files.
 * Exclude files and directories using Vim's `wildignore` and CtrlP's own `g:ctrlp_custom_ignore`:
 
     ```vim
-    set wildignore+=*/tmp/*,*.so,*.swp,*.zip  " MacOSX/Linux
-    set wildignore+=tmp\*,*.swp,*.zip,*.exe   " Windows
+    set wildignore+=*/tmp/*,*.so,*.swp,*.zip     " MacOSX/Linux
+    set wildignore+=*\\tmp\\*,*.swp,*.zip,*.exe  " Windows
 
     let g:ctrlp_custom_ignore = '\v(\.git|\.hg|\.svn)($|[\/])'
     let g:ctrlp_custom_ignore = {

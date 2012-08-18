@@ -210,8 +210,8 @@ You can use Vim's |'wildignore'| to exclude files and directories from the
 results.
 Examples: >
   " Excluding version control directories
-  set wildignore+=*/.git/*,*/.hg/*,*/.svn/*  " Linux/MacOSX
-  set wildignore+=.git\*,.hg\*,.svn\*        " Windows
+  set wildignore+=*/.git/*,*/.hg/*,*/.svn/*        " Linux/MacOSX
+  set wildignore+=*\\.git\\*,*\\.hg\\*,*\\.svn\\*  " Windows ('noshellslash')
 <
 Note #1: the `*/` in front of each directory glob is required.
 
