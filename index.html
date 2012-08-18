@@ -77,19 +77,19 @@ let g:ctrlp_cmd = 'CtrlP'</code></pre>
 				<li>
 					When invoked, unless a starting directory is specified, CtrlP will set its local working directory according to this variable:
 					<pre><code>let g:ctrlp_working_path_mode = 'rc'</code></pre>
-					<code>{empty-string}</code> - don't manage working directory.<br>
-					<code>c</code> - the directory of the current file.<br>
-					<code>r</code> - the nearest ancestor that contains one of these directories or files: <code>.git</code> <code>.hg</code> <code>.svn</code> <code>.bzr</code> <code>_darcs</code>,
-					and your own root markers defined with the <code>g:ctrlp_root_markers</code> option.
+					<code>'c'</code> - the directory of the current file.<br>
+					<code>'r'</code> - the nearest ancestor that contains one of these directories or files: <code>.git</code> <code>.hg</code> <code>.svn</code> <code>.bzr</code> <code>_darcs</code>,
+					and your own root markers defined with the <code>g:ctrlp_root_markers</code> option.<br>
+					<code>0</code> or <code>''</code> (empty string) - don't manage working directory.
 				</li>
 				<li>
 					Exclude files or directories using Vim's <code>wildignore</code>:
-					<pre><code>set wildignore+=*/tmp/*,*.so,*.swp,*.zip   " Linux/MacOSX
-set wildignore+=tmp\*,*.swp,*.zip,*.exe    " Windows</code></pre>
+					<pre><code>set wildignore+=*/tmp/*,*.so,*.swp,*.zip     " Linux/MacOSX
+set wildignore+=*\\tmp\\*,*.swp,*.zip,*.exe  " Windows</code></pre>
 					And/Or CtrlP's own <code>g:ctrlp_custom_ignore</code>:
-					<pre><code>let g:ctrlp_custom_ignore = '\.git$\|\.hg$\|\.svn$'
+					<pre><code>let g:ctrlp_custom_ignore = '\v(\.git|\.hg|\.svn)($|[\/])'
 let g:ctrlp_custom_ignore = {
-	\ 'dir':  '\.git$\|\.hg$\|\.svn$',
+	\ 'dir':  '\v(\.git|\.hg|\.svn)($|[\/])',
 	\ 'file': '\.exe$\|\.so$\|\.dll$',
 	\ 'link': 'SOME_BAD_SYMBOLIC_LINKS',
 	\ }</code></pre>
