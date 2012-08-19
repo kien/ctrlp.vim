@@ -226,9 +226,9 @@ CtrlP to not show. Use regexp to specify the patterns: >
   let g:ctrlp_custom_ignore = ''
 <
 Examples: >
-  let g:ctrlp_custom_ignore = '\v(\.git|\.hg|\.svn)($|[\/])'
+  let g:ctrlp_custom_ignore = '\v[\/](\.git|\.hg|\.svn)$'
   let g:ctrlp_custom_ignore = {
-    \ 'dir':  '\v(\.git|\.hg|\.svn)($|[\/])',
+    \ 'dir':  '\v[\/](\.git|\.hg|\.svn)$',
     \ 'file': '\.exe$\|\.so$\|\.dll$',
     \ 'link': 'SOME_BAD_SYMBOLIC_LINKS',
     \ }

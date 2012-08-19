@@ -20,13 +20,13 @@ fu! s:ignore() "{{{2
 		\ '\~\.plst',
 		\ '\.pc',
 		\ '_MTN',
-		\ '<blib',
-		\ '<CVS',
-		\ '<RCS',
-		\ '<SCCS',
+		\ 'blib',
+		\ 'CVS',
+		\ 'RCS',
+		\ 'SCCS',
 		\ '_sgbak',
-		\ '<autom4te\.cache',
-		\ '<cover_db',
+		\ 'autom4te\.cache',
+		\ 'cover_db',
 		\ '_build',
 		\ ]
 	let igfiles = [
@@ -45,7 +45,7 @@ fu! s:ignore() "{{{2
 		\ '\.tar\.gz$',
 		\ ]
 	retu {
-		\ 'dir': '\v('.join(igdirs, '|').')($|[\/])',
+		\ 'dir': '\v[\/]('.join(igdirs, '|').')$',
 		\ 'file': '\v'.join(igfiles, '|'),
 		\ }
 endf "}}}2
