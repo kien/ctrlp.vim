@@ -87,9 +87,9 @@ let g:ctrlp_cmd = 'CtrlP'</code></pre>
 					<pre><code>set wildignore+=*/tmp/*,*.so,*.swp,*.zip     " Linux/MacOSX
 set wildignore+=*\\tmp\\*,*.swp,*.zip,*.exe  " Windows</code></pre>
 					And/Or CtrlP's own <code>g:ctrlp_custom_ignore</code>:
-					<pre><code>let g:ctrlp_custom_ignore = '\v(\.git|\.hg|\.svn)($|[\/])'
+					<pre><code>let g:ctrlp_custom_ignore = '\v[\/](\.git|\.hg|\.svn)$'
 let g:ctrlp_custom_ignore = {
-	\ 'dir':  '\v(\.git|\.hg|\.svn)($|[\/])',
+	\ 'dir':  '\v[\/](\.git|\.hg|\.svn)$',
 	\ 'file': '\.exe$\|\.so$\|\.dll$',
 	\ 'link': 'SOME_BAD_SYMBOLIC_LINKS',
 	\ }</code></pre>
