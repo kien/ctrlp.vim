@@ -265,8 +265,10 @@ Examples: >
 <
 You can also use 'grep', 'findstr' or something else to filter the results.
 Examples: >
-  let g:ctrlp_user_command = 'find %s -type f | grep (?!tmp/.*)'
-  let g:ctrlp_user_command = 'dir %s /-n /b /s /a-d | findstr .*\.py$'
+  let g:ctrlp_user_command =
+    \ 'find %s -type f | grep -v -P "\.jpg$|/tmp/"'          " MacOSX/Linux
+  let g:ctrlp_user_command =
+    \ 'dir %s /-n /b /s /a-d | findstr /v /l ".jpg \\tmp\\"' " Windows
 <
 Use a version control listing command when inside a repository, this is faster
 when scanning large projects: >
@@ -280,17 +282,29 @@ when scanning large projects: >
     \ 'ignore': 0 or 1
     \ }
 <
-Examples: >
+Some examples: >
+  " Single VCS, listing command does not list untracked files:
   let g:ctrlp_user_command = ['.git', 'cd %s && git ls-files']
   let g:ctrlp_user_command = ['.hg', 'hg --cwd %s locate -I .']
+
+  " Multiple VCS's:
   let g:ctrlp_user_command = {
     \ 'types': {
       \ 1: ['.git', 'cd %s && git ls-files'],
       \ 2: ['.hg', 'hg --cwd %s locate -I .'],
       \ },
-    \ 'fallback': 'find %s -type f',
-    \ 'ignore': 0
+    \ 'fallback': 'find %s -type f'
     \ }
+
+  " Single VCS, listing command lists untracked files (slower):
+  let g:ctrlp_user_command =
+    \ ['.git', 'cd %s && git ls-files . -co --exclude-standard']
+
+  let g:ctrlp_user_command =
+    \ ['.hg', 'hg --cwd %s status -numac -I . $(hg root)'] " MacOSX/Linux
+
+  let g:ctrlp_user_command = ['.hg', 'for /f "tokens=1" %%a in (''hg root'') '
+    \ . 'do hg --cwd %s status -numac -I . %%a']           " Windows
 <
 Note #1: if the fallback_command is empty or not defined, |globpath()| will
 then be used when searching outside a repo.
