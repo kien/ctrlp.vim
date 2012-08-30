@@ -799,7 +799,22 @@ Opening multiple files:~
     - Mark/unmark a file to create a new file in its directory using <c-y>.
 
   <c-o>
-    Open files marked by <c-z>.
+    - Open files marked by <c-z>.
+    - When no file has been marked by <c-z>, open a console dialog with the
+      following options:
+
+      Open the selected file:
+        t - in a tab page.
+        v - in a vertical split.
+        h - in a horizontal split.
+        r - in the current window.
+        i - as a hidden buffer.
+        x - (optional) with the function defined in |g:ctrlp_open_func|.
+
+      Other options (not shown):
+        a - mark all files in the match window.
+        d - change CtrlP's local working directory to the selected file's
+            directory and switch to find file mode.
 
 Function keys:~
 

@@ -906,7 +906,7 @@ fu! s:AcceptSelection(mode)
 	let str = join(s:prompt, '')
 	if a:mode == 'e' | if s:SpecInputs(str) | retu | en | en
 	" Get the selected line
-	let line = !empty(s:lines) ? s:lines[line('.') - 1] : ''
+	let line = ctrlp#getcline()
 	if a:mode != 'e' && !s:itemtype && line == ''
 		\ && str !~ '\v^(\.\.([\/]\.\.)*[\/]?[.\/]*|/|\\|\?|\@.+)$'
 		cal s:CreateNewFile(a:mode) | retu
@@ -958,7 +958,7 @@ fu! s:MarkToOpen()
 		\ || ( s:itemtype > 2 && s:getextvar('opmul') != 1 )
 		retu
 	en
-	let line = !empty(s:lines) ? s:lines[line('.') - 1] : ''
+	let line = ctrlp#getcline()
 	if empty(line) | retu | en
 	let filpath = s:ispath ? fnamemodify(line, ':p') : line
 	if exists('s:marked') && s:dictindex(s:marked, filpath) > 0
@@ -997,7 +997,7 @@ fu! s:OpenMulti(...)
 	let md = a:0 ? a:1 : ( md == '' ? 'v' : md )
 	let nopt = exists('g:ctrlp_open_multiple_files')
 	if !has_marked
-		let line = !empty(s:lines) ? s:lines[line('.') - 1] : ''
+		let line = ctrlp#getcline()
 		if line == '' | retu | en
 		let marked = { 1 : fnamemodify(line, ':p') }
 		let [nr, ur, jf, nopt] = ['1', 0, 0, 1]
@@ -1008,16 +1008,8 @@ fu! s:OpenMulti(...)
 			cal s:unmarksigns()
 			unl! s:marked
 			cal s:BuildPrompt(0)
-		elsei !has_marked && md == 'a'
-			let [s:marked, key] = [{}, 1]
-			for line in s:lines
-				let s:marked = extend(s:marked, { key : fnamemodify(line, ':p') })
-				let key += 1
-			endfo
-			cal s:remarksigns()
-			retu s:BuildPrompt(0)
-		elsei !has_marked && md == 'x'
-			retu call(s:openfunc[s:ctype], [md, line])
+		elsei !has_marked && md =~ '[axd]'
+			retu s:OpenNoMarks(md, line)
 		en
 		if md =~ '\v^c(ancel)?$' | retu | en
 		let nr = nr == '0' ? ( nopt ? '' : '1' ) : nr
@@ -1076,6 +1068,28 @@ fu! s:OpenMulti(...)
 	en
 	let &swb = swb
 	unl! s:tabct
+endf
+
+fu! s:OpenNoMarks(md, line)
+	if a:md == 'a'
+		let [s:marked, key] = [{}, 1]
+		for line in s:lines
+			let s:marked = extend(s:marked, { key : fnamemodify(line, ':p') })
+			let key += 1
+		endfo
+		cal s:remarksigns()
+		cal s:BuildPrompt(0)
+	elsei a:md == 'x'
+		cal call(s:openfunc[s:ctype], [a:md, a:line])
+	elsei a:md == 'd'
+		let dir = fnamemodify(a:line, ':h')
+		if isdirectory(dir)
+			cal ctrlp#setdir(dir)
+			cal ctrlp#switchtype(0)
+			cal ctrlp#recordhist()
+			cal s:PrtClear()
+		en
+	en
 endf
 " ** Helper functions {{{1
 " Sorting {{{2
@@ -1578,11 +1592,17 @@ fu! s:argmaps(md, i)
 	let roh = [
 		\ ['Open Multiple Files', '/h[i]dden/[c]lear', ['i', 'c']],
 		\ ['Create a New File', '/[r]eplace', ['r']],
-		\ ['Open Selected', '/[r]eplace/h[i]dden? Mark [a]ll', ['r', 'i', 'a']],
+		\ ['Open Selected', '/[r]eplace', ['r', 'd', 'a']],
 		\ ]
-	if a:i == 2 && s:openfunc != {} && has_key(s:openfunc, s:ctype)
-		let roh[2][1] = '/[r]eplace/h[i]dden/e[x]ternal? Mark [a]ll'
-		let roh[2][2] = ['r', 'i', 'x', 'a']
+	if a:i == 2
+		if !buflisted(bufnr('^'.fnamemodify(ctrlp#getcline(), ':p').'$'))
+			let roh[2][1] .= '/h[i]dden'
+			let roh[2][2] += ['i']
+		en
+		if s:openfunc != {} && has_key(s:openfunc, s:ctype)
+			let roh[2][1] .= '/e[x]ternal'
+			let roh[2][2] += ['x']
+		en
 	en
 	let str = roh[a:i][0].': [t]ab/[v]ertical/[h]orizontal'.roh[a:i][1].'? '
 	retu s:choices(str, ['t', 'v', 'h'] + roh[a:i][2], 's:argmaps', [a:md, a:i])
@@ -1685,7 +1705,7 @@ fu! s:regexfilter(str)
 endf
 
 fu! s:walker(m, p, d)
-	retu a:d > 0 ? a:p < a:m ? a:p + a:d : 0 : a:p > 0 ? a:p + a:d : a:m
+	retu a:d >= 0 ? a:p < a:m ? a:p + a:d : 0 : a:p > 0 ? a:p + a:d : a:m
 endf
 
 fu! s:delent(rfunc)
@@ -1890,6 +1910,10 @@ fu! s:getextvar(key)
 		retu has_key(vars, a:key) ? vars[a:key] : -1
 	en
 	retu -1
+endf
+
+fu! ctrlp#getcline()
+	retu !empty(s:lines) ? s:lines[line('.') - 1] : ''
 endf
 
 fu! ctrlp#exit()
