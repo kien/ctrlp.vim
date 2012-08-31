@@ -871,7 +871,8 @@ fu! ctrlp#acceptfile(mode, line, ...)
 		" Reset &switchbuf option
 		let [swb, &swb] = [&swb, '']
 		" Open new window/buffer
-		let args = [cmd, useb ? bufnr : filpath, a:0 ? ' +'.a:1 : tail, useb, j2l]
+		let [fid, tail] = [( useb ? bufnr : filpath ), ( a:0 ? ' +'.a:1 : tail )]
+		let args = [cmd, fid, tail, 1, [useb, j2l]]
 		cal call('s:openfile', args)
 		let &swb = swb
 	en
@@ -950,7 +951,7 @@ fu! s:CreateNewFile(...)
 		\ s:newfop =~ '2\|h' || ( a:0 && a:1 == 'h' ) || md == 'h' ? 'new' :
 		\ s:newfop =~ '3\|v' || ( a:0 && a:1 == 'v' ) || md == 'v' ? 'vne' :
 		\ ctrlp#normcmd('e')
-	cal s:openfile(cmd, filpath, tail)
+	cal s:openfile(cmd, filpath, tail, 1)
 endf
 " * OpenMulti() {{{1
 fu! s:MarkToOpen()
@@ -1019,9 +1020,9 @@ fu! s:OpenMulti(...)
 	cal s:sanstail(join(s:prompt, ''))
 	cal s:PrtExit()
 	if nr == '0' || md == 'i'
-		retu map(mkd, "s:openfile('bad', fnamemodify(v:val, ':.'), '')")
+		retu map(mkd, "s:openfile('bad', v:val, '', 0)")
 	en
-	let [tail, fnesc] = [s:tail(), exists('*fnameescape') && v:version > 701]
+	let tail = s:tail()
 	let [emptytail, bufnr] = [empty(tail), bufnr('^'.mkd[0].'$')]
 	let useb = bufnr > 0 && buflisted(bufnr) && emptytail
 	" Move to a replaceable window
@@ -1048,19 +1049,16 @@ fu! s:OpenMulti(...)
 		let conds = [( nr != '' && nr > 1 && nr < ic ) || ( nr == '' && ic > 1 ),
 			\ nr != '' && nr < ic]
 		if conds[nopt]
-			if bufnr <= 0 | if fnesc
-				cal s:openfile('bad', fnamemodify(va, ':.'), '')
-			el
-				cal s:openfile(cmd, va, tail) | sil! hid clo!
-			en | en
+			if !buflisted(bufnr) | cal s:openfile('bad', va, '', 0) | en
 		el
-			cal s:openfile(cmd, useb ? bufnr : va, tail) | let ic += 1
-			if jf | if ic == 2
+			cal s:openfile(cmd, useb ? bufnr : va, tail, ic == 1 ? 1 : 0)
+			if jf | if ic == 1
 				let crpos = [tabpagenr(), winnr()]
 			el
 				let crpos[0] += tabpagenr() <= crpos[0]
-				let crpos[1] += winnr() == crpos[1]
+				let crpos[1] += winnr() <= crpos[1]
 			en | en
+			let ic += 1
 		en
 	endfo
 	if jf && exists('crpos') && ic > 2
@@ -1495,6 +1493,14 @@ fu! s:buftab(bufnr, md)
 	retu [0, 0]
 endf
 
+fu! s:bufwins(bufnr)
+	let winns = 0
+	for tabnr in range(1, tabpagenr('$'))
+		let winns += count(tabpagebuflist(tabnr), a:bufnr)
+	endfo
+	retu winns
+endf
+
 fu! ctrlp#normcmd(cmd, ...)
 	if a:0 < 2 && s:nosplit() | retu a:cmd | en
 	let norwins = filter(range(1, winnr('$')),
@@ -1513,6 +1519,11 @@ fu! ctrlp#normcmd(cmd, ...)
 		retu a:cmd
 	en
 	retu a:0 ? a:1 : 'bo vne'
+endf
+
+fu! ctrlp#modfilecond()
+	retu &mod && !&hid && &bh != 'hide' && !&cf && !&awa
+		\ && s:bufwins(bufnr('%')) == 1
 endf
 
 fu! s:nosplit()
@@ -1767,11 +1778,12 @@ fu! s:buffunc(e)
 	en
 endf
 
-fu! s:openfile(cmd, fid, tail, ...)
-	let cmd = a:cmd =~ '^[eb]$' && &modified ? 'hid '.a:cmd : a:cmd
+fu! s:openfile(cmd, fid, tail, chkmod, ...)
+	let cmd = a:chkmod && a:cmd =~ '^[eb]$' && ctrlp#modfilecond()
+		\ && !( a:cmd == 'b' && &aw ) ? ( a:cmd == 'b' ? 'sb' : 'sp' ) : a:cmd
 	let cmd = cmd =~ '^tab' ? ctrlp#tabcount().cmd : cmd
-	let j2l = a:0 && a:1 ? a:2 : 0
-	exe cmd.( a:0 && a:1 ? '' : a:tail ) ctrlp#fnesc(a:fid)
+	let j2l = a:0 && a:1[0] ? a:1[1] : 0
+	exe cmd.( a:0 && a:1[0] ? '' : a:tail ) ctrlp#fnesc(a:fid)
 	if j2l
 		exe j2l
 	en
