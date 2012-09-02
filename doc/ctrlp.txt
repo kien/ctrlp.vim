@@ -128,13 +128,16 @@ Set the maximum height of the match window: >
 <
 
                                                       *'g:ctrlp_switch_buffer'*
-When opening a file with <cr> or <c-t>, if the file's already opened somewhere
-CtrlP will try to jump to it instead of opening a new instance: >
-  let g:ctrlp_switch_buffer = 2
+When opening a file, if it's already opened in a window somewhere CtrlP will
+try to jump to it instead of opening a new instance: >
+  let g:ctrlp_switch_buffer = 'Et'
 <
-  1 - only jump to the buffer if it's opened in the current tab.
-  2 - jump tab as well if the buffer's opened in another tab.
-  0 - disable this feature.
+  e - jump when <cr> is pressed, but only to windows in the current tab.
+  t - jump when <c-t> is pressed, but only to windows in another tab.
+  v - like e, but jump when <c-v> is pressed.
+  h - like e, but jump when <c-x> is pressed.
+  E, T, V, H - like e, t, v and h respectively, but jump to windows anywhere.
+  0 or <empty-string> - disable this feature.
 
                                                        *'g:ctrlp_reuse_window'*
 When opening a file with <cr>, CtrlP avoids opening it in windows created by
@@ -165,7 +168,7 @@ variable: >
   c - the directory of the current file.
   r - the nearest ancestor that contains one of these directories or files:
       .git .hg .svn .bzr _darcs
-  0 or [empty-string] - don't manage working directory.
+  0 or <empty-string> - don't manage working directory.
 
 Note #1: you can use b:ctrlp_working_path_mode (a |b:var|) to set this option
 on a per buffer basis.
@@ -1160,6 +1163,8 @@ Special thanks:~
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
 
+    + Change |g:ctrlp_switch_buffer|'s and |g:ctrlp_working_path_mode|'s type
+      (old values still work).
     + New key for |g:ctrlp_user_command| when it's a Dictionary: 'ignore'.
     + New options: |g:ctrlp_open_func|.
                    |g:ctrlp_tabpage_position|.

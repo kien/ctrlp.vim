@@ -61,7 +61,7 @@ let [s:pref, s:opts, s:new_opts] = ['g:ctrlp_', {
 	\ 'extensions':            ['s:extensions', []],
 	\ 'follow_symlinks':       ['s:folsym', 0],
 	\ 'highlight_match':       ['s:mathi', [1, 'CtrlPMatch']],
-	\ 'jump_to_buffer':        ['s:jmptobuf', 2],
+	\ 'jump_to_buffer':        ['s:jmptobuf', 'Et'],
 	\ 'lazy_update':           ['s:lazy', 0],
 	\ 'match_func':            ['s:matcher', {}],
 	\ 'match_window_bottom':   ['s:mwbottom', 1],
@@ -847,16 +847,19 @@ fu! ctrlp#acceptfile(mode, line, ...)
 	cal s:PrtExit()
 	let [bufnr, tail] = [bufnr('^'.filpath.'$'), s:tail()]
 	let j2l = a:0 ? a:1 : str2nr(matchstr(tail, '^ +\D*\zs\d\+\ze\D*'))
-	if s:jmptobuf && bufnr > 0 && md =~ 'e\|t'
+	if ( s:jmptobuf =~ md || ( s:jmptobuf && md =~ '[et]' ) ) && bufnr > 0
 		\ && !( md == 'e' && bufnr == bufnr('%') )
 		let [jmpb, bufwinnr] = [1, bufwinnr(bufnr)]
-		let buftab = s:jmptobuf > 1 ? s:buftab(bufnr, md) : [0, 0]
+		let buftab = ( s:jmptobuf =~# '[tTVH]' || s:jmptobuf > 1 )
+			\ ? s:buftab(bufnr, md) : [0, 0]
 	en
 	" Switch to existing buffer or open new one
-	if exists('jmpb') && bufwinnr > 0 && md != 't'
+	if exists('jmpb') && bufwinnr > 0
+		\ && !( md == 't' && ( s:jmptobuf !~# toupper(md) || buftab[0] ) )
 		exe bufwinnr.'winc w'
 		if j2l | cal ctrlp#j2l(j2l) | en
 	elsei exists('jmpb') && buftab[0]
+		\ && !( md =~ '[evh]' && s:jmptobuf !~# toupper(md) )
 		exe 'tabn' buftab[0]
 		exe buftab[1].'winc w'
 		if j2l | cal ctrlp#j2l(j2l) | en
