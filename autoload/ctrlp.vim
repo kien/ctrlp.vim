@@ -83,7 +83,7 @@ let [s:pref, s:opts, s:new_opts] = ['g:ctrlp_', {
 	\ 'use_caching':           ['s:caching', 1],
 	\ 'use_migemo':            ['s:migemo', 0],
 	\ 'user_command':          ['s:usrcmd', ''],
-	\ 'working_path_mode':     ['s:pathmode', 'rc'],
+	\ 'working_path_mode':     ['s:pathmode', 'ra'],
 	\ }, {
 	\ 'open_multiple_files':   's:opmul',
 	\ 'regexp':                's:regexp',
@@ -827,7 +827,8 @@ fu! s:SetWD(args)
 		cal ctrlp#setdir(a:args['dir']) | retu
 	en
 	if s:crfile =~ '^.\+://' | retu | en
-	if pmode =~ 'c' || ( !type(pmode) && pmode )
+	if pmode =~ 'c' || ( pmode =~ 'a' && stridx(s:crfpath, s:cwd) < 0 )
+		\ || ( !type(pmode) && pmode )
 		if exists('+acd') | let [s:glb_acd, &acd] = [&acd, 0] | en
 		cal ctrlp#setdir(s:crfpath)
 	en

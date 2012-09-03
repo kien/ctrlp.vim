@@ -163,18 +163,19 @@ Where to put the new tab page when opening one: >
                                                   *'g:ctrlp_working_path_mode'*
 When starting up, CtrlP sets its local working directory according to this
 variable: >
-  let g:ctrlp_working_path_mode = 'rc'
+  let g:ctrlp_working_path_mode = 'ra'
 <
   c - the directory of the current file.
   r - the nearest ancestor that contains one of these directories or files:
       .git .hg .svn .bzr _darcs
+  a - like c, but only if the current working directory outside of CtrlP is not
+      a direct ancestor of the directory of the current file.
   0 or <empty-string> - don't manage working directory.
 
 Note #1: you can use b:ctrlp_working_path_mode (a |b:var|) to set this option
 on a per buffer basis.
 
-Note #2: with both 'r' and 'c' in the option, when a root isn't found, use the
-directory of the current file.
+Note #2: with 'ra' or 'rc', use the behavior of a or c when a root isn't found.
 
                                                        *'g:ctrlp_root_markers'*
 Use this to set your own root markers in addition to the default ones (.git,
@@ -673,7 +674,7 @@ COMMANDS                                                       *ctrlp-commands*
 
                                                                    *:CtrlPRoot*
 :CtrlPRoot
-    This acts like |:CtrlP| with |g:ctrlp_working_path_mode| = 'rc' and ignores
+    This acts like |:CtrlP| with |g:ctrlp_working_path_mode| = 'r' and ignores
     the variable's current value.
 
                                                              *:CtrlPClearCache*

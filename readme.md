@@ -47,13 +47,13 @@ Use `:diffthis` when opening multiple files to run `:diffthis` on the first 4 fi
 * When invoked, unless a starting directory is specified, CtrlP will set its local working directory according to this variable:
 
     ```vim
-    let g:ctrlp_working_path_mode = 'rc'
+    let g:ctrlp_working_path_mode = 'ra'
     ```
 
     `'c'` - the directory of the current file.  
-    `'r'` - the nearest ancestor that contains one of these directories or files:
-    `.git` `.hg` `.svn` `.bzr` `_darcs`  
-    `0` or `''` (empty string) - don't manage working directory.
+    `'r'` - the nearest ancestor that contains one of these directories or files: `.git` `.hg` `.svn` `.bzr` `_darcs`  
+    `'a'` - like c, but only if the current working directory outside of CtrlP is not a direct ancestor of the directory of the current file.  
+    `0` or `''` (empty string) - disable this feature.
 
     Define additional root markers with the `g:ctrlp_root_markers` option.
 
