@@ -669,8 +669,9 @@ COMMANDS                                                       *ctrlp-commands*
    Open CtrlP in find Most-Recently-Used file mode.
 
                                                                *:CtrlPLastMode*
-:CtrlPLastMode
-   Open CtrlP in the last mode used.
+:CtrlPLastMode [--dir]
+   Open CtrlP in the last mode used. When having the "--dir" argument, also
+   reuse the last working directory.
 
                                                                    *:CtrlPRoot*
 :CtrlPRoot

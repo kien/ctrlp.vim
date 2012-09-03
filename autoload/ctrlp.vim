@@ -821,11 +821,15 @@ fu! s:PrtSwitcher()
 endf
 " - SetWD() {{{1
 fu! s:SetWD(args)
-	let [s:crfilerel, s:dyncwd] = [fnamemodify(s:crfile, ':.'), getcwd()]
-	let pmode = has_key(a:args, 'mode') ? a:args['mode'] : s:wpmode
+	if has_key(a:args, 'args') && stridx(a:args['args'], '--dir') >= 0
+		\ && exists('s:dyncwd')
+		cal ctrlp#setdir(s:dyncwd) | retu
+	en
 	if has_key(a:args, 'dir') && a:args['dir'] != ''
 		cal ctrlp#setdir(a:args['dir']) | retu
 	en
+	let pmode = has_key(a:args, 'mode') ? a:args['mode'] : s:wpmode
+	let [s:crfilerel, s:dyncwd] = [fnamemodify(s:crfile, ':.'), getcwd()]
 	if s:crfile =~ '^.\+://' | retu | en
 	if pmode =~ 'c' || ( pmode =~ 'a' && stridx(s:crfpath, s:cwd) < 0 )
 		\ || ( !type(pmode) && pmode )
