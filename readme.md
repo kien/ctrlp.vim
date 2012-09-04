@@ -74,7 +74,8 @@ Use `:diffthis` when opening multiple files to run `:diffthis` on the first 4 fi
 * Use a custom file listing command:
 
     ```vim
-    let g:ctrlp_user_command = 'find %s -type f'        " MacOSX/Linux
+    let g:ctrlp_user_command = 'mdfind -onlyin %s file' " MacOSX
+    let g:ctrlp_user_command = 'find %s -type f'        " Linux
     let g:ctrlp_user_command = 'dir %s /-n /b /s /a-d'  " Windows
     ```
 
