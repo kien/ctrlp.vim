@@ -1529,9 +1529,9 @@ fu! ctrlp#normcmd(cmd, ...)
 	retu a:0 ? a:1 : 'bo vne'
 endf
 
-fu! ctrlp#modfilecond()
-	retu &mod && !&hid && &bh != 'hide' && !&cf && !&awa
-		\ && s:bufwins(bufnr('%')) == 1
+fu! ctrlp#modfilecond(w)
+	retu &mod && !&hid && &bh != 'hide' && s:bufwins(bufnr('%')) == 1 && !&cf &&
+		\ ( ( !&awa && a:w ) || filewritable(fnamemodify(bufname('%'), ':p')) != 1 )
 endf
 
 fu! s:nosplit()
@@ -1787,8 +1787,10 @@ fu! s:buffunc(e)
 endf
 
 fu! s:openfile(cmd, fid, tail, chkmod, ...)
-	let cmd = a:chkmod && a:cmd =~ '^[eb]$' && ctrlp#modfilecond()
-		\ && !( a:cmd == 'b' && &aw ) ? ( a:cmd == 'b' ? 'sb' : 'sp' ) : a:cmd
+	let cmd = a:cmd
+	if a:chkmod && cmd =~ '^[eb]$' && ctrlp#modfilecond(!( cmd == 'b' && &aw ))
+		let cmd = cmd == 'b' ? 'sb' : 'sp'
+	en
 	let cmd = cmd =~ '^tab' ? ctrlp#tabcount().cmd : cmd
 	let j2l = a:0 && a:1[0] ? a:1[1] : 0
 	exe cmd.( a:0 && a:1[0] ? '' : a:tail ) ctrlp#fnesc(a:fid)
