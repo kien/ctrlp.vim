@@ -32,8 +32,6 @@ Run `:help ctrlp-mappings` or submit `?` in CtrlP for more mapping help.
 * Submit two or more dots `..` to go up the directory tree by one or multiple levels.
 * End the input string with a colon `:` followed by a command to execute it on the opening file(s):  
 Use `:25` to jump to line 25.  
-Use `:/any\:\ string` to jump to the first instance of `any: string`.  
-Use `:+setfiletype\ myfiletype|25` to set the filetype to myfiletype, then jump to line 25.  
 Use `:diffthis` when opening multiple files to run `:diffthis` on the first 4 files.
 
 ## Basic Options
@@ -63,10 +61,10 @@ Use `:diffthis` when opening multiple files to run `:diffthis` on the first 4 fi
     set wildignore+=*/tmp/*,*.so,*.swp,*.zip     " MacOSX/Linux
     set wildignore+=*\\tmp\\*,*.swp,*.zip,*.exe  " Windows
 
-    let g:ctrlp_custom_ignore = '\v[\/](\.git|\.hg|\.svn)$'
+    let g:ctrlp_custom_ignore = '\v[\/]\.(git|hg|svn)$'
     let g:ctrlp_custom_ignore = {
-      \ 'dir':  '\v[\/](\.git|\.hg|\.svn)$',
-      \ 'file': '\.exe$\|\.so$\|\.dll$',
+      \ 'dir':  '\v[\/]\.(git|hg|svn)$',
+      \ 'file': '\v\.(exe|so|dll)$',
       \ 'link': 'some_bad_symbolic_links',
       \ }
     ```
