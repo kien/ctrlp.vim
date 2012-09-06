@@ -851,7 +851,7 @@ fu! ctrlp#acceptfile(mode, line, ...)
 	let [md, filpath] = [a:mode, fnamemodify(a:line, ':p')]
 	cal s:PrtExit()
 	let [bufnr, tail] = [bufnr('^'.filpath.'$'), s:tail()]
-	let j2l = a:0 ? a:1 : str2nr(matchstr(tail, '^ +\D*\zs\d\+\ze\D*'))
+	let j2l = a:0 ? a:1 : matchstr(tail, '^ +\zs\d\+$')
 	if ( s:jmptobuf =~ md || ( s:jmptobuf && md =~ '[et]' ) ) && bufnr > 0
 		\ && !( md == 'e' && bufnr == bufnr('%') )
 		let [jmpb, bufwinnr] = [1, bufwinnr(bufnr)]
@@ -1707,7 +1707,7 @@ fu! s:strwidth(str)
 endf
 
 fu! ctrlp#j2l(nr)
-	exe a:nr
+	exe 'norm!' a:nr.'G'
 	sil! norm! zvzz
 endf
 
@@ -1795,9 +1795,9 @@ fu! s:openfile(cmd, fid, tail, chkmod, ...)
 	let j2l = a:0 && a:1[0] ? a:1[1] : 0
 	exe cmd.( a:0 && a:1[0] ? '' : a:tail ) ctrlp#fnesc(a:fid)
 	if j2l
-		exe j2l
+		cal ctrlp#j2l(j2l)
 	en
-	if !empty(a:tail) || j2l
+	if !empty(a:tail)
 		sil! norm! zvzz
 	en
 	if cmd != 'bad'

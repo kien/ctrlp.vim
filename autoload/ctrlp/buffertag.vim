@@ -185,8 +185,8 @@ fu! s:process(fname, ftype)
 endf
 
 fu! s:parseline(line)
-	let eval = '\v^([^\t]+)\t(.+)\t[?/]\^?(.{-1,})\$?[?/]\;\"\t(.+)\tline(no)?\:(\d+)'
-	let vals = matchlist(a:line, eval)
+	let vals = matchlist(a:line,
+		\ '\v^([^\t]+)\t(.+)\t[?/]\^?(.{-1,})\$?[?/]\;\"\t(.+)\tline(no)?\:(\d+)')
 	if vals == [] | retu '' | en
 	let [bufnr, bufname] = [bufnr('^'.vals[2].'$'), fnamemodify(vals[2], ':p:t')]
 	retu vals[1].'	'.vals[4].'|'.bufnr.':'.bufname.'|'.vals[6].'| '.vals[3]
@@ -218,10 +218,24 @@ fu! ctrlp#buffertag#init(fname)
 endf
 
 fu! ctrlp#buffertag#accept(mode, str)
-	let vals = matchlist(a:str, '\v^[^\t]+\t+[^\t|]+\|(\d+)\:[^\t|]+\|(\d+)\|')
+	let vals = matchlist(a:str,
+		\ '\v^[^\t]+\t+[^\t|]+\|(\d+)\:[^\t|]+\|(\d+)\|\s(.+)$')
 	let bufnr = str2nr(get(vals, 1))
 	if bufnr
-		cal ctrlp#acceptfile(a:mode, bufname(bufnr), get(vals, 2))
+		cal ctrlp#acceptfile(a:mode, bufname(bufnr))
+		let pat = get(vals, 3, '')
+		exe 'norm!' str2nr(get(vals, 2, line('.'))).'G'
+		if match(getline('.'), pat) < 0
+			let [int, forw, maxl] = [1, 1, line('$')]
+			wh !search(pat, 'W'.( forw ? '' : 'b' ))
+				if !forw
+					if int > maxl | brea | en
+					let int += int
+				en
+				let forw = !forw
+			endw
+		en
+		sil! norm! zvzz
 	en
 endf
 
