@@ -47,17 +47,16 @@ a:focus {
 a:link,a:visited {
 	text-decoration:none;
 }
+/* ==========================================================={
+	Fonts:
+}=========================================================== */
 @font-face {
-  font-family:'Amaranth';
-  font-style:normal;
-  font-weight:normal;
-  src:local('Amaranth'), url('../font/Amaranth.woff') format('woff');
+	font-family:'Amaranth';
+	src:local('Amaranth'), url('../font/Amaranth.woff') format('woff');
 }
 @font-face {
-  font-family:'Droid Sans';
-  font-style:normal;
-  font-weight:normal;
-  src:local('Droid Sans'), url('../font/DroidSans.woff') format('woff');
+	font-family:'Droid Sans';
+	src:local('Droid Sans'), url('../font/DroidSans.woff') format('woff');
 }
 /* ============================================================{
 	Page:
@@ -83,7 +82,7 @@ a.external:after {
 	content:'✜';
 }
 header {
-	width:760px;
+	width:960px;
 	margin:0 auto;
 }
 .menu:after {
@@ -147,28 +146,29 @@ article {
 	border-top:2px solid #8bad3e;
 	border-bottom:1px solid #8bad3e;
 	clear:both;
-	width:730px;
+	width:910px;
 	margin:0 auto;
 	font-size:1.2em;
 	letter-spacing:1px;
 	background:#1d1d1d;
 	height:1%;
-	padding:1em 15px 0;
+	padding:1em 25px 0;
 	position:relative;
 }
 article h2 {
 	font-size:1.25em;
 	margin:0 0 .25em;
+	color:#fd971f;
 }
 article h3 {
 	font-size:1.15em;
 	line-height:2;
-	margin:0 -15px .5em;
-	padding:0 15px;
+	margin:0 -25px .5em;
+	padding:0 25px;
 	width:100%;
 	position:relative;
-	border-bottom:1px solid #333;
-	background:#252525;
+	border-bottom:1px solid #434343;
+	background:#2D2D2D;
 }
 article h3 span {
 	color:#a7b8ff;
@@ -262,14 +262,10 @@ article img {
 	background-position:0 -149px;
 	opacity:.8;
 }
-* html .forkme {
-	width:148px;
-	height:148px;
-}
 footer {
 	border-top:1px solid #8bad3e;
 	padding:.5em 0 2em;
-	width:760px;
+	width:960px;
 	margin:0 auto;
 	overflow:hidden;
 }
@@ -279,13 +275,13 @@ footer small {
 /* ============================================================{
 	Media queries:
 }============================================================ */
-@media all and (max-width:780px) {
+@media all and (max-width:980px) {
 	header {
 		width:90%;
-		padding:0 15px;
+		padding:0 25px;
 	}
 	.menu,h1 {
-		margin:0 -15px;
+		margin:0 -25px;
 		width:auto;
 	}
 	article,footer {
@@ -298,8 +294,18 @@ footer small {
 	.forkme {
 		display:none;
 	}
+	footer {
+		padding:.5em 25px 2em;
+	}
 }
 @media all and (max-width:600px) {
+	header {
+		padding:0 15px;
+	}
+	.menu,h1 {
+		margin:0 -15px;
+		width:auto;
+	}
 	.menu {
 		border:none;
 	}
@@ -325,8 +331,18 @@ footer small {
 		-moz-border-radius:0;
 		border-radius:0;
 	}
+	article {
+		padding:1em 15px 0;
+	}
+	article h3 {
+		margin:0 -15px .5em;
+		padding:0 15px;
+	}
 	article img {
 		width:94%;
+	}
+	footer {
+		padding:.5em 15px 2em;
 	}
 }
 @media all and (max-width:400px) {
@@ -337,9 +353,6 @@ footer small {
 		font-size:48px;
 		line-height:1.25;
 		padding-bottom:.5em;
-	}
-	article small {
-		font-style:normal;
 	}
 	article img {
 		width:91%;

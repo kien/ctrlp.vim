@@ -1,0 +1,21 @@
+/* ==========================================================={
+	Fonts:
+}=========================================================== */
+@font-face {
+	font-family:'Amaranth';
+	src:url('../font/Amaranth.eot');
+}
+@font-face {
+	font-family:'Droid Sans';
+	src:url('../font/DroidSans.eot');
+}
+/* ==========================================================={
+	Page:
+}=========================================================== */
+h1 {
+	filter:progid:DXImageTransform.Microsoft.Shadow(direction=180,strength=8,color=666666);
+}
+* html .forkme {
+	width:148px;
+	height:148px;
+}
