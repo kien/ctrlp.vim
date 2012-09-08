@@ -47,7 +47,7 @@ fu! ctrlp#quickfix#accept(mode, str)
 	cal ctrlp#exit()
 	let cmd = md == 't' ? 'tabe' : md == 'h' ? 'new' : md == 'v' ? 'vne'
 		\ : ctrlp#normcmd('e')
-	let cmd = cmd == 'e' && &modified ? 'hid e' : cmd
+	let cmd = cmd == 'e' && ctrlp#modfilecond() ? 'new' : cmd
 	exe cmd ctrlp#fnesc(filpath)
 	cal cursor(items[2], items[3])
 	sil! norm! zvzz

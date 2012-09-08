@@ -1,4 +1,4 @@
-*ctrlp.txt*       Fuzzy file, buffer, mru, tag, ... finder. v1.7.7
+*ctrlp.txt*       Fuzzy file, buffer, mru, tag, ... finder. v1.78
 *CtrlP* *ControlP* *'ctrlp'* *'ctrl-p'*
 ===============================================================================
 #                                                                             #
@@ -45,6 +45,7 @@ Overview:~
   |ctrlp_max_height|            Max height of the match window.
   |ctrlp_switch_buffer|         Jump to an open buffer if already opened.
   |ctrlp_reuse_window|          Reuse special windows (help, quickfix, etc).
+  |ctrlp_tabpage_position|      Where to put the new tab page.
   |ctrlp_working_path_mode|     How to set CtrlP's local working directory.
   |ctrlp_root_markers|          Additional, high priority root markers.
   |ctrlp_use_caching|           Use per-session caching or not.
@@ -74,6 +75,7 @@ Overview:~
   |ctrlp_mruf_case_sensitive|   MRU files are case sensitive or not.
 
   Advanced options:
+  |ctrlp_open_func|             Use custom file opening functions.
   |ctrlp_status_func|           Change CtrlP's two statuslines.
   |ctrlp_buffer_func|           Call custom functions in the CtrlP buffer.
   |ctrlp_match_func|            Replace the built-in matching algorithm.
@@ -126,13 +128,16 @@ Set the maximum height of the match window: >
 <
 
                                                       *'g:ctrlp_switch_buffer'*
-When opening a file with <cr> or <c-t>, if the file's already opened somewhere
-CtrlP will try to jump to it instead of opening a new instance: >
-  let g:ctrlp_switch_buffer = 2
+When opening a file, if it's already opened in a window somewhere CtrlP will
+try to jump to it instead of opening a new instance: >
+  let g:ctrlp_switch_buffer = 'Et'
 <
-  1 - only jump to the buffer if it's opened in the current tab.
-  2 - jump tab as well if the buffer's opened in another tab.
-  0 - disable this feature.
+  e - jump when <cr> is pressed, but only to windows in the current tab.
+  t - jump when <c-t> is pressed, but only to windows in another tab.
+  v - like e, but jump when <c-v> is pressed.
+  h - like e, but jump when <c-x> is pressed.
+  E, T, V, H - like e, t, v and h respectively, but jump to windows anywhere.
+  0 or <empty-string> - disable this feature.
 
                                                        *'g:ctrlp_reuse_window'*
 When opening a file with <cr>, CtrlP avoids opening it in windows created by
@@ -145,17 +150,31 @@ Example: >
   let g:ctrlp_reuse_window = 'netrw\|help\|quickfix'
 <
 
+                                                   *'g:ctrlp_tabpage_position'*
+Where to put the new tab page when opening one: >
+  let g:ctrlp_tabpage_position = 'ac'
+<
+  a - after.
+  b - before.
+  c - the current tab page.
+  l - the last tab page.
+  f - the first tab page.
+
                                                   *'g:ctrlp_working_path_mode'*
 When starting up, CtrlP sets its local working directory according to this
 variable: >
-  let g:ctrlp_working_path_mode = 2
+  let g:ctrlp_working_path_mode = 'rc'
 <
-  1 - the directory of the current file.
-  2 - the nearest ancestor that contains one of these directories or files:
+  c - the directory of the current file.
+  r - the nearest ancestor that contains one of these directories or files:
       .git .hg .svn .bzr _darcs
-  0 - don't manage working directory.
-Note: you can use b:ctrlp_working_path_mode (a |b:var|) to set this option on a
-per buffer basis.
+  0 or <empty-string> - don't manage working directory.
+
+Note #1: you can use b:ctrlp_working_path_mode (a |b:var|) to set this option
+on a per buffer basis.
+
+Note #2: with both 'r' and 'c' in the option, when a root isn't found, use the
+directory of the current file.
 
                                                        *'g:ctrlp_root_markers'*
 Use this to set your own root markers in addition to the default ones (.git,
@@ -164,10 +183,13 @@ Use this to set your own root markers in addition to the default ones (.git,
 <
 
                                                         *'g:ctrlp_use_caching'*
-Set this to 0 to disable per-session caching. When disabled, caching will still
-be enabled for directories that have more than 4000 files: >
+Enable/Disable per-session caching: >
   let g:ctrlp_use_caching = 1
 <
+  0 - Disable caching.
+  1 - Enable caching.
+  n - When bigger than 1, disable caching and use the number as the limit to
+      enable caching again.
 Note: you can quickly purge the cache by pressing <F5> while inside CtrlP.
 
                                                 *'g:ctrlp_clear_cache_on_exit'*
@@ -185,11 +207,14 @@ Set the directory to store the cache files: >
 Set this to 0 if you don't want CtrlP to scan for dotfiles and dotdirs: >
   let g:ctrlp_dotfiles = 1
 <
-You can use |'wildignore'| to exclude anything from the search.
+
+                                                           *'ctrlp-wildignore'*
+You can use Vim's |'wildignore'| to exclude files and directories from the
+results.
 Examples: >
   " Excluding version control directories
-  set wildignore+=*/.git/*,*/.hg/*,*/.svn/*  " Linux/MacOSX
-  set wildignore+=.git\*,.hg\*,.svn\*        " Windows
+  set wildignore+=*/.git/*,*/.hg/*,*/.svn/*        " Linux/MacOSX
+  set wildignore+=*\\.git\\*,*\\.hg\\*,*\\.svn\\*  " Windows ('noshellslash')
 <
 Note #1: the `*/` in front of each directory glob is required.
 
@@ -204,14 +229,22 @@ CtrlP to not show. Use regexp to specify the patterns: >
   let g:ctrlp_custom_ignore = ''
 <
 Examples: >
-  let g:ctrlp_custom_ignore = '\.git$\|\.hg$\|\.svn$'
+  let g:ctrlp_custom_ignore = '\v[\/](\.git|\.hg|\.svn)$'
   let g:ctrlp_custom_ignore = {
-    \ 'dir':  '\.git$\|\.hg$\|\.svn$',
+    \ 'dir':  '\v[\/](\.git|\.hg|\.svn)$',
     \ 'file': '\.exe$\|\.so$\|\.dll$',
     \ 'link': 'SOME_BAD_SYMBOLIC_LINKS',
     \ }
+  let g:ctrlp_custom_ignore = {
+    \ 'file': '\v(\.cpp|\.h|\.hh|\.cxx)@<!$'
+    \ }
 <
-Note: ignoring only works when |globpath()| is used to scan for files.
+Note #1: by default, |wildignore| and |g:ctrlp_custom_ignore| only apply when
+|globpath()| is used to scan for files, thus these options do not apply when a
+command defined with |g:ctrlp_user_command| is being used.
+
+Note #2: when changing the option's variable type, remember to |:unlet| it
+first or restart Vim to avoid the "E706: Variable type mismatch" error.
 
                                                           *'g:ctrlp_max_files'*
 The maximum number of files to scan, set to 0 for no limit: >
@@ -235,8 +268,10 @@ Examples: >
 <
 You can also use 'grep', 'findstr' or something else to filter the results.
 Examples: >
-  let g:ctrlp_user_command = 'find %s -type f | grep (?!tmp/.*)'
-  let g:ctrlp_user_command = 'dir %s /-n /b /s /a-d | findstr .*\.py$'
+  let g:ctrlp_user_command =
+    \ 'find %s -type f | grep -v -P "\.jpg$|/tmp/"'          " MacOSX/Linux
+  let g:ctrlp_user_command =
+    \ 'dir %s /-n /b /s /a-d | findstr /v /l ".jpg \\tmp\\"' " Windows
 <
 Use a version control listing command when inside a repository, this is faster
 when scanning large projects: >
@@ -246,22 +281,44 @@ when scanning large projects: >
       \ 1: [root_marker_1, listing_command_1],
       \ n: [root_marker_n, listing_command_n],
       \ },
-    \ 'fallback': fallback_command
+    \ 'fallback': fallback_command,
+    \ 'ignore': 0 or 1
     \ }
 <
-Examples: >
-  let g:ctrlp_user_command = ['.git/', 'cd %s && git ls-files']
-  let g:ctrlp_user_command = ['.hg/', 'hg --cwd %s locate -I .']
+Some examples: >
+  " Single VCS, listing command does not list untracked files:
+  let g:ctrlp_user_command = ['.git', 'cd %s && git ls-files']
+  let g:ctrlp_user_command = ['.hg', 'hg --cwd %s locate -I .']
+
+  " Multiple VCS's:
   let g:ctrlp_user_command = {
     \ 'types': {
-      \ 1: ['.git/', 'cd %s && git ls-files'],
-      \ 2: ['.hg/', 'hg --cwd %s locate -I .'],
+      \ 1: ['.git', 'cd %s && git ls-files'],
+      \ 2: ['.hg', 'hg --cwd %s locate -I .'],
       \ },
     \ 'fallback': 'find %s -type f'
     \ }
+
+  " Single VCS, listing command lists untracked files (slower):
+  let g:ctrlp_user_command =
+    \ ['.git', 'cd %s && git ls-files . -co --exclude-standard']
+
+  let g:ctrlp_user_command =
+    \ ['.hg', 'hg --cwd %s status -numac -I . $(hg root)'] " MacOSX/Linux
+
+  let g:ctrlp_user_command = ['.hg', 'for /f "tokens=1" %%a in (''hg root'') '
+    \ . 'do hg --cwd %s status -numac -I . %%a']           " Windows
 <
-If the fallback_command is empty or not defined, |globpath()| will then be used
-when searching outside a repo.
+Note #1: if the fallback_command is empty or not defined, |globpath()| will
+then be used when searching outside a repo.
+
+Note #2: unless the |Dictionary| format is used and 'ignore' is defined and set
+to 1, the |wildignore| and |g:ctrlp_custom_ignore| options do not apply when
+these custom commands are being used. When not defined, 'ignore' is set to 0 by
+default to retain the performance advantage of using external commands.
+
+Note #3: when changing the option's variable type, remember to |:unlet| it
+first or restart Vim to avoid the "E706: Variable type mismatch" error.
 
                                                         *'g:ctrlp_max_history'*
 The maximum number of input strings you want CtrlP to remember. The default
@@ -292,17 +349,15 @@ For the number:
   - If given, it'll be used as the maximum number of windows or tabs to create
     when opening the files (the rest will be opened as hidden buffers).
   - If not given, <c-o> will open all files, each in a new window or new tab.
+
 For the letters:
   t - each file in a new tab.
   h - each file in a new horizontal split.
   v - each file in a new vertical split.
   i - all files as hidden buffers.
   j - after opening, jump to the first opened tab or window.
-  Reuse the current window:
-  tr,
-  hr,
-  vr - open the first file in the current window, then the remaining files in
-       new splits or new tabs just like with t, h, v.
+  r - open the first file in the current window, then the remaining files in
+      new splits or new tabs depending on which of h, v and t is also present.
 
                                                             *'g:ctrlp_arg_map'*
 When this is set to 1, the <c-o> and <c-y> mappings will accept one extra key
@@ -340,6 +395,10 @@ delay time in milliseconds.
 Set this to 1 to enable seeding the prompt with the current file's relative
 path: >
   let g:ctrlp_default_input = 0
+<
+Instead of 1 or 0, if the value of the option is a string, it'll be used as-is
+as the default input: >
+  let g:ctrlp_default_input = 'anystring'
 <
 
                                                          *'g:ctrlp_use_migemo'*
@@ -388,9 +447,8 @@ only need to keep the lines that you've changed the values (inside []): >
     \ 'PrtExit()':            ['<esc>', '<c-c>', '<c-g>'],
     \ }
 <
-Note: In some terminals, it's not possible to remap <c-h> without also changing
-<bs> (|keycodes|). So if pressing <bs> moves the cursor to the left instead of
-deleting a char for you, add this to your |.vimrc| to disable the plugin's
+Note: if pressing <bs> moves the cursor one character to the left instead of
+deleting a character for you, add this to your |.vimrc| to disable the plugin's
 default <c-h> mapping: >
   let g:ctrlp_prompt_mappings = { 'PrtCurLeft()': ['<left>', '<c-^>'] }
 <
@@ -438,6 +496,65 @@ MRU entries: >
 
 ----------------------------------------
 Advanced options:~
+
+                                                          *'g:ctrlp_open_func'*
+Define a custom function to open the selected file: >
+  let g:ctrlp_open_func = {}
+<
+Example: >
+  let g:ctrlp_open_func = {
+    \ 'files'     : 'Function_Name_1',
+    \ 'buffers'   : 'Function_Name_2',
+    \ 'mru files' : 'Function_Name_3',
+    \ }
+<
+Structure of the functions: >
+  function! Function_Name(action, line)
+    " Arguments:
+    " |
+    " +- a:action : The opening action:
+    " |             + 'e' : user pressed <cr>  (default)
+    " |             + 'h' : user pressed <c-x> (default)
+    " |             + 'v' : user pressed <c-v> (default)
+    " |             + 't' : user pressed <c-t> (default)
+    " |             + 'x' : user used the <c-o> console dialog (default) and
+    " |                     chose "e[x]ternal".
+    " |
+    " +- a:line   : The selected line.
+
+  endfunction
+<
+Note: does not apply when opening multiple files with <c-z> and <c-o>.
+
+Example: open HTML files in the default web browser when <c-t> is pressed and
+in Vim otherwise >
+  function! HTMLOpenFunc(action, line)
+    if a:action =~ '^[tx]$' && fnamemodify(a:line, ':e') =~? '^html\?$'
+
+      " Get the filename
+      let filename = fnameescape(fnamemodify(a:line, ':p'))
+
+      " Close CtrlP
+      call ctrlp#exit()
+
+      " Open the file
+      silent! execute '!xdg-open' filename
+
+    elseif a:action == 'x' && fnamemodify(a:line, ':e') !~? '^html\?$'
+
+      " Not a HTML file, simulate pressing <c-o> again and wait for new input
+      call feedkeys("\<c-o>")
+
+    else
+
+      " Use CtrlP's default file opening function
+      call call('ctrlp#acceptfile', [a:action, a:line])
+
+    endif
+  endfunction
+
+  let g:ctrlp_open_func = { 'files': 'HTMLOpenFunc' }
+<
 
                                                         *'g:ctrlp_status_func'*
 Use this to customize the statuslines for the CtrlP window: >
@@ -556,8 +673,8 @@ COMMANDS                                                       *ctrlp-commands*
 
                                                                    *:CtrlPRoot*
 :CtrlPRoot
-    This acts like |:CtrlP| with |g:ctrlp_working_path_mode| = 2 (ignores the
-    variable's current value).
+    This acts like |:CtrlP| with |g:ctrlp_working_path_mode| = 'rc' and ignores
+    the variable's current value.
 
                                                              *:CtrlPClearCache*
 :CtrlPClearCache
@@ -665,7 +782,7 @@ Opening/Creating a file:~
     Open the selected file in the 'current' window if possible.
 
   <c-t>
-    Open the selected file in a new 'tab' after the last tabpage.
+    Open the selected file in a new 'tab'.
 
   <c-v>
     Open the selected file in a 'vertical' split.
@@ -685,7 +802,22 @@ Opening multiple files:~
     - Mark/unmark a file to create a new file in its directory using <c-y>.
 
   <c-o>
-    Open files marked by <c-z>.
+    - Open files marked by <c-z>.
+    - When no file has been marked by <c-z>, open a console dialog with the
+      following options:
+
+      Open the selected file:
+        t - in a tab page.
+        v - in a vertical split.
+        h - in a horizontal split.
+        r - in the current window.
+        i - as a hidden buffer.
+        x - (optional) with the function defined in |g:ctrlp_open_func|.
+
+      Other options (not shown):
+        a - mark all files in the match window.
+        d - change CtrlP's local working directory to the selected file's
+            directory and switch to find file mode.
 
 Function keys:~
 
@@ -704,7 +836,7 @@ Pasting:~
     Paste the clipboard content into the prompt.
 
   <c-\>
-    Open a text dialog to paste <cword>, <cfile>, the content of the search
+    Open a console dialog to paste <cword>, <cfile>, the content of the search
     register, the last visual selection, the clipboard or any register into the
     prompt.
 
@@ -716,8 +848,7 @@ When inside the match window (press <s-tab> to switch):~
   a-z
   0-9
   ~^-=;`',.+!@#$%&_(){}[]
-    Cycle through the lines with the first letter (of paths or filenames) that
-    matches that key.
+    Cycle through the lines which have the matching first character.
 
 ===============================================================================
 INPUT FORMATS                                             *ctrlp-input-formats*
@@ -1026,10 +1157,17 @@ Special thanks:~
     * Tacahiroy <github.com/tacahiroy>
     * Luca Pette <github.com/lucapette>
     * Seth Fowler <github.com/sfowler>
-    * Lowe Thiderman <github.com/daethorian>
+    * Lowe Thiderman <github.com/thiderman>
+    * Christopher Fredén <github.com/icetan>
 
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
+
+    + Change |g:ctrlp_switch_buffer|'s and |g:ctrlp_working_path_mode|'s type
+      (old values still work).
+    + New key for |g:ctrlp_user_command| when it's a Dictionary: 'ignore'.
+    + New options: |g:ctrlp_open_func|.
+                   |g:ctrlp_tabpage_position|.
 
 Before 2012/06/15~
 
