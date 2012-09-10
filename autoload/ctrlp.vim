@@ -64,6 +64,7 @@ let [s:pref, s:opts, s:new_opts] = ['g:ctrlp_', {
 	\ 'jump_to_buffer':        ['s:jmptobuf', 'Et'],
 	\ 'lazy_update':           ['s:lazy', 0],
 	\ 'match_func':            ['s:matcher', {}],
+  \ 'highlight_func':        ['s:exthighlight', {}],
 	\ 'match_window_bottom':   ['s:mwbottom', 1],
 	\ 'match_window_reversed': ['s:mwreverse', 1],
 	\ 'max_depth':             ['s:maxdepth', 40],
@@ -1400,7 +1401,11 @@ fu! ctrlp#syntax()
 endf
 
 fu! s:highlight(pat, grp)
-	if s:matcher != {} | retu | en
+  if s:matcher != {}
+		let argms = [a:pat, a:grp]
+    cal call(s:exthighlight['highlight'], argms)
+    retu
+  en
 	cal clearmatches()
 	if !empty(a:pat) && s:ispath
 		let pat = s:regexp ? substitute(a:pat, '\\\@<!\^', '^> \\zs', 'g') : a:pat
