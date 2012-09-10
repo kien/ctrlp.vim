@@ -6,7 +6,8 @@
 " =============================================================================
 
 " ** Static variables {{{1
-fu! s:ignore() "{{{2
+" s:ignore() {{{2
+fu! s:ignore()
 	let igdirs = [
 		\ '\.git',
 		\ '\.hg',
@@ -48,8 +49,8 @@ fu! s:ignore() "{{{2
 		\ 'dir': '\v[\/]('.join(igdirs, '|').')$',
 		\ 'file': '\v'.join(igfiles, '|'),
 		\ }
-endf "}}}2
-" Options
+endf
+" Script local vars {{{2
 let [s:pref, s:bpref, s:opts, s:new_opts, s:lc_opts] =
 	\ ['g:ctrlp_', 'b:ctrlp_', {
 	\ 'arg_map':               ['s:argmap', 0],
@@ -180,9 +181,8 @@ let s:hlgrps = {
 	\ 'PrtText': 'Normal',
 	\ 'PrtCursor': 'Constant',
 	\ }
-
-fu! s:opts() "{{{2
-	" Options
+" s:opts() {{{2
+fu! s:opts()
 	unl! s:usrign s:usrcmd s:urprtmaps
 	for each in ['byfname', 'regexp', 'extensions'] | if exists('s:'.each)
 		let {each} = s:{each}
@@ -226,7 +226,6 @@ endf
 "}}}1
 " * Open & Close {{{1
 fu! s:Open()
-	let s:ermsg = v:errmsg
 	cal s:log(1)
 	cal s:getenv()
 	cal s:execextvar('enter')
@@ -285,7 +284,7 @@ fu! ctrlp#clra()
 	cal ctrlp#clr()
 endf
 
-fu! ctrlp#reset()
+fu! s:Reset()
 	cal s:opts()
 	cal s:autocmds()
 	cal ctrlp#utils#opts()
@@ -1988,8 +1987,9 @@ endf
 
 fu! ctrlp#init(type, ...)
 	if exists('s:init') || s:iscmdwin() | retu | en
+	let [s:ermsg, v:errmsg] = [v:errmsg, '']
 	let [s:matches, s:init] = [1, 1]
-	cal ctrlp#reset()
+	cal s:Reset()
 	noa cal s:Open()
 	cal s:SetWD(a:0 ? a:1 : {})
 	cal s:MapNorms()
