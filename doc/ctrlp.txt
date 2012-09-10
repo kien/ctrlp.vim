@@ -175,17 +175,17 @@ variable: >
       when "r" is also present.
   0 or <empty-string> - disable this feature.
 
-Note #1: you can use b:ctrlp_working_path_mode (a |b:var|) to set this option
-on a per buffer basis.
+Note #1: if "a" or "c" is included with "r", use the behavior of "a" or "c" (as
+a fallback) when a root can't be found.
 
-Note #2: with "ra" or "rc", use the behavior of "a" or "c" if a root can't be
-found.
+Note #2: you can use a |b:var| to set this option on a per buffer basis.
 
                                                        *'g:ctrlp_root_markers'*
 Use this to set your own root markers in addition to the default ones (.git,
 .hg, .svn, .bzr, and _darcs). Your markers will take precedence: >
   let g:ctrlp_root_markers = ['']
 <
+Note: you can use a |b:var| to set this option on a per buffer basis.
 
                                                         *'g:ctrlp_use_caching'*
 Enable/Disable per-session caching: >
@@ -330,6 +330,8 @@ default to retain the performance advantage of using external commands.
 
 Note #3: when changing the option's variable type, remember to |:unlet| it
 first or restart Vim to avoid the "E706: Variable type mismatch" error.
+
+Note #4: you can use a |b:var| to set this option on a per buffer basis.
 
                                                         *'g:ctrlp_max_history'*
 The maximum number of input strings you want CtrlP to remember. The default

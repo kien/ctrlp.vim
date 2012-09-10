@@ -50,7 +50,8 @@ fu! s:ignore() "{{{2
 		\ }
 endf "}}}2
 " Options
-let [s:pref, s:opts, s:new_opts] = ['g:ctrlp_', {
+let [s:pref, s:bpref, s:opts, s:new_opts, s:lc_opts] =
+	\ ['g:ctrlp_', 'b:ctrlp_', {
 	\ 'arg_map':               ['s:argmap', 0],
 	\ 'buffer_func':           ['s:buffunc', {}],
 	\ 'by_filename':           ['s:byfname', 0],
@@ -90,6 +91,10 @@ let [s:pref, s:opts, s:new_opts] = ['g:ctrlp_', {
 	\ 'reuse_window':          's:nosplit',
 	\ 'show_hidden':           's:showhidden',
 	\ 'switch_buffer':         's:jmptobuf',
+	\ }, {
+	\ 'root_markers':          's:rmarkers',
+	\ 'user_command':          's:usrcmd',
+	\ 'working_path_mode':     's:pathmode',
 	\ }]
 
 " Global options
@@ -188,6 +193,13 @@ fu! s:opts() "{{{2
 	unl va
 	for [ke, va] in items(s:new_opts)
 		let {va} = {exists(s:pref.ke) ? s:pref.ke : va}
+	endfo
+	unl va
+	for [ke, va] in items(s:lc_opts)
+		if exists(s:bpref.ke)
+			unl {va}
+			let {va} = {s:bpref.ke}
+		en
 	endfo
 	for each in ['byfname', 'regexp'] | if exists(each)
 		let s:{each} = {each}
@@ -829,7 +841,7 @@ fu! s:SetWD(args)
 	if has_key(a:args, 'dir') && a:args['dir'] != ''
 		cal ctrlp#setdir(a:args['dir']) | retu
 	en
-	let pmode = has_key(a:args, 'mode') ? a:args['mode'] : s:wpmode
+	let pmode = has_key(a:args, 'mode') ? a:args['mode'] : s:pathmode
 	let [s:crfilerel, s:dyncwd] = [fnamemodify(s:crfile, ':.'), getcwd()]
 	if s:crfile =~ '^.\+://' | retu | en
 	if pmode =~ 'c' || ( pmode =~ 'a' && stridx(s:crfpath, s:cwd) < 0 )
@@ -1753,8 +1765,6 @@ fu! s:getenv()
 	let [s:crword, s:crline] = [expand('<cword>', 1), getline('.')]
 	let [s:winh, s:crcursor] = [min([s:mxheight, &lines]), getpos('.')]
 	let [s:crbufnr, s:crvisual] = [bufnr('%'), s:lastvisual()]
-	let s:wpmode = exists('b:ctrlp_working_path_mode')
-		\ ? b:ctrlp_working_path_mode : s:pathmode
 	let [s:mrbs, s:crgfile] = [ctrlp#mrufiles#bufs(), expand('<cfile>', 1)]
 endf
 
