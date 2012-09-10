@@ -57,7 +57,7 @@ let [s:pref, s:opts, s:new_opts] = ['g:ctrlp_', {
 	\ 'custom_ignore':         ['s:usrign', s:ignore()],
 	\ 'default_input':         ['s:deftxt', 0],
 	\ 'dont_split':            ['s:nosplit', 'netrw'],
-	\ 'dotfiles':              ['s:dotfiles', 1],
+	\ 'dotfiles':              ['s:showhidden', 0],
 	\ 'extensions':            ['s:extensions', []],
 	\ 'follow_symlinks':       ['s:folsym', 0],
 	\ 'highlight_match':       ['s:mathi', [1, 'CtrlPMatch']],
@@ -88,6 +88,7 @@ let [s:pref, s:opts, s:new_opts] = ['g:ctrlp_', {
 	\ 'open_multiple_files':   's:opmul',
 	\ 'regexp':                's:regexp',
 	\ 'reuse_window':          's:nosplit',
+	\ 'show_hidden':           's:showhidden',
 	\ 'switch_buffer':         's:jmptobuf',
 	\ }]
 
@@ -194,7 +195,7 @@ fu! s:opts() "{{{2
 	if !exists('g:ctrlp_newcache') | let g:ctrlp_newcache = 0 | en
 	let s:maxdepth = min([s:maxdepth, 100])
 	let s:mxheight = max([s:mxheight, 1])
-	let s:glob = s:dotfiles ? '.*\|*' : '*'
+	let s:glob = s:showhidden ? '.*\|*' : '*'
 	let s:igntype = empty(s:usrign) ? -1 : type(s:usrign)
 	if s:lazy
 		cal extend(s:glbs, { 'ut': ( s:lazy > 1 ? s:lazy : 250 ) })
@@ -1300,7 +1301,7 @@ fu! ctrlp#dirnfile(entries)
 		let etype = getftype(each)
 		if s:igntype >= 0 && s:usrign(each, etype) | con | en
 		if etype == 'dir'
-			if s:dotfiles | if each !~ '[\/]\.\{1,2}$'
+			if s:showhidden | if each !~ '[\/]\.\{1,2}$'
 				cal add(items[0], each)
 			en | el
 				cal add(items[0], each)

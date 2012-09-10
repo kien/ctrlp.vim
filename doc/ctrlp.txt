@@ -51,7 +51,7 @@ Overview:~
   |ctrlp_use_caching|...........Use per-session caching or not.
   |ctrlp_clear_cache_on_exit|...Keep cache after exiting Vim or not.
   |ctrlp_cache_dir|.............Location of the cache directory.
-  |ctrlp_dotfiles|..............Ignore dotfiles and dotdirs or not.
+  |ctrlp_show_hidden|...........Ignore dotfiles and dotdirs or not.
   |ctrlp_custom_ignore|.........Hide stuff when using |globpath()|.
   |ctrlp_max_files|.............Number of files to scan initially.
   |ctrlp_max_depth|.............Directory depth to recurse into when scanning.
@@ -209,9 +209,9 @@ Set the directory to store the cache files: >
   let g:ctrlp_cache_dir = $HOME.'/.cache/ctrlp'
 <
 
-                                                           *'g:ctrlp_dotfiles'*
-Set this to 0 if you don't want CtrlP to scan for dotfiles and dotdirs: >
-  let g:ctrlp_dotfiles = 1
+                                                        *'g:ctrlp_show_hidden'*
+Set this to 1 if you want CtrlP to scan for dotfiles and dotdirs: >
+  let g:ctrlp_show_hidden = 0
 <
 Note: does not apply when a command defined with |g:ctrlp_user_command| is
 being used.
@@ -1178,6 +1178,8 @@ Special thanks:~
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
 
+    + Rename:
+        *g:ctrlp_dotfiles* -> |g:ctrlp_show_hidden|.
     + Change |g:ctrlp_switch_buffer|'s and |g:ctrlp_working_path_mode|'s type
       (old values still work).
     + New key for |g:ctrlp_user_command| when it's a Dictionary: 'ignore'.
