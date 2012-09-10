@@ -1429,6 +1429,15 @@ fu! ctrlp#syntax()
 	en
 endf
 
+fu! s:exthl(pat, grp)
+  cal clearmatches()
+  for i in range(len(a:pat))
+    cal matchadd(a:grp, '\M'.a:pat[i])
+  endfor
+  cal matchadd('CtrlPLinePre', '^>')
+  retu
+endf
+
 fu! s:highlight(pat, grp)
   if s:matcher != {}
 		let argms = [a:pat, a:grp]
