@@ -182,7 +182,7 @@ let s:hlgrps = {
 	\ 'PrtCursor': 'Constant',
 	\ }
 " s:opts() {{{2
-fu! s:opts()
+fu! s:opts(...)
 	unl! s:usrign s:usrcmd s:urprtmaps
 	for each in ['byfname', 'regexp', 'extensions'] | if exists('s:'.each)
 		let {each} = s:{each}
@@ -201,6 +201,17 @@ fu! s:opts()
 			let {va} = {s:bpref.ke}
 		en
 	endfo
+	if a:0 && a:1 != {}
+		unl va
+		for [ke, va] in items(a:1)
+			let opke = substitute(ke, '\(\w:\)\?ctrlp_', '', '')
+			if has_key(s:lc_opts, opke)
+				let sva = s:lc_opts[opke]
+				unl {sva}
+				let {sva} = va
+			en
+		endfo
+	en
 	for each in ['byfname', 'regexp'] | if exists(each)
 		let s:{each} = {each}
 	en | endfo
@@ -284,8 +295,9 @@ fu! ctrlp#clra()
 	cal ctrlp#clr()
 endf
 
-fu! s:Reset()
-	cal s:opts()
+fu! s:Reset(args)
+	let opts = has_key(a:args, 'opts') ? [a:args['opts']] : []
+	cal call('s:opts', opts)
 	cal s:autocmds()
 	cal ctrlp#utils#opts()
 	cal s:execextvar('opts')
@@ -1989,7 +2001,7 @@ fu! ctrlp#init(type, ...)
 	if exists('s:init') || s:iscmdwin() | retu | en
 	let [s:ermsg, v:errmsg] = [v:errmsg, '']
 	let [s:matches, s:init] = [1, 1]
-	cal s:Reset()
+	cal s:Reset(a:0 ? a:1 : {})
 	noa cal s:Open()
 	cal s:SetWD(a:0 ? a:1 : {})
 	cal s:MapNorms()
