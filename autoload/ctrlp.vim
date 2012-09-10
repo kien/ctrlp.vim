@@ -428,15 +428,14 @@ en
 retu array
 endf
 
-fu! s:MatchedItems(items, pat, limit,str)
-	let str = a:str
+fu! s:MatchedItems(items, pat, limit)
 	let exc = exists('s:crfilerel') ? s:crfilerel : ''
 	let items = s:narrowable() ? s:matched + s:mdata[3] : a:items
 	if s:matcher != {}
 		let argms = [items, a:pat, a:limit, s:mmode(), s:ispath, exc, s:regexp]
 		let lines = call(s:matcher['match'], argms)
 	el
-		let lines = s:MatchIt(items, a:pat, str,a:limit)
+		let lines = s:MatchIt(items, a:pat, a:limit, exc)
 	en
 	let s:matches = len(lines)
 	retu lines
@@ -523,7 +522,7 @@ fu! s:Update(str)
 	let s:martcs = &scs && str =~ '\u' ? '\C' : ''
 	let pat = s:matcher == {} ? s:SplitPattern(str) : str
 	let lines = s:nolim == 1 && empty(str) ? copy(g:ctrlp_lines)
-		\ : s:MatchedItems(g:ctrlp_lines, pat, s:winh,str)
+		\ : s:MatchedItems(g:ctrlp_lines, pat, s:winh)
 	cal s:Render(lines, pat)
 endf
 
