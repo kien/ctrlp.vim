@@ -64,6 +64,7 @@ let [s:pref, s:bpref, s:opts, s:new_opts, s:lc_opts] =
 	\ 'follow_symlinks':       ['s:folsym', 0],
 	\ 'highlight_match':       ['s:mathi', [1, 'CtrlPMatch']],
 	\ 'jump_to_buffer':        ['s:jmptobuf', 'Et'],
+	\ 'key_loop':              ['s:keyloop', 0],
 	\ 'lazy_update':           ['s:lazy', 0],
 	\ 'match_func':            ['s:matcher', {}],
 	\ 'match_window_bottom':   ['s:mwbottom', 1],
@@ -220,6 +221,9 @@ fu! s:opts(...)
 	let s:mxheight = max([s:mxheight, 1])
 	let s:glob = s:showhidden ? '.*\|*' : '*'
 	let s:igntype = empty(s:usrign) ? -1 : type(s:usrign)
+	if s:keyloop
+		let [s:lazy, s:glbs['imd']] = [0, 0]
+	en
 	if s:lazy
 		cal extend(s:glbs, { 'ut': ( s:lazy > 1 ? s:lazy : 250 ) })
 	en
@@ -714,7 +718,7 @@ fu! s:PrtSelectJump(char)
 			let npos = match(lines, smartcs.'^'.chr, s:jmpchr[1] + 1)
 			let [jmpln, s:jmpchr] = [npos == -1 ? pos : npos, [chr, npos]]
 		en
-		keepj exe jmpln + 1
+		exe 'keepj norm!' ( jmpln + 1 ).'G'
 		if s:nolim != 1 | let s:cline = line('.') | en
 		if line('$') > winheight(0) | cal s:BuildPrompt(0) | en
 	en
@@ -780,7 +784,6 @@ fu! s:MapNorms()
 	let cmd = substitute(pcmd, 'k%s', 'char-%d', '')
 	let pfunc = 'PrtFocusMap'
 	let ranges = [32, 33, 125, 126] + range(35, 91) + range(93, 123)
-		\ + range(128, 255)
 	for each in [34, 92, 124]
 		exe printf(cmd, each, pfunc, escape(nr2char(each), '"|\'))
 	endfo
@@ -811,20 +814,34 @@ fu! s:MapSpecs()
 	endfo | endfo
 	let s:smapped = s:bufnr
 endf
+
+fu! s:KeyLoop()
+	wh exists('s:init') && s:keyloop
+		redr
+		let nr = getchar()
+		let chr = !type(nr) ? nr2char(nr) : nr
+		if nr >=# 0x20
+			cal s:PrtFocusMap(chr)
+		el
+			let cmd = matchstr(maparg(chr), ':<C-U>\zs.\+\ze<CR>$')
+			exe ( cmd != '' ? cmd : 'norm '.chr )
+		en
+	endw
+endf
 " * Toggling {{{1
 fu! s:ToggleFocus()
-	let s:focus = s:focus ? 0 : 1
+	let s:focus = !s:focus
 	cal s:BuildPrompt(0)
 endf
 
 fu! s:ToggleRegex()
-	let s:regexp = s:regexp ? 0 : 1
+	let s:regexp = !s:regexp
 	cal s:PrtSwitcher()
 endf
 
 fu! s:ToggleByFname()
 	if s:ispath
-		let s:byfname = s:byfname ? 0 : 1
+		let s:byfname = !s:byfname
 		let s:mfunc = s:mfunc()
 		cal s:PrtSwitcher()
 	en
@@ -836,6 +853,16 @@ fu! s:ToggleType(dir)
 	cal ctrlp#syntax()
 	cal ctrlp#setlines(next)
 	cal s:PrtSwitcher()
+endf
+
+fu! s:ToggleKeyLoop()
+	let s:keyloop = !s:keyloop
+	if s:keyloop
+		let [&ut, s:lazy] = [0, 0]
+		cal s:KeyLoop()
+	elsei has_key(s:glbs, 'ut')
+		let [&ut, s:lazy] = [s:glbs['ut'], 1]
+	en
 endf
 
 fu! s:PrtSwitcher()
@@ -2010,6 +2037,7 @@ fu! ctrlp#init(type, ...)
 	cal ctrlp#setlines(s:settype(a:type))
 	cal s:SetDefTxt()
 	cal s:BuildPrompt(1)
+	if s:keyloop | cal s:KeyLoop() | en
 endf
 " - Autocmds {{{1
 if has('autocmd')

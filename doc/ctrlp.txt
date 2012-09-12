@@ -63,8 +63,9 @@ Overview:~
   |ctrlp_follow_symlinks|.......Follow symbolic links or not.
   |ctrlp_lazy_update|...........Only update when typing has stopped.
   |ctrlp_default_input|.........Seed the prompt with an initial string.
+  |ctrlp_key_loop|..............Use input looping for multi-byte input.
   |ctrlp_use_migemo|............Use Migemo patterns for Japanese filenames.
-  |ctrlp_prompt_mappings|.......Change the mappings in the prompt.
+  |ctrlp_prompt_mappings|.......Change the mappings inside the prompt.
 
   MRU mode:
   |ctrlp_mruf_max|..............Max MRU entries to remember.
@@ -415,6 +416,17 @@ path: >
 Instead of 1 or 0, if the value of the option is a string, it'll be used as-is
 as the default input: >
   let g:ctrlp_default_input = 'anystring'
+<
+
+                                                           *'g:ctrlp_key_loop'*
+An experimental feature. Set this to 1 to enable input looping for the typing
+of multi-byte characters: >
+  let g:ctrlp_key_loop = 0
+<
+Note #1: when set, this option resets the |g:ctrlp_lazy_update| option.
+
+Note #2: you can toggle this feature inside the prompt with a custom mapping: >
+  let g:ctrlp_prompt_mappings = { 'ToggleKeyLoop()': ['<F3>'] }
 <
 
                                                          *'g:ctrlp_use_migemo'*
@@ -1180,13 +1192,14 @@ Special thanks:~
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
 
+    + New options: |g:ctrlp_key_loop|,
+                   |g:ctrlp_open_func|,
+                   |g:ctrlp_tabpage_position|
     + Rename:
         *g:ctrlp_dotfiles* -> |g:ctrlp_show_hidden|.
     + Change |g:ctrlp_switch_buffer|'s and |g:ctrlp_working_path_mode|'s type
       (old values still work).
     + New key for |g:ctrlp_user_command| when it's a Dictionary: 'ignore'.
-    + New options: |g:ctrlp_open_func|.
-                   |g:ctrlp_tabpage_position|.
 
 Before 2012/06/15~
 
