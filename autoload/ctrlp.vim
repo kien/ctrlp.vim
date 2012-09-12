@@ -538,18 +538,14 @@ endf
 
 fu! s:KeyLoop()
 	wh exists('s:focus') && s:focus
-		let n = getchar(0)
-		if type(n) == 0
-			if n ==# 0
-				sleep 100m
-			elsei n >= 0x20
-				call s:PrtFocusMap(nr2char(n))
-			else
-				exe "keepj normal" nr2char(n)
-			endif
+		redraw
+		let n = getchar()
+		let c = type(n) == 0 ? nr2char(n) : n
+		if n >=# 0x20
+			cal s:PrtFocusMap(c)
 		el
-			exe "keepj normal" n
-		endi
+			exe "keepj normal" c
+		endif
 	endw
 endf
 
