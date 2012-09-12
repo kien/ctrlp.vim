@@ -62,6 +62,7 @@ Overview:~
   |ctrlp_arg_map|               Intercept <c-y> and <c-o> or not.
   |ctrlp_follow_symlinks|       Follow symbolic links or not.
   |ctrlp_lazy_update|           Only update when typing has stopped.
+  |ctrlp_key_loop|              Use event loop. Useful for multi-bytes input.
   |ctrlp_default_input|         Seed the prompt with an initial string.
   |ctrlp_use_migemo|            Use Migemo patterns for Japanese filenames.
   |ctrlp_prompt_mappings|       Change the mappings in the prompt.
@@ -390,6 +391,12 @@ after typing's been stopped for a certain amount of time: >
 <
 If is 1, update after 250ms. If bigger than 1, the number will be used as the
 delay time in milliseconds.
+
+                                                           *'g:ctrlp_key_loop'*
+Set this to 1 to enable the key event loop. Useful for multi-byte input: >
+  let g:ctrlp_key_loop = 0
+<
+Note that This is experimental feature.
 
                                                       *'g:ctrlp_default_input'*
 Set this to 1 to enable seeding the prompt with the current file's relative
