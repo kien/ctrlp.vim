@@ -197,6 +197,10 @@ fu! s:opts() "{{{2
 	let s:mxheight = max([s:mxheight, 1])
 	let s:glob = s:dotfiles ? '.*\|*' : '*'
 	let s:igntype = empty(s:usrign) ? -1 : type(s:usrign)
+	if s:keyloop
+		let s:lazy = 0
+		let s:glbs['imd'] = 0
+	en
 	if s:keyloop | let s:lazy = 0 | en
 	if s:lazy
 		cal extend(s:glbs, { 'ut': ( s:lazy > 1 ? s:lazy : 250 ) })
