@@ -63,6 +63,7 @@ let [s:pref, s:opts, s:new_opts] = ['g:ctrlp_', {
 	\ 'highlight_match':       ['s:mathi', [1, 'CtrlPMatch']],
 	\ 'jump_to_buffer':        ['s:jmptobuf', 'Et'],
 	\ 'lazy_update':           ['s:lazy', 0],
+	\ 'key_loop':              ['s:keyloop', 0],
 	\ 'match_func':            ['s:matcher', {}],
 	\ 'match_window_bottom':   ['s:mwbottom', 1],
 	\ 'match_window_reversed': ['s:mwreverse', 1],
@@ -196,6 +197,11 @@ fu! s:opts() "{{{2
 	let s:mxheight = max([s:mxheight, 1])
 	let s:glob = s:dotfiles ? '.*\|*' : '*'
 	let s:igntype = empty(s:usrign) ? -1 : type(s:usrign)
+	if s:keyloop
+		let s:lazy = 0
+		let s:glbs['imd'] = 0
+	en
+	if s:keyloop | let s:lazy = 0 | en
 	if s:lazy
 		cal extend(s:glbs, { 'ut': ( s:lazy > 1 ? s:lazy : 250 ) })
 	en
@@ -529,6 +535,25 @@ fu! s:BuildPrompt(upd)
 		exe 'echoh' hibase '| echon "_" | echoh None'
 	en
 endf
+
+fu! s:KeyLoop()
+	wh exists('s:focus') && s:focus
+		redr
+		let n = getchar()
+		let c = type(n) == 0 ? nr2char(n) : n
+		if n >=# 0x20
+			cal s:PrtFocusMap(c)
+		else
+			let ma = matchstr(maparg(c), ':<C-U>\zs.*\ze<CR>$')
+			if len(ma) > 0
+				exe ma
+			else
+				exe "keepj norm" c
+			en
+		endif
+	endw
+endf
+
 " - SetDefTxt() {{{1
 fu! s:SetDefTxt()
 	if s:deftxt == '0' || ( s:deftxt == 1 && !s:ispath ) | retu | en
@@ -1980,6 +2005,7 @@ fu! ctrlp#init(type, ...)
 	cal ctrlp#setlines(s:settype(a:type))
 	cal s:SetDefTxt()
 	cal s:BuildPrompt(1)
+	if s:keyloop | call s:KeyLoop() | en
 endf
 " - Autocmds {{{1
 if has('autocmd')
