@@ -149,8 +149,11 @@ fu! s:esctagscmd(bin, args, ...)
 	if exists('+ssl')
 		let [ssl, &ssl] = [&ssl, 0]
 	en
-	let fname = a:0 == 1 ? shellescape(a:1) : ''
+	let fname = a:0 ? shellescape(a:1) : ''
 	let cmd = shellescape(a:bin).' '.a:args.' '.fname
+	if &sh =~ 'cmd\.exe'
+		let cmd = substitute(cmd, '[&()@^<>|]', '^\0', 'g')
+	en
 	if exists('+ssl')
 		let &ssl = ssl
 	en
