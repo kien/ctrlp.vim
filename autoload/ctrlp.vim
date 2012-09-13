@@ -536,15 +536,21 @@ fu! s:BuildPrompt(upd)
 	en
 endf
 
+let s:keytable = {'9': "\<tab>", '15': "\<c-o>", '28': "\<c-\>"}
 fu! s:KeyLoop()
 	wh exists('s:focus') && s:focus
-		redraw
+		redr
 		let n = getchar()
 		let c = type(n) == 0 ? nr2char(n) : n
 		if n >=# 0x20
 			cal s:PrtFocusMap(c)
-		el
-			exe "keepj normal" c
+		else
+			let ma = matchstr(maparg(c), ':<C-U>\zs.*\ze<CR>$')
+			if len(ma) > 0
+				exe ma
+			else
+				exe "keepj norm" c
+			en
 		endif
 	endw
 endf
