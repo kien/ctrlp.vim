@@ -536,7 +536,6 @@ fu! s:BuildPrompt(upd)
 	en
 endf
 
-let s:keytable = {'9': "\<tab>", '15': "\<c-o>", '28': "\<c-\>"}
 fu! s:KeyLoop()
 	wh exists('s:focus') && s:focus
 		redr
