@@ -53,6 +53,7 @@ endf
 " Script local vars {{{2
 let [s:pref, s:bpref, s:opts, s:new_opts, s:lc_opts] =
 	\ ['g:ctrlp_', 'b:ctrlp_', {
+	\ 'abbrev':                ['s:abbrev', {}],
 	\ 'arg_map':               ['s:argmap', 0],
 	\ 'buffer_func':           ['s:buffunc', {}],
 	\ 'by_filename':           ['s:byfname', 0],
@@ -276,7 +277,7 @@ fu! s:Close()
 		exe s:winres[0]
 	en
 	unl! s:focus s:hisidx s:hstgot s:marked s:statypes s:cline s:init s:savestr
-		\ s:mrbs
+		\ s:mrbs s:did_exp
 	cal ctrlp#recordhist()
 	cal s:execextvar('exit')
 	cal s:log(0)
@@ -413,8 +414,9 @@ endf
 " * MatchedItems() {{{1
 fu! s:MatchIt(items, pat, limit, exc)
 	let [lines, id] = [[], 0]
-	let pat = s:byfname ?
-		\ map(split(a:pat, '^[^;]\+\zs;', 1), 's:martcs.v:val') : s:martcs.a:pat
+	let pat =
+		\ s:byfname ? map(split(a:pat, '^[^;]\+\\\@<!\zs;', 1), 's:martcs.v:val')
+		\ : s:martcs.a:pat
 	for item in a:items
 		let id += 1
 		try | if !( s:ispath && item == a:exc ) && call(s:mfunc, [item, pat]) >= 0
@@ -436,6 +438,7 @@ fu! s:MatchedItems(items, pat, limit)
 		let lines = s:MatchIt(items, a:pat, a:limit, exc)
 	en
 	let s:matches = len(lines)
+	unl! s:did_exp
 	retu lines
 endf
 
@@ -474,7 +477,7 @@ endf
 " * BuildPrompt() {{{1
 fu! s:Render(lines, pat)
 	let [&ma, lines, s:height] = [1, a:lines, min([len(a:lines), s:winh])]
-	let pat = s:byfname ? split(a:pat, '^[^;]\+\zs;', 1)[0] : a:pat
+	let pat = s:byfname ? split(a:pat, '^[^;]\+\\\@<!\zs;', 1)[0] : a:pat
 	" Setup the match window
 	sil! exe '%d _ | res' s:height
 	" Print the new items
@@ -525,18 +528,14 @@ fu! s:Update(str)
 endf
 
 fu! s:ForceUpdate()
-	let [estr, prt] = ['"\', copy(s:prompt)]
-	cal map(prt, 'escape(v:val, estr)')
-	sil! cal s:Update(join(prt, ''))
+	sil! cal s:Update(escape(s:getinput(), '\'))
 endf
 
 fu! s:BuildPrompt(upd)
 	let base = ( s:regexp ? 'r' : '>' ).( s:byfname ? 'd' : '>' ).'> '
-	let [estr, prt] = ['"\', copy(s:prompt)]
-	cal map(prt, 'escape(v:val, estr)')
-	let str = join(prt, '')
-	let lazy = empty(str) || exists('s:force') || !has('autocmd') ? 0 : s:lazy
-	if a:upd && !lazy && ( s:matches || s:regexp
+	let str = escape(s:getinput(), '\')
+	let lazy = str == '' || exists('s:force') || !has('autocmd') ? 0 : s:lazy
+	if a:upd && !lazy && ( s:matches || s:regexp || exists('s:did_exp')
 		\ || str =~ '\(\\\(<\|>\)\|[*|]\)\|\(\\\:\([^:]\|\\:\)*$\)' )
 		sil! cal s:Update(str)
 	en
@@ -548,6 +547,8 @@ fu! s:BuildPrompt(upd)
 	let hibase = 'CtrlPPrtBase'
 	" Build it
 	redr
+	let prt = copy(s:prompt)
+	cal map(prt, 'escape(v:val, ''"\'')')
 	exe 'echoh' hibase '| echon "'.base.'"
 		\ | echoh' hiactive '| echon "'.prt[0].'"
 		\ | echoh' hicursor '| echon "'.prt[1].'"
@@ -640,7 +641,7 @@ endf
 
 fu! s:PrtExpandDir()
 	if !s:focus | retu | en
-	let str = s:prompt[0]
+	let str = s:getinput('c')
 	if str =~ '\v^\@(cd|lc[hd]?|chd)\s.+' && s:spi
 		let hasat = split(str, '\v^\@(cd|lc[hd]?|chd)\s*\zs')
 		let str = get(hasat, 1, '')
@@ -963,7 +964,7 @@ endf
 
 fu! s:AcceptSelection(mode)
 	if a:mode != 'e' && s:OpenMulti(a:mode) != -1 | retu | en
-	let str = join(s:prompt, '')
+	let str = s:getinput()
 	if a:mode == 'e' | if s:SpecInputs(str) | retu | en | en
 	" Get the selected line
 	let line = ctrlp#getcline()
@@ -982,7 +983,7 @@ fu! s:AcceptSelection(mode)
 endf
 " - CreateNewFile() {{{1
 fu! s:CreateNewFile(...)
-	let [md, str] = ['', join(s:prompt, '')]
+	let [md, str] = ['', s:getinput('n')]
 	if empty(str) | retu | en
 	if s:argmap && !a:0
 		" Get the extra argument
@@ -1734,7 +1735,34 @@ endf
 fu! s:narrowable()
 	retu exists('s:act_add') && exists('s:matched') && s:matched != []
 		\ && exists('s:mdata') && s:mdata[:2] == [s:dyncwd, s:itemtype, s:regexp]
-		\ && s:matcher == {}
+		\ && s:matcher == {} && !exists('s:did_exp')
+endf
+
+fu! s:getinput(...)
+	let [prt, spi] = [s:prompt, ( a:0 ? a:1 : '' )]
+	if s:abbrev != {}
+		let gmd = has_key(s:abbrev, 'gmode') ? s:abbrev['gmode'] : ''
+		let [ayt, nkw] = [( gmd =~ 't' ), ( gmd =~ 'k' )]
+		let str = ( ayt && !a:0 ) || spi == 'c' ? prt[0] : join(prt, '')
+		if ayt && nkw && !a:0 && matchstr(str, '.$') =~ '\k'
+			retu join(prt, '')
+		en
+		let [pf, rz] = [( s:byfname ? 'f' : 'p' ), ( s:regexp ? 'r' : 'z' )]
+		for dict in s:abbrev['abbrevs']
+			let dmd = has_key(dict, 'mode') ? dict['mode'] : ''
+			let pat = escape(dict['pattern'], '~')
+			if ( dmd == '' || ( dmd =~ pf && dmd =~ rz && !a:0 )
+				\ || dmd =~ '['.spi.']' ) && str =~ pat
+				let [str, s:did_exp] = [join(split(str, pat, 1), dict['expanded']), 1]
+			en
+		endfo
+		if ayt && !a:0
+			let prt[0] = str
+		el
+			retu str
+		en
+	en
+	retu spi == 'c' ? prt[0] : join(prt, '')
 endf
 
 fu! s:migemo(str)

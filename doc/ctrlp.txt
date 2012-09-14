@@ -63,6 +63,7 @@ Overview:~
   |ctrlp_follow_symlinks|.......Follow symbolic links or not.
   |ctrlp_lazy_update|...........Only update when typing has stopped.
   |ctrlp_default_input|.........Seed the prompt with an initial string.
+  |ctrlp_abbrev|................Input abbreviations.
   |ctrlp_key_loop|..............Use input looping for multi-byte input.
   |ctrlp_use_migemo|............Use Migemo patterns for Japanese filenames.
   |ctrlp_prompt_mappings|.......Change the mappings inside the prompt.
@@ -417,6 +418,57 @@ Instead of 1 or 0, if the value of the option is a string, it'll be used as-is
 as the default input: >
   let g:ctrlp_default_input = 'anystring'
 <
+
+                                                             *'g:ctrlp_abbrev'*
+Define input abbreviations that can be expanded (either internally or visibly)
+in the prompt: >
+  let g:ctrlp_abbrev = {}
+<
+Examples: >
+  let g:ctrlp_abbrev = {
+    \ 'gmode': 'i',
+    \ 'abbrevs': [
+      \ {
+        \ 'pattern': '^cd b',
+        \ 'expanded': '@cd ~/.vim/bundle',
+        \ 'mode': 'pfrz',
+      \ },
+      \ {
+        \ 'pattern': '\(^@.\+\|\\\@<!:.\+\)\@<! ',
+        \ 'expanded': '.\{-}',
+        \ 'mode': 'pfr',
+      \ },
+      \ {
+        \ 'pattern': '\\\@<!:.\+\zs\\\@<! ',
+        \ 'expanded': '\ ',
+        \ 'mode': 'pfz',
+      \ },
+      \ ]
+    \ }
+<
+The 'pattern' string is regexp matched against the entered input. The expansion
+is as if the 'expanded' string was typed into the prompt.
+
+For 'gmode' (optional):
+  i - expand internally (default).
+  t - insert the expanded results into the prompt as you type.
+  k - insert the expanded results when a non-keyword character is typed. Only
+      applies when "t" is also present.
+
+For 'mode' (of each entry; optional):
+  f - only in filename mode.
+  p - only in full path mode.
+  r - only in regexp mode.
+  z - only in fuzzy mode.
+  n - only when creating a new file with <c-y> (use the expanded string in the
+      new filename).
+  c - only when auto-completing directory names with <tab> (expand the pattern
+      immediately before doing the auto-completion).
+  <empty> or not defined - always enable.
+
+Note: the abbrev entries are evaluated in sequence, so a later entry can be
+evaluated against the expanded result of a previous entry; this includes itself
+when 'gmode' is "t".
 
                                                            *'g:ctrlp_key_loop'*
 An experimental feature. Set this to 1 to enable input looping for the typing
@@ -1192,7 +1244,8 @@ Special thanks:~
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
 
-    + New options: |g:ctrlp_key_loop|,
+    + New options: |g:ctrlp_abbrev|,
+                   |g:ctrlp_key_loop|,
                    |g:ctrlp_open_func|,
                    |g:ctrlp_tabpage_position|
     + Rename:
