@@ -129,8 +129,8 @@ Set the maximum height of the match window: >
 <
 
                                                       *'g:ctrlp_switch_buffer'*
-When opening a file, if it's already opened in a window somewhere CtrlP will
-try to jump to it instead of opening a new instance: >
+When opening a file, if it's already open in a window somewhere, CtrlP will try
+to jump to it instead of opening a new instance: >
   let g:ctrlp_switch_buffer = 'Et'
 <
   e - jump when <cr> is pressed, but only to windows in the current tab.
@@ -138,7 +138,7 @@ try to jump to it instead of opening a new instance: >
   v - like "e", but jump when <c-v> is pressed.
   h - like "e", but jump when <c-x> is pressed.
   E, T, V, H - like "e", "t", "v", and "h", but jump to windows anywhere.
-  0 or <empty-string> - disable this feature.
+  0 or <empty> - disable this feature.
 
                                                        *'g:ctrlp_reuse_window'*
 When opening a file with <cr>, CtrlP avoids opening it in windows created by
@@ -174,7 +174,7 @@ variable: >
   w - begin finding a root from the current working directory outside of CtrlP
       instead of from the directory of the current file (default). Only applies
       when "r" is also present.
-  0 or <empty-string> - disable this feature.
+  0 or <empty> - disable this feature.
 
 Note #1: if "a" or "c" is included with "r", use the behavior of "a" or "c" (as
 a fallback) when a root can't be found.
@@ -321,12 +321,12 @@ Some examples: >
   let g:ctrlp_user_command = ['.hg', 'for /f "tokens=1" %%a in (''hg root'') '
     \ . 'do hg --cwd %s status -numac -I . %%a']           " Windows
 <
-Note #1: if the fallback_command is empty or not defined, |globpath()| will
-then be used when searching outside a repo.
+Note #1: if the fallback_command is empty or the 'fallback' key is not defined,
+|globpath()| will then be used when scanning outside of a repository.
 
 Note #2: unless the |Dictionary| format is used and 'ignore' is defined and set
 to 1, the |wildignore| and |g:ctrlp_custom_ignore| options do not apply when
-these custom commands are being used. When not defined, 'ignore' is set to 0 by
+these custom commands are being used. When not present, 'ignore' is set to 0 by
 default to retain the performance advantage of using external commands.
 
 Note #3: when changing the option's variable type, remember to |:unlet| it
