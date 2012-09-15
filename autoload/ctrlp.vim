@@ -384,7 +384,7 @@ fu! s:lsCmd()
 		if s:findroot(s:dyncwd, cmd[0], 0, 1) == []
 			retu len(cmd) == 3 ? cmd[2] : ''
 		en
-		let s:vcscmd = s:lash == '\' ? 1 : 0
+		let s:vcscmd = s:lash == '\'
 		retu cmd[1]
 	elsei type(cmd) == 4 && ( has_key(cmd, 'types') || has_key(cmd, 'fallback') )
 		let fndroot = []
@@ -401,7 +401,7 @@ fu! s:lsCmd()
 		for pair in cmdtypes
 			if pair[0] == fndroot[0] | brea | en
 		endfo
-		let s:vcscmd = s:lash == '\' ? 1 : 0
+		let s:vcscmd = s:lash == '\'
 		retu pair[1]
 	en
 endf
@@ -1114,7 +1114,7 @@ fu! s:OpenMulti(...)
 		if conds[nopt]
 			if !buflisted(bufnr) | cal s:openfile('bad', va, '', 0) | en
 		el
-			cal s:openfile(cmd, useb ? bufnr : va, tail, ic == 1 ? 1 : 0)
+			cal s:openfile(cmd, useb ? bufnr : va, tail, ic == 1)
 			if jf | if ic == 1
 				let crpos = [tabpagenr(), winnr()]
 			el
@@ -1793,7 +1793,7 @@ fu! ctrlp#j2l(nr)
 endf
 
 fu! s:maxf(len)
-	retu s:maxfiles && a:len > s:maxfiles ? 1 : 0
+	retu s:maxfiles && a:len > s:maxfiles
 endf
 
 fu! s:regexfilter(str)

@@ -37,7 +37,7 @@ fu! s:globdirs(dirs, depth)
 endf
 
 fu! s:max(len, max)
-	retu a:max && a:len > a:max ? 1 : 0
+	retu a:max && a:len > a:max
 endf
 
 fu! s:nocache()
