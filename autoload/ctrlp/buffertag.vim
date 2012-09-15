@@ -205,6 +205,19 @@ fu! s:syntax()
 		sy match CtrlPTabExtra '\zs\t.*\ze$' contains=CtrlPBufName,CtrlPTagKind
 	en
 endf
+
+fu! s:chknearby(pat)
+	if match(getline('.'), a:pat) < 0
+		let [int, forw, maxl] = [1, 1, line('$')]
+		wh !search(a:pat, 'W'.( forw ? '' : 'b' ))
+			if !forw
+				if int > maxl | brea | en
+				let int += int
+			en
+			let forw = !forw
+		endw
+	en
+endf
 " Public {{{1
 fu! ctrlp#buffertag#init(fname)
 	let bufs = exists('s:btmode') && s:btmode
@@ -226,18 +239,8 @@ fu! ctrlp#buffertag#accept(mode, str)
 	let bufnr = str2nr(get(vals, 1))
 	if bufnr
 		cal ctrlp#acceptfile(a:mode, bufname(bufnr))
-		let pat = get(vals, 3, '')
 		exe 'norm!' str2nr(get(vals, 2, line('.'))).'G'
-		if match(getline('.'), pat) < 0
-			let [int, forw, maxl] = [1, 1, line('$')]
-			wh !search(pat, 'W'.( forw ? '' : 'b' ))
-				if !forw
-					if int > maxl | brea | en
-					let int += int
-				en
-				let forw = !forw
-			endw
-		en
+		cal s:chknearby('\V\C'.get(vals, 3, ''))
 		sil! norm! zvzz
 	en
 endf
