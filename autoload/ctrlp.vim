@@ -1742,9 +1742,8 @@ fu! s:getinput(...)
 	let [prt, spi] = [s:prompt, ( a:0 ? a:1 : '' )]
 	if s:abbrev != {}
 		let gmd = has_key(s:abbrev, 'gmode') ? s:abbrev['gmode'] : ''
-		let [ayt, nkw] = [( gmd =~ 't' ), ( gmd =~ 'k' )]
-		let str = ( ayt && !a:0 ) || spi == 'c' ? prt[0] : join(prt, '')
-		if ayt && nkw && !a:0 && matchstr(str, '.$') =~ '\k'
+		let str = ( gmd =~ 't' && !a:0 ) || spi == 'c' ? prt[0] : join(prt, '')
+		if gmd =~ 't' && gmd =~ 'k' && !a:0 && matchstr(str, '.$') =~ '\k'
 			retu join(prt, '')
 		en
 		let [pf, rz] = [( s:byfname ? 'f' : 'p' ), ( s:regexp ? 'r' : 'z' )]
@@ -1756,7 +1755,7 @@ fu! s:getinput(...)
 				let [str, s:did_exp] = [join(split(str, pat, 1), dict['expanded']), 1]
 			en
 		endfo
-		if ayt && !a:0
+		if gmd =~ 't' && !a:0
 			let prt[0] = str
 		el
 			retu str
