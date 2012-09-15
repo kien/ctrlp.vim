@@ -858,6 +858,9 @@ endf
 
 fu! s:ToggleKeyLoop()
 	let s:keyloop = !s:keyloop
+	if exists('+imd')
+		let &imd = !s:keyloop
+	en
 	if s:keyloop
 		let [&ut, s:lazy] = [0, 0]
 		cal s:KeyLoop()
