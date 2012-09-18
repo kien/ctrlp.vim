@@ -2017,6 +2017,10 @@ fu! ctrlp#getcline()
 	retu !empty(s:lines) ? s:lines[line('.') - 1] : ''
 endf
 
+fu! ctrlp#getmarkedlist()
+	retu exists('s:marked') ? values(s:marked) : []
+endf
+
 fu! ctrlp#exit()
 	cal s:PrtExit()
 endf
