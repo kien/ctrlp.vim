@@ -17,8 +17,11 @@ let [g:ctrlp_lines, g:ctrlp_allfiles, g:ctrlp_alltags, g:ctrlp_alldirs,
 if !exists('g:ctrlp_map') | let g:ctrlp_map = '<c-p>' | en
 if !exists('g:ctrlp_cmd') | let g:ctrlp_cmd = 'CtrlP' | en
 
-com! -n=? -com=dir CtrlP         cal ctrlp#init(0, { 'dir': <q-args> })
-com! -n=? -com=dir CtrlPMRUFiles cal ctrlp#init(2, { 'dir': <q-args> })
+com! -n=? -com=custom,ctrlp#dircompl CtrlP
+	\ cal ctrlp#init(0, { 'dir': <q-args> })
+
+com! -n=? -com=custom,ctrlp#dircompl CtrlPMRUFiles
+	\ cal ctrlp#init(2, { 'dir': <q-args> })
 
 com! -bar CtrlPBuffer   cal ctrlp#init(1)
 com! -n=? CtrlPLastMode cal ctrlp#init(-1, { 'args': <q-args> })
@@ -42,7 +45,7 @@ cal ctrlp#mrufiles#init()
 com! -bar CtrlPTag      cal ctrlp#init(ctrlp#tag#id())
 com! -bar CtrlPQuickfix cal ctrlp#init(ctrlp#quickfix#id())
 
-com! -n=? -com=dir CtrlPDir
+com! -n=? -com=custom,ctrlp#dircompl CtrlPDir
 	\ cal ctrlp#init(ctrlp#dir#id(), { 'dir': <q-args> })
 
 com! -n=? -com=buffer CtrlPBufTag
@@ -60,7 +63,7 @@ com! -bar CtrlPChangeAll   cal ctrlp#init(ctrlp#changes#cmd(1))
 com! -bar CtrlPMixed       cal ctrlp#init(ctrlp#mixed#id())
 com! -bar CtrlPBookmarkDir cal ctrlp#init(ctrlp#bookmarkdir#id())
 
-com! -n=? -com=dir CtrlPBookmarkDirAdd
+com! -n=? -com=custom,ctrlp#dircompl CtrlPBookmarkDirAdd
 	\ cal ctrlp#call('ctrlp#bookmarkdir#add', <q-args>)
 
 " vim:ts=2:sw=2:sts=2
