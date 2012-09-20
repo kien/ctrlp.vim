@@ -1303,8 +1303,17 @@ endf
 " *** Paths {{{2
 " Line formatting {{{3
 fu! s:formatline(str)
-	let cond = s:ispath && ( s:winw - 4 ) < s:strwidth(a:str)
-	retu '> '.( cond ? s:pathshorten(a:str) : a:str )
+	let str = a:str
+	if s:itemtype == 1
+		let bfnr = bufnr('^'.fnamemodify(str, ':p').'$')
+		let idc = ( bfnr == bufnr('#') ? '#' : '' )
+			\ . ( getbufvar(bfnr, '&ma') ? '' : '-' )
+			\ . ( getbufvar(bfnr, '&ro') ? '=' : '' )
+			\ . ( getbufvar(bfnr, '&mod') ? '+' : '' )
+		let str .= idc != '' ? ' '.idc : ''
+	en
+	let cond = s:ispath && ( s:winw - 4 ) < s:strwidth(str)
+	retu '> '.( cond ? s:pathshorten(str) : str )
 endf
 
 fu! s:pathshorten(str)

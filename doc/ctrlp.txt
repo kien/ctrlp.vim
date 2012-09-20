@@ -1240,6 +1240,7 @@ Special thanks:~
     * Seth Fowler <github.com/sfowler>
     * Lowe Thiderman <github.com/thiderman>
     * Christopher Fredén <github.com/icetan>
+    * Zahary Karadjov <github.com/zah>
 
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
