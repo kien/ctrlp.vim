@@ -405,10 +405,20 @@ fu! s:lsCmd()
 	en
 endf
 " - Buffers {{{1
+fu! s:BufStat(buf)
+  if getbufvar(a:buf, "&mod")
+    return " [+]"
+  elseif getbufvar(a:buf, "&ro")
+    return " [R]"
+  else
+    retu ""
+  endif
+endf
+
 fu! ctrlp#buffers(...)
 	let ids = sort(filter(range(1, bufnr('$')), 'empty(getbufvar(v:val, "&bt"))'
 		\ .' && getbufvar(v:val, "&bl") && strlen(bufname(v:val))'), 's:compmreb')
-	retu a:0 && a:1 == 'id' ? ids : map(ids, 'fnamemodify(bufname(v:val), ":.")')
+	retu a:0 && a:1 == 'id' ? ids : map(ids, 'fnamemodify(bufname(v:val), ":.") . s:BufStat(v:val)')
 endf
 " * MatchedItems() {{{1
 fu! s:MatchIt(items, pat, limit, exc)
