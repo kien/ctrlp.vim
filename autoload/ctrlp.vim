@@ -1334,16 +1334,6 @@ fu! s:findcommon(items, seed)
 	endfo
 	retu cmn
 endf
-
-fu! ctrlp#dircompl(...)
-	let [hsl, str] = [match(a:1, '[\/]'), '']
-	let par = substitute(a:1, '[^\/]*$', '', '')
-	let path = !hsl ? par : hsl > 0 ? getcwd().s:lash().par : getcwd()
-	for dir in split(globpath(s:fnesc(path, 'g', ','), '*/'), '\n')
-		let str .= par.split(dir, '[\/]')[-1]."\n"
-	endfo
-	retu str
-endf
 " Misc {{{3
 fu! s:headntail(str)
 	let parts = split(a:str, '[\/]\ze[^\/]\+[\/:]\?$')
