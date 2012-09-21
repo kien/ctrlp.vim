@@ -405,20 +405,10 @@ fu! s:lsCmd()
 	en
 endf
 " - Buffers {{{1
-fu! s:BufStat(buf)
-  if getbufvar(a:buf, "&mod")
-    return " [+]"
-  elseif getbufvar(a:buf, "&ro")
-    return " [R]"
-  else
-    retu ""
-  endif
-endf
-
 fu! ctrlp#buffers(...)
 	let ids = sort(filter(range(1, bufnr('$')), 'empty(getbufvar(v:val, "&bt"))'
 		\ .' && getbufvar(v:val, "&bl") && strlen(bufname(v:val))'), 's:compmreb')
-	retu a:0 && a:1 == 'id' ? ids : map(ids, 'fnamemodify(bufname(v:val), ":.") . s:BufStat(v:val)')
+	retu a:0 && a:1 == 'id' ? ids : map(ids, 'fnamemodify(bufname(v:val), ":.")')
 endf
 " * MatchedItems() {{{1
 fu! s:MatchIt(items, pat, limit, exc)
@@ -1312,9 +1302,21 @@ fu! ctrlp#progress(enum, ...)
 endf
 " *** Paths {{{2
 " Line formatting {{{3
+fu! s:BufStat(buf)
+	if getbufvar(a:buf, "&mod")
+		return " [+]"
+	elseif getbufvar(a:buf, "&ro")
+		return " [R]"
+	else
+		retu ""
+	endif
+endf
+
 fu! s:formatline(str)
 	let cond = s:ispath && ( s:winw - 4 ) < s:strwidth(a:str)
-	retu '> '.( cond ? s:pathshorten(a:str) : a:str )
+	let res = '> '.( cond ? s:pathshorten(a:str) : a:str )
+	if s:itemtype == 1 | let res .= s:BufStat(a:str) | en
+	retu res
 endf
 
 fu! s:pathshorten(str)
