@@ -1302,9 +1302,21 @@ fu! ctrlp#progress(enum, ...)
 endf
 " *** Paths {{{2
 " Line formatting {{{3
+fu! s:BufStat(buf)
+	if getbufvar(a:buf, "&mod")
+		return " [+]"
+	elseif getbufvar(a:buf, "&ro")
+		return " [R]"
+	else
+		retu ""
+	endif
+endf
+
 fu! s:formatline(str)
 	let cond = s:ispath && ( s:winw - 4 ) < s:strwidth(a:str)
-	retu '> '.( cond ? s:pathshorten(a:str) : a:str )
+	let res = '> '.( cond ? s:pathshorten(a:str) : a:str )
+	if s:itemtype == 1 | let res .= s:BufStat(a:str) | en
+	retu res
 endf
 
 fu! s:pathshorten(str)
