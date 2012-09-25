@@ -1157,8 +1157,8 @@ Highlighting:~
 
 Statuslines:~
   * Highlight groups:
-    CtrlPMode1 : 'prt' or 'win', also for 'regex' (Character)
-    CtrlPMode2 : 'file' or 'path', also for the local working dir (|hl-LineNr|)
+    CtrlPMode1 : 'file' or 'path', and the current mode (Character)
+    CtrlPMode2 : 'prt' or 'win', 'regex', the working directory (|hl-LineNr|)
     CtrlPStats : the scanning status (Function)
 
   For rebuilding the statuslines, see |g:ctrlp_status_func|.
