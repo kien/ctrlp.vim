@@ -97,7 +97,7 @@ fu! ctrlp#tag#accept(mode, str)
 		\ 'e': ['', 'tj'],
 		\ }
 	let cmd = fnd[0] == 1 ? cmds[a:mode][0] : cmds[a:mode][1]
-	let cmd = a:mode == 'e' && ctrlp#modfilecond() && !&aw
+	let cmd = a:mode == 'e' && ctrlp#modfilecond(!&aw)
 		\ ? ( cmd == 'tj' ? 'stj' : 'sp' ) : cmd
 	let cmd = a:mode == 't' ? ctrlp#tabcount().cmd : cmd
 	if fnd[0] == 1
