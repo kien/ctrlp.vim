@@ -68,7 +68,6 @@ let [s:pref, s:bpref, s:opts, s:new_opts, s:lc_opts] =
 	\ 'key_loop':              ['s:keyloop', 0],
 	\ 'lazy_update':           ['s:lazy', 0],
 	\ 'match_func':            ['s:matcher', {}],
-  \ 'highlight_func':        ['s:exthighlight', {}],
 	\ 'match_window_bottom':   ['s:mwbottom', 1],
 	\ 'match_window_reversed': ['s:mwreverse', 1],
 	\ 'max_depth':             ['s:maxdepth', 40],
@@ -454,6 +453,14 @@ for line in matchlist:
 vim.command('let array = %s' % linelist)
 EOF
 en
+
+" highlight matches
+cal clearmatches()
+for i in range(len(a:input))
+  cal matchadd('CtrlPMatch', '\M'.a:input[i])
+endfor
+cal matchadd('CtrlPLinePre', '^>')
+
 retu array
 endf
 
@@ -1499,21 +1506,8 @@ fu! ctrlp#syntax()
 	en
 endf
 
-fu! s:exthl(pat, grp)
-  cal clearmatches()
-  for i in range(len(a:pat))
-    cal matchadd(a:grp, '\M'.a:pat[i])
-  endfor
-  cal matchadd('CtrlPLinePre', '^>')
-  retu
-endf
-
 fu! s:highlight(pat, grp)
-  if s:matcher != {}
-		let argms = [a:pat, a:grp]
-    cal call(s:exthighlight['highlight'], argms)
-    retu
-  en
+  if s:matcher != {} | retu | en
 	cal clearmatches()
 	if !empty(a:pat) && s:ispath
 		let pat = s:regexp ? substitute(a:pat, '\\\@<!\^', '^> \\zs', 'g') : a:pat
