@@ -273,7 +273,7 @@ fu! s:Close()
 	if exists('s:glb_acd') | let &acd = s:glb_acd | en
 	let g:ctrlp_lines = []
 	if s:winres[1] >= &lines && s:winres[2] == winnr('$')
-		exe s:winres[0]
+		exe s:winres[0].s:winres[0]
 	en
 	unl! s:focus s:hisidx s:hstgot s:marked s:statypes s:cline s:init s:savestr
 		\ s:mrbs s:did_exp
