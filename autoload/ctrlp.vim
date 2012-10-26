@@ -431,6 +431,18 @@ fu! s:MatchItPy(lines,input,limit,mmode, ispath, crfile, regex)
   if a:input == ''
     let array = a:lines[0:a:limit]
   el
+
+  " use built-in matcher if mmode set to match until first tab ( in other case
+  " tag.vim doesnt work
+  if a:mmode == "first-non-tab"
+    let array = []
+    for item in a:lines
+      if call(s:mfunc, [item,a:input]) >= 0
+        cal add(array,item)
+      en
+    endfo
+    retu array
+  en
 python << EOF
 import vim
 import re
@@ -455,6 +467,7 @@ EOF
 en
 
 " highlight matches
+" TODO make it case-unsensitive
 cal clearmatches()
 for i in range(len(a:input))
   cal matchadd('CtrlPMatch', '\M'.a:input[i])
