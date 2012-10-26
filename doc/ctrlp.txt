@@ -40,9 +40,7 @@ Overview:~
   |ctrlp_cmd|...................Default command used for the default mapping.
   |ctrlp_by_filename|...........Default to filename mode or not.
   |ctrlp_regexp|................Default to regexp mode or not.
-  |ctrlp_match_window_bottom|...Where to show the match window.
-  |ctrlp_match_window_reversed|.Sort order in the match window.
-  |ctrlp_max_height|............Max height of the match window.
+  |ctrlp_match_window|..........Order, height and position of the match window.
   |ctrlp_switch_buffer|.........Jump to an open buffer if already opened.
   |ctrlp_reuse_window|..........Reuse special windows (help, quickfix, etc).
   |ctrlp_tabpage_position|......Where to put the new tab page.
@@ -114,21 +112,27 @@ Set this to 1 to set regexp search as the default: >
 <
 Can be toggled on/off by pressing <c-r> inside the prompt.
 
-                                                *'g:ctrlp_match_window_bottom'*
-Set this to 0 to show the match window at the top of the screen: >
-  let g:ctrlp_match_window_bottom = 1
+                                                       *'g:ctrlp_match_window'*
+Change the postion, the listing order of results, the minimum and the maximum
+heights of the match window: >
+  let g:ctrlp_match_window = ''
 <
+Example: >
+  let g:ctrlp_match_window = 'bottom,order:btt,min:1,max:10'
+<
+The position: (default: bottom)
+  top - show the match window at the top of the screen.
+  bottom - show the match window at the bottom of the screen.
 
-                                              *'g:ctrlp_match_window_reversed'*
-Change the listing order of the files in the match window. The default setting
-(1) is from bottom to top: >
-  let g:ctrlp_match_window_reversed = 1
-<
+The listing order of results: (default: btt)
+  order:ttb - from top to bottom.
+  order:btt - from bottom to top.
 
-                                                         *'g:ctrlp_max_height'*
-Set the maximum height of the match window: >
-  let g:ctrlp_max_height = 10
-<
+The minimum and maximum heights:
+  min:{n} - show minimum {n} lines (default: 1).
+  max:{n} - show maximum {n} lines (default: 10).
+
+Note: When a setting isn't set, its default value will be used.
 
                                                       *'g:ctrlp_switch_buffer'*
 When opening a file, if it's already open in a window somewhere, CtrlP will try
@@ -1252,6 +1256,10 @@ Special thanks:~
 
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
+
+    + Combine *g:ctrlp_match_window_bottom* *g:ctrlp_match_window_reversed* and
+      *g:ctrlp_max_height* into |g:ctrlp_match_window|.
+    + New option: |g:ctrlp_match_window|.
 
 Before 2012/11/30~
 

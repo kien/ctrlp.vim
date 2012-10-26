@@ -68,6 +68,7 @@ let [s:pref, s:bpref, s:opts, s:new_opts, s:lc_opts] =
 	\ 'key_loop':              ['s:keyloop', 0],
 	\ 'lazy_update':           ['s:lazy', 0],
 	\ 'match_func':            ['s:matcher', {}],
+	\ 'match_window':          ['s:mw', ''],
 	\ 'match_window_bottom':   ['s:mwbottom', 1],
 	\ 'match_window_reversed': ['s:mwreverse', 1],
 	\ 'max_depth':             ['s:maxdepth', 40],
@@ -181,7 +182,7 @@ let s:hlgrps = {
 	\ 'PrtText': 'Normal',
 	\ 'PrtCursor': 'Constant',
 	\ }
-" s:opts() {{{2
+" Get the options {{{2
 fu! s:opts(...)
 	unl! s:usrign s:usrcmd s:urprtmaps
 	for each in ['byfname', 'regexp', 'extensions'] | if exists('s:'.each)
@@ -201,6 +202,9 @@ fu! s:opts(...)
 			let {va} = {s:bpref.ke}
 		en
 	endfo
+	" Match window options
+	cal s:match_window_opts()
+	" One-time values
 	if a:0 && a:1 != {}
 		unl va
 		for [ke, va] in items(a:1)
@@ -217,7 +221,6 @@ fu! s:opts(...)
 	en | endfo
 	if !exists('g:ctrlp_newcache') | let g:ctrlp_newcache = 0 | en
 	let s:maxdepth = min([s:maxdepth, 100])
-	let s:mxheight = max([s:mxheight, 1])
 	let s:glob = s:showhidden ? '.*\|*' : '*'
 	let s:igntype = empty(s:usrign) ? -1 : type(s:usrign)
 	let s:lash = ctrlp#utils#lash()
@@ -238,13 +241,32 @@ fu! s:opts(...)
 		cal extend(s:prtmaps, s:urprtmaps)
 	en
 endf
+
+fu! s:match_window_opts()
+	let s:mw_pos =
+		\ s:mw =~ 'top\|bottom' ? matchstr(s:mw, 'top\|bottom') :
+		\ exists('g:ctrlp_match_window_bottom') ? ( s:mwbottom ? 'bottom' : 'top' )
+		\ : 'bottom'
+	let s:mw_order =
+		\ s:mw =~ 'order:[^,]\+' ? matchstr(s:mw, 'order:\zs[^,]\+') :
+		\ exists('g:ctrlp_match_window_reversed') ? ( s:mwreverse ? 'btt' : 'ttb' )
+		\ : 'btt'
+	let s:mw_max =
+		\ s:mw =~ 'max:[^,]\+' ? str2nr(matchstr(s:mw, 'max:\zs\d\+')) :
+		\ exists('g:ctrlp_max_height') ? s:mxheight
+		\ : 10
+	let s:mw_min =
+		\ s:mw =~ 'min:[^,]\+' ? str2nr(matchstr(s:mw, 'min:\zs\d\+')) : 1
+	let [s:mw_max, s:mw_min] = [max([s:mw_max, 1]), max([s:mw_min, 1])]
+	let s:mw_min = min([s:mw_min, s:mw_max])
+endf
 "}}}1
 " * Open & Close {{{1
 fu! s:Open()
 	cal s:log(1)
 	cal s:getenv()
 	cal s:execextvar('enter')
-	sil! exe 'keepa' ( s:mwbottom ? 'bo' : 'to' ) '1new ControlP'
+	sil! exe 'keepa' ( s:mw_pos == 'top' ? 'to' : 'bo' ) '1new ControlP'
 	cal s:buffunc(1)
 	let [s:bufnr, s:winw] = [bufnr('%'), winwidth(0)]
 	let [s:focus, s:prompt] = [1, ['', '', '']]
@@ -494,15 +516,19 @@ fu! s:SplitPattern(str)
 endf
 " * BuildPrompt() {{{1
 fu! s:Render(lines, pat)
-	let [&ma, lines, s:height] = [1, a:lines, min([len(a:lines), s:winh])]
+	let [&ma, lines, s:res_count] = [1, a:lines, len(a:lines)]
+	let height = min([max([s:mw_min, s:res_count]), s:winmaxh])
 	let pat = s:byfname ? split(a:pat, '^[^;]\+\\\@<!\zs;', 1)[0] : a:pat
+	let cur_cmd = 'keepj norm! '.( s:mw_order == 'btt' ? 'G' : 'gg' ).'1|'
 	" Setup the match window
-	sil! exe '%d _ | res' s:height
+	sil! exe '%d _ | res' height
 	" Print the new items
 	if empty(lines)
 		let [s:matched, s:lines] = [[], []]
-		cal setline(1, ' == NO ENTRIES ==')
+		let lines = [' == NO ENTRIES ==']
+		cal setline(1, s:offset(lines, height - 1))
 		setl noma nocul
+		exe cur_cmd
 		cal s:unmarksigns()
 		if s:dohighlight() | cal clearmatches() | en
 		retu
@@ -514,12 +540,12 @@ fu! s:Render(lines, pat)
 		cal sort(lines, 's:mixedsort')
 		unl s:compat
 	en
-	if s:mwreverse | cal reverse(lines) | en
+	if s:mw_order == 'btt' | cal reverse(lines) | en
 	let s:lines = copy(lines)
 	cal map(lines, 's:formatline(v:val)')
-	cal setline(1, lines)
+	cal setline(1, s:offset(lines, height))
 	setl noma cul
-	exe 'keepj norm!' ( s:mwreverse ? 'G' : 'gg' ).'1|'
+	exe cur_cmd
 	cal s:unmarksigns()
 	cal s:remarksigns()
 	if exists('s:cline') && s:nolim != 1
@@ -541,7 +567,7 @@ fu! s:Update(str)
 	let s:martcs = &scs && str =~ '\u' ? '\C' : ''
 	let pat = s:matcher == {} ? s:SplitPattern(str) : str
 	let lines = s:nolim == 1 && empty(str) ? copy(g:ctrlp_lines)
-		\ : s:MatchedItems(g:ctrlp_lines, pat, s:winh)
+		\ : s:MatchedItems(g:ctrlp_lines, pat, s:winmaxh)
 	cal s:Render(lines, pat)
 endf
 
@@ -1276,7 +1302,7 @@ fu! s:mixedsort(...)
 	let [cln, cml] = [ctrlp#complen(a:1, a:2), s:compmatlen(a:1, a:2)]
 	if s:ispath
 		let ms = []
-		if s:height < 21
+		if s:res_count < 21
 			let ms += [s:compfnlen(a:1, a:2)]
 			if s:itemtype !~ '^[12]$' | let ms += [s:comptime(a:1, a:2)] | en
 			if !s:itemtype | let ms += [s:comparent(a:1, a:2)] | en
@@ -1373,6 +1399,11 @@ endf
 fu! s:pathshorten(str)
 	retu matchstr(a:str, '^.\{9}').'...'
 		\ .matchstr(a:str, '.\{'.( s:winw - 16 ).'}$')
+endf
+
+fu! s:offset(lines, height)
+	let s:offset = s:mw_order == 'btt' ? ( a:height - s:res_count ) : 0
+	retu s:offset > 0 ? ( repeat([''], s:offset) + a:lines ) : a:lines
 endf
 " Directory completion {{{3
 fu! s:dircompl(be, sd)
@@ -1914,7 +1945,7 @@ fu! s:getenv()
 	let [s:cwd, s:winres] = [getcwd(), [winrestcmd(), &lines, winnr('$')]]
 	let [s:crword, s:crnbword] = [expand('<cword>', 1), expand('<cWORD>', 1)]
 	let [s:crgfile, s:crline] = [expand('<cfile>', 1), getline('.')]
-	let [s:winh, s:crcursor] = [min([s:mxheight, &lines]), getpos('.')]
+	let [s:winmaxh, s:crcursor] = [min([s:mw_max, &lines]), getpos('.')]
 	let [s:crbufnr, s:crvisual] = [bufnr('%'), s:lastvisual()]
 	let s:crfile = bufname('%') == ''
 		\ ? '['.s:crbufnr.'*No Name]' : expand('%:p', 1)
@@ -2100,7 +2131,9 @@ fu! s:getextvar(key)
 endf
 
 fu! ctrlp#getcline()
-	retu !empty(s:lines) ? s:lines[line('.') - 1] : ''
+	let [linenr, offset] = [line('.'), ( s:offset > 0 ? s:offset : 0 )]
+	retu !empty(s:lines) && !( offset && linenr <= offset )
+		\ ? s:lines[linenr - 1 - offset] : ''
 endf
 
 fu! ctrlp#getmarkedlist()
