@@ -2054,7 +2054,7 @@ fu! ctrlp#hicheck(grp, defgrp)
 endf
 
 fu! ctrlp#call(func, ...)
-	cal call(a:func, a:000)
+  return call(a:func, a:000)
 endf
 "}}}1
 " * Initialization {{{1
