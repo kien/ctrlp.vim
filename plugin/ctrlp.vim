@@ -66,4 +66,7 @@ com! -bar CtrlPBookmarkDir cal ctrlp#init(ctrlp#bookmarkdir#id())
 com! -n=? -com=custom,ctrlp#utils#dircompl CtrlPBookmarkDirAdd
 	\ cal ctrlp#call('ctrlp#bookmarkdir#add', <q-args>)
 
+com! -n=0 CtrlPCleanMRUCache
+  \ cal ctrlp#mrufiles#cleancachefile()
+
 " vim:ts=2:sw=2:sts=2

@@ -113,6 +113,23 @@ fu! ctrlp#mrufiles#cachefile()
 	retu s:cafile
 endf
 
+fu! ctrlp#mrufiles#cleancachefile()
+  echom 'Cleaning CtrlP MRU Cache list ...'
+
+  let cafile = ctrlp#mrufiles#cachefile()
+  let diskmrufs = ctrlp#utils#readfile(cafile)
+  let len = len(diskmrufs)
+
+  let diskmrufs = filter(diskmrufs, 'filereadable(v:val)')
+
+  if len(diskmrufs) < len
+    cal writefile(diskmrufs, cafile)
+    echom printf('[INFO] %d -> %d done!', len, len(diskmrufs))
+  el
+    echom '[INFO] No entries were removed from the cache file.'
+  en
+endf
+
 fu! ctrlp#mrufiles#init()
 	if !has('autocmd') | retu | en
 	let s:locked = 0
