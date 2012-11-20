@@ -75,6 +75,7 @@ Overview:~
   |ctrlp_mruf_relative|.........Show only MRU files in the working directory.
   |ctrlp_mruf_default_order|....Disable sorting.
   |ctrlp_mruf_case_sensitive|...MRU files are case sensitive or not.
+  |ctrlp_mruf_save_on_update|...Save the list to disk whenever it's updated.
 
   Advanced options:
   |ctrlp_open_func|.............Use custom file opening functions.
@@ -572,6 +573,12 @@ Set this to 1 to disable sorting when searching in MRU mode: >
 Match this with your file system case-sensitivity setting to avoid duplicate
 MRU entries: >
   let g:ctrlp_mruf_case_sensitive = 1
+<
+
+                                                *'g:ctrlp_mruf_save_on_update'*
+Set this to 0 to disable saving of the MRU list to disk whenever the list is
+updated, saving will then only occur when exiting Vim: >
+  let g:ctrlp_mruf_save_on_update = 1
 <
 
 ----------------------------------------
@@ -1249,7 +1256,8 @@ CHANGELOG                                                     *ctrlp-changelog*
     + New options: |g:ctrlp_abbrev|,
                    |g:ctrlp_key_loop|,
                    |g:ctrlp_open_func|,
-                   |g:ctrlp_tabpage_position|
+                   |g:ctrlp_tabpage_position|,
+                   |g:ctrlp_mruf_save_on_update|
     + Rename:
         *g:ctrlp_dotfiles* -> |g:ctrlp_show_hidden|.
     + Change |g:ctrlp_switch_buffer|'s and |g:ctrlp_working_path_mode|'s type

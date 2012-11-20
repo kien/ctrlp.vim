@@ -14,6 +14,7 @@ fu! ctrlp#mrufiles#opts()
 		\ 'exclude': ['s:ex', ''],
 		\ 'case_sensitive': ['s:cseno', 1],
 		\ 'relative': ['s:re', 0],
+		\ 'save_on_update': ['s:soup', 1],
 		\ }]
 	for [ke, va] in items(opts)
 		let [{va[0]}, {pref.ke}] = [pref.ke, exists(pref.ke) ? {pref.ke} : va[1]]
@@ -62,8 +63,14 @@ fu! s:addtomrufs(fname)
 	if ( !empty({s:in}) && fn !~# {s:in} ) || ( !empty({s:ex}) && fn =~# {s:ex} )
 		\ || !empty(getbufvar('^'.fn.'$', '&bt')) || !filereadable(fn) | retu
 	en
-	cal filter(s:mrufs, 'v:val !='.( {s:cseno} ? '#' : '?' ).' fn')
-	cal insert(s:mrufs, fn)
+	if ( {s:cseno} && get(s:mrufs, 0, '') !=# fn )
+		\ || ( !{s:cseno} && get(s:mrufs, 0, '') !=? fn )
+		cal filter(s:mrufs, 'v:val !='.( {s:cseno} ? '#' : '?' ).' fn')
+		cal insert(s:mrufs, fn)
+		if {s:soup}
+			cal s:savetofile(s:mergelists())
+		en
+	en
 endf
 
 fu! s:savetofile(mrufs)
@@ -118,7 +125,7 @@ fu! ctrlp#mrufiles#init()
 	let s:locked = 0
 	aug CtrlPMRUF
 		au!
-		au BufAdd,BufEnter,BufLeave,BufUnload * cal s:record(expand('<abuf>', 1))
+		au BufAdd,BufEnter,BufLeave,BufWritePost * cal s:record(expand('<abuf>', 1))
 		au QuickFixCmdPre  *vimgrep* let s:locked = 1
 		au QuickFixCmdPost *vimgrep* let s:locked = 0
 		au VimLeavePre * cal s:savetofile(s:mergelists())
