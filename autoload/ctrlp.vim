@@ -432,7 +432,7 @@ fu! s:MatchedItems(items, pat, limit)
 	let items = s:narrowable() ? s:matched + s:mdata[3] : a:items
 	if s:matcher != {}
 		let argms = [items, a:pat, a:limit, s:mmode(), s:ispath, exc, s:regexp]
-		let lines = call(s:matcher['match'], argms)
+		let lines = call(s:matcher['match'], argms, s:matcher)
 	el
 		let lines = s:MatchIt(items, a:pat, a:limit, exc)
 	en
@@ -1140,7 +1140,7 @@ fu! s:OpenNoMarks(md, line)
 		cal s:remarksigns()
 		cal s:BuildPrompt(0)
 	elsei a:md == 'x'
-		cal call(s:openfunc[s:ctype], [a:md, a:line])
+		cal call(s:openfunc[s:ctype], [a:md, a:line], s:openfunc)
 	elsei a:md == 'd'
 		let dir = fnamemodify(a:line, ':h')
 		if isdirectory(dir)
@@ -1276,7 +1276,7 @@ fu! ctrlp#statusline()
 		\ exists('s:marked') ? ' <'.s:dismrk().'>' : ' <->' : ''
 	if s:status != {}
 		let args = [focus, byfname, s:regexp, prv, s:ctype, nxt, marked]
-		let &l:stl = call(s:status['main'], args)
+		let &l:stl = call(s:status['main'], args, s:status)
 	el
 		let item    = '%#CtrlPMode1# '.s:ctype.' %*'
 		let focus   = '%#CtrlPMode2# '.focus.' %*'
@@ -1296,7 +1296,7 @@ endf
 fu! ctrlp#progress(enum, ...)
 	if has('macunix') || has('mac') | sl 1m | en
 	let txt = a:0 ? '(press ctrl-c to abort)' : ''
-	let &l:stl = s:status != {} ? call(s:status['prog'], [a:enum])
+	let &l:stl = s:status != {} ? call(s:status['prog'], [a:enum], s:status)
 		\ : '%#CtrlPStats# '.a:enum.' %* '.txt.'%=%<%#CtrlPMode2# %{getcwd()} %*'
 	redraws
 endf
