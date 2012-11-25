@@ -43,7 +43,13 @@ fu! s:reformat(mrufs)
 		let cwd = exists('+ssl') ? tr(getcwd(), '/', '\') : getcwd()
 		cal filter(a:mrufs, '!stridx(v:val, cwd)')
 	en
-	retu map(a:mrufs, 'fnamemodify(v:val, ":.")')
+	let cwd = getcwd()
+	let idx = strlen(cwd) + ( cwd !~ '[\/]$' )
+	if exists('+ssl') && &ssl
+		let cwd = tr(cwd, '\', '/')
+		cal map(a:mrufs, 'tr(v:val, "\\", "/")')
+	en
+	retu map(a:mrufs, '!stridx(v:val, cwd) ? strpart(v:val, idx) : v:val')
 endf
 
 fu! s:record(bufnr)
@@ -63,11 +69,11 @@ fu! s:addtomrufs(fname)
 	if ( !empty({s:in}) && fn !~# {s:in} ) || ( !empty({s:ex}) && fn =~# {s:ex} )
 		\ || !empty(getbufvar('^'.fn.'$', '&bt')) || !filereadable(fn) | retu
 	en
-	if ( {s:cseno} && get(s:mrufs, 0, '') !=# fn )
-		\ || ( !{s:cseno} && get(s:mrufs, 0, '') !=? fn )
+	let idx = index(s:mrufs, fn, 0, !{s:cseno})
+	if idx
 		cal filter(s:mrufs, 'v:val !='.( {s:cseno} ? '#' : '?' ).' fn')
 		cal insert(s:mrufs, fn)
-		if {s:soup}
+		if {s:soup} && idx < 0
 			cal s:savetofile(s:mergelists())
 		en
 	en
@@ -78,24 +84,29 @@ fu! s:savetofile(mrufs)
 endf
 " Public {{{1
 fu! ctrlp#mrufiles#refresh(...)
-	let s:mrufs = s:mergelists()
-	cal filter(s:mrufs, '!empty(ctrlp#utils#glob(v:val, 1)) && !s:excl(v:val)')
+	let mrufs = s:mergelists()
+	cal filter(mrufs, '!empty(ctrlp#utils#glob(v:val, 1)) && !s:excl(v:val)')
 	if exists('+ssl')
+		cal map(mrufs, 'tr(v:val, "/", "\\")')
 		cal map(s:mrufs, 'tr(v:val, "/", "\\")')
-		cal filter(s:mrufs, 'count(s:mrufs, v:val) == 1')
+		let cond = 'count(mrufs, v:val, !{s:cseno}) == 1'
+		cal filter(mrufs, cond)
+		cal filter(s:mrufs, cond)
 	en
-	cal s:savetofile(s:mrufs)
-	retu a:0 && a:1 == 'raw' ? [] : s:reformat(copy(s:mrufs))
+	cal s:savetofile(mrufs)
+	retu a:0 && a:1 == 'raw' ? [] : s:reformat(mrufs)
 endf
 
 fu! ctrlp#mrufiles#remove(files)
-	let s:mrufs = []
+	let mrufs = []
 	if a:files != []
-		let s:mrufs = s:mergelists()
-		cal filter(s:mrufs, 'index(a:files, v:val, 0, '.(!{s:cseno}).') < 0')
+		let mrufs = s:mergelists()
+		let cond = 'index(a:files, v:val, 0, !{s:cseno}) < 0'
+		cal filter(mrufs, cond)
+		cal filter(s:mrufs, cond)
 	en
-	cal s:savetofile(s:mrufs)
-	retu s:reformat(copy(s:mrufs))
+	cal s:savetofile(mrufs)
+	retu s:reformat(mrufs)
 endf
 
 fu! ctrlp#mrufiles#add(fn)
