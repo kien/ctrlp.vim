@@ -1395,8 +1395,9 @@ fu! s:samerootsyml(each, isfile, cwd)
 endf
 
 fu! ctrlp#rmbasedir(items)
-	if a:items != [] && !stridx(a:items[0], s:dyncwd)
-		let idx = strlen(s:dyncwd) + ( s:dyncwd !~ '[\/]$' )
+	let cwd = s:dyncwd.( s:dyncwd !~ '[\/]$' ? s:lash : '' )
+	if a:items != [] && !stridx(a:items[0], cwd)
+		let idx = strlen(cwd)
 		retu map(a:items, 'strpart(v:val, idx)')
 	en
 	retu a:items

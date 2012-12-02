@@ -39,12 +39,13 @@ fu! s:chop(mrufs)
 endf
 
 fu! s:reformat(mrufs)
+	let cwd = getcwd()
+	let cwd .= cwd !~ '[\/]$' ? ctrlp#utils#lash() : ''
 	if {s:re}
-		let cwd = exists('+ssl') ? tr(getcwd(), '/', '\') : getcwd()
+		let cwd = exists('+ssl') ? tr(cwd, '/', '\') : cwd
 		cal filter(a:mrufs, '!stridx(v:val, cwd)')
 	en
-	let cwd = getcwd()
-	let idx = strlen(cwd) + ( cwd !~ '[\/]$' )
+	let idx = strlen(cwd)
 	if exists('+ssl') && &ssl
 		let cwd = tr(cwd, '\', '/')
 		cal map(a:mrufs, 'tr(v:val, "\\", "/")')
