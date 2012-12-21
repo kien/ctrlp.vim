@@ -981,7 +981,11 @@ fu! s:AcceptSelection(mode)
 	el
 		let actfunc = s:itemtype < 3 ? 'ctrlp#acceptfile' : s:getextvar('accept')
 	en
-	cal call(actfunc, [a:mode, line])
+	if s:getextvar('with_index') > 0
+		cal call(actfunc, [a:mode, len(s:lines)-line('.')])
+	else
+		cal call(actfunc, [a:mode, line])
+	endif
 endf
 " - CreateNewFile() {{{1
 fu! s:CreateNewFile(...)
