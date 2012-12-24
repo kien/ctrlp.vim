@@ -759,8 +759,10 @@ fu! s:PrtDeleteMRU()
 endf
 
 fu! s:PrtExit()
-	if !has('autocmd') | cal s:Close() | en
-	exe ( winnr('$') == 1 ? 'bw!' : 'winc p' )
+	if bufnr('%') == s:bufnr && bufname('%') == 'ControlP'
+		if !has('autocmd') | cal s:Close() | en
+		exe ( winnr('$') == 1 ? 'bw!' : 'winc p' )
+	en
 endf
 
 fu! s:PrtHistory(...)
