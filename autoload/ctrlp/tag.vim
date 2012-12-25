@@ -104,7 +104,10 @@ fu! ctrlp#tag#accept(mode, str)
 		if cmd != ''
 			exe cmd
 		en
+		let save_cst = &cst
+		set cst&
 		exe fnd[1].'ta' tg
+		let &cst = save_cst
 	el
 		exe cmd tg
 	en
