@@ -108,6 +108,7 @@ fu! ctrlp#tag#accept(mode, str)
 	el
 		exe cmd tg
 	en
+	sil! norm! zvzz
 	cal ctrlp#setlcdir()
 endf
 
