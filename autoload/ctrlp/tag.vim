@@ -106,10 +106,10 @@ fu! ctrlp#tag#accept(mode, str)
 		en
 		let save_cst = &cst
 		set cst&
-		exe fnd[1].'ta' tg
+		sil! cal feedkeys(":".fnd[1]."ta ".tg."\r", 'nt')
 		let &cst = save_cst
 	el
-		exe cmd tg
+		sil! cal feedkeys(":".cmd." ".tg."\r", 'nt')
 	en
 	cal ctrlp#setlcdir()
 endf
