@@ -652,11 +652,26 @@ fu! s:PrtExpandDir()
 	if str =~ '\v^\@(cd|lc[hd]?|chd)\s.+' && s:spi
 		let hasat = split(str, '\v^\@(cd|lc[hd]?|chd)\s*\zs')
 		let str = get(hasat, 1, '')
+		if str =~# '\v^[~$]\i{-}[\/]?|^#(\<?\d+)?:(p|h|8|\~|\.|g?s+)'
+			let str = expand(s:fnesc(str, 'g'))
+		elsei str =~# '\v^(\%|\<c\h{4}\>):(p|h|8|\~|\.|g?s+)'
+			let spc = str =~# '^%' ? s:crfile
+				\ : str =~# '^<cfile>' ? s:crgfile
+				\ : str =~# '^<cword>' ? s:crword
+				\ : str =~# '^<cWORD>' ? s:crnbword : ''
+			let pat = '(:(p|h|8|\~|\.|g?s(.)[^\3]*\3[^\3]*\3))+'
+			let mdr = matchstr(str, '\v^[^:]+\zs'.pat)
+			let nmd = matchstr(str, '\v^[^:]+'.pat.'\zs.{-}$')
+			let str = fnamemodify(s:fnesc(spc, 'g'), mdr).nmd
+		en
 	en
 	if str == '' | retu | en
 	unl! s:hstgot
 	let s:act_add = 1
 	let [base, seed] = s:headntail(str)
+	if str =~# '^[\/]'
+		let base = expand('/').base
+	en
 	let dirs = s:dircompl(base, seed)
 	if len(dirs) == 1
 		let str = dirs[0]
@@ -1333,8 +1348,16 @@ endf
 " Directory completion {{{3
 fu! s:dircompl(be, sd)
 	if a:sd == '' | retu [] | en
-	let [be, sd] = a:be == '' ? [s:dyncwd, a:sd] : [a:be, a:be.s:lash(a:be).a:sd]
-	let dirs = ctrlp#rmbasedir(split(globpath(s:fnesc(be, 'g', ','), a:sd.'*/'), "\n"))
+	if a:be == ''
+		let [be, sd] = [s:dyncwd, a:sd]
+	el
+		let be = a:be.s:lash(a:be)
+		let sd = be.a:sd
+	en
+	let dirs = split(globpath(s:fnesc(be, 'g', ','), a:sd.'*/'), "\n")
+	if a:be == ''
+		let dirs = ctrlp#rmbasedir(dirs)
+	en
 	cal filter(dirs, '!match(v:val, escape(sd, ''~$.\''))'
 		\ . ' && v:val !~ ''\v(^|[\/])\.{1,2}[\/]$''')
 	retu dirs
@@ -1856,10 +1879,11 @@ endf
 fu! s:getenv()
 	let [s:cwd, s:winres] = [getcwd(), [winrestcmd(), &lines, winnr('$')]]
 	let [s:crfile, s:crfpath] = [expand('%:p', 1), expand('%:p:h', 1)]
-	let [s:crword, s:crline] = [expand('<cword>', 1), getline('.')]
+	let [s:crword, s:crnbword] = [expand('<cword>', 1), expand('<cWORD>', 1)]
+	let [s:crgfile, s:crline] = [expand('<cfile>', 1), getline('.')]
 	let [s:winh, s:crcursor] = [min([s:mxheight, &lines]), getpos('.')]
 	let [s:crbufnr, s:crvisual] = [bufnr('%'), s:lastvisual()]
-	let [s:mrbs, s:crgfile] = [ctrlp#mrufiles#bufs(), expand('<cfile>', 1)]
+	let s:mrbs = ctrlp#mrufiles#bufs()
 endf
 
 fu! s:lastvisual()
