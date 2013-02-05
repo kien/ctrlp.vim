@@ -292,8 +292,7 @@ fu! ctrlp#clra()
 	let cadir = ctrlp#utils#cachedir()
 	if isdirectory(cadir)
 		let cafiles = split(s:glbpath(s:fnesc(cadir, 'g', ','), '**', 1), "\n")
-		let eval = '!isdirectory(v:val) && fnamemodify(v:val, ":t") !~'
-			\ . ' ''\v^<cache>[.a-z]+$|\.log$'''
+		let eval = '!isdirectory(v:val) && v:val !~ ''\v[\/]cache[.a-z]+$|\.log$'''
 		sil! cal map(filter(cafiles, eval), 'delete(v:val)')
 	en
 	cal ctrlp#clr()
