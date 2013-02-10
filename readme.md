@@ -19,6 +19,7 @@ Full path fuzzy __file__, __buffer__, __mru__, __tag__, __...__ finder for Vim.
 Check `:help ctrlp-commands` and `:help ctrlp-extensions` for other commands.
 
 ##### Once CtrlP is open:
+* Press `<c-j>`, `<c-k>` to navigate file list.
 * Press `<F5>` to purge the cache for the current directory to get new files, remove deleted files and apply new ignore options.
 * Press `<c-f>` and `<c-b>` to cycle between modes.
 * Press `<c-d>` to switch to filename only search instead of full path.
