@@ -158,7 +158,7 @@ fu! s:esctagscmd(bin, args, ...)
 		let &ssl = ssl
 	en
 	if has('iconv')
-		let last = s:enc != &enc ? s:enc : !empty($LANG) ? $LANG : &enc
+		let last = s:enc != &enc ? s:enc : !empty( $LANG ) ? $LANG : &enc
 		let cmd = iconv(cmd, &enc, last)
 	en
 	retu cmd
