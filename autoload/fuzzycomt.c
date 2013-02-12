@@ -141,23 +141,23 @@ double recursive_match(matchinfo_t *m,  // sharable meta-data
 PyObject* fuzzycomt_match(PyObject* self, PyObject* args)
 {
     PyObject *paths, *abbrev, *returnlist;
-    if (!PyArg_ParseTuple(args, "OO", &paths, &abbrev)) {
+    Py_ssize_t limit;
+    if (!PyArg_ParseTuple(args, "OOn", &paths, &abbrev, &limit)) {
 		// TODO add normal exception handling
        return NULL;
     }
 	returnlist = PyList_New(0);
 
+	//TODO dont include active buffer path to return list ( maybe better to do it in python part)
+
 	//TODO add exception handling
 	returnstruct matches[PyList_Size(paths)];
 
-	//TODO rewrite this?
-	//TODO rewrite this to set limit, not just 10
-	if (PyString_Size(abbrev) == 0)
+	if ( PyString_Size(abbrev) == 0)
 	{
-		// if string is empty - just return first 10 lines
-		// TODO is this works good when list size < 10?
+		// if string is empty - just return first (:param limit) lines
 		PyObject *initlist;
-		initlist = PyList_GetSlice(paths,0,10);
+		initlist = PyList_GetSlice(paths,0,limit);
 		return initlist;
 	}
 	else
@@ -170,13 +170,9 @@ PyObject* fuzzycomt_match(PyObject* self, PyObject* args)
 	}
 
 	
-	// TODO rewrite to get limit from args, not just 10
-	// TODO this shit causes segfaults when array size < 10...
-	// actually segfaults was caused by free().
-	// still need to rewrite this, look 1st TODO 
     for (long i = 0, max = PyList_Size(paths); i < max ; i++)
     {
-            if (i == 10)
+            if (i == limit)
                 break;
 			PyObject *container;
 			container = PyDict_New();

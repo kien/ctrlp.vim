@@ -449,13 +449,13 @@ import re
 import fuzzycomt 
 lines = vim.eval('a:lines')
 searchinp = vim.eval('a:input')
-limit = vim.eval('a:limit')
+limit = int(vim.eval('a:limit'))
 mmode = vim.eval('a:mmode')
 ispath = vim.eval('a:ispath')
 crfile = vim.eval('a:crfile')
 regex = vim.eval('a:regex')
 
-matchlist = fuzzycomt.match(lines,searchinp)
+matchlist = fuzzycomt.match(lines,searchinp, limit)
 
 linelist = []
 for line in matchlist:
