@@ -12,6 +12,35 @@ void getLineMatches(PyObject* paths, PyObject* abbrev,returnstruct matches[])
     }
 }
 
+// comparison function for use with qsort
+int comp_alpha(const void *a, const void *b)
+{
+    returnstruct a_val = *(returnstruct *)a;
+    returnstruct b_val = *(returnstruct *)b;
+
+    char *a_p = PyString_AsString(a_val.str);
+    long a_len = PyString_Size(a_val.str);
+    char *b_p = PyString_AsString(b_val.str);
+    long b_len = PyString_Size(b_val.str);
+
+    int order = 0;
+    if (a_len > b_len)
+    {
+        order = strncmp(a_p, b_p, b_len);
+        if (order == 0)
+            order = 1; // shorter string (b) wins
+    }
+    else if (a_len < b_len)
+    {
+        order = strncmp(a_p, b_p, a_len);
+        if (order == 0)
+            order = -1; // shorter string (a) wins
+    }
+    else
+        order = strncmp(a_p, b_p, a_len);
+    return order;
+}
+
 int comp_score(const void *a, const void *b)
 {
     returnstruct a_val = *(returnstruct *)a;
@@ -23,8 +52,7 @@ int comp_score(const void *a, const void *b)
     else if (a_score < b_score)
         return 1;  // b scores higher, a should appear later
     else
-		//TODO ? look into matcher.c
-        return 0;
+        return comp_alpha(a, b);
 }
 
 double recursive_match(matchinfo_t *m,  // sharable meta-data
