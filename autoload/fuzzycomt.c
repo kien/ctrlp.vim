@@ -1,15 +1,29 @@
 #include "fuzzycomt.h"
 
-void getLineMatches(PyObject* paths, PyObject* abbrev,returnstruct matches[])
+void getLineMatches(PyObject* paths, PyObject* abbrev,returnstruct matches[], char *mmode)
 {
 	// iterate over lines and get match score for every line
     for (long i = 0, max = PyList_Size(paths); i < max; i++)
     {
         PyObject* path = PyList_GetItem(paths, i);
         returnstruct match;
-        match = findmatch(path, abbrev);
+        match = findmatch(path, abbrev, mmode);
 		matches[i] = match;
     }
+}
+
+char *slashsplit(char *line)
+{
+    char *pch, *linedup, *fname;
+    linedup = strdup(line);
+    pch = strtok(linedup, "/");
+
+    while (pch != NULL)
+    {
+        fname = pch;
+        pch = strtok(NULL, "/");
+    }
+   return fname; 
 }
 
 // comparison function for use with qsort
@@ -142,7 +156,8 @@ PyObject* fuzzycomt_match(PyObject* self, PyObject* args)
 {
     PyObject *paths, *abbrev, *returnlist;
     Py_ssize_t limit;
-    if (!PyArg_ParseTuple(args, "OOn", &paths, &abbrev, &limit)) {
+    char *mmode;
+    if (!PyArg_ParseTuple(args, "OOns", &paths, &abbrev, &limit, &mmode)) {
 		// TODO add normal exception handling
        return NULL;
     }
@@ -163,7 +178,7 @@ PyObject* fuzzycomt_match(PyObject* self, PyObject* args)
 	else
 	{
 		// find matches and place them into matches array.
-		getLineMatches(paths,abbrev, matches);
+		getLineMatches(paths,abbrev, matches, mmode);
 
 		// sort array of struct by struct.score key
 		qsort(matches, PyList_Size(paths), sizeof(returnstruct),comp_score);
@@ -190,14 +205,20 @@ PyObject* fuzzycomt_match(PyObject* self, PyObject* args)
 }
 
 
-returnstruct findmatch(PyObject* str,PyObject* abbrev)
+returnstruct findmatch(PyObject* str,PyObject* abbrev, char *mmode)
 {
 	//TODO look over the algorithm
     returnstruct returnobj;
 
     matchinfo_t m;
-    m.str_p                 = PyString_AsString(str);
-    m.str_len               = PyString_Size(str);
+    if (strcmp(mmode, "filename-only") == 0) {
+        m.str_p = slashsplit(PyString_AsString(str));
+        m.str_len = strlen(m.str_p);
+    }
+    else {
+        m.str_p                 = PyString_AsString(str);
+        m.str_len               = PyString_Size(str);
+    }
     m.abbrev_p              = PyString_AsString(abbrev);
     m.abbrev_len            = PyString_Size(abbrev);
     m.max_score_per_char    = (1.0 / m.str_len + 1.0 / m.abbrev_len) / 2;

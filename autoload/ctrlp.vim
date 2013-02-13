@@ -450,18 +450,26 @@ import fuzzycomt
 lines = vim.eval('a:lines')
 searchinp = vim.eval('a:input')
 limit = int(vim.eval('a:limit'))
+#TODO highlight only name when mmode is 'file'
+#TODO check how other modes works
 mmode = vim.eval('a:mmode')
+#TOOD respect this
 ispath = vim.eval('a:ispath')
+#TODO make this work
 crfile = vim.eval('a:crfile')
+#TODO fallback to ctrlp matching?
 regex = vim.eval('a:regex')
 
-matchlist = fuzzycomt.match(lines,searchinp, limit)
+#TODO Move it to external plugin to autoload/ and call matching as a global func
+matchlist = fuzzycomt.match(lines, searchinp, limit, mmode)
 
 linelist = []
 for line in matchlist:
 #TODO rework this. Silly way to replace \\ in path. Better to do this in C module, but python screws it later
 #TODO rework go get single \ . This seems complicated...
-  linelist.append(line['line'].replace('\\','/'))
+#TODO this is needed only on windows. Check __repr__ methods ( look into ultisnips code, it may be useful )
+  if line['value'] > 0:
+    linelist.append(line['line'].replace('\\','/'))
 vim.command('let array = %s' % linelist)
 EOF
 en
@@ -469,9 +477,17 @@ en
 " highlight matches
 " TODO make it case-unsensitive
 cal clearmatches()
-for i in range(len(a:input))
-  cal matchadd('CtrlPMatch', '\M'.a:input[i])
-endfor
+if a:mmode == "filename-only"
+  for i in range(len(a:input))
+    let pat = substitute(a:input[i], '\[\^\(.\{-}\)\]\\{-}', '[^\\/\1]\\{-}', 'g')
+    let pat = substitute(a:input[i], '\$\@<!$', '\\ze[^\\/]*$', 'g')
+    cal matchadd('CtrlPMatch', '\C'.pat)
+  endfor
+el
+  for i in range(len(a:input))
+    cal matchadd('CtrlPMatch', '\M'.a:input[i])
+  endfor
+en
 cal matchadd('CtrlPLinePre', '^>')
 
 retu array
@@ -1523,7 +1539,7 @@ fu! ctrlp#syntax()
 endf
 
 fu! s:highlight(pat, grp)
-  if s:matcher != {} | retu | en
+	if s:matcher != {} | retu | en
 	cal clearmatches()
 	if !empty(a:pat) && s:ispath
 		let pat = s:regexp ? substitute(a:pat, '\\\@<!\^', '^> \\zs', 'g') : a:pat
