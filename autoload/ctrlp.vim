@@ -453,12 +453,13 @@ limit = int(vim.eval('a:limit'))
 #TODO highlight only name when mmode is 'file'
 #TODO check how other modes works
 mmode = vim.eval('a:mmode')
-#TOOD respect this
-ispath = vim.eval('a:ispath')
-#TODO make this work
+ispath = int(vim.eval('a:ispath'))
 crfile = vim.eval('a:crfile')
 #TODO fallback to ctrlp matching?
 regex = vim.eval('a:regex')
+
+if ispath and crfile:
+  lines.remove(crfile)
 
 #TODO Move it to external plugin to autoload/ and call matching as a global func
 matchlist = fuzzycomt.match(lines, searchinp, limit, mmode)
