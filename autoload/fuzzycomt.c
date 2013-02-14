@@ -23,7 +23,9 @@ char *slashsplit(char *line)
         fname = pch;
         pch = strtok(NULL, "/");
     }
-   return fname; 
+    char *retval = strdup(fname);
+    free(linedup);
+   return retval; 
 }
 
 // comparison function for use with qsort
@@ -242,6 +244,9 @@ returnstruct findmatch(PyObject* str,PyObject* abbrev, char *mmode)
     else // normal case
         score = recursive_match(&m, 0, 0, 0, 0.0);
 
+    if (strcmp(mmode, "filename-only") == 0) {
+        free(m.str_p);
+    }
 	
     returnobj.str = str;
     returnobj.score = score;
