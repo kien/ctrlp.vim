@@ -264,9 +264,13 @@ endf
 
 fu! s:Close()
 	cal s:buffunc(0)
-	try | bun!
-	cat | clo! | endt
-	cal s:unmarksigns()
+	if winnr('$') == 1
+		bw!
+	el
+		try | bun!
+		cat | clo! | endt
+		cal s:unmarksigns()
+	en
 	for key in keys(s:glbs) | if exists('+'.key)
 		sil! exe 'let &'.key.' = s:glb_'.key
 	en | endfo
@@ -759,8 +763,8 @@ endf
 
 fu! s:PrtExit()
 	if bufnr('%') == s:bufnr && bufname('%') == 'ControlP'
-		if !has('autocmd') | cal s:Close() | en
-		exe ( winnr('$') == 1 ? 'bw!' : 'winc p' )
+		noa cal s:Close()
+		noa winc p
 	en
 endf
 
