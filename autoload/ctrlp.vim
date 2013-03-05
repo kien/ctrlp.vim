@@ -316,7 +316,9 @@ fu! ctrlp#files()
 		let [lscmd, s:initcwd, g:ctrlp_allfiles] = [s:lsCmd(), s:dyncwd, []]
 		" Get the list of files
 		if empty(lscmd)
-			cal s:GlobPath(s:fnesc(s:dyncwd, 'g', ','), 0)
+			if !ctrlp#igncwd(s:dyncwd)
+				cal s:GlobPath(s:fnesc(s:dyncwd, 'g', ','), 0)
+			en
 		el
 			sil! cal ctrlp#progress('Indexing...')
 			try | cal s:UserCmd(lscmd)
@@ -353,6 +355,9 @@ endf
 
 fu! s:UserCmd(lscmd)
 	let [path, lscmd] = [s:dyncwd, a:lscmd]
+	let do_ign =
+		\ type(s:usrcmd) == 4 && has_key(s:usrcmd, 'ignore') && s:usrcmd['ignore']
+	if do_ign && ctrlp#igncwd(s:cwd) | retu | en
 	if exists('+ssl') && &ssl
 		let [ssl, &ssl, path] = [&ssl, 0, tr(path, '/', '\')]
 	en
@@ -368,7 +373,7 @@ fu! s:UserCmd(lscmd)
 	if exists('s:vcscmd') && s:vcscmd
 		cal map(g:ctrlp_allfiles, 'tr(v:val, "/", "\\")')
 	en
-	if type(s:usrcmd) == 4 && has_key(s:usrcmd, 'ignore') && s:usrcmd['ignore']
+	if do_ign
 		if !empty(s:usrign)
 			let g:ctrlp_allfiles = ctrlp#dirnfile(g:ctrlp_allfiles)[1]
 		en
@@ -1360,6 +1365,11 @@ endf
 
 fu! s:ispathitem()
 	retu s:itemtype < 3 || ( s:itemtype > 2 && s:getextvar('type') == 'path' )
+endf
+
+fu! ctrlp#igncwd(cwd)
+	retu ctrlp#utils#glob(a:cwd, 0) == '' ||
+		\ ( s:igntype >= 0 && s:usrign(a:cwd, getftype(a:cwd)) )
 endf
 
 fu! ctrlp#dirnfile(entries)

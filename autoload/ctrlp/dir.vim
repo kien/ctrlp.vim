@@ -54,7 +54,9 @@ fu! ctrlp#dir#init(...)
 	let cafile = cadir.ctrlp#utils#lash().ctrlp#utils#cachefile('dir')
 	if g:ctrlp_newdir || s:nocache() || !filereadable(cafile)
 		let [s:initcwd, g:ctrlp_alldirs] = [s:cwd, []]
-		cal s:globdirs(ctrlp#utils#fnesc(s:cwd, 'g', ','), 0)
+		if !ctrlp#igncwd(s:cwd)
+			cal s:globdirs(ctrlp#utils#fnesc(s:cwd, 'g', ','), 0)
+		en
 		cal ctrlp#rmbasedir(g:ctrlp_alldirs)
 		if len(g:ctrlp_alldirs) <= s:compare_lim
 			cal sort(g:ctrlp_alldirs, 'ctrlp#complen')
