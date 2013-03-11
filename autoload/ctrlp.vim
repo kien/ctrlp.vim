@@ -395,7 +395,7 @@ fu! s:lsCmd()
 		retu cmd[1]
 	elsei type(cmd) == 4 && ( has_key(cmd, 'types') || has_key(cmd, 'fallback') )
 		let fndroot = []
-		if has_key(cmd, 'types') && cmd['types'] != {}
+		if !s:shouldUseFallback && has_key(cmd, 'types') && cmd['types'] != {}
 			let [markrs, cmdtypes] = [[], values(cmd['types'])]
 			for pair in cmdtypes
 				cal add(markrs, pair[0])
@@ -1198,6 +1198,10 @@ fu! s:OpenNoMarks(md, line)
 		en
 	en
 endf
+
+fu! s:UseFallback(opts)
+	let s:shouldUseFallback = get(a:opts, 'fallback', 0)
+endfu
 " ** Helper functions {{{1
 " Sorting {{{2
 fu! ctrlp#complen(...)
@@ -2151,6 +2155,7 @@ fu! ctrlp#init(type, ...)
 	let [s:ermsg, v:errmsg] = [v:errmsg, '']
 	let [s:matches, s:init] = [1, 1]
 	cal s:Reset(a:0 ? a:1 : {})
+	cal s:UseFallback(a:0 ? a:1 : {})
 	noa cal s:Open()
 	cal s:SetWD(a:0 ? a:1 : {})
 	cal s:MapNorms()

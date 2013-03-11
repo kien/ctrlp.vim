@@ -33,6 +33,9 @@ com! -bar CtrlPCurWD   cal ctrlp#init(0, { 'mode': '' })
 com! -bar CtrlPCurFile cal ctrlp#init(0, { 'mode': 'c' })
 com! -bar CtrlPRoot    cal ctrlp#init(0, { 'mode': 'r' })
 
+com! -n=? -com=custom,ctrlp#utils#dircompl CtrlPFallback
+	\ cal ctrlp#init(0, { 'dir': <q-args>, 'fallback': 1})
+
 if g:ctrlp_map != '' && !hasmapto(':<c-u>'.g:ctrlp_cmd.'<cr>', 'n')
 	exe 'nn <silent>' g:ctrlp_map ':<c-u>'.g:ctrlp_cmd.'<cr>'
 en
