@@ -1220,7 +1220,7 @@ MISCELLANEOUS CONFIGS                             *ctrlp-miscellaneous-configs*
 ===============================================================================
 CREDITS                                                         *ctrlp-credits*
 
-Developed by Kien Nguyen <github.com/kien>.
+Developed by Kien Nguyen <github.com/kien>. Distributed under Vim's |license|.
 
 Project's homepage:   http://kien.github.com/ctrlp.vim
 Git repository:       https://github.com/kien/ctrlp.vim
