@@ -49,6 +49,7 @@ let s:types = {
 	\ 'awk'    : '%sawk%sawk%sf',
 	\ 'beta'   : '%sbeta%sbeta%sfsv',
 	\ 'c'      : '%sc%sc%sdgsutvf',
+  \ 'objc'   : '%sobjc%sobjc%smpci',
 	\ 'cpp'    : '%sc++%sc++%snvdtcgsuf',
 	\ 'cs'     : '%sc#%sc#%sdtncEgsipm',
 	\ 'cobol'  : '%scobol%scobol%sdfgpPs',
