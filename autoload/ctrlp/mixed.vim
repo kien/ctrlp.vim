@@ -32,12 +32,12 @@ endf
 
 fu! s:getnewmix(cwd, clim)
 	if g:ctrlp_newmix
-		cal ctrlp#mrufiles#refresh('raw')
+		cal ctrlp#mrufiles#refresh()
 		let g:ctrlp_newcache = 1
 	en
 	let g:ctrlp_lines = copy(ctrlp#files())
 	cal ctrlp#progress('Mixing...')
-	let mrufs = copy(ctrlp#mrufiles#list('raw'))
+	let mrufs = copy(ctrlp#mrufiles#list())
 	if exists('+ssl') && &ssl
 		cal map(mrufs, 'tr(v:val, "\\", "/")')
 	en
