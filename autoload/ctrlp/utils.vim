@@ -105,16 +105,6 @@ fu! ctrlp#utils#fnesc(path, type, ...)
 	en
 	retu a:0 ? escape(path, a:1) : path
 endf
-
-fu! ctrlp#utils#dircompl(...)
-	let [hsl, str] = [match(a:1, '[\/]'), '']
-	let par = substitute(a:1, '[^\/]*$', '', '')
-	let path = !hsl ? par : hsl > 0 ? getcwd().s:lash().par : getcwd()
-	for dir in split(globpath(ctrlp#utils#fnesc(path, 'g', ','), '*/'), '\n')
-		let str .= par.split(dir, '[\/]')[-1]."\n"
-	endfo
-	retu str
-endf
 "}}}
 
 " vim:fen:fdm=marker:fmr={{{,}}}:fdl=0:fdc=1:ts=2:sw=2:sts=2
