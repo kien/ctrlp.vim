@@ -415,8 +415,19 @@ endf
 " - Buffers {{{1
 fu! ctrlp#buffers(...)
 	let ids = sort(filter(range(1, bufnr('$')), 'empty(getbufvar(v:val, "&bt"))'
-		\ .' && getbufvar(v:val, "&bl") && strlen(bufname(v:val))'), 's:compmreb')
-	retu a:0 && a:1 == 'id' ? ids : map(ids, 'fnamemodify(bufname(v:val), ":.")')
+		\ .' && getbufvar(v:val, "&bl")'), 's:compmreb')
+	if a:0 && a:1 == 'id'
+		retu ids
+	el
+		let bufs = [[], []]
+		for id in ids
+			let bname = bufname(id)
+			let ebname = bname == ''
+			let fname = fnamemodify(ebname ? '['.id.'*No Name]' : bname, ':.')
+			cal add(bufs[ebname], fname)
+		endfo
+		retu bufs[0] + bufs[1]
+	en
 endf
 " * MatchedItems() {{{1
 fu! s:MatchIt(items, pat, limit, exc)
@@ -927,9 +938,20 @@ fu! s:SetWD(args)
 endf
 " * AcceptSelection() {{{1
 fu! ctrlp#acceptfile(mode, line, ...)
-	let [md, filpath] = [a:mode, fnamemodify(a:line, ':p')]
+	let [md, useb] = [a:mode, 0]
+	if !type(a:line)
+		let [filpath, bufnr, useb] = [a:line, a:line, 1]
+	el
+		let filpath = fnamemodify(a:line, ':p')
+		if s:nonamecond(a:line, filpath)
+			let bufnr = str2nr(matchstr(a:line, '[\/]\?\[\zs\d\+\ze\*No Name\]$'))
+			let [filpath, useb] = [bufnr, 1]
+		el
+			let bufnr = bufnr('^'.filpath.'$')
+		en
+	en
 	cal s:PrtExit()
-	let [bufnr, tail] = [bufnr('^'.filpath.'$'), s:tail()]
+	let tail = s:tail()
 	let j2l = a:0 ? a:1 : matchstr(tail, '^ +\zs\d\+$')
 	if ( s:jmptobuf =~ md || ( s:jmptobuf && md =~ '[et]' ) ) && bufnr > 0
 		\ && !( md == 'e' && bufnr == bufnr('%') )
@@ -949,7 +971,7 @@ fu! ctrlp#acceptfile(mode, line, ...)
 		if j2l | cal ctrlp#j2l(j2l) | en
 	el
 		" Determine the command to use
-		let useb = bufnr > 0 && buflisted(bufnr) && empty(tail)
+		let useb = bufnr > 0 && buflisted(bufnr) && ( empty(tail) || useb )
 		let cmd =
 			\ md == 't' || s:splitwin == 1 ? ( useb ? 'tab sb' : 'tabe' ) :
 			\ md == 'h' || s:splitwin == 2 ? ( useb ? 'sb' : 'new' ) :
@@ -1247,6 +1269,12 @@ fu! s:shortest(lens)
 endf
 
 fu! s:mixedsort(...)
+	if s:itemtype == 1
+		let pat = '[\/]\?\[\d\+\*No Name\]$'
+		if a:1 =~# pat && a:2 =~# pat | retu 0
+		elsei a:1 =~# pat | retu 1
+		elsei a:2 =~# pat | retu -1 | en
+	en
 	let [cln, cml] = [ctrlp#complen(a:1, a:2), s:compmatlen(a:1, a:2)]
 	if s:ispath
 		let ms = []
@@ -1330,11 +1358,14 @@ endf
 fu! s:formatline(str)
 	let str = a:str
 	if s:itemtype == 1
-		let bfnr = bufnr('^'.fnamemodify(str, ':p').'$')
-		let idc = ( bfnr == bufnr('#') ? '#' : '' )
-			\ . ( getbufvar(bfnr, '&ma') ? '' : '-' )
-			\ . ( getbufvar(bfnr, '&ro') ? '=' : '' )
-			\ . ( getbufvar(bfnr, '&mod') ? '+' : '' )
+		let filpath = fnamemodify(str, ':p')
+		let bufnr = s:nonamecond(str, filpath)
+			\ ? str2nr(matchstr(str, '[\/]\?\[\zs\d\+\ze\*No Name\]$'))
+			\ : bufnr('^'.filpath.'$')
+		let idc = ( bufnr == bufnr('#') ? '#' : '' )
+			\ . ( getbufvar(bufnr, '&ma') ? '' : '-' )
+			\ . ( getbufvar(bufnr, '&ro') ? '=' : '' )
+			\ . ( getbufvar(bufnr, '&mod') ? '+' : '' )
 		let str .= idc != '' ? ' '.idc : ''
 	en
 	let cond = s:ispath && ( s:winw - 4 ) < s:strwidth(str)
@@ -1613,6 +1644,11 @@ fu! s:bufwins(bufnr)
 	retu winns
 endf
 
+fu! s:nonamecond(str, filpath)
+	retu a:str =~ '[\/]\?\[\d\+\*No Name\]$' && !filereadable(a:filpath)
+		\ && bufnr('^'.a:filpath.'$') < 1
+endf
+
 fu! ctrlp#normcmd(cmd, ...)
 	if a:0 < 2 && s:nosplit() | retu a:cmd | en
 	let norwins = filter(range(1, winnr('$')),
@@ -1878,11 +1914,13 @@ endf
 " Entering & Exiting {{{2
 fu! s:getenv()
 	let [s:cwd, s:winres] = [getcwd(), [winrestcmd(), &lines, winnr('$')]]
-	let [s:crfile, s:crfpath] = [expand('%:p', 1), expand('%:p:h', 1)]
 	let [s:crword, s:crnbword] = [expand('<cword>', 1), expand('<cWORD>', 1)]
 	let [s:crgfile, s:crline] = [expand('<cfile>', 1), getline('.')]
 	let [s:winh, s:crcursor] = [min([s:mxheight, &lines]), getpos('.')]
 	let [s:crbufnr, s:crvisual] = [bufnr('%'), s:lastvisual()]
+	let s:crfile = bufname('%') == ''
+		\ ? '['.s:crbufnr.'*No Name]' : expand('%:p', 1)
+	let s:crfpath = expand('%:p:h', 1)
 	let s:mrbs = ctrlp#mrufiles#bufs()
 endf
 
