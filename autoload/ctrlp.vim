@@ -584,8 +584,6 @@ fu! s:SetDefTxt()
 		let txt = txt && !stridx(s:crfpath, s:dyncwd)
 			\ ? ctrlp#rmbasedir([s:crfpath])[0] : ''
 		let txt = txt != '' ? txt.s:lash(s:crfpath) : ''
-	el
-		let txt = expand(txt, 1)
 	en
 	let s:prompt[0] = txt
 endf
