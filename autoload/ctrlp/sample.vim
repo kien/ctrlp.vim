@@ -16,15 +16,12 @@
 "         \ 'my_other_extension',
 "         \ ]
 
-" Get the script's filename, in this example s:n is 'sample'
-let s:n = exists('s:n') ? s:n : fnamemodify(expand('<sfile>', 1), ':t:r')
-
 " Load guard
-if ( exists('g:loaded_ctrlp_'.s:n) && g:loaded_ctrlp_{s:n} )
+if ( exists('g:loaded_ctrlp_sample') && g:loaded_ctrlp_sample )
 	\ || v:version < 700 || &cp
 	finish
 endif
-let g:loaded_ctrlp_{s:n} = 1
+let g:loaded_ctrlp_sample = 1
 
 
 " Add this extension's settings to g:ctrlp_ext_vars
@@ -54,16 +51,19 @@ let g:loaded_ctrlp_{s:n} = 1
 "
 " + sort: disable sorting (enabled by default when omitted)
 "
+" + specinput: enable special inputs '..' and '@cd' (disabled by default)
+"
 call add(g:ctrlp_ext_vars, {
-	\ 'init': 'ctrlp#'.s:n.'#init()',
-	\ 'accept': 'ctrlp#'.s:n.'#accept',
+	\ 'init': 'ctrlp#sample#init()',
+	\ 'accept': 'ctrlp#sample#accept',
 	\ 'lname': 'long statusline name',
 	\ 'sname': 'shortname',
 	\ 'type': 'line',
-	\ 'enter': 'ctrlp#'.s:n.'#enter()',
-	\ 'exit': 'ctrlp#'.s:n.'#exit()',
-	\ 'opts': 'ctrlp#'.s:n.'#opts()',
+	\ 'enter': 'ctrlp#sample#enter()',
+	\ 'exit': 'ctrlp#sample#exit()',
+	\ 'opts': 'ctrlp#sample#opts()',
 	\ 'sort': 0,
+	\ 'specinput': 0,
 	\ })
 
 
@@ -71,7 +71,7 @@ call add(g:ctrlp_ext_vars, {
 "
 " Return: a Vim's List
 "
-function! ctrlp#{s:n}#init()
+function! ctrlp#sample#init()
 	let input = [
 		\ 'Sed sodales fri magna, non egestas ante consequat nec.',
 		\ 'Aenean vel enim mattis ultricies erat.',
@@ -91,20 +91,25 @@ endfunction
 "           the values are 'e', 'v', 't' and 'h', respectively
 "  a:str    the selected string
 "
-function! ctrlp#{s:n}#accept(mode, str)
+function! ctrlp#sample#accept(mode, str)
 	" For this example, just exit ctrlp and run help
 	call ctrlp#exit()
 	help ctrlp-extensions
 endfunction
 
 
-" Do something before enterting ctrlp
-function! ctrlp#{s:n}#enter()
+" (optional) Do something before enterting ctrlp
+function! ctrlp#sample#enter()
 endfunction
 
 
-" Do something after exiting ctrlp
-function! ctrlp#{s:n}#exit()
+" (optional) Do something after exiting ctrlp
+function! ctrlp#sample#exit()
+endfunction
+
+
+" (optional) Set or check for user options specific to this extension
+function! ctrlp#sample#opts()
 endfunction
 
 
@@ -112,7 +117,7 @@ endfunction
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 
 " Allow it to be called later
-function! ctrlp#{s:n}#id()
+function! ctrlp#sample#id()
 	return s:id
 endfunction
 
@@ -123,4 +128,4 @@ endfunction
 " command! CtrlPSample call ctrlp#init(ctrlp#sample#id())
 
 
-" vim:fen:fdl=0:ts=2:sw=2:sts=2
+" vim:nofen:fdl=0:ts=2:sw=2:sts=2
