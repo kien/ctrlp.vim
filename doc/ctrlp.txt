@@ -75,6 +75,11 @@ Overview:~
   |ctrlp_mruf_case_sensitive|...MRU files are case sensitive or not.
   |ctrlp_mruf_save_on_update|...Save to disk whenever a new entry is added.
 
+  BufferTag mode: (to enable, see |ctrlp-extensions|)
+  |g:ctrlp_buftag_ctags_bin|....The location of the ctags-compatible binary.
+  |g:ctrlp_buftag_systemenc|....The encoding used for the ctags command.
+  |g:ctrlp_buftag_types|........Add new filetypes and set the cmd arguments.
+
   Advanced options:
   |ctrlp_open_func|.............Use custom file opening functions.
   |ctrlp_status_func|...........Change CtrlP's two statuslines.
