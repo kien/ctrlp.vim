@@ -319,7 +319,7 @@ fu! ctrlp#clra()
 	if isdirectory(cadir)
 		let cafiles = split(s:glbpath(s:fnesc(cadir, 'g', ','), '**', 1), "\n")
 		let eval = '!isdirectory(v:val) && v:val !~ ''\v[\/]cache[.a-z]+$|\.log$'''
-		sil! cal map(filter(cafiles, eval), 'delete(v:val)')
+		sil! cal map(s:ifilter(cafiles, eval), 'delete(v:val)')
 	en
 	cal ctrlp#clr()
 endf
@@ -1628,6 +1628,18 @@ fu! s:dosigns()
 	retu exists('s:marked') && s:bufnr > 0 && s:opmul != '0' && has('signs')
 endf
 " Lists & Dictionaries {{{2
+fu! s:ifilter(list, str)
+	let [rlist, estr] = [[], substitute(a:str, 'v:val', 'each', 'g')]
+	for each in a:list
+		try
+			if eval(estr)
+				cal add(rlist, each)
+			en
+		cat | con | endt
+	endfo
+	retu rlist
+endf
+
 fu! s:dictindex(dict, expr)
 	for key in keys(a:dict)
 		if a:dict[key] == a:expr | retu key | en
@@ -1968,7 +1980,8 @@ endf
 fu! s:log(m)
 	if exists('g:ctrlp_log') && g:ctrlp_log | if a:m
 		let cadir = ctrlp#utils#cachedir()
-		sil! exe 'redi! >' cadir.s:lash(cadir).'ctrlp.log'
+		let apd = g:ctrlp_log > 1 ? '>' : ''
+		sil! exe 'redi! >'.apd cadir.s:lash(cadir).'ctrlp.log'
 	el
 		sil! redi END
 	en | en
