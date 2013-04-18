@@ -1106,8 +1106,8 @@ Available extensions:~
                                                                    *:CtrlPLine*
   * Line mode:~
     - Name: 'line'
-    - Command: ":CtrlPLine"
-    - Search for a line in all listed buffers.
+    - Command: ":CtrlPLine [buffer]"
+    - Search for a line in all listed buffers or in the specified [buffer].
 
                                                                  *:CtrlPChange*
                                                               *:CtrlPChangeAll*
