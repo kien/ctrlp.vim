@@ -472,7 +472,16 @@ fu! s:MatchedItems(items, pat, limit)
 	let exc = exists('s:crfilerel') ? s:crfilerel : ''
 	let items = s:narrowable() ? s:matched + s:mdata[3] : a:items
 	if s:matcher != {}
-		let argms = [items, a:pat, a:limit, s:mmode(), s:ispath, exc, s:regexp]
+		let argms =
+			\ has_key(s:matcher, 'arg_type') && s:matcher['arg_type'] == 'dict' ? [{
+			\ 'items':  items,
+			\ 'str':    a:pat,
+			\ 'limit':  a:limit,
+			\ 'mmode':  s:mmode(),
+			\ 'ispath': s:ispath,
+			\ 'crfile': exc,
+			\ 'regex':  s:regexp,
+			\ }] : [items, a:pat, a:limit, s:mmode(), s:ispath, exc, s:regexp]
 		let lines = call(s:matcher['match'], argms, s:matcher)
 	el
 		let lines = s:MatchIt(items, a:pat, a:limit, exc)
@@ -961,14 +970,21 @@ fu! s:SetWD(args)
 	en
 endf
 " * AcceptSelection() {{{1
-fu! ctrlp#acceptfile(mode, line, ...)
-	let [md, useb] = [a:mode, 0]
-	if !type(a:line)
-		let [filpath, bufnr, useb] = [a:line, a:line, 1]
+fu! ctrlp#acceptfile(...)
+	let useb = 0
+	if a:0 == 1 && type(a:1) == 4
+		let [md, line] = [a:1['action'], a:1['line']]
+		let atl = has_key(a:1, 'tail') ? a:1['tail'] : ''
 	el
-		let filpath = fnamemodify(a:line, ':p')
-		if s:nonamecond(a:line, filpath)
-			let bufnr = str2nr(matchstr(a:line, '[\/]\?\[\zs\d\+\ze\*No Name\]$'))
+		let [md, line] = [a:1, a:2]
+		let atl = a:0 > 2 ? a:3 : ''
+	en
+	if !type(line)
+		let [filpath, bufnr, useb] = [line, line, 1]
+	el
+		let filpath = fnamemodify(line, ':p')
+		if s:nonamecond(line, filpath)
+			let bufnr = str2nr(matchstr(line, '[\/]\?\[\zs\d\+\ze\*No Name\]$'))
 			let [filpath, useb] = [bufnr, 1]
 		el
 			let bufnr = bufnr('^'.filpath.'$')
@@ -976,7 +992,7 @@ fu! ctrlp#acceptfile(mode, line, ...)
 	en
 	cal s:PrtExit()
 	let tail = s:tail()
-	let j2l = a:0 ? a:1 : matchstr(tail, '^ +\zs\d\+$')
+	let j2l = atl != '' ? atl : matchstr(tail, '^ +\zs\d\+$')
 	if ( s:jmptobuf =~ md || ( s:jmptobuf && md =~ '[et]' ) ) && bufnr > 0
 		\ && !( md == 'e' && bufnr == bufnr('%') )
 		let [jmpb, bufwinnr] = [1, bufwinnr(bufnr)]
@@ -1004,7 +1020,7 @@ fu! ctrlp#acceptfile(mode, line, ...)
 		" Reset &switchbuf option
 		let [swb, &swb] = [&swb, '']
 		" Open new window/buffer
-		let [fid, tail] = [( useb ? bufnr : filpath ), ( a:0 ? ' +'.a:1 : tail )]
+		let [fid, tail] = [( useb ? bufnr : filpath ), ( atl != '' ? ' +'.atl : tail )]
 		let args = [cmd, fid, tail, 1, [useb, j2l]]
 		cal call('s:openfile', args)
 		let &swb = swb
@@ -1035,24 +1051,34 @@ fu! s:SpecInputs(str)
 	retu 0
 endf
 
-fu! s:AcceptSelection(mode)
-	if a:mode != 'e' && s:OpenMulti(a:mode) != -1 | retu | en
+fu! s:AcceptSelection(action)
+	let [md, icr] = [a:action[0], match(a:action, 'r') >= 0]
+	let subm = icr || ( !icr && md == 'e' )
+	if !subm && s:OpenMulti(md) != -1 | retu | en
 	let str = s:getinput()
-	if a:mode == 'e' | if s:SpecInputs(str) | retu | en | en
+	if subm | if s:SpecInputs(str) | retu | en | en
 	" Get the selected line
 	let line = ctrlp#getcline()
-	if a:mode != 'e' && !s:itemtype && line == ''
+	if !subm && !s:itemtype && line == '' && line('.') > s:offset
 		\ && str !~ '\v^(\.\.([\/]\.\.)*[\/]?[.\/]*|/|\\|\?|\@.+)$'
-		cal s:CreateNewFile(a:mode) | retu
+		cal s:CreateNewFile(md) | retu
 	en
 	if empty(line) | retu | en
 	" Do something with it
 	if s:openfunc != {} && has_key(s:openfunc, s:ctype)
 		let actfunc = s:openfunc[s:ctype]
+		let type = has_key(s:openfunc, 'arg_type') ? s:openfunc['arg_type'] : 'list'
 	el
-		let actfunc = s:itemtype < 3 ? 'ctrlp#acceptfile' : s:getextvar('accept')
+		if s:itemtype < 3
+			let [actfunc, type] = ['ctrlp#acceptfile', 'dict']
+		el
+			let [actfunc, exttype] = [s:getextvar('accept'), s:getextvar('act_farg')]
+			let type = exttype == 'dict' ? exttype : 'list'
+		en
 	en
-	cal call(actfunc, [a:mode, line])
+	let actargs = type == 'dict' ? [{ 'action': md, 'line': line, 'icr': icr }]
+		\ : [md, line]
+	cal call(actfunc, actargs)
 endf
 " - CreateNewFile() {{{1
 fu! s:CreateNewFile(...)
@@ -1211,7 +1237,10 @@ fu! s:OpenNoMarks(md, line)
 		cal s:remarksigns()
 		cal s:BuildPrompt(0)
 	elsei a:md == 'x'
-		cal call(s:openfunc[s:ctype], [a:md, a:line], s:openfunc)
+		let type = has_key(s:openfunc, 'arg_type') ? s:openfunc['arg_type'] : 'dict'
+		let argms = type == 'dict' ? [{ 'action': a:md, 'line': a:line }]
+			\ : [a:md, a:line]
+		cal call(s:openfunc[s:ctype], argms, s:openfunc)
 	elsei a:md == 'd'
 		let dir = fnamemodify(a:line, ':h')
 		if isdirectory(dir)
@@ -1352,8 +1381,17 @@ fu! ctrlp#statusline()
 	let marked  = s:opmul != '0' ?
 		\ exists('s:marked') ? ' <'.s:dismrk().'>' : ' <->' : ''
 	if s:status != {}
-		let args = [focus, byfname, s:regexp, prv, s:ctype, nxt, marked]
-		let &l:stl = call(s:status['main'], args, s:status)
+		let argms =
+			\ has_key(s:status, 'arg_type') && s:status['arg_type'] == 'dict' ? [{
+			\ 'focus':   focus,
+			\ 'byfname': byfname,
+			\ 'regex':   s:regexp,
+			\ 'prev':    prv,
+			\ 'item':    s:ctype,
+			\ 'next':    nxt,
+			\ 'marked':  marked,
+			\ }] : [focus, byfname, s:regexp, prv, s:ctype, nxt, marked]
+		let &l:stl = call(s:status['main'], argms, s:status)
 	el
 		let item    = '%#CtrlPMode1# '.s:ctype.' %*'
 		let focus   = '%#CtrlPMode2# '.focus.' %*'
@@ -1373,8 +1411,13 @@ endf
 fu! ctrlp#progress(enum, ...)
 	if has('macunix') || has('mac') | sl 1m | en
 	let txt = a:0 ? '(press ctrl-c to abort)' : ''
-	let &l:stl = s:status != {} ? call(s:status['prog'], [a:enum], s:status)
-		\ : '%#CtrlPStats# '.a:enum.' %* '.txt.'%=%<%#CtrlPMode2# %{getcwd()} %*'
+	if s:status != {}
+		let argms = has_key(s:status, 'arg_type') && s:status['arg_type'] == 'dict'
+			\ ? [{ 'str': a:enum }] : [a:enum]
+		let &l:stl = call(s:status['prog'], argms, s:status)
+	el
+		let &l:stl = '%#CtrlPStats# '.a:enum.' %* '.txt.'%=%<%#CtrlPMode2# %{getcwd()} %*'
+	en
 	redraws
 endf
 " *** Paths {{{2
@@ -2177,6 +2220,10 @@ endf
 
 fu! ctrlp#call(func, ...)
 	retu call(a:func, a:000)
+endf
+
+fu! ctrlp#getvar(var)
+	retu {a:var}
 endf
 "}}}1
 " * Initialization {{{1

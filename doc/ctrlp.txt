@@ -743,6 +743,27 @@ Structure of the function: >
   endfunction
 <
 
+Note: you can extend any of the above options with { 'arg_type': 'dict' } to
+enable passing all the function arguments in a single Dictionary argument. Use
+the existing argument names as keys in this Dictionary.
+
+Example: >
+  let g:ctrlp_status_func = {
+    \ 'arg_type' : 'dict',
+    \ 'enter': 'Function_Name_1',
+    \ 'exit':  'Function_Name_2',
+    \ }
+
+  function! Function_Name_1(dict)
+    " where dict == {
+    " \ 'focus':   value,
+    " \ 'byfname': value,
+    " \ 'regex':   value,
+    " \ ...
+    " }
+  endfunction
+<
+
 ===============================================================================
 COMMANDS                                                       *ctrlp-commands*
 
