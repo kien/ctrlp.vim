@@ -1194,7 +1194,7 @@ Highlighting:~
 
 Statuslines:~
   * Highlight groups:
-    CtrlPMode1 : 'file' or 'path', and the current mode (Character)
+    CtrlPMode1 : 'file' or 'path' or 'line', and the current mode (Character)
     CtrlPMode2 : 'prt' or 'win', 'regex', the working directory (|hl-LineNr|)
     CtrlPStats : the scanning status (Function)
 

@@ -455,7 +455,7 @@ endf
 fu! s:MatchIt(items, pat, limit, exc)
 	let [lines, id] = [[], 0]
 	let pat =
-		\ s:byfname ? map(split(a:pat, '^[^;]\+\\\@<!\zs;', 1), 's:martcs.v:val')
+		\ s:byfname() ? map(split(a:pat, '^[^;]\+\\\@<!\zs;', 1), 's:martcs.v:val')
 		\ : s:martcs.a:pat
 	for item in a:items
 		let id += 1
@@ -511,7 +511,7 @@ fu! s:SplitPattern(str)
 	if exists('lst')
 		let pat = ''
 		if !empty(lst)
-			if s:byfname && index(lst, ';') > 0
+			if s:byfname() && index(lst, ';') > 0
 				let fbar = index(lst, ';')
 				let lst_1 = s:sublist(lst, 0, fbar - 1)
 				let lst_2 = len(lst) - 1 > fbar ? s:sublist(lst, fbar + 1, -1) : ['']
@@ -527,7 +527,7 @@ endf
 fu! s:Render(lines, pat)
 	let [&ma, lines, s:res_count] = [1, a:lines, len(a:lines)]
 	let height = min([max([s:mw_min, s:res_count]), s:winmaxh])
-	let pat = s:byfname ? split(a:pat, '^[^;]\+\\\@<!\zs;', 1)[0] : a:pat
+	let pat = s:byfname() ? split(a:pat, '^[^;]\+\\\@<!\zs;', 1)[0] : a:pat
 	let cur_cmd = 'keepj norm! '.( s:mw_order == 'btt' ? 'G' : 'gg' ).'1|'
 	" Setup the match window
 	sil! exe '%d _ | res' height
@@ -585,7 +585,7 @@ fu! s:ForceUpdate()
 endf
 
 fu! s:BuildPrompt(upd)
-	let base = ( s:regexp ? 'r' : '>' ).( s:byfname ? 'd' : '>' ).'> '
+	let base = ( s:regexp ? 'r' : '>' ).( s:byfname() ? 'd' : '>' ).'> '
 	let str = escape(s:getinput(), '\')
 	let lazy = str == '' || exists('s:force') || !has('autocmd') ? 0 : s:lazy
 	if a:upd && !lazy && ( s:matches || s:regexp || exists('s:did_exp')
@@ -768,7 +768,7 @@ endf
 
 fu! s:PrtSelectJump(char)
 	let lines = copy(s:lines)
-	if s:byfname
+	if s:byfname()
 		cal map(lines, 'split(v:val, ''[\/]\ze[^\/]\+$'')[-1]')
 	en
 	" Cycle through matches, use s:jmpchr to store last jump
@@ -1377,7 +1377,7 @@ fu! ctrlp#statusline()
 	let prv = tps[s:walker(max, s:itemtype, -1)][1]
 	let s:ctype = tps[s:itemtype][0]
 	let focus   = s:focus ? 'prt'  : 'win'
-	let byfname = s:byfname ? 'file' : 'path'
+	let byfname = s:ispath ? s:byfname ? 'file' : 'path' : 'line'
 	let marked  = s:opmul != '0' ?
 		\ exists('s:marked') ? ' <'.s:dismrk().'>' : ' <->' : ''
 	if s:status != {}
@@ -1892,7 +1892,6 @@ endf
 fu! s:modevar()
 	let s:matchtype = s:mtype()
 	let s:ispath = s:ispathitem()
-	if !s:ispath | let s:byfname = 0 | en
 	let s:mfunc = s:mfunc()
 	let s:nolim = s:getextvar('nolim')
 	let s:dosort = s:getextvar('sort')
@@ -1902,6 +1901,10 @@ endf
 fu! s:nosort()
 	retu s:matcher != {} || s:nolim == 1 || ( s:itemtype == 2 && s:mrudef )
 		\ || ( s:itemtype =~ '\v^(1|2)$' && s:prompt == ['', '', ''] ) || !s:dosort
+endf
+
+fu! s:byfname()
+	retu s:ispath && s:byfname
 endf
 
 fu! s:narrowable()
@@ -1918,7 +1921,7 @@ fu! s:getinput(...)
 		if gmd =~ 't' && gmd =~ 'k' && !a:0 && matchstr(str, '.$') =~ '\k'
 			retu join(prt, '')
 		en
-		let [pf, rz] = [( s:byfname ? 'f' : 'p' ), ( s:regexp ? 'r' : 'z' )]
+		let [pf, rz] = [( s:byfname() ? 'f' : 'p' ), ( s:regexp ? 'r' : 'z' )]
 		for dict in s:abbrev['abbrevs']
 			let dmd = has_key(dict, 'mode') ? dict['mode'] : ''
 			let pat = escape(dict['pattern'], '~')
@@ -2108,7 +2111,7 @@ endf
 
 fu! s:mfunc()
 	let mfunc = 'match'
-	if s:byfname && s:ispath
+	if s:byfname()
 		let mfunc = 's:matchfname'
 	elsei s:itemtype > 2
 		let matchtypes = { 'tabs': 's:matchtabs', 'tabe': 's:matchtabe' }
