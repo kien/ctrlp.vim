@@ -572,6 +572,9 @@ Example: >
 Set this to 1 to show only MRU files in the current working directory: >
   let g:ctrlp_mruf_relative = 0
 <
+Note: you can use a custom mapping to toggle this option inside the prompt: >
+  let g:ctrlp_prompt_mappings = { 'ToggleMRURelative()': ['<F2>'] }
+<
 
                                                  *'g:ctrlp_mruf_default_order'*
 Set this to 1 to disable sorting when searching in MRU mode: >

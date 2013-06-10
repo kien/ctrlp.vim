@@ -937,6 +937,11 @@ fu! s:ToggleKeyLoop()
 	en
 endf
 
+fu! s:ToggleMRURelative()
+	cal ctrlp#mrufiles#tgrel()
+	cal s:PrtClearCache()
+endf
+
 fu! s:PrtSwitcher()
 	let [s:force, s:matches] = [1, 1]
 	cal s:BuildPrompt(1)
