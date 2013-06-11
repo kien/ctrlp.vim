@@ -332,18 +332,21 @@ Some examples: >
   let g:ctrlp_user_command = ['.hg', 'for /f "tokens=1" %%a in (''hg root'') '
     \ . 'do hg --cwd %s status -numac -I . %%a']           " Windows
 <
-Note #1: if the fallback_command is empty or the 'fallback' key is not defined,
+Note #1: in the |Dictionary| format, 'fallback' and 'ignore' are optional. In
+the |List| format, fallback_command is optional.
+
+Note #2: if the fallback_command is empty or the 'fallback' key is not defined,
 |globpath()| will then be used when scanning outside of a repository.
 
-Note #2: unless the |Dictionary| format is used and 'ignore' is defined and set
+Note #3: unless the |Dictionary| format is used and 'ignore' is defined and set
 to 1, the |wildignore| and |g:ctrlp_custom_ignore| options do not apply when
 these custom commands are being used. When not present, 'ignore' is set to 0 by
 default to retain the performance advantage of using external commands.
 
-Note #3: when changing the option's variable type, remember to |:unlet| it
+Note #4: when changing the option's variable type, remember to |:unlet| it
 first or restart Vim to avoid the "E706: Variable type mismatch" error.
 
-Note #4: you can use a |b:var| to set this option on a per buffer basis.
+Note #5: you can use a |b:var| to set this option on a per buffer basis.
 
                                                         *'g:ctrlp_max_history'*
 The maximum number of input strings you want CtrlP to remember. The default
