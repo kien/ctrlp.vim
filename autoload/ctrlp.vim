@@ -319,6 +319,10 @@ fu! ctrlp#files()
 			if !ctrlp#igncwd(s:dyncwd)
 				cal s:GlobPath(s:fnesc(s:dyncwd, 'g', ','), 0)
 			en
+    elsei lscmd[0] == '*'
+      if !ctrlp#igncwd(s:dyncwd)
+        let g:ctrlp_allfiles = call(lscmd[1:], [s:fnesc(s:dyncwd, 'g', ',')])
+      en
 		el
 			sil! cal ctrlp#progress('Indexing...')
 			try | cal s:UserCmd(lscmd)
