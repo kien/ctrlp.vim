@@ -384,7 +384,7 @@ fu! s:UserCmd(lscmd)
 		let [ssl, &ssl, path] = [&ssl, 0, tr(path, '/', '\')]
 	en
 	if has('win32') || has('win64')
-		let lscmd = substitute(lscmd, '\v(^|&&\s*)\zscd (/d)@!', 'cd /d ', '')
+		let lscmd = substitute(lscmd, '\v(^|\&\&\s*)\zscd (/d)@!', 'cd /d ', '')
 	en
 	let path = exists('*shellescape') ? shellescape(path) : path
 	let g:ctrlp_allfiles = split(system(printf(lscmd, path)), "\n")
