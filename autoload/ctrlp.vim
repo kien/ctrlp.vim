@@ -617,9 +617,8 @@ fu! s:SetDefTxt()
 	if s:deftxt == '0' || ( s:deftxt == 1 && !s:ispath ) | retu | en
 	let txt = s:deftxt
 	if !type(txt)
-		let txt = txt && !stridx(s:crfpath, s:dyncwd)
-			\ ? ctrlp#rmbasedir([s:crfpath])[0] : ''
-		let txt = txt != '' ? txt.s:lash(s:crfpath) : ''
+		let path = s:crfpath.s:lash(s:crfpath)
+		let txt = txt && !stridx(path, s:dyncwd) ? ctrlp#rmbasedir([path])[0] : ''
 	en
 	let s:prompt[0] = txt
 endf
@@ -1542,7 +1541,7 @@ fu! s:samerootsyml(each, isfile, cwd)
 endf
 
 fu! ctrlp#rmbasedir(items)
-	let cwd = s:dyncwd.( s:dyncwd !~ '[\/]$' ? s:lash : '' )
+	let cwd = s:dyncwd.s:lash()
 	if a:items != [] && !stridx(a:items[0], cwd)
 		let idx = strlen(cwd)
 		retu map(a:items, 'strpart(v:val, idx)')
