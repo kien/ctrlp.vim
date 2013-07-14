@@ -1285,6 +1285,7 @@ Special thanks:~
     * Christopher Fredén <github.com/icetan>
     * Zahary Karadjov <github.com/zah>
     * Jo De Boeck <github.com/grimpy>
+    * Rudi Grinberg <github.com/rgrinberg>
 
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
