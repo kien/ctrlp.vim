@@ -1609,8 +1609,7 @@ endf
 fu! ctrlp#syntax()
 	if ctrlp#nosy() | retu | en
 	for [ke, va] in items(s:hlgrps) | cal ctrlp#hicheck('CtrlP'.ke, va) | endfo
-	if !hlexists('CtrlPLinePre')
-		\ && synIDattr(synIDtrans(hlID('Normal')), 'bg') !~ '^-1$\|^$'
+	if synIDattr(synIDtrans(hlID('Normal')), 'bg') !~ '^-1$\|^$'
 		sil! exe 'hi CtrlPLinePre '.( has("gui_running") ? 'gui' : 'cterm' ).'fg=bg'
 	en
 	sy match CtrlPNoEntries '^ == NO ENTRIES ==$'
