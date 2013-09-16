@@ -57,7 +57,7 @@ Use `:diffthis` when opening multiple files to run `:diffthis` on the first 4 fi
 
     Define additional root markers with the `g:ctrlp_root_markers` option.
 
-* Exclude files and directories using Vim's `wildignore` and CtrlP's own `g:ctrlp_custom_ignore`:
+* Exclude files and directories using Vim's `wildignore` and CtrlP's own `g:ctrlp_custom_ignore`. If a custom listing command is being used, exclusions are ignored:
 
     ```vim
     set wildignore+=*/tmp/*,*.so,*.swp,*.zip     " MacOSX/Linux
