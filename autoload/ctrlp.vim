@@ -1632,8 +1632,11 @@ fu! s:highlight(pat, grp)
 			let lettercount = len(split(pat, '\\{-}'))
 			for i in range(lettercount)
 				" surround the letter we care about with \zs and \ze so only it is
-				" highlighted in this go.
-				let letterpat = substitute(pat, '^\%(.\{-}\\{-}\)\{'.i.'}\zs.\{-}\ze\%(\[^.*\)\?$', '\\zs\0\\ze', '')
+				" highlighted in this go. Prefer the letter right next to the previous
+				" one, otherwise scan out to the last one
+				let letterpat = substitute(pat,
+					\ '^\%(\\\?.\zs\[\^\\\?.\]\\{-}\)\{'.i.'}\(\\\?.\)\%(\[\^\\\?.\]\\{-}\)\?\ze.*$',
+					\ '\\(\\zs\1\\|.*\\zs\1\\)\\ze.\\{-}', '')
 
 				if s:byfname
 					" replace [^x] with [^/x] to make sure no slashes between letters
