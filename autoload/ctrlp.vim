@@ -1622,12 +1622,30 @@ fu! s:highlight(pat, grp)
 	if s:matcher != {} | retu | en
 	cal clearmatches()
 	if !empty(a:pat) && s:ispath
-		let pat = s:regexp ? substitute(a:pat, '\\\@<!\^', '^> \\zs', 'g') : a:pat
-		if s:byfname
-			let pat = substitute(pat, '\[\^\(.\{-}\)\]\\{-}', '[^\\/\1]\\{-}', 'g')
-			let pat = substitute(pat, '\$\@<!$', '\\ze[^\\/]*$', 'g')
+		if s:regexp
+			let pat = substitute(a:pat, '\\\@<!\^', '^> \\zs', 'g')
+			cal matchadd(a:grp, ( s:martcs == '' ? '\c' : '\C' ).pat)
+		el
+			let pat = a:pat
+
+			" calculate how many letters are here
+			let lettercount = len(split(pat, '\\{-}'))
+			for i in range(lettercount)
+				" surround the letter we care about with \zs and \ze so only it is
+				" highlighted in this go.
+				let letterpat = substitute(pat, '^\%(.\{-}\\{-}\)\{'.i.'}\zs.\{-}\ze\%(\[^.*\)\?$', '\\zs\0\\ze', '')
+
+				if s:byfname
+					" replace [^x] with [^/x] to make sure no slashes between letters
+					let letterpat = substitute(letterpat, '\[\^\(.\{-}\)\]\\{-}', '[^\\/\1]\\{-}', 'g')
+					" replace the end to make sure no slashes follow the pattern
+					let letterpat = substitute(letterpat, '\$\@<!$', '[^\\/]*$', 'g')
+				en
+
+				cal matchadd(a:grp, ( s:martcs == '' ? '\c' : '\C' ).letterpat)
+			endfo
 		en
-		cal matchadd(a:grp, ( s:martcs == '' ? '\c' : '\C' ).pat)
+
 		cal matchadd('CtrlPLinePre', '^>')
 	en
 endf
