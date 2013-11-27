@@ -286,6 +286,8 @@ fu! s:Open()
 		sign define ctrlpmark text=+> texthl=Search
 	en
 	cal s:setupblank()
+	let s:t_ve = &t_ve
+	set t_ve=
 endf
 
 fu! s:Close()
@@ -307,6 +309,7 @@ fu! s:Close()
 	en
 	unl! s:focus s:hisidx s:hstgot s:marked s:statypes s:cline s:init s:savestr
 		\ s:mrbs s:did_exp
+	let &t_ve = s:t_ve
 	cal ctrlp#recordhist()
 	cal s:execextvar('exit')
 	cal s:log(0)
