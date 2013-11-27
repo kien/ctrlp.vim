@@ -888,17 +888,23 @@ fu! s:MapSpecs()
 endf
 
 fu! s:KeyLoop()
-	wh exists('s:init') && s:keyloop
-		redr
-		let nr = getchar()
-		let chr = !type(nr) ? nr2char(nr) : nr
-		if nr >=# 0x20
-			cal s:PrtFocusMap(chr)
-		el
-			let cmd = matchstr(maparg(chr), ':<C-U>\zs.\+\ze<CR>$')
-			exe ( cmd != '' ? cmd : 'norm '.chr )
-		en
-	endw
+	let t_ve = &t_ve
+	set t_ve=
+	try
+		wh exists('s:init') && s:keyloop
+			redr
+			let nr = getchar()
+			let chr = !type(nr) ? nr2char(nr) : nr
+			if nr >=# 0x20
+				cal s:PrtFocusMap(chr)
+			el
+				let cmd = matchstr(maparg(chr), ':<C-U>\zs.\+\ze<CR>$')
+				exe ( cmd != '' ? cmd : 'norm '.chr )
+			en
+		endw
+	fina
+		let &t_ve = t_ve
+	endt
 endf
 " * Toggling {{{1
 fu! s:ToggleFocus()
