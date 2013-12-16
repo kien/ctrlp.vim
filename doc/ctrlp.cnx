@@ -74,8 +74,8 @@ OPTIONS                                                         *ctrlp-options*
   |ctrlp_use_migemo|............为日语文件名启用Migemo模式。
   |ctrlp_prompt_mappings|.......改变提示符面板内部的按键绑定。
 
-  最近最常使用模式:
-  |ctrlp_mruf_max|..............记录的最近最常最多使用的最大数据。
+  最近最多使用模式:
+  |ctrlp_mruf_max|..............记录的最近最多使用的最大数据。
   |ctrlp_mruf_exclude|..........需要被排除的文件。
   |ctrlp_mruf_include|..........需要被记录的文件。
   |ctrlp_mruf_relative|.........只显示在工作目录内的最近最多使用。
@@ -218,7 +218,7 @@ OPTIONS                                                         *ctrlp-options*
 注意: 当在CtrlP中时你可以使用 <F5> 来快速的清除缓存。
 
                                                 *'g:ctrlp_clear_cache_on_exit'*
-设置该选项为0通过退出Vim时不删除缓存文件来启用跨回话的缓存: >
+设置该选项为0通过退出Vim时不删除缓存文件来启用跨会话的缓存: >
   let g:ctrlp_clear_cache_on_exit = 1
 <
 
