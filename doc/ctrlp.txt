@@ -538,9 +538,10 @@ only need to keep the lines that you've changed the values (inside []): >
     \ 'PrtClearCache()':      ['<F5>'],
     \ 'PrtDeleteEnt()':       ['<F7>'],
     \ 'CreateNewFile()':      ['<c-y>'],
-    \ 'MarkToOpen()':         ['<c-z>'],
+    \ 'MarkToOpen(0)':        ['<c-z>'],
+    \ 'MarkToOpen(1)':        ['<c-g>'],
     \ 'OpenMulti()':          ['<c-o>'],
-    \ 'PrtExit()':            ['<esc>', '<c-c>', '<c-g>'],
+    \ 'PrtExit()':            ['<esc>', '<c-c>'],
     \ }
 <
 Note: if pressing <bs> moves the cursor one character to the left instead of

@@ -139,9 +139,10 @@ let [s:lcmap, s:prtmaps] = ['nn <buffer> <silent>', {
 	\ 'PrtClearCache()':      ['<F5>'],
 	\ 'PrtDeleteEnt()':       ['<F7>'],
 	\ 'CreateNewFile()':      ['<c-y>'],
-	\ 'MarkToOpen()':         ['<c-z>'],
+	\ 'MarkToOpen(0)':        ['<c-z>'],
+	\ 'MarkToOpen(1)':        ['<c-g>'],
 	\ 'OpenMulti()':          ['<c-o>'],
-	\ 'PrtExit()':            ['<esc>', '<c-c>', '<c-g>'],
+	\ 'PrtExit()':            ['<esc>', '<c-c>'],
 	\ }]
 
 if !has('gui_running')
@@ -1121,24 +1122,26 @@ fu! s:CreateNewFile(...)
 	cal s:openfile(cmd, filpath, tail, 1)
 endf
 " * OpenMulti() {{{1
-fu! s:MarkToOpen()
+fu! s:MarkToOpen(all)
 	if s:bufnr <= 0 || s:opmul == '0'
 		\ || ( s:itemtype > 2 && s:getextvar('opmul') != 1 )
 		retu
 	en
-	let line = ctrlp#getcline()
-	if empty(line) | retu | en
-	let filpath = s:ispath ? fnamemodify(line, ':p') : line
-	if exists('s:marked') && s:dictindex(s:marked, filpath) > 0
-		" Unmark and remove the file from s:marked
-		let key = s:dictindex(s:marked, filpath)
-		cal remove(s:marked, key)
-		if empty(s:marked) | unl s:marked | en
-		if has('signs')
-			exe 'sign unplace' key 'buffer='.s:bufnr
-		en
+	if a:all
+		let lines = s:lines
 	el
+		let lines = [ctrlp#getcline()]
+	en
+
+	let found_unmarked = 0
+	for line in lines
+		if empty(line) | continue | en
+		let filpath = s:ispath ? fnamemodify(line, ':p') : line
 		" Add to s:marked and place a new sign
+		if exists('s:marked') && s:dictindex(s:marked, filpath) > 0
+			continue
+		en
+		let found_unmarked = 1
 		if exists('s:marked')
 			let vac = s:vacantdict(s:marked)
 			let key = empty(vac) ? len(s:marked) + 1 : vac[0]
@@ -1147,8 +1150,23 @@ fu! s:MarkToOpen()
 			let [key, s:marked] = [1, { 1 : filpath }]
 		en
 		if has('signs')
-			exe 'sign place' key 'line='.line('.').' name=ctrlpmark buffer='.s:bufnr
+			exe 'sign place' key 'line='.(index(s:lines, line) + 1).' name=ctrlpmark buffer='.s:bufnr
 		en
+	endfo
+	if ! found_unmarked
+		for line in lines
+			if empty(line) | continue | en
+			let filpath = s:ispath ? fnamemodify(line, ':p') : line
+			let key = s:dictindex(s:marked, filpath)
+			cal remove(s:marked, key)
+			if empty(s:marked) | unl s:marked | en
+			if has('signs')
+				exe 'sign unplace' key 'buffer='.s:bufnr
+			en
+		endfo
+		cal s:unmarksigns()
+	el
+		cal s:remarksigns()
 	en
 	sil! cal ctrlp#statusline()
 endf
