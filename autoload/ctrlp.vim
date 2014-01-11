@@ -714,8 +714,8 @@ fu! s:PrtExpandDir()
 	en
 	if str == ''
 		let dir = s:headntail(s:fnesc(ctrlp#getcline(), 'g'))
-		if len(dir) == 2
-			let str = dir[0]
+		if len(dir) == 2 && dir[0] != ''
+			let str = dir[0].s:lash()
 		en
 	en
 	if str == '' | retu | en
@@ -733,10 +733,10 @@ fu! s:PrtExpandDir()
 	el
 		let slash = s:lash()
 		let dir = s:headntail(s:fnesc(ctrlp#getcline(), 'g'))
-		if len(dir) == 2
+		if len(dir) == 2 && dir[0] != ''
 			while str[:len(dir[0])] == dir[0]
 				let tmp = s:headntail(dir[1], 'g'))
-				if len(tmp) == 2
+				if len(tmp) == 2 && dir[0] != ''
 					let dir = [dir[0].slash.tmp[0], tmp[1]]
 				el
 					break
