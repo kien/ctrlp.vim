@@ -712,6 +712,12 @@ fu! s:PrtExpandDir()
 			let str = fnamemodify(s:fnesc(spc, 'g'), mdr).nmd
 		en
 	en
+	if str == ''
+		let dir = s:headntail(s:fnesc(ctrlp#getcline(), 'g'))
+		if len(dir) == 2
+			let str = dir[0]
+		en
+	en
 	if str == '' | retu | en
 	unl! s:hstgot
 	let s:act_add = 1
@@ -724,6 +730,20 @@ fu! s:PrtExpandDir()
 		let str = dirs[0]
 	elsei len(dirs) > 1
 		let str .= s:findcommon(dirs, str)
+	el
+		let slash = s:lash()
+		let dir = s:headntail(s:fnesc(ctrlp#getcline(), 'g'))
+		if len(dir) == 2
+			while str[:len(dir[0])] == dir[0]
+				let tmp = s:headntail(dir[1], 'g'))
+				if len(tmp) == 2
+					let dir = [dir[0].slash.tmp[0], tmp[1]]
+				el
+					break
+				en
+			endw
+			let str = dir[0].slash
+		en
 	en
 	let s:prompt[0] = exists('hasat') ? hasat[0].str : str
 	cal s:BuildPrompt(1)
