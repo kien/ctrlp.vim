@@ -400,7 +400,10 @@ Pressing <c-o> or <c-y> will then prompt for a keypress. The key can be:
   h - open in horizontal split(s)
   v - open in vertical split(s)
   i - open as hidden buffers (for <c-o> only)
+  a - mark all visible files (for <c-o> only)
   c - clear the marked files (for <c-o> only)
+  d - open/descend into directory (for <c-o> only)
+  x - open files with custom function (for <c-o> only, see |g:ctrlp_open_func|)
   r - open in the current window (for <c-y> only)
   <esc>, <c-c>, <c-u> - cancel and go back to the prompt.
   <cr> - use the default behavior specified with |g:ctrlp_open_new_file| and
