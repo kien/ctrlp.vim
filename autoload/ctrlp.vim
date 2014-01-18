@@ -715,8 +715,12 @@ fu! s:PrtExpandDir()
 	let str_tmp = str
 	if str == ''
 		 let dir = s:headfirstntail(s:fnesc(ctrlp#getcline(), 'g'))
-		 if len(dir) == 2 && dir[0] != ''
-			  let str = dir[0].s:lash()
+		 if len(dir) == 2 && dir[0] != '' && isdirectory(dir[0])
+				cal ctrlp#setdir(dir[0])
+				cal ctrlp#switchtype(0)
+				cal ctrlp#recordhist()
+				cal s:PrtClear()
+				return
 		 en
 	en
 	if str == '' | retu | en
@@ -735,7 +739,7 @@ fu! s:PrtExpandDir()
 	if str_tmp == str
 		 let slash = s:lash()
 		 let dir = s:headfirstntail(s:fnesc(ctrlp#getcline(), 'g'))
-		 if len(dir) == 2 && dir[0] != ''
+		 if len(dir) == 2 && dir[0] != '' && isdirectory(dir[0])
 			  let exp = 1
 			  while exp
 				   if str[:len(dir[0])] != dir[0]
@@ -748,7 +752,11 @@ fu! s:PrtExpandDir()
 					    break
 				   en
 			  endw
-			  let str = dir[0].slash
+				cal ctrlp#setdir(dir[0])
+				cal ctrlp#switchtype(0)
+				cal ctrlp#recordhist()
+				cal s:PrtClear()
+				return
 		 en
 	en
 	let s:prompt[0] = exists('hasat') ? hasat[0].str : str
