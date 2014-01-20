@@ -1567,8 +1567,12 @@ fu! s:findroot(curr, mark, depth, type)
 	elsei type(a:mark) == 3
 		for markr in a:mark
 			if s:glbpath(s:fnesc(a:curr, 'g', ','), markr, 1) != ''
-				let fnd = 1
-				brea
+        echo(a:curr)
+        echo(markr)
+        if isdirectory(join([a:curr, markr], '/'))
+          let fnd = 1
+          brea
+        en
 			en
 		endfo
 	en
