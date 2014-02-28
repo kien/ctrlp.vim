@@ -470,7 +470,7 @@ fu! s:MatchIt(items, pat, limit, exc)
 	endfo
 	let s:mdata = [s:dyncwd, s:itemtype, s:regexp, s:sublist(a:items, id, -1)]
 
-    cal s:ProcessMatches(lines, a:pat)
+    cal ctrlp#process(lines, a:pat)
 endf
 
 fu! s:MatchedItems(items, pat, limit)
@@ -491,13 +491,6 @@ fu! s:MatchedItems(items, pat, limit)
 	el
 		cal s:MatchIt(items, a:pat, a:limit, exc)
 	en
-endf
-
-fu! s:ProcessMatches(lines, pat)
-	let s:matches = len(a:lines)
-	unl! s:did_exp
-
-	cal s:Render(a:lines, a:pat)
 endf
 
 fu! s:SplitPattern(str)
@@ -593,6 +586,10 @@ endf
 
 fu! s:ForceUpdate()
 	sil! cal s:Update(escape(s:getinput(), '\'))
+endf
+
+fu! s:UpdateCursorHold()
+    sil! cal feedkeys("f\e")
 endf
 
 fu! s:BuildPrompt(upd)
@@ -2268,6 +2265,13 @@ fu! ctrlp#init(type, ...)
 	cal s:SetDefTxt()
 	cal s:BuildPrompt(1)
 	if s:keyloop | cal s:KeyLoop() | en
+endf
+
+fu! ctrlp#process(lines, pat)
+    let s:matches = len(a:lines)
+    unl! s:did_exp
+
+    cal s:Render(a:lines, a:pat)
 endf
 " - Autocmds {{{1
 if has('autocmd')
