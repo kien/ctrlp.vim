@@ -469,7 +469,8 @@ fu! s:MatchIt(items, pat, limit, exc)
 		if a:limit > 0 && len(lines) >= a:limit | brea | en
 	endfo
 	let s:mdata = [s:dyncwd, s:itemtype, s:regexp, s:sublist(a:items, id, -1)]
-	retu lines
+
+    cal s:ProcessMatches(lines, a:pat)
 endf
 
 fu! s:MatchedItems(items, pat, limit)
@@ -486,13 +487,17 @@ fu! s:MatchedItems(items, pat, limit)
 			\ 'crfile': exc,
 			\ 'regex':  s:regexp,
 			\ }] : [items, a:pat, a:limit, s:mmode(), s:ispath, exc, s:regexp]
-		let lines = call(s:matcher['match'], argms, s:matcher)
+		call(s:matcher['match'], argms, s:matcher)
 	el
-		let lines = s:MatchIt(items, a:pat, a:limit, exc)
+		cal s:MatchIt(items, a:pat, a:limit, exc)
 	en
-	let s:matches = len(lines)
+endf
+
+fu! s:ProcessMatches(lines, pat)
+	let s:matches = len(a:lines)
 	unl! s:did_exp
-	retu lines
+
+	cal s:Render(a:lines, a:pat)
 endf
 
 fu! s:SplitPattern(str)
@@ -579,9 +584,11 @@ fu! s:Update(str)
 	if str == oldstr && !empty(str) && !exists('s:force') | retu | en
 	let s:martcs = &scs && str =~ '\u' ? '\C' : ''
 	let pat = s:matcher == {} ? s:SplitPattern(str) : str
-	let lines = s:nolim == 1 && empty(str) ? copy(g:ctrlp_lines)
-		\ : s:MatchedItems(g:ctrlp_lines, pat, s:mw_res)
-	cal s:Render(lines, pat)
+
+    if s:nolim == 1 && empty(str)
+        cal s:Render(copy(g:ctrlp_lines), pat)
+    else
+        cal s:MatchedItems(g:ctrlp_lines, pat, s:mw_res)
 endf
 
 fu! s:ForceUpdate()
