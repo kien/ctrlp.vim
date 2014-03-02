@@ -144,6 +144,15 @@ let [s:lcmap, s:prtmaps] = ['nn <buffer> <silent>', {
 	\ 'PrtExit()':            ['<esc>', '<c-c>', '<c-g>'],
 	\ }]
 
+let s:scriptpath = expand('<sfile>:p:h')
+if has('autocmd') && has('python')
+    py import sys
+    exe 'python sys.path.insert( 0, "' . escape(s:scriptpath, '\') . '/../python" )'
+    py from ctrlp.matcher import CtrlPMatcher
+    py ctrlp = CtrlPMatcher(debug=True)
+    let s:pymatcher = 1
+en 
+
 if !has('gui_running')
 	cal add(s:prtmaps['PrtBS()'], remove(s:prtmaps['PrtCurLeft()'], 0))
 en
@@ -489,7 +498,11 @@ fu! s:MatchedItems(items, pat, limit)
 			\ }] : [items, a:pat, a:limit, s:mmode(), s:ispath, exc, s:regexp]
 		call(s:matcher['match'], argms, s:matcher)
     elsei s:pymatcher && !s:regexp
-        py ctrlp.filter(items, a:pat, a:limit, exc, s:itemtype, s:matchtype, s:ispath, s:byfname())
+        py <<EOPYTHON
+ctrlp.filter(vim.eval('items'), vim.eval('a:pat'), vim.eval('a:limit'), vim.eval('exc'),
+    vim.eval('s:itemtype'), vim.eval('s:matchtype'), vim.eval('s:ispath'),
+    vim.eval('s:byfname()'))
+EOPYTHON
 	el
 		cal s:MatchIt(items, a:pat, a:limit, exc)
 	en
@@ -2257,7 +2270,6 @@ fu! ctrlp#init(type, ...)
 	let [s:ermsg, v:errmsg] = [v:errmsg, '']
 	let [s:matches, s:init] = [1, 1]
 	cal s:Reset(a:0 ? a:1 : {})
-    cal s:pymatcherinit()
 	noa cal s:Open()
 	cal s:SetWD(a:0 ? a:1 : {})
 	cal s:MapNorms()
@@ -2297,16 +2309,6 @@ fu! s:autocmds()
 			au CursorHold ControlP cal s:ForceUpdate()
 		aug END
 	en
-endf
-
-fu! s:pymatcherinit()
-    if !has('autocmd') || !has("python") | retu | en
-
-    py import sys
-    exe 'python sys.path.insert( 0, "' . escape(expand('<sfile>:p:h'), '\') . '/../python" )'
-    py from ctrlp.matcher import CtrlPMatcher
-    py ctrlp = CtrlPMatcher()
-    let s:pymatcher = 1
 endf
 "}}}
 

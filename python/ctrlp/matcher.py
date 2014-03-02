@@ -19,6 +19,8 @@ class CtrlPMatcher:
         self.logger.addHandler(hdlr)
 
     def filter(self, items, pat, limit, exc, itemtype, mtype, ispath=False, byfname=False):
+        self.logger.debug("Filtering {number} items using {pat}".format(number = len(items), pat=pat))
+
         processed = False
         if self.process():
             processed = True
@@ -39,6 +41,11 @@ class CtrlPMatcher:
                 itemtype, mtype, ispath, byfname, vim.eval('&ic'), vim.eval('&scs'),
                 self.logger
             ))
+            # self.thread = Thread(target=lambda a,b,c,d,e,f,g,h,i,j,k,l: a, args=(
+            #     self.queue, items, pat, limit, exc,
+            #     itemtype, mtype, ispath, byfname, vim.eval('&ic'), vim.eval('&scs'),
+            #     self.logger
+            # ))
             self.thread.daemon = True
             self.thread.start()
 
@@ -60,16 +67,55 @@ class CtrlPMatcher:
             return False
 
     def forceCursorHold(self):
-        vim.command("call feedkeys(\"f\e\")")
+        # col = vim.eval("col('.')")
+        # if col == 1:
 
-def threadWorker(queue, items, pat, limit, exc, itemtype, mtype, ispath, byfname, scs, logger):
-    patterns = splitPattern(pat, byfname, scs)
+        # pass
+        vim.command('call feedkeys("f\e")', 'n')
 
-    id = 0
+def threadWorker(queue, items, pat, limit, exc, itemtype, mtype, ispath, byfname, ic, scs, logger):
+    logger.debug("Splitting pattern {pat}".format(pat=pat))
+
+    chars =  [re.escape(c) for c in pat]
+
+    logger.debug("Chars: {chars}".format(chars=chars))
+
+    patterns = []
+    builder = lambda c: c + '[^' + c + ']*?'
+
+    flags = 0
+    if ic:
+        if scs:
+            upper = any(c.isupper() for c in pat)
+            if upper:
+                flags = re.I
+        else:
+            flags = re.I
+
+    logger.debug("Flags: {flags}".format(flags=flags))
+
+    try:
+        if byfname:
+            delim = chars.index(';')
+            logger.debug("Creating filename patterns")
+            filechars = chars[:delim]
+            dirchars = chars[delim+1:]
+            patterns.append(re.compile(''.join(map(builder, filechars)), flags))
+
+            if dirchars:
+                patterns.append(re.compile(''.join(map(builder, dirchars)), flags))
+    except ValueError:
+        pass
+
+    if not len(patterns):
+        patterns.append(re.compile(''.join(map(builder, chars)), flags))
+        logger.debug("Creating normal patterns")
+
+    itemId = 0
     matchedItems = []
     logger.debug("Matching against {number} items using {pat}".format(number=len(items), pat=pat))
     for item in items:
-        id += 1
+        itemId += 1
         if ispath and item == exc:
             continue
 
@@ -99,33 +145,3 @@ def threadWorker(queue, items, pat, limit, exc, itemtype, mtype, ispath, byfname
 
     queue.put(matchedItems, timeout=1)
     logger.debug("Got {number} matched items using {pat}".format(number=len(matchedItems), pat=pat))
-
-def splitPattern(pat, byfname, ic, scs):
-    chars =  [re.escape(c) for c in pat]
-
-    patterns = []
-    builder = lambda c: c + '[^' + c + ']*?'
-
-    flags = 0
-    if ic:
-        if scs:
-            upper = any(c.isupper() for c in pat)
-            if upper:
-                flags = re.I
-        else:
-            flags = re.I
-
-    try:
-        if byfname:
-            delim = chars.index(';')
-            filechars = chars[:delim]
-            dirchars = chars[delim+1:]
-            patterns.append(re.compile(''.join(map(builder, filechars)), flags))
-
-            if dirchars:
-                patterns.append(re.compile(''.join(map(builder, dirchars)), flags))
-    finally:
-        if not len(patterns):
-            patterns.append(re.compile(''.join(map(builder, chars)), flags))
-
-    return patterns
