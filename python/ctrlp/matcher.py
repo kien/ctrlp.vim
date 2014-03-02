@@ -40,11 +40,6 @@ class CtrlPMatcher:
                 itemtype, mtype, ispath, byfname, vim.eval('&ic'), vim.eval('&scs'),
                 self.logger
             ))
-            # self.thread = Thread(target=lambda a,b,c,d,e,f,g,h,i,j,k,l: a, args=(
-            #     self.queue, items, pat, limit, exc,
-            #     itemtype, mtype, ispath, byfname, vim.eval('&ic'), vim.eval('&scs'),
-            #     self.logger
-            # ))
             self.thread.daemon = True
             self.thread.start()
 
@@ -66,18 +61,15 @@ class CtrlPMatcher:
             return False
 
     def forceCursorHold(self):
-        # col = vim.eval("col('.')")
-        # if col == 1:
+        col  = vim.eval("col('.')")
 
-        # pass
-        vim.command('call feedkeys("f\e")', 'n')
+        if col == 1:
+            vim.command('call feedkeys("\<Right>\<Left>")')
+        else:
+            vim.command('call feedkeys("\<Left>\<Right>")')
 
 def threadWorker(queue, items, pat, limit, exc, itemtype, mtype, ispath, byfname, ic, scs, logger):
-    logger.debug("Splitting pattern {pat}".format(pat=pat))
-
     chars =  [re.escape(c) for c in pat]
-
-    logger.debug("Chars: {chars}".format(chars=chars))
 
     patterns = []
     builder = lambda c: c + '[^' + c + ']*?'
@@ -90,8 +82,6 @@ def threadWorker(queue, items, pat, limit, exc, itemtype, mtype, ispath, byfname
                 flags = re.I
         else:
             flags = re.I
-
-    logger.debug("Flags: {flags}".format(flags=flags))
 
     try:
         if byfname:
