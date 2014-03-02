@@ -1,12 +1,22 @@
 from Queue import Empty, Queue
 from threading import Thread
 
-import re, os, vim
+import logging, re, os, tempfile, vim
 
 class CtrlPMatcher:
-    def __init__(self):
+    def __init__(self, debug=False):
         self.queue = Queue()
         self.lastPat = None
+        self.debug = debug
+
+        self.logger = logging.getLogger('ctrlp')
+        if debug:
+            self.logger.setLevel(logging.DEBUG)
+
+        hdlr = logging.FileHandler(os.path.join(tempfile.gettempdir(), 'ctrlp-py.log'))
+        formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+        hdlr.setFormatter(formatter)
+        self.logger.addHandler(hdlr)
 
     def filter(self, items, pat, limit, exc, itemtype, mtype, ispath=False, byfname=False):
         processed = False
@@ -15,13 +25,19 @@ class CtrlPMatcher:
 
         if self.lastPat == pat:
             if self.process() and self.queue.qsize() == 0 and not self.thread.isAlive():
+                self.logger.debug("Thread job is processed for {pat}".format(pat=pat))
                 self.lastPat = None
             elif not processed:
+                self.logger.debug("Waiting for thread job for {pat}".format(pat=pat))
                 self.forceCursorHold()
+            else:
+                self.logger.debug("The same pattern '{pat}'".format(pat=pat))
         elif pat:
+            self.logger.debug("Starting thread for {pat}".format(pat=pat))
             self.thread = Thread(target=threadWorker, args=(
                 self.queue, items, pat, limit, exc,
-                itemtype, mtype, ispath, byfname, vim.eval('&ic'), vim.eval('&scs')
+                itemtype, mtype, ispath, byfname, vim.eval('&ic'), vim.eval('&scs'),
+                self.logger
             ))
             self.thread.daemon = True
             self.thread.start()
@@ -46,11 +62,12 @@ class CtrlPMatcher:
     def forceCursorHold(self):
         vim.command("call feedkeys(\"f\e\")")
 
-def threadWorker(queue, items, pat, limit, exc, itemtype, mtype, ispath, byfname, scs):
+def threadWorker(queue, items, pat, limit, exc, itemtype, mtype, ispath, byfname, scs, logger):
     patterns = splitPattern(pat, byfname, scs)
 
     id = 0
     matchedItems = []
+    logger.debug("Matching against {number} items using {pat}".format(number=len(items), pat=pat))
     for item in items:
         id += 1
         if ispath and item == exc:
@@ -81,6 +98,7 @@ def threadWorker(queue, items, pat, limit, exc, itemtype, mtype, ispath, byfname
             break
 
     queue.put(matchedItems, timeout=1)
+    logger.debug("Got {number} matched items using {pat}".format(number=len(matchedItems), pat=pat))
 
 def splitPattern(pat, byfname, ic, scs):
     chars =  [re.escape(c) for c in pat]
