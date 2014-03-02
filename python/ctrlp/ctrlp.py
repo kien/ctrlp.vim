@@ -6,6 +6,7 @@ import re, os, vim
 class CtrlP:
     def __init__(self):
         self.queue = Queue()
+        self.lastPat = None
 
     def filter(self, items, pat, limit, exc, itemtype, mtype, ispath=False, byfname=False):
         processed = False

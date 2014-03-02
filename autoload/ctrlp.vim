@@ -488,6 +488,8 @@ fu! s:MatchedItems(items, pat, limit)
 			\ 'regex':  s:regexp,
 			\ }] : [items, a:pat, a:limit, s:mmode(), s:ispath, exc, s:regexp]
 		call(s:matcher['match'], argms, s:matcher)
+    elsei s:pymatcher && !s:regexp
+        py ctrlp.filter(items, a:pat, a:limit, exc, s:itemtype, s:matchtype, s:ispath, s:byfname())
 	el
 		cal s:MatchIt(items, a:pat, a:limit, exc)
 	en
@@ -576,7 +578,10 @@ fu! s:Update(str)
 	" Stop if the string's unchanged
 	if str == oldstr && !empty(str) && !exists('s:force') | retu | en
 	let s:martcs = &scs && str =~ '\u' ? '\C' : ''
-	let pat = s:matcher == {} ? s:SplitPattern(str) : str
+	let pat = s:matcher == {}
+        ? s:pymatcher && !s:regexp
+            ? str : s:SplitPattern(str)
+        : str
 
     if s:nolim == 1 && empty(str)
         cal s:Render(copy(g:ctrlp_lines), pat)
@@ -2252,6 +2257,7 @@ fu! ctrlp#init(type, ...)
 	let [s:ermsg, v:errmsg] = [v:errmsg, '']
 	let [s:matches, s:init] = [1, 1]
 	cal s:Reset(a:0 ? a:1 : {})
+    cal s:pymatcherinit()
 	noa cal s:Open()
 	cal s:SetWD(a:0 ? a:1 : {})
 	cal s:MapNorms()
@@ -2290,15 +2296,17 @@ fu! s:autocmds()
 			au!
 			au CursorHold ControlP cal s:ForceUpdate()
 		aug END
-
-        if has("python")
-            py import sys
-            exe 'python sys.path.insert( 0, "' . escape(expand('<sfile>:p:h'), '\') . '/../python" )'
-            py from ctrlp.ctrlp import CtrlP
-            py ctrlp = Ctrlp()
-            let s:pymatcher = 1
-        en
 	en
+endf
+
+fu! s:pymatcherinit()
+    if !has('autocmd') || !has("python") | retu | en
+
+    py import sys
+    exe 'python sys.path.insert( 0, "' . escape(expand('<sfile>:p:h'), '\') . '/../python" )'
+    py from ctrlp.ctrlp import CtrlP
+    py ctrlp = Ctrlp()
+    let s:pymatcher = 1
 endf
 "}}}
 
