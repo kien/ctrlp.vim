@@ -591,10 +591,10 @@ fu! s:Update(str)
 	" Stop if the string's unchanged
 	if str == oldstr && !empty(str) && !exists('s:force') | retu | en
 	let s:martcs = &scs && str =~ '\u' ? '\C' : ''
-	let pat = s:matcher == {}
-        ? s:pymatcher && !s:regexp
-            ? str : s:SplitPattern(str)
-        : str
+    let pat = str
+    if s:matcher == {} && (!s:pymatcher || s:regexp)
+        let pat =  s:SplitPattern(str)
+    en
 
     if s:nolim == 1 && empty(str)
         cal s:Render(copy(g:ctrlp_lines), pat)
