@@ -2292,7 +2292,7 @@ fu! s:autocmds()
 		aug END
 
         if has("python")
-             exe 'python sys.path.insert( 0, "' . s:script_folder_path . '/../python" )'
+             exe 'python sys.path.insert( 0, "' . escape(expand('<sfile>:p:h'), '\') . '/../python" )'
              py from ctrlp import CtrlP
              py ctrlp = Ctrlp()
              let s:pymatcher = 1
