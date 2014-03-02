@@ -588,10 +588,6 @@ fu! s:ForceUpdate()
 	sil! cal s:Update(escape(s:getinput(), '\'))
 endf
 
-fu! s:UpdateCursorHold()
-    sil! cal feedkeys("f\e")
-endf
-
 fu! s:BuildPrompt(upd)
 	let base = ( s:regexp ? 'r' : '>' ).( s:byfname() ? 'd' : '>' ).'> '
 	let str = escape(s:getinput(), '\')
@@ -2284,6 +2280,7 @@ if has('autocmd')
 en
 
 fu! s:autocmds()
+    let s:pymatcher = 0
 	if !has('autocmd') | retu | en
 	if exists('#CtrlPLazy')
 		au! CtrlPLazy
@@ -2293,6 +2290,13 @@ fu! s:autocmds()
 			au!
 			au CursorHold ControlP cal s:ForceUpdate()
 		aug END
+
+        if has("python")
+             exe 'python sys.path.insert( 0, "' . s:script_folder_path . '/../python" )'
+             py from ctrlp import CtrlP
+             py ctrlp = Ctrlp()
+             let s:pymatcher = 1
+        en
 	en
 endf
 "}}}
