@@ -2298,7 +2298,6 @@ if has('autocmd')
 en
 
 fu! s:autocmds()
-    let s:pymatcher = 0
 	if !has('autocmd') | retu | en
 	if exists('#CtrlPLazy')
 		au! CtrlPLazy

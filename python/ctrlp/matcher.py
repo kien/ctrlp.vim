@@ -7,16 +7,15 @@ class CtrlPMatcher:
     def __init__(self, debug=False):
         self.queue = Queue()
         self.lastPat = None
-        self.debug = debug
 
         self.logger = logging.getLogger('ctrlp')
-        if debug:
-            self.logger.setLevel(logging.DEBUG)
-
         hdlr = logging.FileHandler(os.path.join(tempfile.gettempdir(), 'ctrlp-py.log'))
         formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
         hdlr.setFormatter(formatter)
         self.logger.addHandler(hdlr)
+
+        if debug:
+            self.logger.setLevel(logging.DEBUG)
 
     def filter(self, items, pat, limit, exc, itemtype, mtype, ispath=False, byfname=False):
         self.logger.debug("Filtering {number} items using {pat}".format(number = len(items), pat=pat))
