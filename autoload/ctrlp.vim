@@ -2304,8 +2304,8 @@ fu! s:pymatcherinit()
 
     py import sys
     exe 'python sys.path.insert( 0, "' . escape(expand('<sfile>:p:h'), '\') . '/../python" )'
-    py from ctrlp.ctrlp import CtrlP
-    py ctrlp = Ctrlp()
+    py from ctrlp.matcher import CtrlPMatcher
+    py ctrlp = CtrlPMatcher()
     let s:pymatcher = 1
 endf
 "}}}

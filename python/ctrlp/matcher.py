@@ -3,7 +3,7 @@ from threading import Thread
 
 import re, os, vim
 
-class CtrlP:
+class CtrlPMatcher:
     def __init__(self):
         self.queue = Queue()
         self.lastPat = None
