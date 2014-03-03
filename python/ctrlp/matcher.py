@@ -18,14 +18,24 @@ class CtrlPMatcher:
             self.logger.setLevel(logging.DEBUG)
 
     def filter(self, items, pat, limit, exc, itemtype, mtype, ispath=False, byfname=False):
+        limit = int(limit) if limit else None
+        if not pat:
+            self.logger.debug("No pattern, returning original items")
+            self.lastPat = None
+            self.queue.put(items[:limit], timeout=1)
+
+            self.process(pat)
+
+            return
+
         self.logger.debug("Filtering {number} items using {pat}".format(number = len(items), pat=pat))
 
         processed = False
-        if self.process():
+        if self.process(pat):
             processed = True
 
         if self.lastPat == pat:
-            if self.process() and self.queue.qsize() == 0 and not self.thread.isAlive():
+            if self.process(pat) and self.queue.qsize() == 0 and not self.thread.isAlive():
                 self.logger.debug("Thread job is processed for {pat}".format(pat=pat))
                 self.lastPat = None
             elif not processed:
@@ -46,7 +56,7 @@ class CtrlPMatcher:
             self.lastPat = pat
             self.forceCursorHold()
 
-    def process(self):
+    def process(self, pat):
         try:
             lines = self.queue.get(False)
             self.queue.task_done()
