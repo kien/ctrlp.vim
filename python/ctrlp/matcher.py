@@ -22,7 +22,7 @@ class CtrlPMatcher:
         if not pat:
             self.logger.debug("No pattern, returning original items")
             self.lastPat = None
-            self.queue.put(items[:limit], timeout=1)
+            self.queue.put({"items": items[:limit], "subitems": items[limit-1:]}, timeout=1)
 
             self.process(pat)
 
@@ -58,13 +58,14 @@ class CtrlPMatcher:
 
     def process(self, pat):
         try:
-            lines = self.queue.get(False)
+            data = self.queue.get(False)
             self.queue.task_done()
 
             callback = vim.bindeval('function("ctrlp#process")')
-            lines = vim.List(lines)
+            lines = vim.List(data["items"])
+            subitems = vim.List(data["subitems"])
 
-            callback(lines, pat)
+            callback(lines, pat, 1, subitems)
 
             return True
         except Empty:
@@ -143,5 +144,5 @@ def threadWorker(queue, items, pat, limit, exc, itemtype, mtype, ispath, byfname
         if limit > 0 and len(matchedItems) >= limit:
             break
 
-    queue.put(matchedItems, timeout=1)
+    queue.put({"items": matchedItems, "subitems": items[itemId:]}, timeout=1)
     logger.debug("Got {number} matched items using {pat}".format(number=len(matchedItems), pat=pat))

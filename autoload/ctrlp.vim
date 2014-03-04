@@ -478,9 +478,8 @@ fu! s:MatchIt(items, pat, limit, exc)
 		en | cat | brea | endt
 		if a:limit > 0 && len(lines) >= a:limit | brea | en
 	endfo
-	let s:mdata = [s:dyncwd, s:itemtype, s:regexp, s:sublist(a:items, id, -1)]
 
-    cal ctrlp#process(lines, a:pat)
+    cal ctrlp#process(lines, a:pat, 0, s:sublist(a:items, id, -1))
 endf
 
 fu! s:MatchedItems(items, pat, limit)
@@ -2284,11 +2283,17 @@ fu! ctrlp#init(type, ...)
 	if s:keyloop | cal s:KeyLoop() | en
 endf
 
-fu! ctrlp#process(lines, pat)
+fu! ctrlp#process(lines, pat, split, subitems)
     let s:matches = len(a:lines)
     unl! s:did_exp
 
-    cal s:Render(a:lines, a:pat)
+    let pat = a:pat
+
+    if a:split | let pat = s:SplitPattern(pat) | en
+
+	let s:mdata = [s:dyncwd, s:itemtype, s:regexp, a:subitems]
+
+    cal s:Render(a:lines, pat)
 endf
 " - Autocmds {{{1
 if has('autocmd')
