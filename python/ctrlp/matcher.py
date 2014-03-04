@@ -72,13 +72,8 @@ class CtrlPMatcher:
             return False
 
     def forceCursorHold(self):
-        # TODO: needs to be a function in the vimscript
-        col  = vim.eval("col('.')")
+        vim.bindeval('function("ctrlp#forcecursorhold")')()
 
-        if col == 1:
-            vim.command('call feedkeys("\<Right>\<Left>")')
-        else:
-            vim.command('call feedkeys("\<Left>\<Right>")')
 
 def threadWorker(queue, items, pat, limit, exc, itemtype, mtype, ispath, byfname, ic, scs, logger):
     chars =  [re.escape(c) for c in pat]
