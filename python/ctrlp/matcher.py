@@ -6,6 +6,7 @@ import logging, re, os, tempfile, vim
 class CtrlPMatcher:
     def __init__(self, debug=False):
         self.queue = Queue()
+        self.patterns = []
         self.lastPat = None
 
         self.logger = logging.getLogger('ctrlp')
@@ -22,7 +23,7 @@ class CtrlPMatcher:
         if not pat:
             self.logger.debug("No pattern, returning original items")
             self.lastPat = None
-            self.queue.put({"items": items[:limit], "subitems": items[limit-1:]}, timeout=1)
+            self.queue.put({"items": items[:limit], "subitems": items[limit-1:], "pat": ""}, timeout=1)
 
             self.process(pat)
 
@@ -30,21 +31,20 @@ class CtrlPMatcher:
 
         self.logger.debug("Filtering {number} items using {pat}".format(number = len(items), pat=pat))
 
-        processed = False
-        if self.process(pat):
-            processed = True
+        self.process(pat)
 
         if self.lastPat == pat:
             if self.process(pat) and self.queue.qsize() == 0 and not self.thread.isAlive():
                 self.logger.debug("Thread job is processed for {pat}".format(pat=pat))
                 self.lastPat = None
-            elif not processed and self.thread.isAlive():
+            elif self.thread.isAlive() or self.queue.qsize() > 0:
                 self.logger.debug("Waiting for thread job for {pat}".format(pat=pat))
                 self.forceCursorHold()
             else:
                 self.logger.debug("The same pattern '{pat}'".format(pat=pat))
         elif pat:
             self.logger.debug("Starting thread for {pat}".format(pat=pat))
+            self.patterns.append(pat)
             self.thread = Thread(target=threadWorker, args=(
                 self.queue, items, pat, limit, exc,
                 itemtype, mtype, ispath, byfname, vim.eval('&ic'), vim.eval('&scs'),
@@ -61,11 +61,20 @@ class CtrlPMatcher:
             data = self.queue.get(False)
             self.queue.task_done()
 
+            try:
+                index = self.patterns.index(data["pat"])
+                self.patterns = self.patterns[index+1:]
+            except ValueError:
+                return False
+
             callback = vim.bindeval('function("ctrlp#process")')
             lines = vim.List(data["items"])
             subitems = vim.List(data["subitems"])
 
             callback(lines, pat, 1, subitems)
+
+            if data["pat"] == pat:
+                self.queue = Queue()
 
             return True
         except Empty:
@@ -139,5 +148,5 @@ def threadWorker(queue, items, pat, limit, exc, itemtype, mtype, ispath, byfname
         if limit > 0 and len(matchedItems) >= limit:
             break
 
-    queue.put({"items": matchedItems, "subitems": items[itemId:]}, timeout=1)
+    queue.put({"items": matchedItems, "subitems": items[itemId:], "pat": pat}, timeout=1)
     logger.debug("Got {number} matched items using {pat}".format(number=len(matchedItems), pat=pat))
