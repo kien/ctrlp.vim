@@ -38,7 +38,7 @@ class CtrlPMatcher:
             if self.process(pat) and self.queue.qsize() == 0 and not self.thread.isAlive():
                 self.logger.debug("Thread job is processed for {pat}".format(pat=pat))
                 self.lastPat = None
-            elif not processed:
+            elif not processed and self.thread.isAlive():
                 self.logger.debug("Waiting for thread job for {pat}".format(pat=pat))
                 self.forceCursorHold()
             else:
@@ -71,6 +71,7 @@ class CtrlPMatcher:
             return False
 
     def forceCursorHold(self):
+        # TODO: needs to be a function in the vimscript
         col  = vim.eval("col('.')")
 
         if col == 1:
@@ -88,7 +89,7 @@ def threadWorker(queue, items, pat, limit, exc, itemtype, mtype, ispath, byfname
     if ic:
         if scs:
             upper = any(c.isupper() for c in pat)
-            if upper:
+            if not upper:
                 flags = re.I
         else:
             flags = re.I
@@ -122,17 +123,17 @@ def threadWorker(queue, items, pat, limit, exc, itemtype, mtype, ispath, byfname
             dirname = os.path.dirname(item)
             basename = os.path.basename(item)
 
-            match = patterns[0].match(basename)
+            match = patterns[0].search(basename)
 
             if len(patterns) == 2 and match is not None:
-                match = patterns[1].match(dirname)
+                match = patterns[1].search(dirname)
         else:
             if itemtype > 2 and mtype == 'tabs':
-                match = patterns[1].match(re.split('\t+', item)[0])
+                match = patterns[1].search(re.split('\t+', item)[0])
             elif itemtype > 2 and mtype == 'tabe':
-                match = patterns[1].match(re.split('\t+[^\t]+$', item)[0])
+                match = patterns[1].search(re.split('\t+[^\t]+$', item)[0])
             else:
-                match = patterns[0].match(item)
+                match = patterns[0].search(item)
 
         if match is None:
             continue

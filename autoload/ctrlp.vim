@@ -145,6 +145,7 @@ let [s:lcmap, s:prtmaps] = ['nn <buffer> <silent>', {
 	\ }]
 
 let s:scriptpath = expand('<sfile>:p:h')
+let s:pymatcher = 0
 if has('autocmd') && has('python')
     py import sys
     exe 'python sys.path.insert( 0, "' . escape(s:scriptpath, '\') . '/../python" )'
