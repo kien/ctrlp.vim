@@ -2284,6 +2284,8 @@ fu! ctrlp#init(type, ...)
 endf
 
 fu! ctrlp#process(lines, pat, split, subitems)
+    if !exists('s:init') | retu | en
+
     let s:matches = len(a:lines)
     unl! s:did_exp
 
