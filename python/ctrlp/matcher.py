@@ -18,7 +18,7 @@ class CtrlPMatcher:
         if debug:
             self.logger.setLevel(logging.DEBUG)
 
-    def filter(self, items, pat, limit, exc, itemtype, mtype, ispath=False, byfname=False):
+    def filter(self, items, pat, limit, mmode, ispath, crfile, regexp):
         limit = int(limit) if limit else None
         if not pat:
             self.logger.debug("No pattern, returning original items")
@@ -45,9 +45,9 @@ class CtrlPMatcher:
             self.logger.debug("Starting thread for {pat}".format(pat=pat))
             self.patterns.append(pat)
             self.thread = Thread(target=threadWorker, args=(
-                self.queue, items, pat, limit, exc,
-                itemtype, mtype, ispath, byfname, vim.eval('&ic'), vim.eval('&scs'),
-                self.logger
+                self.queue, items, pat, limit,
+                mmode, ispath, crfile, regexp,
+                vim.eval('&ic'), vim.eval('&scs'), self.logger
             ))
             self.thread.daemon = True
             self.thread.start()
@@ -87,7 +87,7 @@ class CtrlPMatcher:
         vim.bindeval('function("ctrlp#forcecursorhold")')()
 
 
-def threadWorker(queue, items, pat, limit, exc, itemtype, mtype, ispath, byfname, ic, scs, logger):
+def threadWorker(queue, items, pat, limit, mmode, ispath, crfile, regexp, ic, scs, logger):
     chars =  [re.escape(c) for c in pat]
 
     patterns = []
@@ -103,7 +103,7 @@ def threadWorker(queue, items, pat, limit, exc, itemtype, mtype, ispath, byfname
             flags = re.I
 
     try:
-        if byfname:
+        if mmode == 'filename-only':
             delim = chars.index(';')
             logger.debug("Creating filename patterns")
             filechars = chars[:delim]
@@ -124,10 +124,10 @@ def threadWorker(queue, items, pat, limit, exc, itemtype, mtype, ispath, byfname
     logger.debug("Matching against {number} items using {pat}".format(number=len(items), pat=pat))
     for item in items:
         itemId += 1
-        if ispath and item == exc:
+        if ispath and item == crfile:
             continue
 
-        if byfname:
+        if mmode == 'filename-only':
             dirname = os.path.dirname(item)
             basename = os.path.basename(item)
 
@@ -135,13 +135,12 @@ def threadWorker(queue, items, pat, limit, exc, itemtype, mtype, ispath, byfname
 
             if len(patterns) == 2 and match is not None:
                 match = patterns[1].search(dirname)
+        elif mmode == 'first-non-tab':
+            match = patterns[1].search(re.split('\t+', item)[0])
+        elif mmode == 'until-last-tab':
+            match = patterns[1].search(re.split('\t+[^\t]+$', item)[0])
         else:
-            if itemtype > 2 and mtype == 'tabs':
-                match = patterns[1].search(re.split('\t+', item)[0])
-            elif itemtype > 2 and mtype == 'tabe':
-                match = patterns[1].search(re.split('\t+[^\t]+$', item)[0])
-            else:
-                match = patterns[0].search(item)
+            match = patterns[0].search(item)
 
         if match is None:
             continue
