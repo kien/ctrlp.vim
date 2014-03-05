@@ -588,7 +588,9 @@ fu! s:Update(str)
 	" Get the new string sans tail
 	let str = s:sanstail(a:str)
 	" Stop if the string's unchanged
-	if str == oldstr && !empty(str) && !exists('s:force') && (!s:pymatcher || s:regexp)
+	if str == oldstr && !empty(str) && !exists('s:force')
+                \ && (!has_key(s:matcher, 'force_update') || s:matcher['force_update'] == 1)
+                \ && (!s:pymatcher || s:regexp)
         retu
     en
 	let s:martcs = &scs && str =~ '\u' ? '\C' : ''
