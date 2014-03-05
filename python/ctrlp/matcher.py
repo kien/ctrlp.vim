@@ -22,7 +22,6 @@ class CtrlPMatcher:
         limit = int(limit) if limit else None
         if not pat:
             self.logger.debug("No pattern, returning original items")
-            self.lastPat = None
             self.queue.put({"items": items[:limit], "subitems": items[limit-1:], "pat": ""}, timeout=1)
 
             self.process(pat)
@@ -62,8 +61,12 @@ class CtrlPMatcher:
             self.queue.task_done()
 
             try:
-                index = self.patterns.index(data["pat"])
-                self.patterns = self.patterns[index+1:]
+                if data["pat"]:
+                    index = self.patterns.index(data["pat"])
+                    self.patterns = self.patterns[index+1:]
+                else:
+                    self.lastPat = None
+                    self.patterns = []
             except ValueError:
                 return False
 
