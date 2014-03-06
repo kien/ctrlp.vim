@@ -959,23 +959,20 @@ fu! s:SetWD(args)
 	if has_key(a:args, 'dir') && a:args['dir'] != ''
 		cal ctrlp#setdir(a:args['dir']) | retu
 	en
-	let pmode = has_key(a:args, 'mode') ? a:args['mode'] : s:pathmode
+	let pmodes = has_key(a:args, 'mode') ? a:args['mode'] : s:pathmode
 	let [s:crfilerel, s:dyncwd] = [fnamemodify(s:crfile, ':.'), getcwd()]
 	if s:crfile =~ '^.\+://' | retu | en
-	if pmode =~ 'c' || ( pmode =~ 'a' && stridx(s:crfpath, s:cwd) < 0 )
-		\ || ( !type(pmode) && pmode )
-		if exists('+acd') | let [s:glb_acd, &acd] = [&acd, 0] | en
-		cal ctrlp#setdir(s:crfpath)
+	if (!type(pmodes))
+		let pmodes =
+			\ pmodes == 0 ? '' :
+			\ pmodes == 1 ? 'a' :
+			\ pmodes == 2 ? 'r' :
+			\ 'c'
 	en
-	if pmode =~ 'r' || pmode == 2
-		let markers = ['.git', '.hg', '.svn', '.bzr', '_darcs']
-		let spath = pmode =~ 'd' ? s:dyncwd : pmode =~ 'w' ? s:cwd : s:crfpath
-		if type(s:rmarkers) == 3 && !empty(s:rmarkers)
-			if s:findroot(spath, s:rmarkers, 0, 0) != [] | retu | en
-			cal filter(markers, 'index(s:rmarkers, v:val) < 0')
-		en
-		cal s:findroot(spath, markers, 0, 0)
-	en
+	let spath = pmodes =~ 'd' ? s:dyncwd : pmodes =~ 'w' ? s:cwd : s:crfpath
+	for pmode in split(pmodes, '\zs')
+		if ctrlp#setpathmode(pmode, spath) | retu | en
+	endfo
 endf
 " * AcceptSelection() {{{1
 fu! ctrlp#acceptfile(...)
@@ -1584,6 +1581,23 @@ fu! s:findroot(curr, mark, depth, type)
 		en
 	en
 	retu []
+endf
+
+fu! ctrlp#setpathmode(pmode, ...)
+	if a:pmode == 'c' || ( a:pmode == 'a' && stridx(s:crfpath, s:cwd) < 0 )
+		if exists('+acd') | let [s:glb_acd, &acd] = [&acd, 0] | en
+		cal ctrlp#setdir(s:crfpath)
+		retu 1
+	elsei a:pmode == 'r'
+		let spath = a:0 ? a:1 : s:crfpath
+		let markers = ['.git', '.hg', '.svn', '.bzr', '_darcs']
+		if type(s:rmarkers) == 3 && !empty(s:rmarkers)
+			if s:findroot(spath, s:rmarkers, 0, 0) != [] | retu 1 | en
+			cal filter(markers, 'index(s:rmarkers, v:val) < 0')
+		en
+		if s:findroot(spath, markers, 0, 0) != [] | retu 1 | en
+	en
+	retu 0
 endf
 
 fu! ctrlp#setdir(path, ...)
