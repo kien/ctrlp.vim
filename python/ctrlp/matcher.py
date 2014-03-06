@@ -145,10 +145,69 @@ def threadWorker(queue, items, pat, limit, mmode, ispath, crfile, regexp, ic, sc
         if match is None:
             continue
 
-        matchedItems.append(item)
+        span = match.span()
+        matchedItems.append({"line": item, "matlen": span[1] - span[0]})
 
-        if limit > 0 and len(matchedItems) >= limit:
-            break
+    matchedItems = sorted(matchedItems, cmp=sortItems(crfile, mmode, ispath, len(matchedItems)))
+    if limit > 0:
+        matchedItems = matchedItems[:limit]
 
-    queue.put({"items": matchedItems, "subitems": items[itemId:], "pat": pat}, timeout=1)
+    queue.put({"items": [i["line"] for i in matchedItems], "subitems": items[itemId:], "pat": pat}, timeout=1)
     logger.debug("Got {number} matched items using {pat}".format(number=len(matchedItems), pat=pat))
+
+def sortItems(crfile, mmode, ispath, total):
+    crdir = os.path.dirname(crfile)
+
+    def cmpFunc(a, b):
+        line1 = a["line"]
+        line2 = b["line"]
+        len1 = len(line1)
+        len2 = len(line2)
+
+        lanesort = 0 if len1 == len2 else 1 if len1 > len2 else -1
+
+        len1 = a["matlen"]
+        len2 = b["matlen"]
+
+        patsort = 0 if len1 == len2 else 1 if len1 > len2 else -1
+
+        if ispath:
+            ms = []
+
+            fnlen = 0
+            mtime = 0
+            pcomp = 0
+
+            if total < 21:
+                len1 = len(os.path.basename(line1))
+                len2 = len(os.path.basename(line2))
+                fnlen = 0 if len1 == len2 else 1 if len1 > len2 else -1
+
+                if mmode == 'full-line':
+                    try:
+                        len1 = os.path.getmtime(line1)
+                        len2 = os.path.getmtime(line2)
+                        mtime = 0 if len1 == len2 else 1 if len1 > len2 else -1
+
+                        dir1 = os.path.dirname(line1)
+                        dir2 = os.path.dirname(line2)
+
+                        if dir1.endswith(crdir) and not dir2.endswith(crdir):
+                            pcomp = -1
+                        elif dir2.endswith(crdir) and not dir1.endswith(crdir):
+                            pcomp = 1
+                        
+                    except OSError:
+                        pass
+
+            ms.extend([fnlen, mtime, pcomp, patsort])
+            mp = [2 if ms[0] else 0]
+            mp.append(1 + (mp[0] if mp[0] else 1) if ms[1] else 0)
+            mp.append(1 + (mp[0] + mp[1] if mp[0] + mp[1] else 1) if ms[2] else 0)
+            mp.append(1 + (mp[0] + mp[1] + mp[2] if mp[0] + mp[1] + mp[2] else 1) if ms[3] else 0)
+
+            return lanesort + reduce(lambda x, y: x + y[0]*y[1], zip(ms, mp), 0)
+        else:
+            return lanesort + patsort * 2
+
+    return cmpFunc
