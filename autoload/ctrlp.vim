@@ -497,7 +497,7 @@ fu! s:MatchedItems(items, pat, limit)
 			\ 'regex':  s:regexp,
 			\ }] : [items, a:pat, a:limit, s:mmode(), s:ispath, exc, s:regexp]
 		call(s:matcher['match'], argms, s:matcher)
-    elsei s:pymatcher && !s:regexp
+    elsei s:pymatcher && s:lazy > 1
         py <<EOPYTHON
 ctrlp.filter(vim.eval('items'), vim.eval('a:pat'), vim.eval('a:limit'),
     vim.eval('s:mmode()'), vim.eval('s:ispath'), vim.eval('exc'), vim.eval('s:regexp'))
@@ -590,12 +590,12 @@ fu! s:Update(str)
 	" Stop if the string's unchanged
 	if str == oldstr && !empty(str) && !exists('s:force')
                 \ && (!has_key(s:matcher, 'force_update') || s:matcher['force_update'] == 1)
-                \ && (!s:pymatcher || s:regexp)
+                \ && (!s:pymatcher || s:lazy < 2)
         retu
     en
 	let s:martcs = &scs && str =~ '\u' ? '\C' : ''
     let pat = str
-    if s:matcher == {} && (!s:pymatcher || s:regexp)
+    if s:matcher == {} && (!s:pymatcher || s:lazy < 2)
         let pat =  s:SplitPattern(str)
     en
 

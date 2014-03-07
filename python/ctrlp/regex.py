@@ -179,9 +179,11 @@ def process_group(pat):
 
                 regex += atom + r')'
             else:
-                regex += '\\' + char
-        elif char == '\\':
-            if pat[index+1] == '}'and incurly:
+                regex += r'\\' + char
+        elif char == r'\\':
+            if len(pat) == index + 1:
+                regex += r'\\'
+            elif pat[index+1] == '}'and incurly:
                 special = False
             else:
                 special = True

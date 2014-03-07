@@ -1,13 +1,23 @@
 from Queue import Empty, Queue
 from threading import Thread
+from ctrlp.regex import from_vim, is_escaped
 
-import logging, re, os, tempfile, vim
+import logging, re, os, tempfile
+
+novim = False
+try:
+    import vim
+except ImportError:
+    novim = True
 
 class CtrlPMatcher:
     def __init__(self, debug=False):
+        if novim:
+            raise ImportError("No module named vim")
+
         self.queue = Queue()
         self.patterns = []
-        self.lastPat = None
+        self.lastpat = None
 
         self.logger = logging.getLogger('ctrlp')
         hdlr = logging.FileHandler(os.path.join(tempfile.gettempdir(), 'ctrlp-py.log'))
@@ -32,10 +42,10 @@ class CtrlPMatcher:
 
         self.process(pat)
 
-        if self.lastPat == pat:
+        if self.lastpat == pat:
             if self.process(pat) and self.queue.qsize() == 0 and not self.thread.isAlive():
                 self.logger.debug("Thread job is processed for {pat}".format(pat=pat))
-                self.lastPat = None
+                self.lastpat = None
             elif self.thread.isAlive() or self.queue.qsize() > 0:
                 self.logger.debug("Waiting for thread job for {pat}".format(pat=pat))
                 self.forceCursorHold()
@@ -44,7 +54,7 @@ class CtrlPMatcher:
         elif pat:
             self.logger.debug("Starting thread for {pat}".format(pat=pat))
             self.patterns.append(pat)
-            self.thread = Thread(target=threadWorker, args=(
+            self.thread = Thread(target=thread_worker, args=(
                 self.queue, items, pat, limit,
                 mmode, ispath, crfile, regexp,
                 vim.eval('&ic'), vim.eval('&scs'), self.logger
@@ -52,7 +62,7 @@ class CtrlPMatcher:
             self.thread.daemon = True
             self.thread.start()
 
-            self.lastPat = pat
+            self.lastpat = pat
             self.forceCursorHold()
 
     def process(self, pat):
@@ -65,7 +75,7 @@ class CtrlPMatcher:
                     index = self.patterns.index(data["pat"])
                     self.patterns = self.patterns[index+1:]
                 else:
-                    self.lastPat = None
+                    self.lastpat = None
                     self.patterns = []
             except ValueError:
                 return False
@@ -87,37 +97,41 @@ class CtrlPMatcher:
         vim.bindeval('function("ctrlp#forcecursorhold")')()
 
 
-def threadWorker(queue, items, pat, limit, mmode, ispath, crfile, regexp, ic, scs, logger):
-    chars =  [re.escape(c) for c in pat]
+def thread_worker(queue, items, pat, limit, mmode, ispath, crfile, regexp, ic, scs, logger):
+    if ispath and mmode == 'filename-only':
+        semi = 0
+        while semi != -1:
+            semi = pat.find(';', semi)
+            if semi != -1 and is_escaped(pat, semi):
+                semi += 1
+            else:
+                break
+    else:
+        semi = -1
+
+    if semi != -1:
+        pats = [pat[:semi], pat[semi+1:]] if pat[semi+1:] else [pat[:semi]]
+    else:
+        pats = [pat]
 
     patterns = []
-    builder = lambda c: c + '[^' + c + ']*?'
-
-    flags = 0
-    if ic:
-        if scs:
-            upper = any(c.isupper() for c in pat)
-            if not upper:
+    if regexp:
+        patterns = [from_vim(p, ignorecase=ic, smartcase=scs) for p in pats]
+    else:
+        if ic:
+            if scs:
+                upper = any(c.isupper() for c in pat)
+                if not upper:
+                    flags = re.I
+            else:
                 flags = re.I
-        else:
-            flags = re.I
 
-    try:
-        if mmode == 'filename-only':
-            delim = chars.index(';')
-            logger.debug("Creating filename patterns")
-            filechars = chars[:delim]
-            dirchars = chars[delim+1:]
-            patterns.append(re.compile(''.join(map(builder, filechars)), flags))
+        for p in pats:
+            chars = [re.escape(c) for c in pat]
+            builder = lambda c: c + '[^' + c + ']*?'
+            flags = 0
 
-            if dirchars:
-                patterns.append(re.compile(''.join(map(builder, dirchars)), flags))
-    except ValueError:
-        pass
-
-    if not len(patterns):
-        patterns.append(re.compile(''.join(map(builder, chars)), flags))
-        logger.debug("Creating normal patterns")
+            patterns.append(re.compile(''.join(map(builder, chars)), flags))
 
     itemId = 0
     matchedItems = []
@@ -148,17 +162,17 @@ def threadWorker(queue, items, pat, limit, mmode, ispath, crfile, regexp, ic, sc
         span = match.span()
         matchedItems.append({"line": item, "matlen": span[1] - span[0]})
 
-    matchedItems = sorted(matchedItems, cmp=sortItems(crfile, mmode, ispath, len(matchedItems)))
+    matchedItems = sorted(matchedItems, cmp=sort_items(crfile, mmode, ispath, len(matchedItems)))
     if limit > 0:
         matchedItems = matchedItems[:limit]
 
     queue.put({"items": [i["line"] for i in matchedItems], "subitems": items[itemId:], "pat": pat}, timeout=1)
     logger.debug("Got {number} matched items using {pat}".format(number=len(matchedItems), pat=pat))
 
-def sortItems(crfile, mmode, ispath, total):
+def sort_items(crfile, mmode, ispath, total):
     crdir = os.path.dirname(crfile)
 
-    def cmpFunc(a, b):
+    def cmp_func(a, b):
         line1 = a["line"]
         line2 = b["line"]
         len1 = len(line1)
@@ -210,4 +224,4 @@ def sortItems(crfile, mmode, ispath, total):
         else:
             return lanesort + patsort * 2
 
-    return cmpFunc
+    return cmp_func
