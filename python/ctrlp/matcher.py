@@ -119,6 +119,7 @@ def thread_worker(queue, items, pat, limit, mmode, ispath, crfile, regexp, ic, s
         patterns = [from_vim(p, ignorecase=ic, smartcase=scs) for p in pats]
     else:
         logger.debug("Fuzzy matching")
+        flags = 0
         if ic:
             if scs:
                 upper = any(c.isupper() for c in pat)
@@ -130,7 +131,6 @@ def thread_worker(queue, items, pat, limit, mmode, ispath, crfile, regexp, ic, s
         for p in pats:
             chars = [re.escape(c) for c in pat]
             builder = lambda c: c + '[^' + c + ']*?'
-            flags = 0
 
             patterns.append(re.compile(''.join(map(builder, chars)), flags))
 
