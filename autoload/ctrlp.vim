@@ -2302,9 +2302,9 @@ fu! ctrlp#process(lines, pat, split, subitems)
 endf
 
 fu! ctrlp#forcecursorhold()
-    if s:prompt[0]
+    if len(s:prompt[0])
         cal feedkeys("\<left>\<right>")
-    elsei s:prompt[2]
+    elsei len(s:prompt[2])
         cal feedkeys("\<right>\<left>")
     el
         cal feedkeys("\<right>")
