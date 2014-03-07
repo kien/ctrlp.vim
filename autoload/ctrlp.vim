@@ -499,8 +499,10 @@ fu! s:MatchedItems(items, pat, limit)
 		call(s:matcher['match'], argms, s:matcher)
     elsei s:pymatcher && s:lazy > 1
         py <<EOPYTHON
-ctrlp.filter(vim.eval('items'), vim.eval('a:pat'), vim.eval('a:limit'),
-    vim.eval('s:mmode()'), vim.eval('s:ispath'), vim.eval('exc'), vim.eval('s:regexp'))
+ctrlp.filter(vim.bindeval('items'), vim.bindeval('a:pat'),
+    vim.bindeval('a:limit'), vim.bindeval('s:mmode()'),
+    vim.bindeval('s:ispath'), vim.bindeval('exc'),
+    vim.bindeval('s:regexp'))
 EOPYTHON
 	el
 		cal s:MatchIt(items, a:pat, a:limit, exc)

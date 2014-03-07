@@ -29,7 +29,6 @@ class CtrlPMatcher:
             self.logger.setLevel(logging.DEBUG)
 
     def filter(self, items, pat, limit, mmode, ispath, crfile, regexp):
-        limit = int(limit) if limit else None
         if not pat:
             self.logger.debug("No pattern, returning original items")
             self.queue.put({"items": items[:limit], "subitems": items[limit-1:], "pat": ""}, timeout=1)
@@ -57,7 +56,7 @@ class CtrlPMatcher:
             self.thread = Thread(target=thread_worker, args=(
                 self.queue, items, pat, limit,
                 mmode, ispath, crfile, regexp,
-                vim.eval('&ic'), vim.eval('&scs'), self.logger
+                vim.bindeval('&ic'), vim.bindeval('&scs'), self.logger
             ))
             self.thread.daemon = True
             self.thread.start()
@@ -116,8 +115,10 @@ def thread_worker(queue, items, pat, limit, mmode, ispath, crfile, regexp, ic, s
 
     patterns = []
     if regexp:
+        logger.debug("Regex matching")
         patterns = [from_vim(p, ignorecase=ic, smartcase=scs) for p in pats]
     else:
+        logger.debug("Fuzzy matching")
         if ic:
             if scs:
                 upper = any(c.isupper() for c in pat)
