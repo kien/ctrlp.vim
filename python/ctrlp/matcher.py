@@ -129,7 +129,7 @@ def thread_worker(queue, items, pat, limit, mmode, ispath, crfile, regexp, ic, s
                 flags = re.I
 
         for p in pats:
-            chars = [re.escape(c) for c in pat]
+            chars = [re.escape(c) for c in p]
             builder = lambda c: c + '[^' + c + ']*?'
 
             patterns.append(re.compile(''.join(map(builder, chars)), flags))
