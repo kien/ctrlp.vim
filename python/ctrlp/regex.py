@@ -6,6 +6,8 @@ def from_vim(pat, ignorecase=False, smartcase=False):
 
     >>> from_vim('\w\+').pattern == '\w+'
     True
+    >>> from_vim('foo\\').pattern == r'foo\\'
+    True
     >>> from_vim('\w\+').flags
     0
     >>> from_vim('\c\w\+').flags
@@ -179,8 +181,8 @@ def process_group(pat):
 
                 regex += atom + r')'
             else:
-                regex += r'\\' + char
-        elif char == r'\\':
+                regex += '\\' + char
+        elif char == '\\':
             if len(pat) == index + 1:
                 regex += r'\\'
             elif pat[index+1] == '}'and incurly:
