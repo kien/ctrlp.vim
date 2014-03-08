@@ -142,6 +142,7 @@ let [s:lcmap, s:prtmaps] = ['nn <buffer> <silent>', {
 	\ 'MarkToOpen()':         ['<c-z>'],
 	\ 'OpenMulti()':          ['<c-o>'],
 	\ 'PrtExit()':            ['<esc>', '<c-c>', '<c-g>'],
+	\ 'PrtNoop()':            ['<c-/>'],
 	\ }]
 
 let s:scriptpath = expand('<sfile>:p:h')
@@ -856,6 +857,9 @@ fu! s:PrtExit()
 		noa cal s:Close()
 		noa winc p
 	en
+endf
+
+fu! s:PrtNoop()
 endf
 
 fu! s:PrtHistory(...)
@@ -2303,13 +2307,7 @@ fu! ctrlp#process(lines, pat, split, subitems)
 endf
 
 fu! ctrlp#forcecursorhold()
-    if len(s:prompt[0])
-        cal feedkeys("\<left>\<right>")
-    elsei len(s:prompt[2])
-        cal feedkeys("\<right>\<left>")
-    el
-        cal feedkeys("\<right>")
-    en
+    cal feedkeys("\<c-/>")
 endf
 
 " - Autocmds {{{1
