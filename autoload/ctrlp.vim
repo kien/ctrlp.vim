@@ -1929,7 +1929,8 @@ fu! s:modevar()
 endf
 
 fu! s:nosort()
-	retu s:matcher != {} || s:nolim == 1 || ( s:itemtype == 2 && s:mrudef )
+	retu s:matcher != {} || (s:pymatcher && s:lazy > 1)
+        \ || s:nolim == 1 || ( s:itemtype == 2 && s:mrudef )
 		\ || ( s:itemtype =~ '\v^(1|2)$' && s:prompt == ['', '', ''] ) || !s:dosort
 endf
 
