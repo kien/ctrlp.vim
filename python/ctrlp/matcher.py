@@ -53,9 +53,13 @@ class CtrlPMatcher:
         elif pat:
             self.logger.debug("Starting thread for {pat}".format(pat=pat))
             self.patterns.append(pat)
+
+            mru = vim.bindeval('ctrlp#mrufiles#list()')
+            mru = list(mru)[:50] if isinstance(mru, vim.List) else []
+
             self.thread = Thread(target=thread_worker, args=(
                 self.queue, items, pat, limit,
-                mmode, ispath, crfile, regexp,
+                mmode, ispath, crfile, regexp, mru,
                 vim.bindeval('&ic'), vim.bindeval('&scs'), self.logger
             ))
             self.thread.daemon = True
@@ -96,7 +100,7 @@ class CtrlPMatcher:
         vim.bindeval('function("ctrlp#forcecursorhold")')()
 
 
-def thread_worker(queue, items, pat, limit, mmode, ispath, crfile, regexp, ic, scs, logger):
+def thread_worker(queue, items, pat, limit, mmode, ispath, crfile, regexp, mru, ic, scs, logger):
     if ispath and mmode == 'filename-only':
         semi = 0
         while semi != -1:
@@ -163,14 +167,20 @@ def thread_worker(queue, items, pat, limit, mmode, ispath, crfile, regexp, ic, s
         span = match.span()
         matchedItems.append({"line": item, "matlen": span[1] - span[0]})
 
-    matchedItems = sorted(matchedItems, cmp=sort_items(crfile, mmode, ispath, len(matchedItems)))
+    mrudict = {}
+    index = 0
+    for f in mru:
+        mrudict[f] = index
+        index += 1
+
+    matchedItems = sorted(matchedItems, cmp=sort_items(crfile, mmode, ispath, mrudict, len(matchedItems)))
     if limit > 0:
         matchedItems = matchedItems[:limit]
 
     queue.put({"items": [i["line"] for i in matchedItems], "subitems": items[itemId:], "pat": pat}, timeout=1)
     logger.debug("Got {number} matched items using {pat}".format(number=len(matchedItems), pat=pat))
 
-def sort_items(crfile, mmode, ispath, total):
+def sort_items(crfile, mmode, ispath, mrudict, total):
     crdir = os.path.dirname(crfile)
 
     def cmp_func(a, b):
@@ -211,15 +221,24 @@ def sort_items(crfile, mmode, ispath, total):
                             pcomp = -1
                         elif dir2.endswith(crdir) and not dir1.endswith(crdir):
                             pcomp = 1
-                        
+
                     except OSError:
                         pass
 
-            ms.extend([fnlen, mtime, pcomp, patsort])
+            mrucomp = 0
+            if mrudict:
+                len1 = mrudict.get(line1, -1)
+                len2 = mrudict.get(line2, -1)
+
+                mrucomp = 0 if len1 == len2 else 1 if len1 == -1 else -1 if len2 == -1 \
+                        else 1 if len1 > len2 else -1
+
+            ms.extend([fnlen, mtime, pcomp, patsort, mrucomp])
             mp = [2 if ms[0] else 0]
             mp.append(1 + (mp[0] if mp[0] else 1) if ms[1] else 0)
             mp.append(1 + (mp[0] + mp[1] if mp[0] + mp[1] else 1) if ms[2] else 0)
             mp.append(1 + (mp[0] + mp[1] + mp[2] if mp[0] + mp[1] + mp[2] else 1) if ms[3] else 0)
+            mp.append(1 + (mp[0] + mp[1] + mp[2] + mp[3] if mp[0] + mp[1] + mp[2] + mp[3] else 1) if ms[4] else 0)
 
             return lanesort + reduce(lambda x, y: x + y[0]*y[1], zip(ms, mp), 0)
         else:
