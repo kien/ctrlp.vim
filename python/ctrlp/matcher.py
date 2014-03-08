@@ -17,8 +17,11 @@ class CtrlPMatcher:
 
         self.queue = Queue()
         self.patterns = []
-        self.lastpat = None
         self.thread = None
+
+        self.lastpat = None
+        self.lastmmode = None
+        self.lastispath = None
 
         self.logger = logging.getLogger('ctrlp')
         hdlr = logging.FileHandler(os.path.join(tempfile.gettempdir(), 'ctrlp-py.log'))
@@ -42,7 +45,7 @@ class CtrlPMatcher:
 
         self.process(pat)
 
-        if self.lastpat == pat:
+        if self.lastpat == pat and self.lastmmode == mmode and self.lastispath == ispath:
             if self.process(pat) and self.queue.qsize() == 0 and not self.thread.isAlive():
                 self.logger.debug("Thread job is processed for {pat}".format(pat=pat))
                 self.lastpat = None
@@ -67,6 +70,8 @@ class CtrlPMatcher:
             self.thread.start()
 
             self.lastpat = pat
+            self.lastmmode = mmode
+            self.lastispath = ispath
 
             self.forceCursorHold()
 
