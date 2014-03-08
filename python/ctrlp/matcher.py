@@ -18,6 +18,7 @@ class CtrlPMatcher:
         self.queue = Queue()
         self.patterns = []
         self.lastpat = None
+        self.thread = None
 
         self.logger = logging.getLogger('ctrlp')
         hdlr = logging.FileHandler(os.path.join(tempfile.gettempdir(), 'ctrlp-py.log'))
@@ -66,35 +67,52 @@ class CtrlPMatcher:
             self.thread.start()
 
             self.lastpat = pat
+
             self.forceCursorHold()
 
     def process(self, pat):
-        try:
-            data = self.queue.get(False)
-            self.queue.task_done()
-
+        queue = []
+        while True:
             try:
-                if data["pat"]:
-                    index = self.patterns.index(data["pat"])
-                    self.patterns = self.patterns[index+1:]
-                else:
-                    self.lastpat = None
-                    self.patterns = []
-            except ValueError:
-                return False
+                queue.append(self.queue.get(False))
+                self.queue.task_done()
+            except Empty:
+                break
 
-            callback = vim.bindeval('function("ctrlp#process")')
-            lines = vim.List(data["items"])
-            subitems = vim.List(data["subitems"])
-
-            callback(lines, pat, 1, subitems)
-
-            if data["pat"] == pat:
-                self.queue = Queue()
-
-            return True
-        except Empty:
+        if not queue:
+            self.logger.debug("Empty queue")
             return False
+
+        data = None
+
+        for d in queue:
+            if d["pat"]:
+                try:
+                    index = self.patterns.index(d["pat"])
+                    self.patterns = self.patterns[index+1:]
+                    data = d
+                except ValueError:
+                    continue
+            else:
+                data = d
+                self.lastpat = None
+                self.patterns = []
+                break
+
+        if not data:
+            self.logger.debug("No valid data entry")
+            return False
+
+        callback = vim.bindeval('function("ctrlp#process")')
+        lines = vim.List(data["items"])
+        subitems = vim.List(data["subitems"])
+
+        callback(lines, pat, 1, subitems)
+
+        if data["pat"] == pat:
+            self.queue = Queue()
+
+        return True
 
     def forceCursorHold(self):
         vim.bindeval('function("ctrlp#forcecursorhold")')()
@@ -139,6 +157,7 @@ def thread_worker(queue, items, pat, limit, mmode, ispath, crfile, regexp, mru, 
             patterns.append(re.compile(''.join(map(builder, chars)), flags))
 
     itemId = 0
+    index = 0
     matchedItems = []
     logger.debug("Matching against {number} items using {pat}".format(number=len(items), pat=pat))
     for item in items:
@@ -166,6 +185,11 @@ def thread_worker(queue, items, pat, limit, mmode, ispath, crfile, regexp, mru, 
 
         span = match.span()
         matchedItems.append({"line": item, "matlen": span[1] - span[0]})
+
+        if limit and index >= limit * 3:
+            break
+
+        index += 1
 
     mrudict = {}
     index = 0
