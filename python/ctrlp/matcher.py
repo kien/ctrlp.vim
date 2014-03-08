@@ -155,9 +155,9 @@ def thread_worker(queue, items, pat, limit, mmode, ispath, crfile, regexp, mru, 
             if len(patterns) == 2 and match is not None:
                 match = patterns[1].search(dirname)
         elif mmode == 'first-non-tab':
-            match = patterns[1].search(re.split('\t+', item)[0])
+            match = patterns[0].search(re.split('\t+', item)[0])
         elif mmode == 'until-last-tab':
-            match = patterns[1].search(re.split('\t+[^\t]+$', item)[0])
+            match = patterns[0].search(re.split('\t+[^\t]+$', item)[0])
         else:
             match = patterns[0].search(item)
 
