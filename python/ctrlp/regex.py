@@ -8,6 +8,24 @@ def from_vim(pat, ignorecase=False, smartcase=False):
     True
     >>> from_vim('foo\\').pattern == r'foo\\'
     True
+    >>> from_vim('foo\(').pattern == r'foo\('
+    True
+    >>> from_vim('foo(').pattern == r'foo\('
+    True
+    >>> from_vim('foo\[').pattern == r'foo\['
+    True
+    >>> from_vim('foo[').pattern == r'foo\['
+    True
+    >>> from_vim('foo\(a').pattern == r'foo\(a'
+    True
+    >>> from_vim('foo(a').pattern == r'foo\(a'
+    True
+    >>> from_vim('foo\[a').pattern == r'foo\[a'
+    True
+    >>> from_vim('foo[a').pattern == r'foo\[a'
+    True
+    >>> from_vim('\zsfoo\ze').pattern == r'foo'
+    True
     >>> from_vim('\w\+').flags
     0
     >>> from_vim('\c\w\+').flags
@@ -67,6 +85,30 @@ def from_vim(pat, ignorecase=False, smartcase=False):
     >>> from_vim(r'\%(foo\)\@<!').pattern == r'(?<!foo)'
     True
     >>> from_vim(r'[a-z]').pattern == r'[a-z]'
+    True
+    >>> from_vim(r'\x').pattern == r'[0-9A-Fa-f]'
+    True
+    >>> from_vim(r'\X').pattern == r'[^0-9A-Fa-f]'
+    True
+    >>> from_vim(r'\o').pattern == r'[0-7]'
+    True
+    >>> from_vim(r'\O').pattern == r'[^0-7]'
+    True
+    >>> from_vim(r'\h').pattern == r'[A-Za-z_]'
+    True
+    >>> from_vim(r'\H').pattern == r'[^A-Za-z_]'
+    True
+    >>> from_vim(r'\a').pattern == r'[A-Za-z]'
+    True
+    >>> from_vim(r'\A').pattern == r'[^A-Za-z]'
+    True
+    >>> from_vim(r'\l').pattern == r'[a-z]'
+    True
+    >>> from_vim(r'\L').pattern == r'[^a-z]'
+    True
+    >>> from_vim(r'\u').pattern == r'[A-Z]'
+    True
+    >>> from_vim(r'\U').pattern == r'[^A-Z]'
     True
     """
 
@@ -143,23 +185,26 @@ def process_group(pat):
             elif char == r'(':
                 closing = find_matching(pat, index, r'\(', r'\)')
 
-                regex += r'('
-                if pat[closing+2:closing+5] == r'\@=':
-                    regex += r'?='
-                    skip.update(skip.fromkeys([closing+2, closing+3, closing+4], True))
-                elif pat[closing+2:closing+5] == r'\@!':
-                    regex += r'?!'
-                    skip.update(skip.fromkeys([closing+2, closing+3, closing+4], True))
-                elif pat[closing+2:closing+6] == r'\@<=':
-                    regex += r'?<='
-                    skip.update(skip.fromkeys([closing+2, closing+3, closing+4, closing+5], True))
-                elif pat[closing+2:closing+6] == r'\@<!':
-                    regex += r'?<!'
-                    skip.update(skip.fromkeys([closing+2, closing+3, closing+4, closing+5], True))
-                elif nomemory:
-                    regex += r'?:'
+                if closing == -1:
+                    regex += r'\('
+                else:
+                    regex += r'('
+                    if pat[closing+2:closing+5] == r'\@=':
+                        regex += r'?='
+                        skip.update(skip.fromkeys([closing+2, closing+3, closing+4], True))
+                    elif pat[closing+2:closing+5] == r'\@!':
+                        regex += r'?!'
+                        skip.update(skip.fromkeys([closing+2, closing+3, closing+4], True))
+                    elif pat[closing+2:closing+6] == r'\@<=':
+                        regex += r'?<='
+                        skip.update(skip.fromkeys([closing+2, closing+3, closing+4, closing+5], True))
+                    elif pat[closing+2:closing+6] == r'\@<!':
+                        regex += r'?<!'
+                        skip.update(skip.fromkeys([closing+2, closing+3, closing+4, closing+5], True))
+                    elif nomemory:
+                        regex += r'?:'
 
-                nomemory = False
+                    nomemory = False
             elif char == r')':
                 regex += r')'
             elif char == r'@' and (pat[index+1] == '=' or pat[index+1] == '!' or pat[index+1] == '<'):
@@ -180,6 +225,32 @@ def process_group(pat):
                     skip.update(skip.fromkeys([index+1, index+2], True))
 
                 regex += atom + r')'
+            elif char == 'z' and (pat[index+1] == 's' or pat[index+1] == 'e'):
+                skip[index+1] = True
+            elif char == 'x':
+                regex += r'[0-9A-Fa-f]'
+            elif char == 'X':
+                regex += r'[^0-9A-Fa-f]'
+            elif char == 'o':
+                regex += r'[0-7]'
+            elif char == 'O':
+                regex += r'[^0-7]'
+            elif char == 'h':
+                regex += r'[A-Za-z_]'
+            elif char == 'H':
+                regex += r'[^A-Za-z_]'
+            elif char == 'a':
+                regex += r'[A-Za-z]'
+            elif char == 'A':
+                regex += r'[^A-Za-z]'
+            elif char == 'l':
+                regex += r'[a-z]'
+            elif char == 'L':
+                regex += r'[^a-z]'
+            elif char == 'u':
+                regex += r'[A-Z]'
+            elif char == 'U':
+                regex += r'[^A-Z]'
             else:
                 regex += '\\' + char
         elif char == '\\':
@@ -203,6 +274,12 @@ def process_group(pat):
                 regex += r'\('
             elif char == r')':
                 regex += r'\)'
+            elif char == r'[':
+                closing = find_matching(pat, index, '[', ']')
+                if closing == -1:
+                    regex += r'\['
+                else:
+                    regex += char
             else:
                 regex += char
 
@@ -228,6 +305,8 @@ def find_matching(string, start, opening, closing):
     28
     >>> find_matching(r"foo \( bar \\) inner 1 after \) alpha", 5, "\(", "\)")
     29
+    >>> find_matching(r"foo \( bar ", 5, "\(", "\)")
+    -1
     """
 
     cursor = end = start - len(opening)
@@ -248,7 +327,7 @@ def find_matching(string, start, opening, closing):
                 break
 
         if not start:
-            start = cursos
+            start = cursor
 
         if end < 0:
             end = string.rfind(closing)
