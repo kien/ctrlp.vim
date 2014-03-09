@@ -22,6 +22,7 @@ class CtrlPMatcher:
         self.lastpat = None
         self.lastmmode = None
         self.lastispath = None
+        self.lastregexp = None
 
         self.logger = logging.getLogger('ctrlp')
         hdlr = logging.FileHandler(os.path.join(tempfile.gettempdir(), 'ctrlp-py.log'))
@@ -45,7 +46,8 @@ class CtrlPMatcher:
 
         self.process(pat)
 
-        if self.lastpat == pat and self.lastmmode == mmode and self.lastispath == ispath:
+        if self.lastpat == pat and self.lastmmode == mmode \
+                and self.lastispath == ispath and self.lastregexp == regexp:
             if self.process(pat) and self.queue.qsize() == 0 and not self.thread.isAlive():
                 self.logger.debug("Thread job is processed for {pat}".format(pat=pat))
                 self.lastpat = None
@@ -72,6 +74,7 @@ class CtrlPMatcher:
             self.lastpat = pat
             self.lastmmode = mmode
             self.lastispath = ispath
+            self.lastregexp = regexp
 
             self.forceCursorHold()
 
@@ -161,40 +164,80 @@ def thread_worker(queue, items, pat, limit, mmode, ispath, crfile, regexp, mru, 
 
             patterns.append(re.compile(''.join(map(builder, chars)), flags))
 
-    itemId = 0
-    index = 0
+    fileId = 0
+    count = 0
+    index = -1
     matchedItems = []
+    skip = {}
+
     logger.debug("Matching against {number} items using {pat}".format(number=len(items), pat=pat))
-    for item in items:
-        itemId += 1
-        if ispath and item == crfile:
-            continue
 
-        if mmode == 'filename-only':
-            dirname = os.path.dirname(item)
+    if ispath and (mmode == 'filename-only' or mmode == 'full-line'):
+        for item in items:
+            index += 1
+            fileId += 1
+
+            if item == crfile:
+                continue
+
             basename = os.path.basename(item)
+            span = ()
+            match = None
 
-            match = patterns[0].search(basename)
+            if mmode == 'filename-only':
+                match = patterns[0].search(basename)
+                if match:
+                    span = match.span()
 
-            if len(patterns) == 2 and match is not None:
-                match = patterns[1].search(dirname)
-        elif mmode == 'first-non-tab':
-            match = patterns[0].search(re.split('\t+', item)[0])
-        elif mmode == 'until-last-tab':
-            match = patterns[0].search(re.split('\t+[^\t]+$', item)[0])
-        else:
-            match = patterns[0].search(item)
+                    if len(patterns) == 2:
+                        dirname = os.path.dirname(item)
+                        match = patterns[1].search(dirname)
 
-        if match is None:
-            continue
+            elif mmode == 'full-line':
+                match = patterns[0].search(basename)
 
-        span = match.span()
-        matchedItems.append({"line": item, "matlen": span[1] - span[0]})
+            if not match:
+                continue
 
-        if limit and index >= limit * 3:
-            break
+            if not span:
+                span = match.span()
 
-        index += 1
+            matchedItems.append({"line": item, "matlen": span[1] - span[0]})
+            skip[index] = True
+
+            if limit and count >= limit:
+                break
+
+            count += 1
+
+    index = -1
+    itemId = 0
+
+    if count < limit - 1 and (not ispath or mmode != 'filename-only'):
+        for item in items:
+            index += 1
+            itemId += 1
+
+            if skip.get(index, False) or ispath and item == crfile:
+                continue
+
+            if mmode == 'first-non-tab':
+                match = patterns[0].search(re.split('\t+', item)[0])
+            elif mmode == 'until-last-tab':
+                match = patterns[0].search(re.split('\t+[^\t]+$', item)[0])
+            else:
+                match = patterns[0].search(item)
+
+            if match is None:
+                continue
+
+            span = match.span()
+            matchedItems.append({"line": item, "matlen": span[1] - span[0]})
+
+            if limit and count >= limit:
+                break
+
+            count += 1
 
     mrudict = {}
     index = 0
@@ -202,11 +245,17 @@ def thread_worker(queue, items, pat, limit, mmode, ispath, crfile, regexp, mru, 
         mrudict[f] = index
         index += 1
 
-    matchedItems = sorted(matchedItems, cmp=sort_items(crfile, mmode, ispath, mrudict, len(matchedItems)))
-    if limit > 0:
+    matchedItems = sorted(matchedItems, cmp=sort_items(crfile, mmode, ispath,
+        mrudict, len(matchedItems)))
+
+    if limit:
         matchedItems = matchedItems[:limit]
 
-    queue.put({"items": [i["line"] for i in matchedItems], "subitems": items[itemId:], "pat": pat}, timeout=1)
+    queue.put({
+        "items": [i["line"] for i in matchedItems],
+        "subitems": items[itemId if itemId > fileId else fileId:],
+        "pat": pat
+    }, timeout=1)
     logger.debug("Got {number} matched items using {pat}".format(number=len(matchedItems), pat=pat))
 
 def sort_items(crfile, mmode, ispath, mrudict, total):

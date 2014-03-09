@@ -142,12 +142,9 @@ def process_group(pat):
     skip = {}
 
     for char in pat:
-        try:
-            if skip[index]:
-                index += 1
-                continue
-        except KeyError:
-            pass
+        if skip.get(index, False):
+            index += 1
+            continue
 
         if special:
             special = False
