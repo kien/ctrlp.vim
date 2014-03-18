@@ -36,7 +36,7 @@ class CtrlPMatcher:
     def filter(self, items, pat, limit, mmode, ispath, crfile, regexp):
         if not pat:
             self.logger.debug("No pattern, returning original items")
-            self.queue.put({"items": items[:limit], "subitems": items[limit-1:], "pat": ""}, timeout=1)
+            self.queue.put(self.initialList(items, limit, ispath, crfile), timeout=1)
 
             self.process(pat)
 
@@ -125,6 +125,46 @@ class CtrlPMatcher:
     def forceCursorHold(self):
         vim.bindeval('function("ctrlp#forcecursorhold")')()
 
+    def initialList(self, items, limit, ispath, crfile):
+        mru = None
+        if ispath:
+            mru = vim.bindeval('ctrlp#mrufiles#list()')
+
+        if isinstance(mru, vim.List) and mru:
+            mrudict = {}
+            mrucount = len(mru)
+            index = 0
+            for f in mru:
+                mrudict[f] = index
+                index += 1
+
+            recentCount = 0
+            restCount = 0
+
+            recent = []
+            rest = []
+            for item in items:
+                if item == crfile:
+                    continue
+
+                if mrudict.get(item, -1) != -1:
+                    recent.append(item)
+                    recentCount += 1
+                    mrucount -= 1
+
+                elif restCount + recentCount < limit:
+                    rest.append(item)
+                    restCount += 1
+
+                if recentCount == limit or not mrucount and restCount + recentCount >= limit:
+                    break
+
+            recent = sorted(recent, cmp=lambda a, b: mrudict.get(a, -1) - mrudict.get(b, -1))
+            return {"items": recent + rest[:limit - restCount], "subitems": items[recentCount-1:], "pat": ""}
+
+        else:
+            return {"items": items[:limit], "subitems": items[limit-1:], "pat": ""}
+
 
 def thread_worker(queue, items, pat, limit, mmode, ispath, crfile, regexp, mru, ic, scs, logger):
     if ispath and mmode == 'filename-only':
@@ -201,6 +241,7 @@ def thread_worker(queue, items, pat, limit, mmode, ispath, crfile, regexp, mru, 
         "pat": pat
     }, timeout=1)
     logger.debug("Got {number} matched items using {pat}".format(number=len(matchedItems), pat=pat))
+
 
 def reducer(items, patterns, limit, mmode, ispath, crfile, matchedItems, count, skip, itemIds):
     index = -1
@@ -280,6 +321,7 @@ def reducer(items, patterns, limit, mmode, ispath, crfile, matchedItems, count, 
             count += 1
 
     return count
+
 
 def sort_items(crfile, mmode, ispath, mrudict, total):
     crdir = os.path.dirname(crfile)
