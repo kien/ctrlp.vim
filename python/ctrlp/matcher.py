@@ -164,20 +164,57 @@ def thread_worker(queue, items, pat, limit, mmode, ispath, crfile, regexp, mru, 
 
             patterns.append(re.compile(''.join(map(builder, chars)), flags))
 
-    fileId = 0
+    index = 0
+    mrudict = {}
+    for f in mru:
+        mrudict[f] = index
+        index += 1
+
+    recent = []
+    if ispath and mrudict:
+        for item in items:
+            recent.append(item if mrudict.has_key(item) else None)
+
     count = 0
-    index = -1
     matchedItems = []
     skip = {}
+    itemIds = [0, 0]
 
     logger.debug("Matching against {number} items using {pat}".format(number=len(items), pat=pat))
 
+    if recent:
+        count = reducer(recent, patterns, limit, mmode, ispath, crfile, matchedItems, count, skip, itemIds)
+
+    if count < limit - 1:
+        count = reducer(items, patterns, limit, mmode, ispath, crfile, matchedItems, count, skip, itemIds)
+
+    matchedItems = matchedItems[:limit]
+    matchedItems = sorted(matchedItems, cmp=sort_items(crfile, mmode, ispath,
+        mrudict, len(matchedItems)))
+
+    if limit:
+        matchedItems = matchedItems[:limit]
+
+    queue.put({
+        "items": [i["line"] for i in matchedItems],
+        "subitems": items[max(itemIds)],
+        "pat": pat
+    }, timeout=1)
+    logger.debug("Got {number} matched items using {pat}".format(number=len(matchedItems), pat=pat))
+
+def reducer(items, patterns, limit, mmode, ispath, crfile, matchedItems, count, skip, itemIds):
+    index = -1
     if ispath and (mmode == 'filename-only' or mmode == 'full-line'):
         for item in items:
             index += 1
-            fileId += 1
 
-            if item == crfile:
+            if item is None:
+                continue
+
+            if itemIds[0] < index:
+                itemIds[0] = index
+
+            if skip.get(index, False) or ispath and item == crfile:
                 continue
 
             basename = os.path.basename(item)
@@ -211,12 +248,15 @@ def thread_worker(queue, items, pat, limit, mmode, ispath, crfile, regexp, mru, 
             count += 1
 
     index = -1
-    itemId = 0
-
     if count < limit - 1 and (not ispath or mmode != 'filename-only'):
         for item in items:
             index += 1
-            itemId += 1
+
+            if item is None:
+                continue
+
+            if itemIds[1] < index:
+                itemIds[1] = index
 
             if skip.get(index, False) or ispath and item == crfile:
                 continue
@@ -239,24 +279,7 @@ def thread_worker(queue, items, pat, limit, mmode, ispath, crfile, regexp, mru, 
 
             count += 1
 
-    mrudict = {}
-    index = 0
-    for f in mru:
-        mrudict[f] = index
-        index += 1
-
-    matchedItems = sorted(matchedItems, cmp=sort_items(crfile, mmode, ispath,
-        mrudict, len(matchedItems)))
-
-    if limit:
-        matchedItems = matchedItems[:limit]
-
-    queue.put({
-        "items": [i["line"] for i in matchedItems],
-        "subitems": items[itemId if itemId > fileId else fileId:],
-        "pat": pat
-    }, timeout=1)
-    logger.debug("Got {number} matched items using {pat}".format(number=len(matchedItems), pat=pat))
+    return count
 
 def sort_items(crfile, mmode, ispath, mrudict, total):
     crdir = os.path.dirname(crfile)
