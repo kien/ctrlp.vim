@@ -83,6 +83,6 @@ Check `:help ctrlp-options` for other options.
 ## Installation
 Use your favorite method or check the homepage for a [quick installation guide][3].
 
-[1]: http://i.imgur.com/yIynr.png
+[1]: http://i.imgur.com/aOcwHwt.png
 [2]: https://github.com/kien/ctrlp.vim/tree/extensions
 [3]: http://kien.github.com/ctrlp.vim#installation
