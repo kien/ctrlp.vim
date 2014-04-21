@@ -181,13 +181,12 @@ variable: >
   let g:ctrlp_working_path_mode = 'ra'
 <
   c - the directory of the current file.
-  a - like "c", but only applies when the current working directory outside of
-      CtrlP isn't a direct ancestor of the directory of the current file.
-  r - the nearest ancestor that contains one of these directories or files:
+  a - the directory of the current file, unless it is a subdirectory of the cwd
+  r - the nearest ancestor of the current file that contains one of these
+      directories or files:
       .git .hg .svn .bzr _darcs
-  w - begin finding a root from the current working directory outside of CtrlP
-      instead of from the directory of the current file (default). Only applies
-      when "r" is also present.
+  w - modifier to "r": start search from the cwd instead of the current file's
+      directory
   0 or <empty> - disable this feature.
 
 Note #1: if "a" or "c" is included with "r", use the behavior of "a" or "c" (as

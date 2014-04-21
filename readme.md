@@ -51,8 +51,9 @@ Use `:diffthis` when opening multiple files to run `:diffthis` on the first 4 fi
     ```
 
     `'c'` - the directory of the current file.  
-    `'r'` - the nearest ancestor that contains one of these directories or files: `.git` `.hg` `.svn` `.bzr` `_darcs`  
-    `'a'` - like c, but only if the current working directory outside of CtrlP is not a direct ancestor of the directory of the current file.  
+    `'a'` - the directory of the current file, unless it is a subdirectory of the cwd  
+    `'r'` - the nearest ancestor of the current file that contains one of these directories or files: `.git` `.hg` `.svn` `.bzr` `_darcs`  
+    `'w'` - modifier to "r": start search from the cwd instead of the current file's directory  
     `0` or `''` (empty string) - disable this feature.
 
     Define additional root markers with the `g:ctrlp_root_markers` option.
