@@ -2206,6 +2206,10 @@ fu! ctrlp#getmarkedlist()
 	retu exists('s:marked') ? values(s:marked) : []
 endf
 
+fu! ctrlp#clearmarkedlist()
+  let s:marked = {}
+endf
+
 fu! ctrlp#exit()
 	cal s:PrtExit()
 endf
