@@ -968,7 +968,7 @@ fu! s:SetWD(args)
 		cal ctrlp#setdir(s:crfpath)
 	en
 	if pmode =~ 'r' || pmode == 2
-		let markers = ['.git', '.hg', '.svn', '.bzr', '_darcs']
+		let markers = ['.git', '.hg', '.svn', '.bzr', '_darcs', '.p4rc']
 		let spath = pmode =~ 'd' ? s:dyncwd : pmode =~ 'w' ? s:cwd : s:crfpath
 		if type(s:rmarkers) == 3 && !empty(s:rmarkers)
 			if s:findroot(spath, s:rmarkers, 0, 0) != [] | retu | en
