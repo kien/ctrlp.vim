@@ -58,6 +58,7 @@ let [s:pref, s:bpref, s:opts, s:new_opts, s:lc_opts] =
 	\ 'buffer_func':           ['s:buffunc', {}],
 	\ 'by_filename':           ['s:byfname', 0],
 	\ 'custom_ignore':         ['s:usrign', s:ignore()],
+	\ 'custom_ancestors':      ['s:custom_markers', []],
 	\ 'default_input':         ['s:deftxt', 0],
 	\ 'dont_split':            ['s:nosplit', 'netrw'],
 	\ 'dotfiles':              ['s:showhidden', 0],
@@ -968,7 +969,7 @@ fu! s:SetWD(args)
 		cal ctrlp#setdir(s:crfpath)
 	en
 	if pmode =~ 'r' || pmode == 2
-		let markers = ['.git', '.hg', '.svn', '.bzr', '_darcs']
+		let markers = ['.git', '.hg', '.svn', '.bzr', '_darcs'] + s:custom_markers
 		let spath = pmode =~ 'd' ? s:dyncwd : pmode =~ 'w' ? s:cwd : s:crfpath
 		if type(s:rmarkers) == 3 && !empty(s:rmarkers)
 			if s:findroot(spath, s:rmarkers, 0, 0) != [] | retu | en
