@@ -84,5 +84,5 @@ Check `:help ctrlp-options` for other options.
 Use your favorite method or check the homepage for a [quick installation guide][3].
 
 [1]: http://i.imgur.com/aOcwHwt.png
-[2]: https://github.com/kien/ctrlp.vim/tree/extensions
-[3]: http://kien.github.com/ctrlp.vim#installation
+[2]: https://github.com/ctrlpvim/ctrlp.vim/tree/extensions
+[3]: http://ctrlpvim.github.com/ctrlp.vim#installation
