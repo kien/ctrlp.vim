@@ -87,7 +87,6 @@ let [s:pref, s:bpref, s:opts, s:new_opts, s:lc_opts] =
 	\ 'status_func':           ['s:status', {}],
 	\ 'tabpage_position':      ['s:tabpage', 'ac'],
 	\ 'use_caching':           ['s:caching', 1],
-	\ 'use_migemo':            ['s:migemo', 0],
 	\ 'user_command':          ['s:usrcmd', ''],
 	\ 'working_path_mode':     ['s:pathmode', 'ra'],
 	\ }, {
@@ -499,9 +498,6 @@ endf
 
 fu! s:SplitPattern(str)
 	let str = a:str
-	if s:migemo && s:regexp && len(str) > 0 && executable('cmigemo')
-		let str = s:migemo(str)
-	en
 	let s:savestr = str
 	if s:regexp
 		let pat = s:regexfilter(str)
@@ -1946,22 +1942,6 @@ fu! s:getinput(...)
 		en
 	en
 	retu spi == 'c' ? prt[0] : join(prt, '')
-endf
-
-fu! s:migemo(str)
-	let [str, rtp] = [a:str, s:fnesc(&rtp, 'g')]
-	let dict = s:glbpath(rtp, printf("dict/%s/migemo-dict", &enc), 1)
-	if !len(dict)
-		let dict = s:glbpath(rtp, "dict/migemo-dict", 1)
-	en
-	if len(dict)
-		let [tokens, str, cmd] = [split(str, '\s'), '', 'cmigemo -v -w %s -d %s']
-		for token in tokens
-			let rtn = system(printf(cmd, shellescape(token), shellescape(dict)))
-			let str .= !v:shell_error && strlen(rtn) > 0 ? '.*'.rtn : token
-		endfo
-	en
-	retu str
 endf
 
 fu! s:strwidth(str)
