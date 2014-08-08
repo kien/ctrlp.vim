@@ -55,8 +55,13 @@ Use `:diffthis` when opening multiple files to run `:diffthis` on the first 4 fi
     `'r'` - use the nearest ancestor of the current file that contains one of these markers: `.git` `.hg` `.svn` `.bzr` `_darcs`
     `0` or `''` (empty string) - use the current working directory outside of CtrlP.
 
+    If none of the default markers (`.git` `.hg` `.svn` `.bzr` `_darcs`) are present in a project, you can define additional ones with `g:ctrlp_root_markers`:
+
+    ```vim
+    let g:ctrlp_root_markers = ['pom.xml', '.p4ignore']
+    ```
+
     If more than one mode is specified, they will be tried in order until a directory is located.
-    Define additional root markers with the `g:ctrlp_root_markers` option.
 
 * Exclude files and directories using Vim's `wildignore` and CtrlP's own `g:ctrlp_custom_ignore`:
 
