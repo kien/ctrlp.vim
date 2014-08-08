@@ -260,6 +260,9 @@ Examples: >
   let g:ctrlp_custom_ignore = {
     \ 'file': '\v(\.cpp|\.h|\.hh|\.cxx)@<!$'
     \ }
+  let g:ctrlp_custom_ignore = {
+    \ 'func': 'some#custom#match_function'
+    \ }
 <
 Note #1: by default, |wildignore| and |g:ctrlp_custom_ignore| only apply when
 |globpath()| is used to scan for files, thus these options do not apply when a
@@ -267,6 +270,12 @@ command defined with |g:ctrlp_user_command| is being used.
 
 Note #2: when changing the option's variable type, remember to |:unlet| it
 first or restart Vim to avoid the "E706: Variable type mismatch" error.
+
+Note #3: when using the "func" ignore type, you must provide the full name of
+a function that can be called from CtrlP. An |autoload| function name is
+recommended here. The function must take 2 parameters, the item to match and
+its type. The type will be "dir", "file", or "link". The function must return
+1 if the item should be ignored, 0 otherwise.
 
                                                           *'g:ctrlp_max_files'*
 The maximum number of files to scan, set to 0 for no limit: >
