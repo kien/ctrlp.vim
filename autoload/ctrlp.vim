@@ -1526,17 +1526,17 @@ fu! ctrlp#dirnfile(entries)
 endf
 
 fu! s:usrign(item, type)
-  if s:igntype == 1 | retu a:item =~ s:usrign | end
-  if s:igntype == 4
-    if has_key(s:usrign, a:type) && s:usrign[a:type] != ''
-          \ && a:item =~ s:usrign[a:type]
-      retu 1
-    elsei has_key(s:usrign, 'func') && s:usrign['func'] != ''
-          \ && call(s:usrign['func'], [a:item, a:type])
-      retur 1
-    end
-  end
-  retu 0
+	if s:igntype == 1 | retu a:item =~ s:usrign | end
+	if s:igntype == 4
+		if has_key(s:usrign, a:type) && s:usrign[a:type] != ''
+					\ && a:item =~ s:usrign[a:type]
+			retu 1
+		elsei has_key(s:usrign, 'func') && s:usrign['func'] != ''
+					\ && call(s:usrign['func'], [a:item, a:type])
+			retur 1
+		end
+	end
+	retu 0
 endf
 
 fu! s:samerootsyml(each, isfile, cwd)
@@ -2210,7 +2210,7 @@ fu! ctrlp#getmarkedlist()
 endf
 
 fu! ctrlp#clearmarkedlist()
-  let s:marked = {}
+	let s:marked = {}
 endf
 
 fu! ctrlp#exit()
