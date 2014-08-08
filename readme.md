@@ -64,7 +64,7 @@ Use `:diffthis` when opening multiple files to run `:diffthis` on the first 4 fi
 
     If more than one mode is specified, they will be tried in order until a directory is located.
 
-* Exclude files and directories using Vim's `wildignore` and CtrlP's own `g:ctrlp_custom_ignore`:
+* Exclude files and directories using Vim's `wildignore` and CtrlP's own `g:ctrlp_custom_ignore`. If a custom listing command is being used, exclusions are ignored:
 
     ```vim
     set wildignore+=*/tmp/*,*.so,*.swp,*.zip     " MacOSX/Linux
