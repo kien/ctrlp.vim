@@ -71,7 +71,6 @@ OPTIONS                                                         *ctrlp-options*
   |ctrlp_default_input|.........为提示符面板提供一个种子。
   |ctrlp_abbrev|................输入缩写。
   |ctrlp_key_loop|..............为多字节输入开启输入事件循环。
-  |ctrlp_use_migemo|............为日语文件名启用Migemo模式。
   |ctrlp_prompt_mappings|.......改变提示符面板内部的按键绑定。
 
   最近最多使用模式:
@@ -477,12 +476,6 @@ OPTIONS                                                         *ctrlp-options*
 
 注意 #2: 你可以在提示符面板使用自定义的按键绑定切换这个特性: >
   let g:ctrlp_prompt_mappings = { 'ToggleKeyLoop()': ['<F3>'] }
-<
-
-                                                         *'g:ctrlp_use_migemo'*
-设置该选项为1将为日文文件名使用Migemo模式。Migemo搜索只在正则模式下有效。 使
-用空格分割单词来分离模式: >
-  let g:ctrlp_use_migemo = 0
 <
 
                                                     *'g:ctrlp_prompt_mappings'*
