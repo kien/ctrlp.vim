@@ -1644,12 +1644,55 @@ fu! s:highlight(pat, grp)
 	if s:matcher != {} | retu | en
 	cal clearmatches()
 	if !empty(a:pat) && s:ispath
-		let pat = s:regexp ? substitute(a:pat, '\\\@<!\^', '^> \\zs', 'g') : a:pat
-		if s:byfname
-			let pat = substitute(pat, '\[\^\(.\{-}\)\]\\{-}', '[^\\/\1]\\{-}', 'g')
-			let pat = substitute(pat, '\$\@<!$', '\\ze[^\\/]*$', 'g')
+		if s:regexp
+			let pat = substitute(a:pat, '\\\@<!\^', '^> \\zs', 'g')
+			cal matchadd(a:grp, ( s:martcs == '' ? '\c' : '\C' ).pat)
+		el
+			let pat = a:pat
+
+			" get original characters so we can rebuild pat
+			let chars = split(pat, '\[\^\\\?.\]\\{-}')
+
+			" Build a pattern like /a.*b.*c/ from abc (but with .\{-} non-greedy
+			" matchers instead)
+			let pat = join(chars, '.\{-}')
+			" Ensure we match the last version of our pattern
+			let ending = '\(.*'.pat.'\)\@!'
+			" Case sensitive?
+			let beginning = ( s:martcs == '' ? '\c' : '\C' ).'^.*'
+			if s:byfname
+				" Make sure there are no slashes in our match
+				let beginning = beginning.'\([^\/]*$\)\@='
+			end
+
+			for i in range(len(chars))
+				" Surround our current target letter with \zs and \ze so it only
+				" actually matches that one letter, but has all preceding and trailing
+				" letters as well.
+				" \zsa.*b.*c
+				" a\(\zsb\|.*\zsb)\ze.*c
+				let charcopy = copy(chars)
+				if i == 0
+					let charcopy[i] = '\zs'.charcopy[i].'\ze'
+					let middle = join(charcopy, '.\{-}')
+				else
+					let before = join(charcopy[0:i-1], '.\{-}')
+					let after = join(charcopy[i+1:-1], '.\{-}')
+					let c = charcopy[i]
+					" for abc, match either ab.\{-}c or a.*b.\{-}c in that order
+					let cpat = '\(\zs'.c.'\|'.'.*\zs'.c.'\)\ze.*'
+					let middle = before.cpat.after
+				endif
+
+				" Now we matchadd for each letter, the basic form being:
+				" ^.*\zsx\ze.*$, but with our pattern we built above for the letter,
+				" and a negative lookahead ensuring that we only highlight the last
+				" occurrence of our letters. We also ensure that our matcher is case
+				" insensitive or sensitive depending.
+				cal matchadd(a:grp, beginning.middle.ending)
+			endfor
 		en
-		cal matchadd(a:grp, ( s:martcs == '' ? '\c' : '\C' ).pat)
+
 		cal matchadd('CtrlPLinePre', '^>')
 	en
 endf
