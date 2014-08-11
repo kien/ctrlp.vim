@@ -186,12 +186,10 @@ OPTIONS                                                         *ctrlp-options*
   let g:ctrlp_working_path_mode = 'ra'
 <
   c - 当前文件所在的目录。
-  a - 类似 "c", 但是只有在CtrlP之外的当前工作目录不是当前文件所在目录的直接祖
-      先时才生效。(译注：请参考https://github.com/kien/ctrlp.vim/issues/397)
-  r - 包含下列文件或者目录的最近的祖先:
+  a - 当前文件所在的目录，除非这个目录为当前工作目录的子目录
+  r - 包含下列文件或者目录的最近的祖先目录:
       .git .hg .svn .bzr _darcs
-  w - 开始从CtrlP的工作目录之外的目录，而不是当前文件所在的目录（默认）查找根
-      目录。只有在"r"选项存在的时候才生效。
+  w - 用来修饰r：使用当前工作目录而不是当前文件所在目录进行查找
   0 或者 <empty> - 禁用这项功能。
 
 注意 #1: 如果 "a" 或者 "c" 和 "r"一起被包含，当无法找到根目录时使用 "a" 或者 
@@ -261,6 +259,9 @@ OPTIONS                                                         *ctrlp-options*
   let g:ctrlp_custom_ignore = {
     \ 'file': '\v(\.cpp|\.h|\.hh|\.cxx)@<!$'
     \ }
+  let g:ctrlp_custom_ignore = {
+    \ 'func': 'some#custom#match_function'
+    \ }
 <
 注意 #1: 默认情况下， |wildignore| 和 |g:ctrlp_custom_ignore| 只在 |globpath()| 被用
 来扫描文件的情况下使用，这样这些选项在那些使用 |g:ctrlp_user_command| 定义的命
@@ -268,6 +269,10 @@ OPTIONS                                                         *ctrlp-options*
 
 注意 #2: 当改变选项的变量类型时，记得先 |:unlet| ，或者重启Vim来避免这个错误：
 "E706: Variable type mismatch" 。
+
+注意 #3: 当使用函数来忽略类型时，你必须提供CtrlP可以调用的函数的全名。建议使用
+自动加载的函数。函数必须接受两个参数，要匹配的条目和接受的类型，类型可以是目
+录、文件和链接。如果条目被忽略，函数需要返回1，反之，返回0。
 
                                                           *'g:ctrlp_max_files'*
 扫描文件的最大数量，设置为0时不进行限制: >
