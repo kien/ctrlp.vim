@@ -343,6 +343,7 @@ fu! ctrlp#files()
 		" Get the list of files
 		if empty(lscmd)
 			if !ctrlp#igncwd(s:dyncwd)
+				cal s:InitCustomFuncs()
 				cal s:GlobPath(s:fnesc(s:dyncwd, 'g', ','), 0)
 			en
 		el
@@ -367,6 +368,12 @@ fu! ctrlp#files()
 	en
 	cal extend(s:ficounts, { s:dyncwd : [len(g:ctrlp_allfiles), catime] })
 	retu g:ctrlp_allfiles
+endf
+
+fu! s:InitCustomFuncs()
+	if has_key(s:usrign, 'func-init') && s:usrign['func-init'] != ''
+		exe call(s:usrign['func-init'], [])
+	en
 endf
 
 fu! s:GlobPath(dirs, depth)
