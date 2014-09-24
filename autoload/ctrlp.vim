@@ -2248,7 +2248,7 @@ fu! s:getextvar(key)
 		let vars = g:ctrlp_ext_vars[s:itemtype - 3]
 		retu has_key(vars, a:key) ? vars[a:key] : -1
 	en
-	retu -1
++	retu get(g:, 'ctrlp_' . s:matchtype . '_' . a:key, -1)
 endf
 
 fu! ctrlp#getcline()
