@@ -773,6 +773,12 @@ Example: >
     " }
   endfunction
 <
+                                                          *ctrlp-default-value*
+Otherwize, you can use below to change default value.
+Example: >
+  let g:ctrlp_path_nolim = 1
+
+This is possible to change no-limit mode for match type "path".
 
 ===============================================================================
 COMMANDS                                                       *ctrlp-commands*
