@@ -81,6 +81,7 @@ let s:types = {
 	\ 'verilog': '%sverilog%sverilog%smcPertwpvf',
 	\ 'vim'    : '%svim%svim%savf',
 	\ 'yacc'   : '%syacc%syacc%sl',
+	\ 'matlab' : '%smatlab%smatlab%sf',
 	\ }
 
 cal map(s:types, 'printf(v:val, "--language-force=", " --", "-types=")')
