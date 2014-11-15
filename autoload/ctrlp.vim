@@ -160,8 +160,6 @@ let s:fpats = {
 	\ '^\S\*$': '\*',
 	\ '^\S\\?$': '\\?',
 	\ }
-let s:bufnrpat = '\s[{]*\zs\d\+'
-let s:bufindpat = '\[\zs[#+]*\ze\]'
 
 " Keypad
 let s:kprange = {
@@ -182,15 +180,6 @@ let s:hlgrps = {
 	\ 'PrtBase': 'Comment',
 	\ 'PrtText': 'Normal',
 	\ 'PrtCursor': 'Constant',
-	\ 'BufferNr': 'Constant',
-	\ 'BufferInd': 'Normal',
-	\ 'BufferHid': 'Comment',
-	\ 'BufferHidMod': 'String',
-	\ 'BufferVis': 'Normal',
-	\ 'BufferVisMod': 'Identifier',
-	\ 'BufferCur': 'Question',
-	\ 'BufferCurMod': 'WarningMsg',
-	\ 'BufferPath': 'Comment',
 	\ }
 " Get the options {{{2
 fu! s:opts(...)
@@ -453,34 +442,18 @@ endf
 fu! ctrlp#buffers(...)
 	let ids = sort(filter(range(1, bufnr('$')), 'empty(getbufvar(v:val, "&bt"))'
 		\ .' && getbufvar(v:val, "&bl")'), 's:compmreb')
-	let lines = []
-	for id in ids
-		let bname = bufname(id)
-		let bname = (bname == '' ? '[No Name]' : bname)
-		let flag =
-			\ (bufwinnr(id) != -1    ? '*' : '') .
-			\ (getbufvar(id, '&mod') ? '+' : '') .
-			\ (id == s:crbufnr       ? '!' : '')
-		let indicator =
-			\ (id == bufnr('#')      ? '#' : '') .
-			\ (getbufvar(id, '&mod') ? '+' : '')
-
-		if has('conceal')
-			let line = printf('%5s %-4s %s%-32s  %s',
-				\ '{'.id.'}',
-				\ '['.indicator.']',
-				\ '('.flag, '{'.fnamemodify(bname, ':t').'})',
-				\ '<'.fnamemodify(bname, ':~:.:h').s:lash().'>')
-		el
-			let line = printf('%3s %-2s %-30s  %s',
-				\ id,
-				\ indicator,
-				\ fnamemodify(bname, ':t'),
-				\ fnamemodify(bname, ':~:.:h').'/')
-		en
-		cal add(lines, line)
-	endfo
-	retu lines
+	if a:0 && a:1 == 'id'
+		retu ids
+	el
+		let bufs = [[], []]
+		for id in ids
+			let bname = bufname(id)
+			let ebname = bname == ''
+			let fname = fnamemodify(ebname ? '['.id.'*No Name]' : bname, ':.')
+			cal add(bufs[ebname], fname)
+		endfo
+		retu bufs[0] + bufs[1]
+	en
 endf
 " * MatchedItems() {{{1
 fu! s:MatchIt(items, pat, limit, exc)
@@ -500,7 +473,7 @@ fu! s:MatchIt(items, pat, limit, exc)
 endf
 
 fu! s:MatchedItems(items, pat, limit)
-	let exc = s:itemtype == 1 ? '' : exists('s:crfilerel') ? s:crfilerel : ''
+	let exc = exists('s:crfilerel') ? s:crfilerel : ''
 	let items = s:narrowable() ? s:matched + s:mdata[3] : a:items
 	if s:matcher != {}
 		let argms =
@@ -839,9 +812,7 @@ fu! s:PrtClearCache()
 endf
 
 fu! s:PrtDeleteEnt()
-	if s:itemtype == 1
-		cal s:delbuf()
-	elsei s:itemtype == 2
+	if s:itemtype == 2
 		cal s:PrtDeleteMRU()
 	elsei type(s:getextvar('wipe')) == 1
 		cal s:delent(s:getextvar('wipe'))
@@ -1015,13 +986,16 @@ fu! ctrlp#acceptfile(...)
 		let [md, line] = [a:1, a:2]
 		let atl = a:0 > 2 ? a:3 : ''
 	en
-	if s:itemtype == 1
-		let useb = 1
-		let bufnr = str2nr(matchstr(line, s:bufnrpat))
-		let filpath = fnamemodify(bufname(bufnr), ':p')
+	if !type(line)
+		let [filpath, bufnr, useb] = [line, line, 1]
 	el
 		let filpath = fnamemodify(line, ':p')
-		let bufnr = bufnr('^'.filpath.'$')
+		if s:nonamecond(line, filpath)
+			let bufnr = str2nr(matchstr(line, '[\/]\?\[\zs\d\+\ze\*No Name\]$'))
+			let [filpath, useb] = [bufnr, 1]
+		el
+			let bufnr = bufnr('^'.filpath.'$')
+		en
 	en
 	cal s:PrtExit()
 	let tail = s:tail()
@@ -1356,7 +1330,7 @@ endf
 
 fu! s:mixedsort(...)
 	if s:itemtype == 1
-		let pat = '\[No Name\]'
+		let pat = '[\/]\?\[\d\+\*No Name\]$'
 		if a:1 =~# pat && a:2 =~# pat | retu 0
 		elsei a:1 =~# pat | retu 1
 		elsei a:2 =~# pat | retu -1 | en
@@ -1457,7 +1431,18 @@ endf
 " Line formatting {{{3
 fu! s:formatline(str)
 	let str = a:str
-	let cond = s:ispath && s:itemtype != 1 && ( s:winw - 4 ) < s:strwidth(str)
+	if s:itemtype == 1
+		let filpath = fnamemodify(str, ':p')
+		let bufnr = s:nonamecond(str, filpath)
+			\ ? str2nr(matchstr(str, '[\/]\?\[\zs\d\+\ze\*No Name\]$'))
+			\ : bufnr('^'.filpath.'$')
+		let idc = ( bufnr == bufnr('#') ? '#' : '' )
+			\ . ( getbufvar(bufnr, '&ma') ? '' : '-' )
+			\ . ( getbufvar(bufnr, '&ro') ? '=' : '' )
+			\ . ( getbufvar(bufnr, '&mod') ? '+' : '' )
+		let str .= idc != '' ? ' '.idc : ''
+	en
+	let cond = s:ispath && ( s:winw - 4 ) < s:strwidth(str)
 	retu '> '.( cond ? s:pathshorten(str) : str )
 endf
 
@@ -1659,20 +1644,6 @@ fu! ctrlp#syntax()
 	if hlexists('CtrlPLinePre')
 		sy match CtrlPLinePre '^>'
 	en
-
-	if has('conceal')
-		sy region CtrlPBufferNr     concealends matchgroup=Ignore start='{' end='}'
-		sy region CtrlPBufferInd    concealends matchgroup=Ignore start='\[' end='\]'
-		sy region CtrlPBufferRegion concealends matchgroup=Ignore start='(' end=')'
-			\ contains=CtrlPBufferHid,CtrlPBufferHidMod,CtrlPBufferVis,CtrlPBufferVisMod,CtrlPBufferCur,CtrlPBufferCurMod
-		sy region CtrlPBufferHid    concealends matchgroup=Ignore     start='\s*{' end='}' contained
-		sy region CtrlPBufferHidMod concealends matchgroup=Ignore    start='+\s*{' end='}' contained
-		sy region CtrlPBufferVis    concealends matchgroup=Ignore   start='\*\s*{' end='}' contained
-		sy region CtrlPBufferVisMod concealends matchgroup=Ignore  start='\*+\s*{' end='}' contained
-		sy region CtrlPBufferCur    concealends matchgroup=Ignore  start='\*!\s*{' end='}' contained
-		sy region CtrlPBufferCurMod concealends matchgroup=Ignore start='\*+!\s*{' end='}' contained
-		sy region CtrlPBufferPath   concealends matchgroup=Ignore start='<' end='>'
-	en
 endf
 
 fu! s:highlight(pat, grp)
@@ -1695,7 +1666,7 @@ fu! s:highlight(pat, grp)
 			let ending = '\(.*'.pat.'\)\@!'
 			" Case sensitive?
 			let beginning = ( s:martcs == '' ? '\c' : '\C' ).'^.*'
-			if s:byfname && s:itemtype != 1
+			if s:byfname
 				" Make sure there are no slashes in our match
 				let beginning = beginning.'\([^\/]*$\)\@='
 			end
@@ -1835,6 +1806,11 @@ fu! s:bufwins(bufnr)
 	retu winns
 endf
 
+fu! s:nonamecond(str, filpath)
+	retu a:str =~ '[\/]\?\[\d\+\*No Name\]$' && !filereadable(a:filpath)
+		\ && bufnr('^'.a:filpath.'$') < 1
+endf
+
 fu! ctrlp#normcmd(cmd, ...)
 	if a:0 < 2 && s:nosplit() | retu a:cmd | en
 	let norwins = filter(range(1, winnr('$')),
@@ -1869,9 +1845,6 @@ fu! s:setupblank()
 	setl fdc=0 fdl=99 tw=0 bt=nofile bh=unload
 	if v:version > 702
 		setl nornu noudf cc=0
-	en
-	if has('conceal')
-		setl cole=2 cocu=nc
 	en
 endf
 
@@ -2009,7 +1982,7 @@ fu! s:nosort()
 endf
 
 fu! s:byfname()
-	retu s:itemtype != 1 && s:ispath && s:byfname
+	retu s:ispath && s:byfname
 endf
 
 fu! s:narrowable()
@@ -2087,25 +2060,6 @@ fu! s:delent(rfunc)
 	cal s:BuildPrompt(1)
 	unl s:force
 endf
-
-fu! s:delbuf()
-	let lines = []
-	if exists('s:marked')
-		let lines = values(s:marked)
-		for line in lines
-			let bufnr = matchstr(line, s:bufnrpat)
-			exe ":bd ". bufnr
-		endfo
-		cal s:unmarksigns()
-		unl s:marked
-	else
-		let line = ctrlp#getcline()
-		let bufnr = matchstr(line, s:bufnrpat)
-		exe ":bd ". bufnr
-	en
-	call s:PrtClearCache()
-endf
-
 " Entering & Exiting {{{2
 fu! s:getenv()
 	let [s:cwd, s:winres] = [getcwd(), [winrestcmd(), &lines, winnr('$')]]
@@ -2113,7 +2067,8 @@ fu! s:getenv()
 	let [s:crgfile, s:crline] = [expand('<cfile>', 1), getline('.')]
 	let [s:winmaxh, s:crcursor] = [min([s:mw_max, &lines]), getpos('.')]
 	let [s:crbufnr, s:crvisual] = [bufnr('%'), s:lastvisual()]
-	let s:crfile = bufname('%') == '' ? '[No Name]' : expand('%:p', 1)
+	let s:crfile = bufname('%') == ''
+		\ ? '['.s:crbufnr.'*No Name]' : expand('%:p', 1)
 	let s:crfpath = expand('%:p:h', 1)
 	let s:mrbs = ctrlp#mrufiles#bufs()
 endf
@@ -2200,15 +2155,6 @@ fu! s:matchfname(item, pat)
 	en
 endf
 
-fu! s:matchbuf(item, pat)
-	let bufnr = str2nr(matchstr(a:item, s:bufnrpat))
-	let bufind = matchstr(a:item, s:bufindpat)
-	let bname = fnamemodify(bufname(bufnr), ':t')
-	let bpath = fnamemodify(bufname(bufnr), ':~:.:h')
-	let item = bufnr.bufind.bname.s:lash().bpath
-	retu match(item, a:pat)
-endf
-
 fu! s:matchtabs(item, pat)
 	retu match(split(a:item, '\t\+')[0], a:pat)
 endf
@@ -2227,9 +2173,7 @@ endf
 
 fu! s:mfunc()
 	let mfunc = 'match'
-	if s:itemtype == 1
-		let mfunc = 's:matchbuf'
-	elsei s:byfname()
+	if s:byfname()
 		let mfunc = 's:matchfname'
 	elsei s:itemtype > 2
 		let matchtypes = { 'tabs': 's:matchtabs', 'tabe': 's:matchtabe' }
@@ -2244,7 +2188,6 @@ fu! s:mmode()
 	let matchmodes = {
 		\ 'match': 'full-line',
 		\ 's:matchfname': 'filename-only',
-		\ 's:matchbuf': 'full-line',
 		\ 's:matchtabs': 'first-non-tab',
 		\ 's:matchtabe': 'until-last-tab',
 		\ }
