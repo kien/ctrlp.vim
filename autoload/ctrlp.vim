@@ -2152,7 +2152,6 @@ fu! s:matchfname(item, pat)
 	retu len(a:pat) == 1 ? mfn : len(a:pat) == 2 ?
 		\ ( mfn >= 0 && ( len(parts) == 2 ? match(parts[0], a:pat[1]) : -1 ) >= 0
 		\ ? 0 : -1 ) : -1
-	en
 endf
 
 fu! s:matchtabs(item, pat)
