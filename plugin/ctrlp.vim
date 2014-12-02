@@ -33,8 +33,10 @@ com! -bar CtrlPCurWD   cal ctrlp#init(0, { 'mode': '' })
 com! -bar CtrlPCurFile cal ctrlp#init(0, { 'mode': 'c' })
 com! -bar CtrlPRoot    cal ctrlp#init(0, { 'mode': 'r' })
 
-if g:ctrlp_map != '' && !hasmapto(':<c-u>'.g:ctrlp_cmd.'<cr>', 'n')
-	exe 'nn <silent>' g:ctrlp_map ':<c-u>'.g:ctrlp_cmd.'<cr>'
+exe 'nn <silent> <plug>(ctrlp) :<c-u>'.g:ctrlp_cmd.'<cr>'
+
+if g:ctrlp_map != '' && !hasmapto('<plug>(ctrlp)')
+	exe 'map <silent>' g:ctrlp_map '<plug>(ctrlp)'
 en
 
 cal ctrlp#mrufiles#init()
