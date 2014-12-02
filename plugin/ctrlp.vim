@@ -36,7 +36,7 @@ com! -bar CtrlPRoot    cal ctrlp#init(0, { 'mode': 'r' })
 exe 'nn <silent> <plug>(ctrlp) :<c-u>'.g:ctrlp_cmd.'<cr>'
 
 if g:ctrlp_map != '' && !hasmapto('<plug>(ctrlp)')
-	exe 'map <silent>' g:ctrlp_map '<plug>(ctrlp)'
+	exe 'map' g:ctrlp_map '<plug>(ctrlp)'
 en
 
 cal ctrlp#mrufiles#init()
