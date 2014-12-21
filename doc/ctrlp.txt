@@ -1146,7 +1146,23 @@ Available extensions:~
     - Name: 'bookmarkdir'
     - Commands: ":CtrlPBookmarkDir",
                 ":CtrlPBookmarkDirAdd [directory]".
+                ":CtrlPBookmarkDirAdd!".
+
     - Search for a bookmarked directory and change the working directory to it.
+    - Asks for a [TITLE] and the directory [directory] and adds [directory] under 
+      the title [TITLE] to the CtrlPBookmarkDir list
+    - Add the current work dir [CWD] under the title [CWD] to the CtrlPBookmarkDir 
+      list
+
+    The last command can be used to add all recently used work dirs to the 
+    CtrlPBookmarkDir list by an autocommand like
+    >
+    augroup CtrlPDirMRU
+      autocmd!
+      autocmd FileType * if &modifiable | execute 'silent CtrlPBookmarkDirAdd! %:p:h' | endif
+    augroup END
+    <
+    
     - Mappings:
       + <cr> change the local working directory for CtrlP, keep it open and
         switch to find file mode.
