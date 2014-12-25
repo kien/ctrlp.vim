@@ -73,6 +73,7 @@ let s:types = {
 	\ 'sh'     : '%ssh%ssh%sf',
 	\ 'csh'    : '%ssh%ssh%sf',
 	\ 'zsh'    : '%ssh%ssh%sf',
+	\ 'scala'  : '%sscala%sscala%sctTmlp',
 	\ 'slang'  : '%sslang%sslang%snf',
 	\ 'sml'    : '%ssml%ssml%secsrtvf',
 	\ 'sql'    : '%ssql%ssql%scFPrstTvfp',
