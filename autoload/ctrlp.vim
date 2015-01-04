@@ -590,6 +590,9 @@ fu! s:Update(str)
 	let str = s:sanstail(a:str)
 	" Stop if the string's unchanged
 	if str == oldstr && !empty(str) && !exists('s:force') | retu | en
+	" Optionally send the string to an extensions update function
+	let ext_update = s:getextvar('update')
+	if ext_update != -1 | let str = call(ext_update, [str]) | en
 	let s:martcs = &scs && str =~ '\u' ? '\C' : ''
 	let pat = s:matcher == {} ? s:SplitPattern(str) : str
 	let lines = s:nolim == 1 && empty(str) ? copy(g:ctrlp_lines)
@@ -2336,6 +2339,7 @@ fu! ctrlp#init(type, ...)
 	cal s:BuildPrompt(1)
 	if s:keyloop | cal s:KeyLoop() | en
 endf
+
 " - Autocmds {{{1
 if has('autocmd')
 	aug CtrlPAug
