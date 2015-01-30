@@ -345,6 +345,7 @@ fu! ctrlp#files()
 			if !ctrlp#igncwd(s:dyncwd)
 				cal s:InitCustomFuncs()
 				cal s:GlobPath(s:fnesc(s:dyncwd, 'g', ','), 0)
+        cal s:CloseCustomFuncs()
 			en
 		el
 			sil! cal ctrlp#progress('Indexing...')
@@ -374,6 +375,12 @@ fu! s:InitCustomFuncs()
 	if has_key(s:usrign, 'func-init') && s:usrign['func-init'] != ''
 		exe call(s:usrign['func-init'], [])
 	en
+endf
+
+fu! s:CloseCustomFuncs()
+  if has_key(s:usrign, 'func-close') && s:usrign['func-close'] != ''
+    exe call(s:usrign['func-close'], [])
+  en
 endf
 
 fu! s:GlobPath(dirs, depth)
