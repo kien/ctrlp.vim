@@ -378,9 +378,9 @@ fu! s:InitCustomFuncs()
 endf
 
 fu! s:CloseCustomFuncs()
-  if s:igntype == 4 && has_key(s:usrign, 'func-close') && s:usrign['func-close'] != ''
-    exe call(s:usrign['func-close'], [])
-  en
+	if s:igntype == 4 && has_key(s:usrign, 'func-close') && s:usrign['func-close'] != ''
+		exe call(s:usrign['func-close'], [])
+	en
 endf
 
 fu! s:GlobPath(dirs, depth)
