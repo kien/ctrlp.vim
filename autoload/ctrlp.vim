@@ -372,13 +372,13 @@ fu! ctrlp#files()
 endf
 
 fu! s:InitCustomFuncs()
-	if has_key(s:usrign, 'func-init') && s:usrign['func-init'] != ''
+	if s:igntype == 4 && has_key(s:usrign, 'func-init') && s:usrign['func-init'] != ''
 		exe call(s:usrign['func-init'], [])
 	en
 endf
 
 fu! s:CloseCustomFuncs()
-  if has_key(s:usrign, 'func-close') && s:usrign['func-close'] != ''
+  if s:igntype == 4 && has_key(s:usrign, 'func-close') && s:usrign['func-close'] != ''
     exe call(s:usrign['func-close'], [])
   en
 endf
