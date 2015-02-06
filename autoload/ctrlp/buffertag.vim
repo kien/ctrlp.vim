@@ -69,6 +69,7 @@ let s:types = {
 	\ 'python' : '%spython%spython%scmf',
 	\ 'rexx'   : '%srexx%srexx%ss',
 	\ 'ruby'   : '%sruby%sruby%scfFm',
+	\ 'scala'  : '%sscala%sscala%sctTmlp',
 	\ 'scheme' : '%sscheme%sscheme%ssf',
 	\ 'sh'     : '%ssh%ssh%sf',
 	\ 'csh'    : '%ssh%ssh%sf',
