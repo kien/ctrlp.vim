@@ -70,6 +70,7 @@ Overview:~
   |ctrlp_mruf_exclude|..........Files that shouldn't be remembered.
   |ctrlp_mruf_include|..........Files to be remembered.
   |ctrlp_mruf_relative|.........Show only MRU files in the working directory.
+  |ctrlp_mruf_tilde_homedir|....Save MRU file paths in home dir as ~/.
   |ctrlp_mruf_default_order|....Disable sorting.
   |ctrlp_mruf_case_sensitive|...MRU files are case sensitive or not.
   |ctrlp_mruf_save_on_update|...Save to disk whenever a new entry is added.
@@ -575,6 +576,14 @@ Example: >
   let g:ctrlp_mruf_include = '\.py$\|\.rb$'
 <
 
+                                                 *'g:ctrlp_mruf_tilde_homedir'*
+Set this to 1 to save every MRU file path $HOME/$filepath in the $HOME dir
+  as ~/$filepath instead of $HOME/$filepath : >
+  let g:ctrlp_mruf_tilde_homedir = 0
+<
+Note: This applies also to all dir paths stored by :CtrlPBookmarkDirAdd!
+<
+
                                                       *'g:ctrlp_mruf_relative'*
 Set this to 1 to show only MRU files in the current working directory: >
   let g:ctrlp_mruf_relative = 0
@@ -582,7 +591,6 @@ Set this to 1 to show only MRU files in the current working directory: >
 Note: you can use a custom mapping to toggle this option inside the prompt: >
   let g:ctrlp_prompt_mappings = { 'ToggleMRURelative()': ['<F2>'] }
 <
-
                                                  *'g:ctrlp_mruf_default_order'*
 Set this to 1 to disable sorting when searching in MRU mode: >
   let g:ctrlp_mruf_default_order = 0

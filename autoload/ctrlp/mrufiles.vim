@@ -15,6 +15,7 @@ fu! ctrlp#mrufiles#opts()
 		\ 'case_sensitive': ['s:cseno', 1],
 		\ 'relative': ['s:re', 0],
 		\ 'save_on_update': ['s:soup', 1],
+		\ 'tilde_homedir': ['s:thd', 0],
 		\ }]
 	for [ke, va] in items(opts)
 		let [{va[0]}, {pref.ke}] = [pref.ke, exists(pref.ke) ? {pref.ke} : va[1]]
@@ -66,10 +67,11 @@ fu! s:record(bufnr)
 endf
 
 fu! s:addtomrufs(fname)
-	let fn = fnamemodify(a:fname, ':p')
+	let fn = fnamemodify(a:fname, g:ctrlp_mruf_tilde_homedir ? ':p:~' : ':p')
 	let fn = exists('+ssl') ? tr(fn, '/', '\') : fn
+	let abs_fn = fnamemodify(fn,':p')
 	if ( !empty({s:in}) && fn !~# {s:in} ) || ( !empty({s:ex}) && fn =~# {s:ex} )
-		\ || !empty(getbufvar('^'.fn.'$', '&bt')) || !filereadable(fn) | retu
+		\ || !empty(getbufvar('^' . abs_fn . '$', '&bt')) || !filereadable(abs_fn) | retu
 	en
 	let idx = index(s:mrufs, fn, 0, !{s:cseno})
 	if idx

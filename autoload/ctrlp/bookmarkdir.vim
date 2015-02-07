@@ -114,7 +114,8 @@ endf
 
 fu! ctrlp#bookmarkdir#add(bang, dir, ...)
 	if a:bang == '!'
-		let cwd = fnamemodify(a:dir != '' ? a:dir : getcwd(), ':p')
+		let cwd = fnamemodify(a:dir != '' ? a:dir : getcwd(), 
+												\ g:ctrlp_mruf_tilde_homedir ? ':p:~' : ':p')
 		let name = a:0 && a:1 != '' ? a:1 : cwd
 	el
 		let str = 'Directory to bookmark: '
