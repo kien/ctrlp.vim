@@ -1153,14 +1153,16 @@ Available extensions:~
   * BookmarkDir mode:~
     - Name: 'bookmarkdir'
     - Commands: ":CtrlPBookmarkDir",
-                ":CtrlPBookmarkDirAdd [directory]".
-                ":CtrlPBookmarkDirAdd!".
+                ":CtrlPBookmarkDirAdd  [directory] [TITLE]".
+                ":CtrlPBookmarkDirAdd! [directory] [TITLE]".
 
     - Search for a bookmarked directory and change the working directory to it.
-    - Asks for a [TITLE] and the directory [directory] and adds [directory] under 
-      the title [TITLE] to the CtrlPBookmarkDir list
-    - Add the current work dir [CWD] under the title [CWD] to the CtrlPBookmarkDir 
-      list
+    - Add either the dir [directory], if supplied, or otherwise ask for it,
+      under the title given by either [TITLE], if supplied, or otherwise ask for
+      it, to the CtrlPBookmarkDir list.
+    - Add either the dir [directory], if supplied, or otherwise the current
+      work dir ( [CWD] ) under the title given by either [TITLE], if supplied,
+      or otherwise [CWD] to the CtrlPBookmarkDir list.
 
     The last command can be used to add all recently used work dirs to the 
     CtrlPBookmarkDir list by an autocommand like
