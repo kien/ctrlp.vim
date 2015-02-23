@@ -70,7 +70,7 @@ Overview:~
   |ctrlp_mruf_exclude|..........Files that shouldn't be remembered.
   |ctrlp_mruf_include|..........Files to be remembered.
   |ctrlp_mruf_relative|.........Show only MRU files in the working directory.
-  |ctrlp_mruf_tilde_homedir|....Save MRU file paths in home dir as ~/.
+  |ctrlp_tilde_homedir|....Save MRU file paths in home dir as ~/.
   |ctrlp_mruf_default_order|....Disable sorting.
   |ctrlp_mruf_case_sensitive|...MRU files are case sensitive or not.
   |ctrlp_mruf_save_on_update|...Save to disk whenever a new entry is added.
@@ -576,10 +576,10 @@ Example: >
   let g:ctrlp_mruf_include = '\.py$\|\.rb$'
 <
 
-                                                 *'g:ctrlp_mruf_tilde_homedir'*
+                                                 *'g:ctrlp_tilde_homedir'*
 Set this to 1 to save every MRU file path $HOME/$filepath in the $HOME dir
   as ~/$filepath instead of $HOME/$filepath : >
-  let g:ctrlp_mruf_tilde_homedir = 0
+  let g:ctrlp_tilde_homedir = 0
 <
 Note: This applies also to all dir paths stored by :CtrlPBookmarkDirAdd!
 <
@@ -1164,7 +1164,7 @@ Available extensions:~
       work dir ( [CWD] ) under the title given by either [TITLE], if supplied,
       or otherwise [CWD] to the CtrlPBookmarkDir list.
 
-    The last command can be used to add all recently used work dirs to the 
+    The last command can be used to add all recently used work dirs to the
     CtrlPBookmarkDir list by an autocommand like
     >
     augroup CtrlPDirMRU
@@ -1172,7 +1172,7 @@ Available extensions:~
       autocmd FileType * if &modifiable | execute 'silent CtrlPBookmarkDirAdd! %:p:h' | endif
     augroup END
     <
-    
+
     - Mappings:
       + <cr> change the local working directory for CtrlP, keep it open and
         switch to find file mode.

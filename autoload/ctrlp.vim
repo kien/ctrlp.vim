@@ -218,6 +218,7 @@ fu! s:opts(...)
 	for each in ['byfname', 'regexp'] | if exists(each)
 		let s:{each} = {each}
 	en | endfo
+	if !exists('g:ctrlp_tilde_homedir') | let g:ctrlp_tilde_homedir = 0 | en
 	if !exists('g:ctrlp_newcache') | let g:ctrlp_newcache = 0 | en
 	let s:maxdepth = min([s:maxdepth, 100])
 	let s:glob = s:showhidden ? '.*\|*' : '*'
