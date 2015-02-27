@@ -88,6 +88,7 @@ let [s:pref, s:bpref, s:opts, s:new_opts, s:lc_opts] =
 	\ 'use_caching':           ['s:caching', 1],
 	\ 'user_command':          ['s:usrcmd', ''],
 	\ 'working_path_mode':     ['s:pathmode', 'ra'],
+	\ 'open_single_match':     ['s:opensingle', 0],
 	\ }, {
 	\ 'open_multiple_files':   's:opmul',
 	\ 'regexp':                's:regexp',
@@ -593,6 +594,7 @@ fu! s:Update(str)
 	let lines = s:nolim == 1 && empty(str) ? copy(g:ctrlp_lines)
 		\ : s:MatchedItems(g:ctrlp_lines, pat, s:mw_res)
 	cal s:Render(lines, pat)
+	return lines
 endf
 
 fu! s:ForceUpdate()
@@ -2319,6 +2321,15 @@ fu! ctrlp#setlines(...)
 	let g:ctrlp_lines = eval(types[s:itemtype])
 endf
 
+fu! s:exitIfSingleCandidate()
+	if len(s:Update(s:prompt[0])) == 1
+		call s:AcceptSelection('e')
+		call ctrlp#exit()
+		return 1
+	endif
+	return 0
+endfu
+
 fu! ctrlp#init(type, ...)
 	if exists('s:init') || s:iscmdwin() | retu | en
 	let [s:ermsg, v:errmsg] = [v:errmsg, '']
@@ -2331,8 +2342,12 @@ fu! ctrlp#init(type, ...)
 	cal ctrlp#syntax()
 	cal ctrlp#setlines(s:settype(a:type))
 	cal s:SetDefTxt()
+	if s:opensingle && s:exitIfSingleCandidate()
+		return 0
+	endif
 	cal s:BuildPrompt(1)
 	if s:keyloop | cal s:KeyLoop() | en
+	return 1
 endf
 " - Autocmds {{{1
 if has('autocmd')
