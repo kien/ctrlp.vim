@@ -15,6 +15,7 @@ fu! ctrlp#mrufiles#opts()
 		\ 'case_sensitive': ['s:cseno', 1],
 		\ 'relative': ['s:re', 0],
 		\ 'save_on_update': ['s:soup', 1],
+		\ 'exclude_nomod': ['s:exclnomod', 0],
 		\ }]
 	for [ke, va] in items(opts)
 		let [{va[0]}, {pref.ke}] = [pref.ke, exists(pref.ke) ? {pref.ke} : va[1]]
@@ -55,6 +56,8 @@ fu! s:reformat(mrufs, ...)
 endf
 
 fu! s:record(bufnr)
+	if s:exclnomod && &l:modifiable | retu | en
+  if s:exclnomod && !&l:modifiable | retu | en
 	if s:locked | retu | en
 	let bufnr = a:bufnr + 0
 	let bufname = bufname(bufnr)
@@ -144,7 +147,7 @@ fu! ctrlp#mrufiles#init()
 	let s:locked = 0
 	aug CtrlPMRUF
 		au!
-		au BufAdd,BufEnter,BufLeave,BufWritePost * cal s:record(expand('<abuf>', 1))
+		au BufWinEnter,BufWinLeave,BufWritePost * cal s:record(expand('<abuf>', 1))
 		au QuickFixCmdPre  *vimgrep* let s:locked = 1
 		au QuickFixCmdPost *vimgrep* let s:locked = 0
 		au VimLeavePre * cal s:savetofile(s:mergelists())
