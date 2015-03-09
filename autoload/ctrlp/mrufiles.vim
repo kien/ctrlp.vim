@@ -69,7 +69,7 @@ fu! s:record(bufnr)
 endf
 
 fu! s:addtomrufs(fname)
-	let fn = fnamemodify(a:fname, g:ctrlp_tilde_homedir ? ':p:~' : ':p')
+	let fn = fnamemodify(a:fname, get(g:, 'ctrlp_tilde_homedir', 0) ? ':p:~' : ':p')
 	let fn = exists('+ssl') ? tr(fn, '/', '\') : fn
 	let abs_fn = fnamemodify(fn,':p')
 	if ( !empty({s:in}) && fn !~# {s:in} ) || ( !empty({s:ex}) && fn =~# {s:ex} )

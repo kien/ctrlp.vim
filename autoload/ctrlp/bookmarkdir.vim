@@ -113,8 +113,9 @@ fu! ctrlp#bookmarkdir#accept(mode, str)
 endf
 
 fu! ctrlp#bookmarkdir#add(bang, dir, ...)
-	let cwd = fnamemodify(getcwd(), g:ctrlp_tilde_homedir ? ':p:~' : ':p')
-	let dir = fnamemodify(a:dir, g:ctrlp_tilde_homedir ? ':p:~' : ':p')
+	let ctrlp_tilde_homedir = get(g:, 'ctrlp_tilde_homedir', 0)
+	let cwd = fnamemodify(getcwd(), ctrlp_tilde_homedir ? ':p:~' : ':p')
+	let dir = fnamemodify(a:dir, ctrlp_tilde_homedir ? ':p:~' : ':p')
 	if a:bang == '!'
 		let cwd = dir != '' ? dir : cwd
 		let name = a:0 && a:1 != '' ? a:1 : cwd
