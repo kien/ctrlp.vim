@@ -88,7 +88,7 @@ let [s:pref, s:bpref, s:opts, s:new_opts, s:lc_opts] =
 	\ 'use_caching':           ['s:caching', 1],
 	\ 'user_command':          ['s:usrcmd', ''],
 	\ 'working_path_mode':     ['s:pathmode', 'ra'],
-	\ 'open_single_match':     ['s:opensingle', 0],
+	\ 'open_single_match':     ['s:opensingle', []],
 	\ }, {
 	\ 'open_multiple_files':   's:opmul',
 	\ 'regexp':                's:regexp',
@@ -2321,7 +2321,7 @@ fu! ctrlp#setlines(...)
 	let g:ctrlp_lines = eval(types[s:itemtype])
 endf
 
-fu! s:exitIfSingleCandidate()
+fu! s:ExitIfSingleCandidate()
 	if len(s:Update(s:prompt[0])) == 1
 		call s:AcceptSelection('e')
 		call ctrlp#exit()
@@ -2342,7 +2342,7 @@ fu! ctrlp#init(type, ...)
 	cal ctrlp#syntax()
 	cal ctrlp#setlines(s:settype(a:type))
 	cal s:SetDefTxt()
-	if s:opensingle && s:exitIfSingleCandidate()
+	if index(s:opensingle, s:getextvar("lname"))>=0 && s:ExitIfSingleCandidate()
 		return 0
 	endif
 	cal s:BuildPrompt(1)
