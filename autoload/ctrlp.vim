@@ -90,6 +90,7 @@ let [s:pref, s:bpref, s:opts, s:new_opts, s:lc_opts] =
 	\ 'validate':              ['s:validate', ''],
 	\ 'working_path_mode':     ['s:pathmode', 'ra'],
 	\ 'line_prefix':					 ['s:lineprefix', '> '],
+	\ 'open_single_match':     ['s:opensingle', []],
 	\ }, {
 	\ 'open_multiple_files':   's:opmul',
 	\ 'regexp':                's:regexp',
@@ -183,6 +184,14 @@ let s:hlgrps = {
 	\ 'PrtText': 'Normal',
 	\ 'PrtCursor': 'Constant',
 	\ }
+
+" lname, sname of the basic(non-extension) modes
+let s:coretypes = [
+	\ ['files', 'fil'],
+	\ ['buffers', 'buf'],
+	\ ['mru files', 'mru'],
+\ ]
+
 " Get the options {{{2
 fu! s:opts(...)
 	unl! s:usrign s:usrcmd s:urprtmaps
@@ -598,6 +607,7 @@ fu! s:Update(str)
 	let lines = s:nolim == 1 && empty(str) ? copy(g:ctrlp_lines)
 		\ : s:MatchedItems(g:ctrlp_lines, pat, s:mw_res)
 	cal s:Render(lines, pat)
+	return lines
 endf
 
 fu! s:ForceUpdate()
@@ -1387,11 +1397,7 @@ endf
 " Statusline {{{2
 fu! ctrlp#statusline()
 	if !exists('s:statypes')
-		let s:statypes = [
-			\ ['files', 'fil'],
-			\ ['buffers', 'buf'],
-			\ ['mru files', 'mru'],
-			\ ]
+		let s:statypes = copy(s:coretypes)
 		if !empty(g:ctrlp_ext_vars)
 			cal map(copy(g:ctrlp_ext_vars),
 				\ 'add(s:statypes, [ v:val["lname"], v:val["sname"] ])')
@@ -2324,6 +2330,24 @@ fu! ctrlp#setlines(...)
 	let g:ctrlp_lines = eval(types[s:itemtype])
 endf
 
+" Returns [lname, sname]
+fu! s:CurTypeName()
+	if s:itemtype < 3
+		return s:coretypes[s:itemtype]
+	else
+		return [s:getextvar("lname"), s:getextvar('sname')]
+	endif
+endfu
+
+fu! s:ExitIfSingleCandidate()
+	if len(s:Update(s:prompt[0])) == 1
+		call s:AcceptSelection('e')
+		call ctrlp#exit()
+		return 1
+	endif
+	return 0
+endfu
+
 fu! ctrlp#init(type, ...)
 	if exists('s:init') || s:iscmdwin() | retu | en
 	let [s:ermsg, v:errmsg] = [v:errmsg, '']
@@ -2336,8 +2360,14 @@ fu! ctrlp#init(type, ...)
 	cal ctrlp#syntax()
 	cal ctrlp#setlines(s:settype(a:type))
 	cal s:SetDefTxt()
+	let curName = s:CurTypeName()
+	let shouldExitSingle = index(s:opensingle, curName[0])>=0 || index(s:opensingle, curName[1])>=0
+	if shouldExitSingle && s:ExitIfSingleCandidate()
+		return 0
+	endif
 	cal s:BuildPrompt(1)
 	if s:keyloop | cal s:KeyLoop() | en
+	return 1
 endf
 " - Autocmds {{{1
 if has('autocmd')
