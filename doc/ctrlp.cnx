@@ -78,9 +78,11 @@ OPTIONS                                                         *ctrlp-options*
   |ctrlp_mruf_exclude|..........需要被排除的文件。
   |ctrlp_mruf_include|..........需要被记录的文件。
   |ctrlp_mruf_relative|.........只显示在工作目录内的最近最多使用。
+  |ctrlp_tilde_homedir|.........保存 home 目录中的 MRU 的目录路径为波浪扩展的形式 ~/。
   |ctrlp_mruf_default_order|....禁用排序。
   |ctrlp_mruf_case_sensitive|...最近最多使用文件是否大小写敏感。
   |ctrlp_mruf_save_on_update|...只要有一个新的条目添加，就保存到磁盘。
+  |ctrlp_mruf_exclude_nomod|....从 MRU 中排除不可编辑的缓冲区。
 
   缓冲区标签模式: (开启此模式，参考 |ctrlp-extensions| )
   |g:ctrlp_buftag_ctags_bin|....兼容的ctags二进制程序的位置。
@@ -552,6 +554,12 @@ MRU mode options:~
 例子: >
   let g:ctrlp_mruf_include = '\.py$\|\.rb$'
 <
+                                                       *'g:ctrlp_tilde_homedir'*
+将这个选项设置为1来把所有的 MRU 文件路径中 $HOME 目录下的 $HOME/$filepath 保存
+为 ~/$filepath ，而不是 $HOME/$filepath : >
+  let g:ctrlp_tilde_homedir = 0
+<
+注意: 对所有通过 :CtrlPBookmarkDirAdd! 保存的也有效
 
                                                       *'g:ctrlp_mruf_relative'*
 设置该选项为1将只显示在当前工作目录内的最近最多使用文件: >
@@ -577,6 +585,10 @@ MRU mode options:~
   let g:ctrlp_mruf_save_on_update = 1
 <
 
+                                                *'g:ctrlp_mruf_exclude_nomod'*
+将这个选项设置为1来禁止添加不可编辑的缓冲区，例如帮助文件，到 MRU 列表: >
+  let g:ctrlp_mruf_exclude_nomod = 0
+<
 ----------------------------------------
 高级选项:~
 
@@ -1084,7 +1096,7 @@ h)  使用?打开帮助文件。
   * 修改列表模式:~
     - 名称: 'changes'
     - 命令: ":CtrlPChange [缓冲区]",
-                ":CtrlPChangeAll".
+            ":CtrlPChangeAll".
     - 在当前缓冲区或者在所有列出的缓冲区内搜索最近的修改并跳转。
 
                                                                   *:CtrlPMixed*
@@ -1098,8 +1110,23 @@ h)  使用?打开帮助文件。
   * 书签目录模式:~
     - 名称: 'bookmarkdir'
     - 命令: ":CtrlPBookmarkDir",
-                ":CtrlPBookmarkDirAdd [目录]".
+            ":CtrlPBookmarkDirAdd [目录] [标题]".
+            ":CtrlPBookmarkDirAdd! [目录] [标题]".
     - 搜索一个被书签标记的目录并将其作为工作目录。
+    - 以指定的[标题]添加[目录]到 CtrlPBookmarkDir 中，如果没有给出[标题]或
+      者[目录]，会请求用户输入。
+    - 以指定的[标题]添加[目录]到 CtrlPBookmarkDir 中，如果没有给出目录，则
+      默认为当前目录( [CWD] )，如果没有给出[标题] ，会请求用户输入。
+
+      最新的用来添加所有最近使用过的目录到 CtrlPBookmarkDir 列表中的自动命令
+      如下
+      >
+      augroup CtrlPDirMRU
+        autocmd!
+        autocmd FileType * if &modifiable | execute 'silent CtrlPBookmarkDirAdd! %:p:h' | endif
+      augroup END
+<
+
     - 按键绑定:
       + <cr> 为CtrlP修改工作目录并且保持打开状态，并且切换到文件搜索模式。
       + <c-x> 修改全局的工作目录（退出）。
