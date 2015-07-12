@@ -54,7 +54,7 @@ fu! s:reformat(mrufs, ...)
 		let cwd = tr(cwd, '\', '/')
 		cal map(a:mrufs, 'tr(v:val, "\\", "/")')
 	en
-  retu map(a:mrufs, g:ctrlp_mruf_map_string)
+	retu map(a:mrufs, g:ctrlp_mruf_map_string)
 endf
 
 fu! s:record(bufnr)
