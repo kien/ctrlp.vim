@@ -66,6 +66,12 @@ fu! s:record(bufnr)
 endf
 
 fu! s:addtomrufs(fname)
+	for p in get(g:, 'ctrlp_mru_custom_ignore', [])
+		if a:fname =~ p
+			retu
+		endif
+	endfor
+
 	let fn = fnamemodify(a:fname, ':p')
 	let fn = exists('+ssl') ? tr(fn, '/', '\') : fn
 	if ( !empty({s:in}) && fn !~# {s:in} ) || ( !empty({s:ex}) && fn =~# {s:ex} )

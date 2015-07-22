@@ -269,6 +269,14 @@ command defined with |g:ctrlp_user_command| is being used.
 Note #2: when changing the option's variable type, remember to |:unlet| it
 first or restart Vim to avoid the "E706: Variable type mismatch" error.
 
+                                                  *'g:ctrlp_mru_custom_ignore'*
+Regexp patterns used to ignore file for mru list.
+<
+Examples: >
+  let g:ctrlp_mru_custom_ignore = [
+    \ '.*fugitive.*',
+    \ ]
+
                                                           *'g:ctrlp_max_files'*
 The maximum number of files to scan, set to 0 for no limit: >
   let g:ctrlp_max_files = 10000
