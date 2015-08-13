@@ -64,6 +64,8 @@ Overview:~
   |ctrlp_abbrev|................Input abbreviations.
   |ctrlp_key_loop|..............Use input looping for multi-byte input.
   |ctrlp_prompt_mappings|.......Change the mappings inside the prompt.
+  |ctrlp_line_prefix|...........Prefix for each line in ctrlp window.
+  |ctrlp_open_single_match|.....Automatically accept when only one candidate.
 
   MRU mode:
   |ctrlp_mruf_max|..............Max MRU entries to remember.
@@ -443,6 +445,7 @@ Instead of 1 or 0, if the value of the option is a string, it'll be used as-is
 as the default input: >
   let g:ctrlp_default_input = 'anystring'
 <
+This option works well together with |g:ctrlp_open_single_match|
 
                                                              *'g:ctrlp_abbrev'*
 Define input abbreviations that can be expanded (either internally or visibly)
@@ -552,6 +555,34 @@ default <c-h> mapping: >
   let g:ctrlp_prompt_mappings = { 'PrtCurLeft()': ['<left>', '<c-^>'] }
 <
 
+                                                    *'g:ctrlp_line_prefix'*
+This prefix will be prepended to each line in ctrlp's item listing.
+default: >
+  let g:ctrlp_line_prefix = '> '
+<
+
+                                                    *'g:ctrlp_open_single_match'*
+List of CtrlP modes for which CtrlP should accept an entry directly, if only
+one candidate exists.
+Example: >
+  let g:ctrlp_open_single_match = ['buffer tags', 'buffer']
+<
+This is currently only really useful together with |g:ctrlp_default_input|
+set before launching, and cleared afterwards, with a function such as
+following: >
+  fu! <SID>tagsUnderCursor()
+    try
+      let default_input_save = get(g:, 'ctrlp_default_input', '')
+      let g:ctrlp_default_input = expand('<cword>')
+      CtrlPBufTagAll
+    finally
+      if exists('default_input_save')
+        let g:ctrlp_default_input = default_input_save
+      endif
+    endtry
+  endfu
+>
+<
 ----------------------------------------
 MRU mode options:~
 
