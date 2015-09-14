@@ -43,6 +43,7 @@ let s:bins = [
 	\ ]
 
 let s:types = {
+	\ 'ant'    : '%sant%sant%spt',
 	\ 'asm'    : '%sasm%sasm%sdlmt',
 	\ 'aspperl': '%sasp%sasp%sfsv',
 	\ 'aspvbs' : '%sasp%sasp%sfsv',
@@ -77,6 +78,7 @@ let s:types = {
 	\ 'slang'  : '%sslang%sslang%snf',
 	\ 'sml'    : '%ssml%ssml%secsrtvf',
 	\ 'sql'    : '%ssql%ssql%scFPrstTvfp',
+	\ 'tex'    : '%stex%stex%sipcsubPGl',
 	\ 'tcl'    : '%stcl%stcl%scfmp',
 	\ 'vera'   : '%svera%svera%scdefgmpPtTvx',
 	\ 'verilog': '%sverilog%sverilog%smcPertwpvf',
