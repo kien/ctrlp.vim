@@ -85,6 +85,12 @@ Use `:diffthis` when opening multiple files to run `:diffthis` on the first 4 fi
     let g:ctrlp_user_command = 'dir %s /-n /b /s /a-d'  " Windows
     ```
 
+* Ignore files in `.gitignore`
+    
+    ```vim
+      let g:ctrlp_user_command = ['.git/', 'git --git-dir=%s/.git ls-files -oc --exclude-standard']
+    ```
+
 Check `:help ctrlp-options` for other options.
 
 ## Installation
