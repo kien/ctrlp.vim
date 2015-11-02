@@ -6,6 +6,7 @@
 
 " Static variables {{{1
 let [s:mrbs, s:mrufs] = [[], []]
+let s:mruf_map_string = '!stridx(v:val, cwd) ? strpart(v:val, idx) : v:val'
 
 fu! ctrlp#mrufiles#opts()
 	let [pref, opts] = ['g:ctrlp_mruf_', {
@@ -16,6 +17,7 @@ fu! ctrlp#mrufiles#opts()
 		\ 'relative': ['s:re', 0],
 		\ 'save_on_update': ['s:soup', 1],
 		\ 'exclude_nomod': ['s:exclnomod', 0],
+		\ 'map_string': ['g:ctrlp_mruf_map_string', s:mruf_map_string],
 		\ }]
 	for [ke, va] in items(opts)
 		let [{va[0]}, {pref.ke}] = [pref.ke, exists(pref.ke) ? {pref.ke} : va[1]]
@@ -52,7 +54,7 @@ fu! s:reformat(mrufs, ...)
 		let cwd = tr(cwd, '\', '/')
 		cal map(a:mrufs, 'tr(v:val, "\\", "/")')
 	en
-	retu map(a:mrufs, '!stridx(v:val, cwd) ? strpart(v:val, idx) : v:val')
+	retu map(a:mrufs, g:ctrlp_mruf_map_string)
 endf
 
 fu! s:record(bufnr)
