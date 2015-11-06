@@ -1203,12 +1203,13 @@ Available extensions:~
 
     The last command can be used to add all recently used work dirs to the
     CtrlPBookmarkDir list by an autocommand like
+
     >
     augroup CtrlPDirMRU
       autocmd!
       autocmd FileType * if &modifiable | execute 'silent CtrlPBookmarkDirAdd! %:p:h' | endif
     augroup END
-    <
+<
 
     - Mappings:
       + <cr> change the local working directory for CtrlP, keep it open and
@@ -1218,6 +1219,80 @@ Available extensions:~
       + <F7>
         - Wipe bookmark list.
         - Delete entries marked by <c-z>.
+
+                                                 *ctrlp-autoignore-extension*
+  * Autoignore mode:~
+    - Name: 'autoignore'
+
+    - This extension doesn't add new commands. It adds support for per-project
+      ignore patterns (as per |ctrlp_custom_ignore|) via a `.ctrlpignore` file
+      at the root of the project. It's basically like a `.gitignore` or
+      `.hgignore` for CtrlP.
+
+      Note: auto-ignore won't work when |g:ctrlp_user_command| is used.
+
+      Note: `.ctrlpignore` will be added to the root markers (see
+      |g:ctrlp_root_markers|).
+
+    - Ignore file syntax:
+      Empty lines, and lines starting with `#` (comments) are ignored.
+
+      Other lines are treated like regular expression patterns. See *string-match*
+      for how patterns are used. Anything that matches any of the patterns will be
+      ignored from CtrlP's search results.
+
+      Example:
+
+        \.tmp$
+        ^generated/
+        local\.cfg
+
+      Note: patterns should use forward slashes, even on Windows.
+
+      You can also switch to a glob-like syntax like this:
+
+        syntax:wildignore
+        *.tar.gz
+        *.tmp
+
+      This will temporarily add each pattern to |'wildignore'| for the
+      duration of the file scan, and remove them at the end.
+
+      You can switch back to the default regular-expression-based patterns by
+      writing:
+
+        syntax:regexp
+
+      You can also specify a match on only a given type of item:
+
+        dir:build
+        file:foo\.txt
+
+      This will only ignore directories with "build" in them, and files with
+      "foo.txt" in them. Not files with "build" in them or vice-versa.
+
+      Note: to ignore a root directory "build", and not _any_ directory with
+      "build" in it, you can root the regex: ^build$
+
+    - FAQ:
+      Q: Why can't CtrlP support `.gitignore` or `.hgignore` natively?
+
+      A: Those files look at first like they may contain all the patterns
+      you'd want to exclude from CtrlP already. However, more often than not,
+      there are some differences. Those files list patterns that should not be
+      included in source-control. This includes things you want to ignore, but
+      also things you may not want to: local settings, external packages and
+      dependencies, etc. The author felt the trouble of supporting various
+      syntaxes was too much compared to just copy/pasting a few lines. Feel
+      free to contribute a patch if you disagree :)
+
+      Q: I enabled |ctrlp-autoignore-extension|, or edited `.ctrlpignore`, but
+      none of the new patterns are working. What did I do wrong?
+
+      A: Probably nothing! CtrlP can cache search results for faster response
+      times. You can hit <F5> to force it to refresh. This will use the newer
+      ignore patterns if the `.ctrlpignore` file has changed, too.
+
 
 ----------------------------------------
 Buffer Tag mode options:~
