@@ -66,6 +66,7 @@ Overview:~
   |ctrlp_prompt_mappings|.......Change the mappings inside the prompt.
   |ctrlp_line_prefix|...........Prefix for each line in ctrlp window.
   |ctrlp_open_single_match|.....Automatically accept when only one candidate.
+  |ctrlp_brief_prompt|..........Exit CtrlP on empty prompt by <bs>.
 
   MRU mode:
   |ctrlp_mruf_max|..............Max MRU entries to remember.
@@ -818,6 +819,9 @@ Example: >
     " }
   endfunction
 <
+                                                       *'g:ctrlp_brief_prompt'*
+When this is set to 1, the <bs> on empty prompt exit CtrlP.
+
                                                           *ctrlp-default-value*
 Otherwize, you can use below to change default value.
 Example: >
