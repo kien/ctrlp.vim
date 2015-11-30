@@ -91,6 +91,7 @@ let [s:pref, s:bpref, s:opts, s:new_opts, s:lc_opts] =
 	\ 'working_path_mode':     ['s:pathmode', 'ra'],
 	\ 'line_prefix':					 ['s:lineprefix', '> '],
 	\ 'open_single_match':     ['s:opensingle', []],
+	\ 'brief_prompt':          ['s:brfprt', 0],
 	\ }, {
 	\ 'open_multiple_files':   's:opmul',
 	\ 'regexp':                's:regexp',
@@ -674,6 +675,10 @@ endf
 
 fu! s:PrtBS()
 	if !s:focus | retu | en
+	if empty(s:prompt[0]) && s:brfprt != 0
+		cal s:PrtExit()
+		retu
+	endif
 	unl! s:hstgot
 	let [s:prompt[0], s:matches] = [substitute(s:prompt[0], '.$', '', ''), 1]
 	cal s:BuildPrompt(1)
