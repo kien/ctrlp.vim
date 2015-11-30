@@ -270,7 +270,7 @@ fu! s:Open()
 	cal s:log(1)
 	cal s:getenv()
 	cal s:execextvar('enter')
-	sil! exe 'keepa' ( s:mw_pos == 'top' ? 'to' : 'bo' ) '1new ControlP'
+	sil! exe 'keepa' ( s:mw_pos == 'top' ? 'to' : 'bo' ) (s:mw_min) 'new ControlP'
 	cal s:buffunc(1)
 	let [s:bufnr, s:winw] = [bufnr('%'), winwidth(0)]
 	let [s:focus, s:prompt] = [1, ['', '', '']]
