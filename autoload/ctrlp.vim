@@ -142,7 +142,18 @@ let [s:lcmap, s:prtmaps] = ['nn <buffer> <silent>', {
 	\ 'MarkToOpen()':         ['<c-z>'],
 	\ 'OpenMulti()':          ['<c-o>'],
 	\ 'PrtExit()':            ['<esc>', '<c-c>', '<c-g>'],
+	\ 'PrtNoop()':            ['<c-/>'],
 	\ }]
+
+let s:scriptpath = expand('<sfile>:p:h')
+let s:pymatcher = 0
+if has('autocmd') && has('python')
+    py import sys
+    exe 'python sys.path.insert( 0, "' . escape(s:scriptpath, '\') . '/../python" )'
+    py from ctrlp.matcher import CtrlPMatcher
+    py ctrlp = CtrlPMatcher()
+    let s:pymatcher = 1
+en 
 
 if !has('gui_running')
 	cal add(s:prtmaps['PrtBS()'], remove(s:prtmaps['PrtCurLeft()'], 0))
@@ -468,8 +479,8 @@ fu! s:MatchIt(items, pat, limit, exc)
 		en | cat | brea | endt
 		if a:limit > 0 && len(lines) >= a:limit | brea | en
 	endfo
-	let s:mdata = [s:dyncwd, s:itemtype, s:regexp, s:sublist(a:items, id, -1)]
-	retu lines
+
+    cal ctrlp#process(lines, a:pat, 0, s:sublist(a:items, id, -1))
 endf
 
 fu! s:MatchedItems(items, pat, limit)
@@ -486,13 +497,17 @@ fu! s:MatchedItems(items, pat, limit)
 			\ 'crfile': exc,
 			\ 'regex':  s:regexp,
 			\ }] : [items, a:pat, a:limit, s:mmode(), s:ispath, exc, s:regexp]
-		let lines = call(s:matcher['match'], argms, s:matcher)
+		call(s:matcher['match'], argms, s:matcher)
+    elsei s:pymatcher && s:lazy > 1
+        py <<EOPYTHON
+ctrlp.filter(vim.bindeval('items'), vim.bindeval('a:pat'),
+    vim.bindeval('a:limit'), vim.bindeval('s:mmode()'),
+    vim.bindeval('s:ispath'), vim.bindeval('exc'),
+    vim.bindeval('s:regexp'))
+EOPYTHON
 	el
-		let lines = s:MatchIt(items, a:pat, a:limit, exc)
+		cal s:MatchIt(items, a:pat, a:limit, exc)
 	en
-	let s:matches = len(lines)
-	unl! s:did_exp
-	retu lines
 endf
 
 fu! s:SplitPattern(str)
@@ -576,12 +591,21 @@ fu! s:Update(str)
 	" Get the new string sans tail
 	let str = s:sanstail(a:str)
 	" Stop if the string's unchanged
-	if str == oldstr && !empty(str) && !exists('s:force') | retu | en
+	if str == oldstr && !empty(str) && !exists('s:force')
+                \ && (!has_key(s:matcher, 'force_update') || s:matcher['force_update'] == 1)
+                \ && (!s:pymatcher || s:lazy < 2)
+        retu
+    en
 	let s:martcs = &scs && str =~ '\u' ? '\C' : ''
-	let pat = s:matcher == {} ? s:SplitPattern(str) : str
-	let lines = s:nolim == 1 && empty(str) ? copy(g:ctrlp_lines)
-		\ : s:MatchedItems(g:ctrlp_lines, pat, s:mw_res)
-	cal s:Render(lines, pat)
+    let pat = str
+    if s:matcher == {} && (!s:pymatcher || s:lazy < 2)
+        let pat =  s:SplitPattern(str)
+    en
+
+    if s:nolim == 1 && empty(str)
+        cal s:Render(copy(g:ctrlp_lines), pat)
+    else
+        cal s:MatchedItems(g:ctrlp_lines, pat, s:mw_res)
 endf
 
 fu! s:ForceUpdate()
@@ -833,6 +857,9 @@ fu! s:PrtExit()
 		noa cal s:Close()
 		noa winc p
 	en
+endf
+
+fu! s:PrtNoop()
 endf
 
 fu! s:PrtHistory(...)
@@ -1906,7 +1933,8 @@ fu! s:modevar()
 endf
 
 fu! s:nosort()
-	retu s:matcher != {} || s:nolim == 1 || ( s:itemtype == 2 && s:mrudef )
+	retu s:matcher != {} || (s:pymatcher && s:lazy > 1)
+        \ || s:nolim == 1 || ( s:itemtype == 2 && s:mrudef )
 		\ || ( s:itemtype =~ '\v^(1|2)$' && s:prompt == ['', '', ''] ) || !s:dosort
 endf
 
@@ -2262,6 +2290,26 @@ fu! ctrlp#init(type, ...)
 	cal s:BuildPrompt(1)
 	if s:keyloop | cal s:KeyLoop() | en
 endf
+
+fu! ctrlp#process(lines, pat, split, subitems)
+    if !exists('s:init') | retu | en
+
+    let s:matches = len(a:lines)
+    unl! s:did_exp
+
+    let pat = a:pat
+
+    if a:split | let pat = s:SplitPattern(pat) | en
+
+	let s:mdata = [s:dyncwd, s:itemtype, s:regexp, a:subitems]
+
+    cal s:Render(a:lines, pat)
+endf
+
+fu! ctrlp#forcecursorhold()
+    cal feedkeys("\<c-/>")
+endf
+
 " - Autocmds {{{1
 if has('autocmd')
 	aug CtrlPAug
