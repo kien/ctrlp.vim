@@ -35,8 +35,8 @@ Check `:help ctrlp-commands` and `:help ctrlp-extensions` for other commands.
 Run `:help ctrlp-mappings` or submit `?` in CtrlP for more mapping help.
 
 * Submit two or more dots `..` to go up the directory tree by one or multiple levels.
-* End the input string with a colon `:` followed by a command to execute it on the opening file(s):  
-Use `:25` to jump to line 25.  
+* End the input string with a colon `:` followed by a command to execute it on the opening file(s):
+Use `:25` to jump to line 25.
 Use `:diffthis` when opening multiple files to run `:diffthis` on the first 4 files.
 
 ## Basic Options
@@ -53,9 +53,9 @@ Use `:diffthis` when opening multiple files to run `:diffthis` on the first 4 fi
     let g:ctrlp_working_path_mode = 'ra'
     ```
 
-    `'c'` - the directory of the current file.  
-    `'r'` - the nearest ancestor that contains one of these directories or files: `.git` `.hg` `.svn` `.bzr` `_darcs`  
-    `'a'` - like c, but only if the current working directory outside of CtrlP is not a direct ancestor of the directory of the current file.  
+    `'c'` - the directory of the current file.
+    `'r'` - the nearest ancestor that contains one of these directories or files: `.git` `.hg` `.svn` `.bzr` `_darcs`
+    `'a'` - like c, but only if the current working directory outside of CtrlP is not a direct ancestor of the directory of the current file.
     `0` or `''` (empty string) - disable this feature.
 
     Define additional root markers with the `g:ctrlp_root_markers` option.
@@ -72,6 +72,9 @@ Use `:diffthis` when opening multiple files to run `:diffthis` on the first 4 fi
       \ 'file': '\v\.(exe|so|dll)$',
       \ 'link': 'some_bad_symbolic_links',
       \ }
+    let g:ctrlp_mru_custom_ignore = [
+      \ '.*fugitive.*',
+      \ ]
     ```
 
 * Use a custom file listing command:
