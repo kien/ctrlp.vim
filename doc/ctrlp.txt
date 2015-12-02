@@ -118,7 +118,7 @@ Set this to 1 to set regexp search as the default: >
 Can be toggled on/off by pressing <c-r> inside the prompt.
 
                                                        *'g:ctrlp_match_window'*
-Change the postion, the listing order of results, the minimum and the maximum
+Change the position, the listing order of results, the minimum and the maximum
 heights of the match window: >
   let g:ctrlp_match_window = ''
 <
@@ -1027,7 +1027,7 @@ d)  Submit two dots '..' to go upward the directory tree by 1 level. To go up
 e)  Similarly, submit '/' or '\' to find and go to the project's root.
 
     If the project is large, using a VCS listing command to look for files
-    might help speeding up the intial scan (see |g:ctrlp_user_command| for more
+    might help speeding up the initial scan (see |g:ctrlp_user_command| for more
     details).
 
     Note: d) and e) only work in file, directory and mixed modes.
