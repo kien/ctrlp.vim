@@ -86,7 +86,6 @@ let [s:pref, s:bpref, s:opts, s:new_opts, s:lc_opts] =
 	\ 'status_func':           ['s:status', {}],
 	\ 'tabpage_position':      ['s:tabpage', 'ac'],
 	\ 'use_caching':           ['s:caching', 1],
-	\ 'use_migemo':            ['s:migemo', 0],
 	\ 'user_command':          ['s:usrcmd', ''],
 	\ 'working_path_mode':     ['s:pathmode', 'ra'],
 	\ }, {
@@ -283,7 +282,8 @@ fu! s:Open()
 		sil! exe 'let s:glb_'.ke.' = &'.ke.' | let &'.ke.' = '.string(va)
 	en | endfo
 	if s:opmul != '0' && has('signs')
-		sign define ctrlpmark text=+> texthl=Search
+		sign define ctrlpmark text=+> texthl=CtrlPMark
+		hi def link CtrlPMark Search
 	en
 	cal s:setupblank()
 endf
@@ -387,7 +387,7 @@ fu! s:UserCmd(lscmd)
 	if exists('+ssl') && &ssl
 		let [ssl, &ssl, path] = [&ssl, 0, tr(path, '/', '\')]
 	en
-	if has('win32') || has('win64')
+	if (has('win32') || has('win64')) && match(&shellcmdflag, "/") != -1
 		let lscmd = substitute(lscmd, '\v(^|\&\&\s*)\zscd (/d)@!', 'cd /d ', '')
 	en
 	let path = exists('*shellescape') ? shellescape(path) : path
@@ -497,9 +497,6 @@ endf
 
 fu! s:SplitPattern(str)
 	let str = a:str
-	if s:migemo && s:regexp && len(str) > 0 && executable('cmigemo')
-		let str = s:migemo(str)
-	en
 	let s:savestr = str
 	if s:regexp
 		let pat = s:regexfilter(str)
@@ -959,23 +956,19 @@ fu! s:SetWD(args)
 	if has_key(a:args, 'dir') && a:args['dir'] != ''
 		cal ctrlp#setdir(a:args['dir']) | retu
 	en
-	let pmode = has_key(a:args, 'mode') ? a:args['mode'] : s:pathmode
+	let pmodes = has_key(a:args, 'mode') ? a:args['mode'] : s:pathmode
 	let [s:crfilerel, s:dyncwd] = [fnamemodify(s:crfile, ':.'), getcwd()]
-	if s:crfile =~ '^.\+://' | retu | en
-	if pmode =~ 'c' || ( pmode =~ 'a' && stridx(s:crfpath, s:cwd) < 0 )
-		\ || ( !type(pmode) && pmode )
-		if exists('+acd') | let [s:glb_acd, &acd] = [&acd, 0] | en
-		cal ctrlp#setdir(s:crfpath)
+	if (!type(pmodes))
+		let pmodes =
+			\ pmodes == 0 ? '' :
+			\ pmodes == 1 ? 'a' :
+			\ pmodes == 2 ? 'r' :
+			\ 'c'
 	en
-	if pmode =~ 'r' || pmode == 2
-		let markers = ['.git', '.hg', '.svn', '.bzr', '_darcs']
-		let spath = pmode =~ 'd' ? s:dyncwd : pmode =~ 'w' ? s:cwd : s:crfpath
-		if type(s:rmarkers) == 3 && !empty(s:rmarkers)
-			if s:findroot(spath, s:rmarkers, 0, 0) != [] | retu | en
-			cal filter(markers, 'index(s:rmarkers, v:val) < 0')
-		en
-		cal s:findroot(spath, markers, 0, 0)
-	en
+	let spath = pmodes =~ 'd' ? s:dyncwd : pmodes =~ 'w' ? s:cwd : s:crfpath
+	for pmode in split(pmodes, '\zs')
+		if ctrlp#setpathmode(pmode, spath) | retu | en
+	endfo
 endf
 " * AcceptSelection() {{{1
 fu! ctrlp#acceptfile(...)
@@ -1532,9 +1525,21 @@ fu! ctrlp#dirnfile(entries)
 endf
 
 fu! s:usrign(item, type)
-	retu s:igntype == 1 ? a:item =~ s:usrign
-		\ : s:igntype == 4 && has_key(s:usrign, a:type) && s:usrign[a:type] != ''
-		\ ? a:item =~ s:usrign[a:type] : 0
+	if s:igntype == 1 | retu a:item =~ s:usrign | end
+	if s:igntype == 2
+		if call(s:usrign, [a:item, a:type])
+			retu 1
+		end
+	elsei s:igntype == 4
+		if has_key(s:usrign, a:type) && s:usrign[a:type] != ''
+					\ && a:item =~ s:usrign[a:type]
+			retu 1
+		elsei has_key(s:usrign, 'func') && s:usrign['func'] != ''
+					\ && call(s:usrign['func'], [a:item, a:type])
+			retu 1
+		end
+	end
+	retu 0
 endf
 
 fu! s:samerootsyml(each, isfile, cwd)
@@ -1584,6 +1589,23 @@ fu! s:findroot(curr, mark, depth, type)
 		en
 	en
 	retu []
+endf
+
+fu! ctrlp#setpathmode(pmode, ...)
+	if a:pmode == 'c' || ( a:pmode == 'a' && stridx(s:crfpath, s:cwd) < 0 )
+		if exists('+acd') | let [s:glb_acd, &acd] = [&acd, 0] | en
+		cal ctrlp#setdir(s:crfpath)
+		retu 1
+	elsei a:pmode == 'r'
+		let spath = a:0 ? a:1 : s:crfpath
+		let markers = ['.git', '.hg', '.svn', '.bzr', '_darcs']
+		if type(s:rmarkers) == 3 && !empty(s:rmarkers)
+			if s:findroot(spath, s:rmarkers, 0, 0) != [] | retu 1 | en
+			cal filter(markers, 'index(s:rmarkers, v:val) < 0')
+		en
+		if s:findroot(spath, markers, 0, 0) != [] | retu 1 | en
+	en
+	retu 0
 endf
 
 fu! ctrlp#setdir(path, ...)
@@ -1946,22 +1968,6 @@ fu! s:getinput(...)
 	retu spi == 'c' ? prt[0] : join(prt, '')
 endf
 
-fu! s:migemo(str)
-	let [str, rtp] = [a:str, s:fnesc(&rtp, 'g')]
-	let dict = s:glbpath(rtp, printf("dict/%s/migemo-dict", &enc), 1)
-	if !len(dict)
-		let dict = s:glbpath(rtp, "dict/migemo-dict", 1)
-	en
-	if len(dict)
-		let [tokens, str, cmd] = [split(str, '\s'), '', 'cmigemo -v -w %s -d %s']
-		for token in tokens
-			let rtn = system(printf(cmd, shellescape(token), shellescape(dict)))
-			let str .= !v:shell_error && strlen(rtn) > 0 ? '.*'.rtn : token
-		endfo
-	en
-	retu str
-endf
-
 fu! s:strwidth(str)
 	retu exists('*strdisplaywidth') ? strdisplaywidth(a:str) : strlen(a:str)
 endf
@@ -2204,6 +2210,10 @@ endf
 
 fu! ctrlp#getmarkedlist()
 	retu exists('s:marked') ? values(s:marked) : []
+endf
+
+fu! ctrlp#clearmarkedlist()
+	let s:marked = {}
 endf
 
 fu! ctrlp#exit()
