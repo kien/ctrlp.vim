@@ -89,6 +89,10 @@ if executable('jsctags')
 	cal extend(s:types, { 'javascript': { 'args': '-f -', 'bin': 'jsctags' } })
 en
 
+if executable('lushtags')
+	cal extend(s:types, { 'haskell': { 'args': '--ignore-parse-error', 'bin': 'lushtags' } })
+en
+
 fu! ctrlp#buffertag#opts()
 	for [ke, va] in items(s:opts)
 		let {va[0]} = exists(s:pref.ke) ? {s:pref.ke} : va[1]
