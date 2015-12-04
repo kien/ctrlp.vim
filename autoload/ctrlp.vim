@@ -1831,6 +1831,9 @@ fu! s:sanstail(str)
 		\ substitute(a:str, '^\(@.*$\|\\\\\ze@\|\.\.\zs[.\/]\+$\)', '', 'g') : a:str
 	let [str, pat] = [substitute(str, '\\\\', '\', 'g'), '\([^:]\|\\:\)*$']
 	unl! s:optail
+	if !s:getextvar('sanstail')
+		retu str
+	en
 	if str =~ '\\\@<!:'.pat
 		let s:optail = matchstr(str, '\\\@<!:\zs'.pat)
 		let str = substitute(str, '\\\@<!:'.pat, '', '')
