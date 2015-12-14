@@ -681,6 +681,10 @@ fu! s:PrtInsert(...)
 		let regcont = s:getregs()
 		if regcont < 0 | retu | en
 	en
+	if type =~# '^r.$'
+		let regcont = s:regisfilter(type[1])
+		let type = 'r'
+	en
 	unl! s:hstgot
 	let s:act_add = 1
 	let s:prompt[0] .= type ==# 'w' ? s:crword
