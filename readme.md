@@ -35,8 +35,8 @@ Check `:help ctrlp-commands` and `:help ctrlp-extensions` for other commands.
 Run `:help ctrlp-mappings` or submit `?` in CtrlP for more mapping help.
 
 * Submit two or more dots `..` to go up the directory tree by one or multiple levels.
-* End the input string with a colon `:` followed by a command to execute it on the opening file(s):  
-Use `:25` to jump to line 25.  
+* End the input string with a colon `:` followed by a command to execute it on the opening file(s):
+Use `:25` to jump to line 25.
 Use `:diffthis` when opening multiple files to run `:diffthis` on the first 4 files.
 
 ## Basic Options
@@ -47,17 +47,18 @@ Use `:diffthis` when opening multiple files to run `:diffthis` on the first 4 fi
     let g:ctrlp_cmd = 'CtrlP'
     ```
 
-* When invoked, unless a starting directory is specified, CtrlP will set its local working directory according to this variable:
+* When invoked without an explicit starting directory, CtrlP will set its local working directory according to this variable:
 
     ```vim
     let g:ctrlp_working_path_mode = 'ra'
     ```
 
-    `'c'` - the directory of the current file.  
-    `'r'` - the nearest ancestor that contains one of these directories or files: `.git` `.hg` `.svn` `.bzr` `_darcs`  
-    `'a'` - like c, but only if the current working directory outside of CtrlP is not a direct ancestor of the directory of the current file.  
-    `0` or `''` (empty string) - disable this feature.
+    `'c'` - use the parent directory of the current file.
+    `'a'` - use the parent directory of the current file if it is not a descendant of the current working directory outside of CtrlP.
+    `'r'` - use the nearest ancestor of the current file that contains one of these markers: `.git` `.hg` `.svn` `.bzr` `_darcs`
+    `0` or `''` (empty string) - use the current working directory outside of CtrlP.
 
+    If more than one mode is specified, they will be tried in order until a directory is located. 
     Define additional root markers with the `g:ctrlp_root_markers` option.
 
 * Exclude files and directories using Vim's `wildignore` and CtrlP's own `g:ctrlp_custom_ignore`:
