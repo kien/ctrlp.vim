@@ -1084,8 +1084,11 @@ fu! s:AcceptSelection(action)
 			let type = exttype == 'dict' ? exttype : 'list'
 		en
 	en
-	let actargs = type == 'dict' ? [{ 'action': md, 'line': line, 'icr': icr }]
-		\ : [md, line]
+	if type ==# 'dict'
+		let actargs = [{ 'action': md, 'line': line, 'icr': icr }]
+	el
+		let actargs = [md, line]
+	en
 	cal call(actfunc, actargs)
 endf
 " - CreateNewFile() {{{1
