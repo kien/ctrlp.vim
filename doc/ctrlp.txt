@@ -1408,11 +1408,12 @@ MISCELLANEOUS CONFIGS                             *ctrlp-miscellaneous-configs*
 ===============================================================================
 CREDITS                                                         *ctrlp-credits*
 
-Developed by Kien Nguyen <github.com/kien>. Distributed under Vim's |license|.
+Originally developed by Kien Nguyen <github.com/kien>.  Now maintained by the
+members of the ctrlpvim Github organisation
+(https://github.com/orgs/ctrlpvim/people).  Distributed under Vim's |license|.
 
-Project's homepage:   http://kien.github.com/ctrlp.vim
-Git repository:       https://github.com/kien/ctrlp.vim
-Mercurial repository: https://bitbucket.org/kien/ctrlp.vim
+Project's homepage:   http://ctrlpvim.github.com/ctrlp.vim
+Git repository:       https://github.com/ctrlpvim/ctrlp.vim
 
 -------------------------------------------------------------------------------
 Thanks to everyone that has submitted ideas, bug reports or helped debugging on
