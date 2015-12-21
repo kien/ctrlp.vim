@@ -419,7 +419,7 @@ fu! s:UserCmd(lscmd)
 		let lscmd = substitute(lscmd, '\v(^|\&\&\s*)\zscd (/d)@!', 'cd /d ', '')
 	en
 	let path = exists('*shellescape') ? shellescape(path) : path
-	if has('patch-7.4-597')
+	if has('patch-7.4-597') && !(has('win32') || has('win64'))
 		let g:ctrlp_allfiles = systemlist(printf(lscmd, path))
 	else
 		let g:ctrlp_allfiles = split(system(printf(lscmd, path)), "\n")
