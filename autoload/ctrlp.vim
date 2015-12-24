@@ -89,7 +89,7 @@ let [s:pref, s:bpref, s:opts, s:new_opts, s:lc_opts] =
 	\ 'user_command':          ['s:usrcmd', ''],
 	\ 'validate':              ['s:validate', ''],
 	\ 'working_path_mode':     ['s:pathmode', 'ra'],
-	\ 'line_prefix':					 ['s:lineprefix', '> '],
+	\ 'line_prefix':           ['s:lineprefix', '> '],
 	\ 'open_single_match':     ['s:opensingle', []],
 	\ 'brief_prompt':          ['s:brfprt', 0],
 	\ }, {
