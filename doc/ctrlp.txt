@@ -77,7 +77,6 @@ Overview:~
   |ctrlp_mruf_default_order|....Disable sorting.
   |ctrlp_mruf_case_sensitive|...MRU files are case sensitive or not.
   |ctrlp_mruf_save_on_update|...Save to disk whenever a new entry is added.
-  |ctrlp_mruf_exclude_nomod|....Exclude nonmodifiable buffers from the MRU list.
 
   BufferTag mode: (to enable, see |ctrlp-extensions|)
   |g:ctrlp_buftag_ctags_bin|....The location of the ctags-compatible binary.
@@ -639,12 +638,6 @@ MRU entries: >
 Set this to 0 to disable saving of the MRU list to hard drive whenever a new
 entry is added, saving will then only occur when exiting Vim: >
   let g:ctrlp_mruf_save_on_update = 1
-<
-
-                                                *'g:ctrlp_mruf_exclude_nomod'*
-Set this to 1 to disable adding nonmodifiable buffers, for example help files,
-to the MRU list: >
-  let g:ctrlp_mruf_exclude_nomod = 0
 <
 ----------------------------------------
 Advanced options:~
