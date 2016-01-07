@@ -67,6 +67,7 @@ Overview:~
   |ctrlp_line_prefix|...........Prefix for each line in ctrlp window.
   |ctrlp_open_single_match|.....Automatically accept when only one candidate.
   |ctrlp_brief_prompt|..........Exit CtrlP on empty prompt by <bs>.
+  |ctrlp_match_current_file|....Include current file in match entries.
 
   MRU mode:
   |ctrlp_mruf_max|..............Max MRU entries to remember.
@@ -447,6 +448,16 @@ as the default input: >
   let g:ctrlp_default_input = 'anystring'
 <
 This option works well together with |g:ctrlp_open_single_match|
+
+
+                                                 *'g:ctrlp_match_current_file'*
+Includes the current file in the match entries:
+  let g:ctrlp_match_current_file = 1
+
+By default, the current file is excluded from the list.
+
+Note: does not apply when |g:ctrlp_match_func| is used. 
+
 
                                                              *'g:ctrlp_abbrev'*
 Define input abbreviations that can be expanded (either internally or visibly)

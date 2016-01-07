@@ -92,6 +92,7 @@ let [s:pref, s:bpref, s:opts, s:new_opts, s:lc_opts] =
 	\ 'line_prefix':           ['s:lineprefix', '> '],
 	\ 'open_single_match':     ['s:opensingle', []],
 	\ 'brief_prompt':          ['s:brfprt', 0],
+	\ 'match_current_file':    ['s:matchcrfile', 0],
 	\ }, {
 	\ 'open_multiple_files':   's:opmul',
 	\ 'regexp':                's:regexp',
@@ -494,9 +495,12 @@ fu! s:MatchIt(items, pat, limit, exc)
 		\ : s:martcs.a:pat
 	for item in a:items
 		let id += 1
-		try | if !( s:ispath && item == a:exc ) && call(s:mfunc, [item, pat]) >= 0
-			cal add(lines, item)
-		en | cat | brea | endt
+		try
+			if (s:matchcrfile || !( s:ispath && item == a:exc )) && 
+						\call(s:mfunc, [item, pat]) >= 0
+				cal add(lines, item)
+			en
+		cat | brea | endt
 		if a:limit > 0 && len(lines) >= a:limit | brea | en
 	endfo
 	let s:mdata = [s:dyncwd, s:itemtype, s:regexp, s:sublist(a:items, id, -1)]
