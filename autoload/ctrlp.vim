@@ -565,6 +565,10 @@ fu! s:Render(lines, pat)
 	let height = min([max([s:mw_min, s:res_count]), s:winmaxh])
 	let pat = s:byfname() ? split(a:pat, '^[^;]\+\\\@<!\zs;', 1)[0] : a:pat
 	let cur_cmd = 'keepj norm! '.( s:mw_order == 'btt' ? 'G' : 'gg' ).'1|'
+	" Since the active line won't be restored if s:nolim is set to 1, you cannot
+	" change the active line.
+	let cur_line = line('.')
+
 	" Setup the match window
 	sil! exe '%d _ | res' height
 	" Print the new items
@@ -595,6 +599,9 @@ fu! s:Render(lines, pat)
 	cal s:remarksigns()
 	if exists('s:cline') && s:nolim != 1
 		cal cursor(s:cline, 1)
+	el
+		let cur_line = line('$') < cur_line ? 1 : cur_line
+		cal cursor(cur_line, 1)
 	en
 	" Highlighting
 	if s:dohighlight()
