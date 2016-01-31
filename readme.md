@@ -88,7 +88,7 @@ Use `:diffthis` when opening multiple files to run `:diffthis` on the first 4 fi
 * Ignore files in `.gitignore`
     
     ```vim
-      let g:ctrlp_user_command = ['.git/', 'git --git-dir=%s/.git ls-files -oc --exclude-standard']
+      let g:ctrlp_user_command = ['.git', 'cd %s && git ls-files -co --exclude-standard']
     ```
 
 Check `:help ctrlp-options` for other options.
