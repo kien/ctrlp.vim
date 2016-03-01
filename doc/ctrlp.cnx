@@ -330,7 +330,7 @@ OPTIONS                                                         *ctrlp-options*
 
   " 单个版本控制系统，列出命令列出没有被追踪的文件（较慢）:
   let g:ctrlp_user_command =
-    \ ['.git', 'cd %s && git ls-files . -co --exclude-standard']
+    \ ['.git', 'cd %s && git ls-files -co --exclude-standard']
 
   let g:ctrlp_user_command =
     \ ['.hg', 'hg --cwd %s status -numac -I . $(hg root)'] " MacOSX/Linux
