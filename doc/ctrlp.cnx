@@ -82,7 +82,6 @@ OPTIONS                                                         *ctrlp-options*
   |ctrlp_mruf_default_order|....禁用排序。
   |ctrlp_mruf_case_sensitive|...最近最多使用文件是否大小写敏感。
   |ctrlp_mruf_save_on_update|...只要有一个新的条目添加，就保存到磁盘。
-  |ctrlp_mruf_exclude_nomod|....从 MRU 中排除不可编辑的缓冲区。
 
   缓冲区标签模式: (开启此模式，参考 |ctrlp-extensions| )
   |g:ctrlp_buftag_ctags_bin|....兼容的ctags二进制程序的位置。
@@ -583,11 +582,6 @@ MRU mode options:~
 设置该选项为0将不会每当有一个新条目增加就把最近最多使用列表保存到磁盘文件，而
 是在退出Vim时才保存: >
   let g:ctrlp_mruf_save_on_update = 1
-<
-
-                                                *'g:ctrlp_mruf_exclude_nomod'*
-将这个选项设置为1来禁止添加不可编辑的缓冲区，例如帮助文件，到 MRU 列表: >
-  let g:ctrlp_mruf_exclude_nomod = 0
 <
 ----------------------------------------
 高级选项:~

@@ -16,7 +16,6 @@ fu! ctrlp#mrufiles#opts()
 		\ 'case_sensitive': ['s:cseno', 1],
 		\ 'relative': ['s:re', 0],
 		\ 'save_on_update': ['s:soup', 1],
-		\ 'exclude_nomod': ['s:exclnomod', 0],
 		\ 'map_string': ['g:ctrlp_mruf_map_string', s:mruf_map_string],
 		\ }]
 	for [ke, va] in items(opts)
@@ -58,8 +57,6 @@ fu! s:reformat(mrufs, ...)
 endf
 
 fu! s:record(bufnr)
-	if s:exclnomod && &l:modifiable | retu | en
-  if s:exclnomod && !&l:modifiable | retu | en
 	if s:locked | retu | en
 	let bufnr = a:bufnr + 0
 	let bufname = bufname(bufnr)
@@ -75,7 +72,8 @@ fu! s:addtomrufs(fname)
 	let fn = exists('+ssl') ? tr(fn, '/', '\') : fn
 	let abs_fn = fnamemodify(fn,':p')
 	if ( !empty({s:in}) && fn !~# {s:in} ) || ( !empty({s:ex}) && fn =~# {s:ex} )
-		\ || !empty(getbufvar('^' . abs_fn . '$', '&bt')) || !filereadable(abs_fn) | retu
+		\ || !empty(getbufvar('^' . abs_fn . '$', '&bt'))
+		retu
 	en
 	let idx = index(s:mrufs, fn, 0, !{s:cseno})
 	if idx
