@@ -359,7 +359,7 @@ fu! ctrlp#files()
 			if !ctrlp#igncwd(s:dyncwd)
 				cal s:InitCustomFuncs()
 				cal s:GlobPath(s:fnesc(s:dyncwd, 'g', ','), 0)
-        cal s:CloseCustomFuncs()
+				cal s:CloseCustomFuncs()
 			en
 		el
 			sil! cal ctrlp#progress('Indexing...')
