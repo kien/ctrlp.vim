@@ -93,6 +93,7 @@ let [s:pref, s:bpref, s:opts, s:new_opts, s:lc_opts] =
 	\ 'open_single_match':     ['s:opensingle', []],
 	\ 'brief_prompt':          ['s:brfprt', 0],
 	\ 'match_current_file':    ['s:matchcrfile', 0],
+	\ 'compare_lim':           ['s:compare_lim', 3000],
 	\ }, {
 	\ 'open_multiple_files':   's:opmul',
 	\ 'regexp':                's:regexp',
@@ -151,8 +152,6 @@ let [s:lcmap, s:prtmaps] = ['nn <buffer> <silent>', {
 if !has('gui_running')
 	cal add(s:prtmaps['PrtBS()'], remove(s:prtmaps['PrtCurLeft()'], 0))
 en
-
-let s:compare_lim = 3000
 
 let s:ficounts = {}
 
