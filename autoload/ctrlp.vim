@@ -932,7 +932,6 @@ fu! s:KeyLoop()
 	set t_ve=
 	try
 		wh exists('s:init') && s:keyloop
-			redr
 			let nr = getchar()
 			let chr = !type(nr) ? nr2char(nr) : nr
 			if nr >=# 0x20
