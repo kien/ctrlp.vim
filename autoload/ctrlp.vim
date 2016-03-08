@@ -625,6 +625,7 @@ fu! s:ForceUpdate()
 endf
 
 fu! s:BuildPrompt(upd)
+	if a:upd == 0 && line('$') <= winheight(0) | | redr | retu | en
 	let base = ( s:regexp ? 'r' : '>' ).( s:byfname() ? 'd' : '>' ).'> '
 	let str = escape(s:getinput(), '\')
 	let lazy = str == '' || exists('s:force') || !has('autocmd') ? 0 : s:lazy
@@ -806,7 +807,7 @@ fu! s:PrtSelectMove(dir)
 	let dirs = {'t': 'gg','b': 'G','j': 'j','k': 'k','u': wht.'k','d': wht.'j'}
 	exe 'keepj norm!' dirs[a:dir]
 	if s:nolim != 1 | let s:cline = line('.') | en
-	if line('$') > winheight(0) | cal s:BuildPrompt(0) | en
+	cal s:BuildPrompt(0)
 endf
 
 fu! s:PrtSelectJump(char)
@@ -830,7 +831,7 @@ fu! s:PrtSelectJump(char)
 		en
 		exe 'keepj norm!' ( jmpln + 1 ).'G'
 		if s:nolim != 1 | let s:cline = line('.') | en
-		if line('$') > winheight(0) | cal s:BuildPrompt(0) | en
+		cal s:BuildPrompt(0)
 	en
 endf
 " Misc {{{2
