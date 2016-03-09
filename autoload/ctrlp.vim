@@ -318,7 +318,7 @@ fu! s:Close()
 	if s:winres[1] >= &lines && s:winres[2] == winnr('$')
 		exe s:winres[0].s:winres[0]
 	en
-	unl! s:focus s:hisidx s:hstgot s:marked s:statypes s:cline s:init s:savestr
+	unl! s:focus s:hisidx s:hstgot s:marked s:statypes s:init s:savestr
 		\ s:mrbs s:did_exp
 	cal ctrlp#recordhist()
 	cal s:execextvar('exit')
@@ -593,9 +593,6 @@ fu! s:Render(lines, pat)
 	exe cur_cmd
 	cal s:unmarksigns()
 	cal s:remarksigns()
-	if exists('s:cline') && s:nolim != 1
-		cal cursor(s:cline, 1)
-	en
 	" Highlighting
 	if s:dohighlight()
 		cal s:highlight(pat, s:mathi[1])
@@ -621,7 +618,9 @@ fu! s:Update(str)
 endf
 
 fu! s:ForceUpdate()
+	let wv = winsaveview()
 	sil! cal s:Update(escape(s:getinput(), '\'))
+	cal winrestview(wv)
 endf
 
 fu! s:BuildPrompt(upd)
@@ -806,8 +805,9 @@ fu! s:PrtSelectMove(dir)
 	let wht = winheight(0)
 	let dirs = {'t': 'gg','b': 'G','j': 'j','k': 'k','u': wht.'k','d': wht.'j'}
 	exe 'keepj norm!' dirs[a:dir]
-	if s:nolim != 1 | let s:cline = line('.') | en
+	let wv = winsaveview()
 	cal s:BuildPrompt(0)
+	cal winrestview(wv)
 endf
 
 fu! s:PrtSelectJump(char)
@@ -830,8 +830,9 @@ fu! s:PrtSelectJump(char)
 			let [jmpln, s:jmpchr] = [npos == -1 ? pos : npos, [chr, npos]]
 		en
 		exe 'keepj norm!' ( jmpln + 1 ).'G'
-		if s:nolim != 1 | let s:cline = line('.') | en
+		let wv = winsaveview()
 		cal s:BuildPrompt(0)
+		cal winrestview(wv)
 	en
 endf
 " Misc {{{2
