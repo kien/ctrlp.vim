@@ -940,7 +940,10 @@ fu! s:KeyLoop()
 				cal s:PrtFocusMap(chr)
 			el
 				let cmd = matchstr(maparg(chr), ':<C-U>\zs.\+\ze<CR>$')
-				exe ( cmd != '' ? cmd : 'norm '.chr )
+				try
+					exe ( cmd != '' ? cmd : 'norm '.chr )
+				cat
+				endt
 			en
 		endw
 	fina
