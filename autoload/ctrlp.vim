@@ -94,6 +94,7 @@ let [s:pref, s:bpref, s:opts, s:new_opts, s:lc_opts] =
 	\ 'brief_prompt':          ['s:brfprt', 0],
 	\ 'match_current_file':    ['s:matchcrfile', 0],
 	\ 'compare_lim':           ['s:compare_lim', 3000],
+	\ 'user_command_async':    ['s:usrcmdasync', 0],
 	\ }, {
 	\ 'open_multiple_files':   's:opmul',
 	\ 'regexp':                's:regexp',
@@ -406,6 +407,10 @@ fu! s:GlobPath(dirs, depth)
 	en
 endf
 
+fu! ctrlp#addfile(ch, file)
+	call add(g:ctrlp_allfiles, a:file)
+endf
+
 fu! s:UserCmd(lscmd)
 	let [path, lscmd] = [s:dyncwd, a:lscmd]
 	let do_ign =
@@ -418,7 +423,14 @@ fu! s:UserCmd(lscmd)
 		let lscmd = substitute(lscmd, '\v(^|\&\&\s*)\zscd (/d)@!', 'cd /d ', '')
 	en
 	let path = exists('*shellescape') ? shellescape(path) : path
-	if has('patch-7.4-597') && !(has('win32') || has('win64'))
+	if s:usrcmdasync && has('patch-7.4-1510') && exists('*job_start')
+		let g:ctrlp_allfiles = []
+		if has('win32') || has('win64')
+			let s:job = job_start(printf("%s %s %s", &shell, &shellcmdflag, printf(lscmd, path)), {'callback': 'ctrlp#addfile'})
+		else
+			let s:job = job_start([&shell, &shellcmdflag, printf(lscmd, path)], {'callback': 'ctrlp#addfile'})
+		en
+	elsei has('patch-7.4-597') && !(has('win32') || has('win64'))
 		let g:ctrlp_allfiles = systemlist(printf(lscmd, path))
 	else
 		let g:ctrlp_allfiles = split(system(printf(lscmd, path)), "\n")
