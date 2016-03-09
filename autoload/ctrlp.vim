@@ -624,7 +624,6 @@ fu! s:ForceUpdate()
 endf
 
 fu! s:BuildPrompt(upd)
-	if a:upd == 0 && line('$') <= winheight(0) | | redr | retu | en
 	let base = ( s:regexp ? 'r' : '>' ).( s:byfname() ? 'd' : '>' ).'> '
 	let str = escape(s:getinput(), '\')
 	let lazy = str == '' || exists('s:force') || !has('autocmd') ? 0 : s:lazy
@@ -931,26 +930,26 @@ endf
 
 fu! s:KeyLoop()
 	let [t_ve, guicursor] = [&t_ve, &guicursor]
-	set t_ve=
-	set guicursor=a:NONE
-	try
-		wh exists('s:init') && s:keyloop
+	wh exists('s:init') && s:keyloop
+		try
+			set t_ve=
+			set guicursor=a:NONE
 			let nr = getchar()
-			let chr = !type(nr) ? nr2char(nr) : nr
-			if nr >=# 0x20
-				cal s:PrtFocusMap(chr)
-			el
-				let cmd = matchstr(maparg(chr), ':<C-U>\zs.\+\ze<CR>$')
-				try
-					exe ( cmd != '' ? cmd : 'norm '.chr )
-				cat
-				endt
-			en
-		endw
-	fina
-		let &t_ve = t_ve
-		let &guicursor = guicursor
-	endt
+		fina
+			let &t_ve = t_ve
+			let &guicursor = guicursor
+		endt
+		let chr = !type(nr) ? nr2char(nr) : nr
+		if nr >=# 0x20
+			cal s:PrtFocusMap(chr)
+		el
+			let cmd = matchstr(maparg(chr), ':<C-U>\zs.\+\ze<CR>$')
+			try
+				exe ( cmd != '' ? cmd : 'norm '.chr )
+			cat
+			endt
+		en
+	endw
 endf
 " * Toggling {{{1
 fu! s:ToggleFocus()
