@@ -621,14 +621,14 @@ fu! s:Render(lines, pat)
 	let s:lines = copy(lines)
 	cal map(lines, 's:formatline(v:val)')
 	cal setline(1, s:offset(lines, height))
-	setl noma cul
-	exe cur_cmd
 	cal s:unmarksigns()
 	cal s:remarksigns()
 	" Highlighting
 	if s:dohighlight()
 		cal s:highlight(pat, s:mathi[1])
 	en
+	setl noma cul
+	exe cur_cmd
 endf
 
 fu! s:Update(str)
