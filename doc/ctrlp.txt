@@ -79,6 +79,10 @@ Overview:~
   |ctrlp_mruf_case_sensitive|...MRU files are case sensitive or not.
   |ctrlp_mruf_save_on_update|...Save to disk whenever a new entry is added.
 
+  Buffer mode:
+  |ctrlp_bufname_mod|...........File name section modificator.
+  |ctrlp_bufpath_mod|...........File path section modificator.
+
   BufferTag mode: (to enable, see |ctrlp-extensions|)
   |g:ctrlp_buftag_ctags_bin|....The location of the ctags-compatible binary.
   |g:ctrlp_buftag_systemenc|....The encoding used for the ctags command.
@@ -650,6 +654,14 @@ Set this to 0 to disable saving of the MRU list to hard drive whenever a new
 entry is added, saving will then only occur when exiting Vim: >
   let g:ctrlp_mruf_save_on_update = 1
 <
+                                                *'g:ctrlp_bufname_mod'*
+Modify file name section according to modificator string. See |filename-modifiers|. >
+  let g:ctrlp_bufname_mod = ':t'
+<
+                                                *'g:ctrlp_bufpath_mod'*
+Modify file path section according to modificator string. See |filename-modifiers|. >
+  let g:ctrlp_bufpath_mod = ':~:.:h'
+<
 ----------------------------------------
 Advanced options:~
 
@@ -1013,8 +1025,12 @@ Function keys:~
     - Remove deleted files from the MRU list.
 
   <F7>
-    - Wipe the MRU list.
-    - Delete MRU entries marked by <c-z>.
+    MRU mode:
+    - Wipe the list.
+    - Delete entries marked by <c-z>.
+    Buffer mode:
+    - Delete entry under the cursor or delete multiple entries marked by <c-z>.
+
 
 Pasting:~
 
@@ -1342,6 +1358,17 @@ Highlighting:~
     CtrlPPrtText   : the prompt's text (|hl-Normal|)
     CtrlPPrtCursor : the prompt's cursor when moving over the text (Constant)
 
+  * Buffer explorer mode:
+    CtrlPBufferNr     : buffer number
+    CtrlPBufferInd    : '+', '-', '=' and '#' indicators (see |:buffers|)
+    CtrlPBufferHid    : hidden buffer
+    CtrlPBufferHidMod : hidden and modified buffer
+    CtrlPBufferVis    : visible buffer
+    CtrlPBufferVisMod : visible and modified buffer
+    CtrlPBufferCur    : current buffer
+    CtrlPBufferCurMod : current and modified buffer
+    CtrlPBufferPath   : buffer path
+
   * In extensions:
     CtrlPTabExtra  : the part of each line that's not matched against (Comment)
     CtrlPBufName   : the buffer name an entry belongs to (|hl-Directory|)
@@ -1444,10 +1471,14 @@ Special thanks:~
     * Jo De Boeck <github.com/grimpy>
     * Rudi Grinberg <github.com/rgrinberg>
     * Timothy Mellor <github.com/mellort>
+    * Sergey Vlasov <github.com/noscript>
 
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
 
+    + New buffer explorer mode with highlighting (|+conceal| recommended)
+    + New options: |g:ctrlp_bufname_mod|,
+                   |g:ctrlp_bufpath_mod|
     + Combine *g:ctrlp_match_window_bottom* *g:ctrlp_match_window_reversed* and
       *g:ctrlp_max_height* into |g:ctrlp_match_window|.
     + New option: |g:ctrlp_match_window|.
