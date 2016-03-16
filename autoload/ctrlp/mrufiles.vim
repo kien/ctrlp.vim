@@ -72,7 +72,7 @@ fu! s:addtomrufs(fname)
 	let fn = exists('+ssl') ? tr(fn, '/', '\') : fn
 	let abs_fn = fnamemodify(fn,':p')
 	if ( !empty({s:in}) && fn !~# {s:in} ) || ( !empty({s:ex}) && fn =~# {s:ex} )
-		\ || !empty(getbufvar('^' . abs_fn . '$', '&bt'))
+		\ || !empty(getbufvar('^' . abs_fn . '$', '&bt')) || !filereadable(abs_fn)
 		retu
 	en
 	let idx = index(s:mrufs, fn, 0, !{s:cseno})
