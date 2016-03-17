@@ -527,7 +527,7 @@ fu! s:MatchIt(items, pat, limit, exc)
 	for item in a:items
 		let id += 1
 		try
-			if (s:matchcrfile || !( s:ispath && item == a:exc )) && 
+			if (s:matchcrfile || !( s:ispath && item == a:exc )) &&
 						\call(s:mfunc, [item, pat]) >= 0
 				cal add(lines, item)
 			en
@@ -1728,8 +1728,9 @@ endf
 fu! ctrlp#syntax()
 	if ctrlp#nosy() | retu | en
 	for [ke, va] in items(s:hlgrps) | cal ctrlp#hicheck('CtrlP'.ke, va) | endfo
-	if synIDattr(synIDtrans(hlID('Normal')), 'bg') !~ '^-1$\|^$'
-		sil! exe 'hi CtrlPLinePre '.( has("gui_running") ? 'gui' : 'cterm' ).'fg=bg'
+	let bgColor=synIDattr(synIDtrans(hlID('Normal')), 'bg')
+	if bgColor !~ '^-1$\|^$'
+		sil! exe 'hi CtrlPLinePre guifg='.bgColor.' ctermfg='.bgColor
 	en
 	sy match CtrlPNoEntries '^ == NO ENTRIES ==$'
 	if hlexists('CtrlPLinePre')
