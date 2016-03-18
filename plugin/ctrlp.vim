@@ -15,7 +15,7 @@ if !exists('g:ctrlp_types')
 en
 let [g:ctrlp_lines, g:ctrlp_allfiles, g:ctrlp_alltags, g:ctrlp_alldirs,
 	\ g:ctrlp_allmixes, g:ctrlp_buftags, g:ctrlp_ext_vars, g:ctrlp_builtins]
-	\ = [[], [], [], [], {}, {}, [], len(g:ctrlp_types)]
+	\ = [[], [], [], [], {}, {}, [], len(g:ctrlp_types)-1]
 
 if !exists('g:ctrlp_map') | let g:ctrlp_map = '<c-p>' | en
 if !exists('g:ctrlp_cmd') | let g:ctrlp_cmd = 'CtrlP' | en
