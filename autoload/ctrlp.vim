@@ -201,11 +201,11 @@ let s:hlgrps = {
 	\ }
 
 " lname, sname of the basic(non-extension) modes
-let s:coretypes = [
+let s:coretypes = filter([
 	\ ['files', 'fil'],
 	\ ['buffers', 'buf'],
 	\ ['mru files', 'mru'],
-\ ]
+\ ], 'index(g:ctrlp_types, v:val[1])!=-1')
 
 " Get the options {{{2
 fu! s:opts(...)
@@ -1458,7 +1458,6 @@ endf
 " Statusline {{{2
 fu! ctrlp#statusline()
 	if !exists('s:statypes')
-		let s:coretypes = filter(s:coretypes, 'index(g:ctrlp_types, v:val[1])!=-1')
 		let s:statypes = copy(s:coretypes)
 		if !empty(g:ctrlp_ext_vars)
 			cal map(copy(g:ctrlp_ext_vars),
@@ -2404,7 +2403,7 @@ fu! s:execextvar(key)
 endf
 
 fu! s:getextvar(key)
-	if s:itemtype >= len(s:coretypes) && len(g:ctrlp_ext_vars)
+	if s:itemtype >= len(s:coretypes) && len(g:ctrlp_ext_vars) > 0
 		let vars = g:ctrlp_ext_vars[s:itemtype - len(s:coretypes)]
 		retu has_key(vars, a:key) ? vars[a:key] : -1
 	en
@@ -2459,7 +2458,8 @@ endf
 fu! ctrlp#setlines(...)
 	if a:0 | let s:itemtype = a:1 | en
 	cal s:modevar()
-	let types = ['ctrlp#files()', 'ctrlp#buffers()', 'ctrlp#mrufiles#list()']
+	let inits = {'fil': 'ctrlp#files()', 'buf': 'ctrlp#buffers()', 'mru': 'ctrlp#mrufiles#list()'}
+	let types = map(copy(g:ctrlp_types), 'inits[v:val]')
 	if !empty(g:ctrlp_ext_vars)
 		cal map(copy(g:ctrlp_ext_vars), 'add(types, v:val["init"])')
 	en
