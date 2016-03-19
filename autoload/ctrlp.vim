@@ -2469,7 +2469,7 @@ endf
 " Returns [lname, sname]
 fu! s:CurTypeName()
 	if s:itemtype < len(s:coretypes)
-		return s:coretypes[s:itemtype]
+		return filter(copy(s:coretypes), 'v:val[1]==g:ctrlp_types[s:itemtype]')[0][1]
 	el
 		return [s:getextvar("lname"), s:getextvar('sname')]
 	en
