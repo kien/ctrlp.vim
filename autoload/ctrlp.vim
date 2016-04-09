@@ -1916,7 +1916,7 @@ fu! s:bufwins(bufnr)
 endf
 
 fu! s:bufnrfilpath(line)
-	let filpath = fnamemodify(a:line, ':p')
+	let filpath = fnamemodify(s:dyncwd.(&shellslash ? '/' : '\').a:line, ':p')
 	let bufnr = bufnr('^'.filpath.'$')
 	if (a:line =~ '[\/]\?\[\d\+\*No Name\]$' && !filereadable(filpath) && bufnr < 1)
 		let bufnr = str2nr(matchstr(a:line, '[\/]\?\[\zs\d\+\ze\*No Name\]$'))
