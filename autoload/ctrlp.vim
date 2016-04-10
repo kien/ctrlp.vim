@@ -1915,8 +1915,20 @@ fu! s:bufwins(bufnr)
 	retu winns
 endf
 
+fu! s:isabs(path)
+	if (has('win32') || has('win64'))
+		return a:path =~ '^\([a-zA-Z]:\)\{-}[/\\]'
+	el
+		return a:path =~ '^[/\\]'
+	en
+endf
+
 fu! s:bufnrfilpath(line)
-	let filpath = fnamemodify(a:line, ':p')
+	if s:isabs(a:line)
+		let filpath = fnamemodify(a:line, ':p')
+	el
+		let filpath = fnamemodify(s:dyncwd.(&shellslash ? '/' : '\').a:line, ':p')
+	en
 	let bufnr = bufnr('^'.filpath.'$')
 	if (a:line =~ '[\/]\?\[\d\+\*No Name\]$' && !filereadable(filpath) && bufnr < 1)
 		let bufnr = str2nr(matchstr(a:line, '[\/]\?\[\zs\d\+\ze\*No Name\]$'))
