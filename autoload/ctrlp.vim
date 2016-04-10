@@ -1934,10 +1934,15 @@ endf
 
 fu! s:bufnrfilpath(line)
 	if s:isabs(a:line)
-		let filpath = fnamemodify(a:line, ':p')
+		let filpath = a:line
 	el
-		let filpath = fnamemodify(s:dyncwd.(&shellslash ? '/' : '\').a:line, ':p')
+		if (has('win32') || has('win64')) && !&shellslash
+			let filpath = s:dyncwd.'\'.a:line
+		el
+			let filpath = s:dyncwd.'/'.a:line
+		en
 	en
+	let filpath = fnamemodify(filpath, ':p')
 	let bufnr = bufnr('^'.filpath.'$')
 	if (a:line =~ '[\/]\?\[\d\+\*No Name\]$' && !filereadable(filpath) && bufnr < 1)
 		let bufnr = str2nr(matchstr(a:line, '[\/]\?\[\zs\d\+\ze\*No Name\]$'))
