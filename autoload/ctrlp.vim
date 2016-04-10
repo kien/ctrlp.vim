@@ -1374,7 +1374,16 @@ endf
 fu! s:compmreb(...)
 	" By last entered time (bufnr)
 	let [id1, id2] = [index(s:mrbs, a:1), index(s:mrbs, a:2)]
-	retu id1 == id2 ? 0 : id1 > id2 ? 1 : -1
+	if id1 == id2
+		return 0
+	endif
+	if id1 < 0
+		return 1
+	endif
+	if id2 < 0
+		return -1
+	endif
+	return id1 > id2 ? 1 : -1
 endf
 
 fu! s:compmref(...)
