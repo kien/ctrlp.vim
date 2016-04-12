@@ -1933,7 +1933,7 @@ fu! s:isabs(path)
 endf
 
 fu! s:bufnrfilpath(line)
-	if s:isabs(a:line)
+	if s:isabs(a:line) || a:line =~ '^\~[/\\]'
 		let filpath = a:line
 	el
 		if (has('win32') || has('win64')) && !&shellslash
