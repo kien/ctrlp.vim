@@ -1944,7 +1944,7 @@ fu! s:bufnrfilpath(line)
 	if s:isabs(a:line) || a:line =~ '^\~[/\\]'
 		let filpath = a:line
 	el
-		let filpath = s:dyncwd.s:lash()
+		let filpath = s:dyncwd.s:lash().a:line
 	en
 	let filpath = fnamemodify(filpath, ':p')
 	let bufnr = bufnr('^'.filpath.'$')
