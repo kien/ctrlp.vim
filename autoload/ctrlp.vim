@@ -1658,8 +1658,16 @@ fu! s:samerootsyml(each, isfile, cwd)
 endf
 
 fu! ctrlp#rmbasedir(items)
+	if a:items == []
+		retu a:items
+	en
 	let cwd = s:dyncwd.s:lash()
-	if a:items != [] && !stridx(a:items[0], cwd)
+	let first = a:items[0]
+	if has('win32') || has('win64')
+		let cwd = tr(cwd, '\', '/')
+		let first = tr(first, '\', '/')
+	en
+	if !stridx(first, cwd)
 		let idx = strlen(cwd)
 		retu map(a:items, 'strpart(v:val, idx)')
 	en
@@ -1936,11 +1944,7 @@ fu! s:bufnrfilpath(line)
 	if s:isabs(a:line) || a:line =~ '^\~[/\\]'
 		let filpath = a:line
 	el
-		if (has('win32') || has('win64')) && !&shellslash
-			let filpath = s:dyncwd.'\'.a:line
-		el
-			let filpath = s:dyncwd.'/'.a:line
-		en
+		let filpath = s:dyncwd.s:lash()
 	en
 	let filpath = fnamemodify(filpath, ':p')
 	let bufnr = bufnr('^'.filpath.'$')
