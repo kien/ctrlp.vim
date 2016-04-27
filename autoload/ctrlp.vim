@@ -1082,7 +1082,7 @@ fu! ctrlp#acceptfile(...)
 	cal s:PrtExit()
 	let tail = s:tail()
 	let j2l = atl != '' ? atl : matchstr(tail, '^ +\zs\d\+$')
-	if ( s:jmptobuf =~ md || ( !empty(s:jmptobuf) && s:jmptobuf !~# '\v^0$' && md =~ '[et]' ) ) && bufnr > 0
+	if bufnr > 0 && ( !empty(s:jmptobuf) && s:jmptobuf =~ md )
 		\ && !( md == 'e' && bufnr == bufnr('%') )
 		let [jmpb, bufwinnr] = [1, bufwinnr(bufnr)]
 		let buftab = ( s:jmptobuf =~# '[tTVH]' || s:jmptobuf > 1 )
