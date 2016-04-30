@@ -1754,7 +1754,7 @@ fu! ctrlp#syntax()
 	en
 	sy match CtrlPNoEntries '^ == NO ENTRIES ==$'
 	if hlexists('CtrlPLinePre')
-		sy match CtrlPLinePre '^>'
+		exe "sy match CtrlPLinePre '^".escape(get(g:, 'ctrlp_line_prefix', '>'),'^$.*~\')."'"
 	en
 
 	if s:itemtype == 1 && s:has_conceal
