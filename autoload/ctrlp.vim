@@ -320,6 +320,7 @@ fu! s:Close()
 	if winnr('$') == 1
 		bw!
 	el
+		unl! s:init
 		try | bun!
 		cat | clo! | endt
 		cal s:unmarksigns()
@@ -332,7 +333,7 @@ fu! s:Close()
 	if s:winres[1] >= &lines && s:winres[2] == winnr('$')
 		exe s:winres[0].s:winres[0]
 	en
-	unl! s:focus s:hisidx s:hstgot s:marked s:statypes s:init s:savestr
+	unl! s:focus s:hisidx s:hstgot s:marked s:statypes s:savestr
 		\ s:mrbs s:did_exp
 	cal ctrlp#recordhist()
 	cal s:execextvar('exit')
