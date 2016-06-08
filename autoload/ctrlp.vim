@@ -653,9 +653,9 @@ fu! s:Update(str)
 endf
 
 fu! s:ForceUpdate()
-	let wv = winsaveview()
+	let pos = getcurpos()
 	sil! cal s:Update(escape(s:getinput(), '\'))
-	cal winrestview(wv)
+	cal setpos('.', pos)
 endf
 
 fu! s:BuildPrompt(upd)
@@ -839,9 +839,9 @@ fu! s:PrtSelectMove(dir)
 	let wht = winheight(0)
 	let dirs = {'t': 'gg','b': 'G','j': 'j','k': 'k','u': wht.'k','d': wht.'j'}
 	exe 'keepj norm!' dirs[a:dir]
-	let wv = winsaveview()
+	let pos = getcurpos()
 	cal s:BuildPrompt(0)
-	cal winrestview(wv)
+	cal setpos('.', pos)
 endf
 
 fu! s:PrtSelectJump(char)
@@ -864,9 +864,9 @@ fu! s:PrtSelectJump(char)
 			let [jmpln, s:jmpchr] = [npos == -1 ? pos : npos, [chr, npos]]
 		en
 		exe 'keepj norm!' ( jmpln + 1 ).'G'
-		let wv = winsaveview()
+		let pos = getcurpos()
 		cal s:BuildPrompt(0)
-		cal winrestview(wv)
+		cal setpos('.', pos)
 	en
 endf
 " Misc {{{2
