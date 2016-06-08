@@ -315,11 +315,11 @@ fu! s:Open()
 	cal s:setupblank()
 endf
 
-fu! s:Close()
+fu! s:Close(exit)
 	cal s:buffunc(0)
 	if winnr('$') == 1
 		bw!
-	el
+	elsei a:exit
 		try | bun!
 		cat | clo! | endt
 		cal s:unmarksigns()
@@ -908,7 +908,7 @@ endf
 
 fu! s:PrtExit()
 	if bufnr('%') == s:bufnr && bufname('%') == 'ControlP'
-		noa cal s:Close()
+		noa cal s:Close(1)
 		noa winc p
 	en
 endf
@@ -2534,7 +2534,7 @@ if has('autocmd')
 	aug CtrlPAug
 		au!
 		au BufEnter ControlP cal s:checkbuf()
-		au BufLeave ControlP noa cal s:Close()
+		au BufLeave ControlP noa cal s:Close(0)
 		au VimLeavePre * cal s:leavepre()
 	aug END
 en
