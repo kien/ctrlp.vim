@@ -2348,7 +2348,8 @@ endf
 fu! s:buildpat(lst)
 	let pat = a:lst[0]
 	for item in range(1, len(a:lst) - 1)
-		let pat .= '[^'.a:lst[item - 1].']\{-}'.a:lst[item]
+		let c = a:lst[item - 1]
+		let pat .= (c == '/' ? '[^/]\{-}' : '[^'.c.'/]\{-}').a:lst[item]
 	endfo
 	retu pat
 endf
