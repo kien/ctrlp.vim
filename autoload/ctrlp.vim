@@ -907,6 +907,7 @@ fu! s:PrtDeleteMRU()
 endf
 
 fu! s:PrtExit()
+	exe bufwinnr(s:bufnr).'winc w'
 	if bufnr('%') == s:bufnr && bufname('%') == 'ControlP'
 		noa cal s:Close(1)
 		noa winc p
