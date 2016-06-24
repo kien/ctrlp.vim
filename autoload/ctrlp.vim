@@ -425,7 +425,7 @@ fu! s:UserCmd(lscmd)
 	let do_ign =
 		\ type(s:usrcmd) == 4 && has_key(s:usrcmd, 'ignore') && s:usrcmd['ignore']
 	if do_ign && ctrlp#igncwd(s:cwd) | retu | en
-	if exists('+ssl') && &ssl
+	if exists('+ssl') && &ssl && &shell !~ 'sh'
 		let [ssl, &ssl, path] = [&ssl, 0, tr(path, '/', '\')]
 	en
 	if (has('win32') || has('win64')) && match(&shellcmdflag, "/") != -1
