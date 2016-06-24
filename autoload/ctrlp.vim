@@ -93,6 +93,7 @@ let [s:pref, s:bpref, s:opts, s:new_opts, s:lc_opts] =
 	\ 'open_single_match':     ['s:opensingle', []],
 	\ 'brief_prompt':          ['s:brfprt', 0],
 	\ 'match_current_file':    ['s:matchcrfile', 0],
+	\ 'match_natural_name':    ['s:matchnatural', 0],
 	\ 'compare_lim':           ['s:compare_lim', 3000],
 	\ 'bufname_mod':           ['s:bufname_mod', ':t'],
 	\ 'bufpath_mod':           ['s:bufpath_mod', ':~:.:h'],
@@ -1823,7 +1824,7 @@ fu! s:highlight(pat, grp)
 				" occurrence of our letters. We also ensure that our matcher is case
 				" insensitive or sensitive depending.
 				cal matchadd(a:grp, beginning.middle.ending)
-			endfor
+			endfo
 		en
 
 		cal matchadd('CtrlPLinePre', '^>')
@@ -2347,10 +2348,16 @@ endf
 
 fu! s:buildpat(lst)
 	let pat = a:lst[0]
-	for item in range(1, len(a:lst) - 1)
-		let c = a:lst[item - 1]
-		let pat .= (c == '/' ? '[^/]\{-}' : '[^'.c.'/]\{-}').a:lst[item]
-	endfo
+	if s:matchnatural == 1
+		for item in range(1, len(a:lst) - 1)
+			let c = a:lst[item - 1]
+			let pat .= (c == '/' ? '[^/]\{-}' : '[^'.c.'/]\{-}').a:lst[item]
+		endfo
+	else
+		for item in range(1, len(a:lst) - 1)
+			let pat .= '[^'.a:lst[item - 1].']\{-}'.a:lst[item]
+		endfo
+	en
 	retu pat
 endf
 
