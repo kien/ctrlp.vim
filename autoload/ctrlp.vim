@@ -653,7 +653,7 @@ fu! s:Update(str)
 endf
 
 fu! s:ForceUpdate()
-	let pos = getcurpos()
+	let pos = exists('*getcurpos') ? getcurpos() : getpos('.')
 	sil! cal s:Update(escape(s:getinput(), '\'))
 	cal setpos('.', pos)
 endf
@@ -839,7 +839,7 @@ fu! s:PrtSelectMove(dir)
 	let wht = winheight(0)
 	let dirs = {'t': 'gg','b': 'G','j': 'j','k': 'k','u': wht.'k','d': wht.'j'}
 	exe 'keepj norm!' dirs[a:dir]
-	let pos = getcurpos()
+	let pos = exists('*getcurpos') ? getcurpos() : getpos('.')
 	cal s:BuildPrompt(0)
 	cal setpos('.', pos)
 endf
@@ -864,7 +864,7 @@ fu! s:PrtSelectJump(char)
 			let [jmpln, s:jmpchr] = [npos == -1 ? pos : npos, [chr, npos]]
 		en
 		exe 'keepj norm!' ( jmpln + 1 ).'G'
-		let pos = getcurpos()
+		let pos = exists('*getcurpos') ? getcurpos() : getpos('.')
 		cal s:BuildPrompt(0)
 		cal setpos('.', pos)
 	en
