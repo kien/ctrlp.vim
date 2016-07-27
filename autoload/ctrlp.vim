@@ -97,6 +97,7 @@ let [s:pref, s:bpref, s:opts, s:new_opts, s:lc_opts] =
 	\ 'compare_lim':           ['s:compare_lim', 3000],
 	\ 'bufname_mod':           ['s:bufname_mod', ':t'],
 	\ 'bufpath_mod':           ['s:bufpath_mod', ':~:.:h'],
+	\ 'formatline_func':       ['s:flfunc', 's:formatline(v:val)'],
 	\ }, {
 	\ 'open_multiple_files':   's:opmul',
 	\ 'regexp':                's:regexp',
@@ -624,7 +625,7 @@ fu! s:Render(lines, pat)
 	en
 	if s:mw_order == 'btt' | cal reverse(lines) | en
 	let s:lines = copy(lines)
-	cal map(lines, 's:formatline(v:val)')
+	cal map(lines, s:flfunc)
 	cal setline(1, s:offset(lines, height))
 	cal s:unmarksigns()
 	cal s:remarksigns()
