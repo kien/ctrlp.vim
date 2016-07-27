@@ -1943,7 +1943,7 @@ fu! s:isabs(path)
 endf
 
 fu! s:bufnrfilpath(line)
-	if s:isabs(a:line) || a:line =~ '^\~[/\\]' || a:line =~ '^\w\+:\/\/'
+  if s:isabs(a:line) || a:line =~ '^\~[/\\]'
 		let filpath = a:line
 	el
 		let filpath = s:dyncwd.s:lash().a:line
