@@ -2382,7 +2382,7 @@ fu! s:buildpat(lst)
 endf
 
 fu! s:curtype()
-	return s:CurTypeName()[1]
+	return s:CurTypeName()
 endf
 
 fu! s:mfunc()
