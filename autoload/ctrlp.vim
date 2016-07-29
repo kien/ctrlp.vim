@@ -2382,7 +2382,7 @@ fu! s:buildpat(lst)
 endf
 
 fu! s:curtype()
-	return s:CurTypeName()
+	return s:CurTypeName()[1]
 endf
 
 fu! s:mfunc()
@@ -2527,7 +2527,7 @@ endf
 " Returns [lname, sname]
 fu! s:CurTypeName()
 	if s:itemtype < len(s:coretypes)
-		return filter(copy(s:coretypes), 'v:val[1]==g:ctrlp_types[s:itemtype]')[0][1]
+		return filter(copy(s:coretypes), 'v:val[1]==g:ctrlp_types[s:itemtype]')[0]
 	el
 		return [s:getextvar("lname"), s:getextvar('sname')]
 	en
