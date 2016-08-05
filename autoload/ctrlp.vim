@@ -1994,9 +1994,13 @@ fu! s:bufnrfilpath(line)
 	en
 	let filpath = fnamemodify(filpath, ':p')
 	let bufnr = bufnr('^'.filpath.'$')
-	if (a:line =~ '[\/]\?\[\d\+\*No Name\]$' && !filereadable(filpath) && bufnr < 1)
-		let bufnr = str2nr(matchstr(a:line, '[\/]\?\[\zs\d\+\ze\*No Name\]$'))
-		let filpath = bufnr
+	if (!filereadable(filpath) && bufnr < 1)
+		if (a:line =~ '[\/]\?\[\d\+\*No Name\]$')
+			let bufnr = str2nr(matchstr(a:line, '[\/]\?\[\zs\d\+\ze\*No Name\]$'))
+			let filpath = bufnr
+		else
+			let bufnr = bufnr(a:line)
+		en
 	en
 	retu [bufnr, filpath]
 endf
