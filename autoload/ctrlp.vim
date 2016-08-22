@@ -2032,7 +2032,7 @@ fu! s:checkbuf()
 endf
 
 fu! s:iscmdwin()
-	let ermsg = v:errmsg
+	let [ermsg, v:errmsg] = [v:errmsg, '']
 	sil! noa winc p
 	sil! noa winc p
 	let [v:errmsg, ermsg] = [ermsg, v:errmsg]
