@@ -204,6 +204,14 @@ let s:hlgrps = {
 	\ }
 
 " lname, sname of the basic(non-extension) modes
+let s:types = ['fil', 'buf', 'mru']
+if !exists('g:ctrlp_types')
+	let g:ctrlp_types = s:types
+el
+	call filter(g:ctrlp_types, "index(['fil', 'buf', 'mru'], v:val)!=-1")
+en
+let g:ctrlp_builtins = len(g:ctrlp_types)-1
+
 let s:coretypes = filter([
 	\ ['files', 'fil'],
 	\ ['buffers', 'buf'],
