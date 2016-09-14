@@ -255,8 +255,9 @@ plugins look for .git/, .hg/,... some other plugins look for external *.exe
 tools on Windows). So be a little mindful of what you put in your |wildignore|.
 
                                                       *'g:ctrlp_custom_ignore'*
-In addition to |'wildignore'|, use this for files and directories you want only
-CtrlP to not show. Use regexp to specify the patterns: >
+In addition to |'wildignore'| and |g:ctrlp_show_hidden|, use this for files
+and directories you want only CtrlP to not show. Use regexp to specify the
+patterns: >
   let g:ctrlp_custom_ignore = ''
 <
 Examples: >
