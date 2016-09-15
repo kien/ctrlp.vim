@@ -861,13 +861,24 @@ COMMANDS                                                       *ctrlp-commands*
    Open CtrlP in find file mode.
 
    If no argument is given, the value of |g:ctrlp_working_path_mode| will be
-   used to determine the starting directory.
+   used to determine the starting directory.  See |:CtrlPCurFile| and
+   |:CtrlPCurWD| to temporarily override the setting.
 
    You can use <tab> to auto-complete the [starting-directory] when typing it.
 
                                                                  *:CtrlPBuffer*
 :CtrlPBuffer
    Open CtrlP in find buffer mode.
+
+                                                                *:CtrlPCurFile*
+:CtrlPCurFile
+    This acts like |:CtrlP| with |g:ctrlp_working_path_mode| = '' and ignores
+    the variable's current value.
+
+                                                                  *:CtrlPCurWD*
+:CtrlPCurWD
+    This acts like |:CtrlP| with |g:ctrlp_working_path_mode| = '' and ignores
+    the variable's current value.
 
                                                                     *:CtrlPMRU*
 :CtrlPMRU
