@@ -920,13 +920,10 @@ fu! s:PrtDeleteMRU()
 endf
 
 fu! s:PrtExit()
-	let bw = bufwinnr('%')
 	exe bufwinnr(s:bufnr).'winc w'
 	if bufnr('%') == s:bufnr && bufname('%') == 'ControlP'
 		noa cal s:Close(1)
 		noa winc p
-	els
-		exe bw.'winc w'
 	en
 endf
 
