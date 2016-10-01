@@ -2562,6 +2562,10 @@ fu! ctrlp#init(type, ...)
 	cal s:SetWD(a:0 ? a:1 : {})
 	cal s:MapNorms()
 	cal s:MapSpecs()
+	if empty(g:ctrlp_types) && empty(g:ctrlp_ext_vars)
+		call ctrlp#exit()
+		retu
+	en
 	if type(a:type) == 0
 		let type = a:type
 	el
