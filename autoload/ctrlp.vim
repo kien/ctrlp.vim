@@ -212,11 +212,13 @@ el
 en
 let g:ctrlp_builtins = len(g:ctrlp_types)-1
 
-let s:coretypes = filter([
-	\ ['files', 'fil'],
-	\ ['buffers', 'buf'],
-	\ ['mru files', 'mru'],
-\ ], 'index(g:ctrlp_types, v:val[1])!=-1')
+let s:coretype_names = {
+	\ 'fil' : 'files',
+	\ 'buf' : 'buffers',
+	\ 'mru' : 'mru files',
+	\ }
+
+let s:coretypes = map(copy(g:ctrlp_types), '[s:coretype_names[v:val], v:val]')
 
 " Get the options {{{2
 fu! s:opts(...)
