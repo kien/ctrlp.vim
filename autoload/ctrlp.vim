@@ -453,6 +453,9 @@ fu! s:UserCmd(lscmd)
 		let path = tr(path, '\', '/')
 	en
 	if s:usrcmdasync && v:version >= 800 && exists('*job_start')
+		if exists('s:job')
+			call job_stop(s:job)
+		en
 		let g:ctrlp_allfiles = []
 		let s:job = job_start(printf(lscmd, path), {'callback': 'ctrlp#addfile'})
 	elsei has('patch-7.4-597') && !(has('win32') || has('win64'))
