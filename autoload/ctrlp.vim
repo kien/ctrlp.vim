@@ -98,6 +98,7 @@ let [s:pref, s:bpref, s:opts, s:new_opts, s:lc_opts] =
 	\ 'bufname_mod':           ['s:bufname_mod', ':t'],
 	\ 'bufpath_mod':           ['s:bufpath_mod', ':~:.:h'],
 	\ 'formatline_func':       ['s:flfunc', 's:formatline(v:val)'],
+	\ 'user_command_async':    ['s:usrcmdasync', 0],
 	\ }, {
 	\ 'open_multiple_files':   's:opmul',
 	\ 'regexp':                's:regexp',
@@ -433,6 +434,11 @@ fu! s:GlobPath(dirs, depth)
 	en
 endf
 
+fu! ctrlp#addfile(ch, file)
+	call add(g:ctrlp_allfiles, a:file)
+	cal s:BuildPrompt(1)
+endf
+
 fu! s:UserCmd(lscmd)
 	let [path, lscmd] = [s:dyncwd, a:lscmd]
 	let do_ign =
@@ -448,7 +454,13 @@ fu! s:UserCmd(lscmd)
 	if (has('win32') || has('win64')) && match(&shell, 'sh') != -1
 		let path = tr(path, '\', '/')
 	en
-	if has('patch-7.4-597') && !(has('win32') || has('win64'))
+	if s:usrcmdasync && v:version >= 800 && exists('*job_start')
+		if exists('s:job')
+			call job_stop(s:job)
+		en
+		let g:ctrlp_allfiles = []
+		let s:job = job_start(printf(lscmd, path), {'callback': 'ctrlp#addfile'})
+	elsei has('patch-7.4-597') && !(has('win32') || has('win64'))
 		let g:ctrlp_allfiles = systemlist(printf(lscmd, path))
 	el
 		let g:ctrlp_allfiles = split(system(printf(lscmd, path)), "\n")
@@ -660,7 +672,7 @@ fu! s:Update(str)
 	let pat = s:matcher == {} ? s:SplitPattern(str) : str
 	let lines = s:nolim == 1 && empty(str) ? copy(g:ctrlp_lines)
 		\ : s:MatchedItems(g:ctrlp_lines, pat, s:mw_res)
-	if empty(str) | call clearmatches() | en
+	if empty(str) | cal clearmatches() | en
 	cal s:Render(lines, pat)
 	return lines
 endf
