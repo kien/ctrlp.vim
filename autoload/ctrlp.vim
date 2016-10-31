@@ -459,7 +459,7 @@ fu! s:UserCmd(lscmd)
 			call job_stop(s:job)
 		en
 		let g:ctrlp_allfiles = []
-		let s:job = job_start(printf(lscmd, path), {'callback': 'ctrlp#addfile'})
+		let s:job = job_start([&shell, &shellcmdflag, printf(lscmd, path)], {'callback': 'ctrlp#addfile'})
 	elsei has('patch-7.4-597') && !(has('win32') || has('win64'))
 		let g:ctrlp_allfiles = systemlist(printf(lscmd, path))
 	el
