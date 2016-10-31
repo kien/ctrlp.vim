@@ -329,11 +329,11 @@ fu! s:Open()
 	cal s:setupblank()
 endf
 
-fu! s:Close(exit)
+fu! s:Close()
 	cal s:buffunc(0)
 	if winnr('$') == 1
 		bw!
-	elsei a:exit
+	el
 		try | bun!
 		cat | clo! | endt
 		cal s:unmarksigns()
@@ -937,7 +937,7 @@ fu! s:PrtExit()
 	let bw = bufwinnr('%')
 	exe bufwinnr(s:bufnr).'winc w'
 	if bufnr('%') == s:bufnr && bufname('%') == 'ControlP'
-		noa cal s:Close(1)
+		noa cal s:Close()
 		noa winc p
 	els
 		exe bw.'winc w'
@@ -2606,7 +2606,7 @@ if has('autocmd')
 	aug CtrlPAug
 		au!
 		au BufEnter ControlP cal s:checkbuf()
-		au BufLeave ControlP noa cal s:Close(0)
+		au BufLeave ControlP noa cal s:Close()
 		au VimLeavePre * cal s:leavepre()
 	aug END
 en
