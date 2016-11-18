@@ -1583,7 +1583,7 @@ fu! s:formatline(str)
 				let str .= printf('  %s', '<bp>'.parts[3].'</bp>')
 			en
 		el
-			let str .= printf(' %-5s %-30s  %s',
+			let str .= printf(' %-5s %-30s',
 				\ parts[0],
 				\ parts[2])
 			if (!empty(s:bufpath_mod))
