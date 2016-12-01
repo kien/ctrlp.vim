@@ -73,6 +73,7 @@ let s:types = {
 	\ 'sh'     : '%ssh%ssh%sf',
 	\ 'csh'    : '%ssh%ssh%sf',
 	\ 'zsh'    : '%ssh%ssh%sf',
+	\ 'scala'  : '%sscala%sscala%sctTmlp',
 	\ 'slang'  : '%sslang%sslang%snf',
 	\ 'sml'    : '%ssml%ssml%secsrtvf',
 	\ 'sql'    : '%ssql%ssql%scFPrstTvfp',
@@ -130,7 +131,7 @@ fu! s:exectags(cmd)
 endf
 
 fu! s:exectagsonfile(fname, ftype)
-	let [ags, ft] = ['-f - --sort=no --excmd=pattern --fields=nKs ', a:ftype]
+	let [ags, ft] = ['-f - --sort=no --excmd=pattern --fields=nKs --extra= ', a:ftype]
 	if type(s:types[ft]) == 1
 		let ags .= s:types[ft]
 		let bin = s:bin
