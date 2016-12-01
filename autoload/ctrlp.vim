@@ -283,7 +283,12 @@ fu! s:Open()
 		sil! exe 'let s:glb_'.ke.' = &'.ke.' | let &'.ke.' = '.string(va)
 	en | endfo
 	if s:opmul != '0' && has('signs')
-		sign define ctrlpmark text=+> texthl=Search
+		sign define ctrlpmark text=+> texthl=CtrlPMark
+		if version < 508
+			hi link CtrlPMark Search
+		else
+			hi def link CtrlPMark Search
+		endif
 	en
 	cal s:setupblank()
 endf
