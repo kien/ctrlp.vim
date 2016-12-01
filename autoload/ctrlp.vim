@@ -1842,7 +1842,7 @@ fu! s:argmaps(md, i)
 	let roh = [
 		\ ['Open Multiple Files', '/h[i]dden/[c]lear', ['i', 'c']],
 		\ ['Create a New File', '/[r]eplace', ['r']],
-		\ ['Open Selected', '/[r]eplace', ['r', 'd', 'a']],
+		\ ['Open Selected', '/[r]eplace/open [d]ir/mark [a]ll', ['r', 'd', 'a']],
 		\ ]
 	if a:i == 2
 		if !buflisted(bufnr('^'.fnamemodify(ctrlp#getcline(), ':p').'$'))
