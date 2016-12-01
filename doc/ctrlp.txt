@@ -63,7 +63,6 @@ Overview:~
   |ctrlp_default_input|.........Seed the prompt with an initial string.
   |ctrlp_abbrev|................Input abbreviations.
   |ctrlp_key_loop|..............Use input looping for multi-byte input.
-  |ctrlp_use_migemo|............Use Migemo patterns for Japanese filenames.
   |ctrlp_prompt_mappings|.......Change the mappings inside the prompt.
 
   MRU mode:
@@ -495,12 +494,6 @@ Note #1: when set, this option resets the |g:ctrlp_lazy_update| option.
 
 Note #2: you can toggle this feature inside the prompt with a custom mapping: >
   let g:ctrlp_prompt_mappings = { 'ToggleKeyLoop()': ['<F3>'] }
-<
-
-                                                         *'g:ctrlp_use_migemo'*
-Set this to 1 to use Migemo Pattern for Japanese filenames. Migemo Search only
-works in regexp mode. To split the pattern, separate words with space: >
-  let g:ctrlp_use_migemo = 0
 <
 
                                                     *'g:ctrlp_prompt_mappings'*
