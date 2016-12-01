@@ -62,7 +62,7 @@ com! -bar CtrlPChangeAll   cal ctrlp#init(ctrlp#changes#cmd(1))
 com! -bar CtrlPMixed       cal ctrlp#init(ctrlp#mixed#id())
 com! -bar CtrlPBookmarkDir cal ctrlp#init(ctrlp#bookmarkdir#id())
 
-com! -n=? -com=dir CtrlPBookmarkDirAdd
-	\ cal ctrlp#call('ctrlp#bookmarkdir#add', <q-args>)
+com! -n=? -com=dir -bang CtrlPBookmarkDirAdd
+	\ cal ctrlp#call('ctrlp#bookmarkdir#add', '<bang>', <q-args>)
 
 " vim:ts=2:sw=2:sts=2
