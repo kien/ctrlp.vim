@@ -1381,8 +1381,8 @@ fu! ctrlp#statusline()
 	en
 	let tps = s:statypes
 	let max = len(tps) - 1
-	let nxt = tps[s:walker(max, s:itemtype,  1)][1]
-	let prv = tps[s:walker(max, s:itemtype, -1)][1]
+	let nxt = tps[s:walker(max, s:itemtype,  1)][1].'('. substitute(s:prtmaps['ToggleType(1)'][0],'[\<\>]','','g').')'
+	let prv = tps[s:walker(max, s:itemtype, -1)][1].'('. substitute(s:prtmaps['ToggleType(-1)'][0],'[\<\>]','','g').')'
 	let s:ctype = tps[s:itemtype][0]
 	let focus   = s:focus ? 'prt'  : 'win'
 	let byfname = s:ispath ? s:byfname ? 'file' : 'path' : 'line'
