@@ -1498,6 +1498,9 @@ Special thanks:~
 ===============================================================================
 CHANGELOG                                                     *ctrlp-changelog*
 
+    * New option |g:ctrlp_custom_tag_files| to specify custom tag files.
+    * Accept 0 for g:ctrlp_match_window no-limited window size.
+
 Before 2016/11/28~
 
     + New command: |YankLine()| to yank current line.
