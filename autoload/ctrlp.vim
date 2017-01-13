@@ -303,7 +303,6 @@ fu! s:match_window_opts()
 	let s:mw_res =
 		\ s:mw =~ 'results:[^,]\+' ? str2nr(matchstr(s:mw, 'results:\zs\d\+'))
 		\ : min([s:mw_max, &lines])
-	let s:mw_res = max([s:mw_res, 1])
 endf
 "}}}1
 " * Open & Close {{{1

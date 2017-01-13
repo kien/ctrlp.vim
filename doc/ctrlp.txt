@@ -148,6 +148,7 @@ The minimum and maximum heights:
 
 The maximum number of results:
   results:{n} - list maximum {n} results (default: sync with max height).
+                0 mean no-limit.
 
 Note: When a setting isn't set, its default value will be used.
 
