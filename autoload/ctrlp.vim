@@ -2384,7 +2384,7 @@ endf
 fu! s:matchbuf(item, pat)
 	let bufnr = s:bufnrfilpath(a:item)[0]
 	let parts = s:bufparts(bufnr)
-	let item = bufnr.parts[0].parts[2].s:lash().parts[3]
+	let item = s:byfname ? parts[2] : bufnr.parts[0].parts[2].s:lash().parts[3]
 	retu match(item, a:pat)
 endf
 
