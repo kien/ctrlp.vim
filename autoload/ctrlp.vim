@@ -2262,6 +2262,12 @@ fu! ctrlp#init(type, ...)
 	cal s:BuildPrompt(1)
 	if s:keyloop | cal s:KeyLoop() | en
 endf
+
+fu! ctrlp#close()
+    call s:Close()
+    call ctrlp#exit()
+endf
+
 " - Autocmds {{{1
 if has('autocmd')
 	aug CtrlPAug
