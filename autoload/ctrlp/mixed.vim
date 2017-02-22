@@ -38,6 +38,10 @@ fu! s:getnewmix(cwd, clim)
 	let g:ctrlp_lines = copy(ctrlp#files())
 	cal ctrlp#progress('Mixing...')
 	let mrufs = copy(ctrlp#mrufiles#list('raw'))
+	if exists('g:ctrlp_mruf_relative') && g:ctrlp_mruf_relative
+		let cwd = exists('+ssl') ? tr(a:cwd, '/', '\') : a:cwd
+		cal filter(mrufs, '!stridx(v:val, cwd)')
+	en
 	if exists('+ssl') && &ssl
 		cal map(mrufs, 'tr(v:val, "\\", "/")')
 	en
