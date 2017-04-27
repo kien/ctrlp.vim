@@ -6,8 +6,9 @@
 " GetLatestVimScripts: 3736 1 :AutoInstall: ctrlp.zip
 
 if ( exists('g:loaded_ctrlp') && g:loaded_ctrlp ) || v:version < 700 || &cp
-	fini
-en
+	finish
+endif
+
 let g:loaded_ctrlp = 1
 
 let [g:ctrlp_lines, g:ctrlp_allfiles, g:ctrlp_alltags, g:ctrlp_alldirs,
