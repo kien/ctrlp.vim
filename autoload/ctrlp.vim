@@ -2305,7 +2305,7 @@ fu! s:lastvisual()
 	let cview = winsaveview()
 	let [ovreg, ovtype] = [getreg('v'), getregtype('v')]
 	let [oureg, outype] = [getreg('"'), getregtype('"')]
-	sil! exe 'norm! \<C-U>gv"vy'
+	sil! norm! gV"vy
 	let selected = s:regisfilter('v')
 	cal setreg('v', ovreg, ovtype)
 	cal setreg('"', oureg, outype)
