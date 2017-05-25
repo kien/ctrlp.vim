@@ -39,7 +39,7 @@ if g:ctrlp_map != '' && !hasmapto('<plug>(ctrlp)')
 	exe 'map' g:ctrlp_map '<plug>(ctrlp)'
 en
 
-if exists('g:ctrlp_types') && index(g:ctrlp_types, 'mru') >= 0
+if !exists('g:ctrlp_types') || index(g:ctrlp_types, 'mru') >= 0
 	cal ctrlp#mrufiles#init()
 en
 
