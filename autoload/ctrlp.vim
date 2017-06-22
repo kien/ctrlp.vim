@@ -569,9 +569,14 @@ endf
 fu! s:MatchedItems(items, pat, limit)
 	let exc = exists('s:crfilerel') ? s:crfilerel : ''
 	let items = s:narrowable() ? s:matched + s:mdata[3] : a:items
-	if s:matcher != {}
+	let matcher = s:getextvar('matcher')
+	let g:hoge = matcher
+	if empty(matcher)
+		let matcher = s:matcher
+	en
+	if matcher != {}
 		let argms =
-			\ has_key(s:matcher, 'arg_type') && s:matcher['arg_type'] == 'dict' ? [{
+			\ has_key(matcher, 'arg_type') && matcher['arg_type'] == 'dict' ? [{
 			\ 'items':  items,
 			\ 'str':    a:pat,
 			\ 'limit':  a:limit,
@@ -580,7 +585,7 @@ fu! s:MatchedItems(items, pat, limit)
 			\ 'crfile': exc,
 			\ 'regex':  s:regexp,
 			\ }] : [items, a:pat, a:limit, s:mmode(), s:ispath, exc, s:regexp]
-		let lines = call(s:matcher['match'], argms, s:matcher)
+		let lines = call(matcher['match'], argms, matcher)
 	el
 		let lines = s:MatchIt(items, a:pat, a:limit, exc)
 	en
