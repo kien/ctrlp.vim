@@ -1873,6 +1873,11 @@ fu! s:highlight(pat, grp)
 		en
 
 		cal matchadd('CtrlPLinePre', '^>')
+	elseif !empty(a:pat) && s:regexp &&
+				\ exists('g:ctrlp_regex_always_higlight') &&
+				\ g:ctrlp_regex_always_higlight
+		let pat = substitute(a:pat, '\\\@<!\^', '^> \\zs', 'g')
+		cal matchadd(a:grp, ( s:martcs == '' ? '\c' : '\C').pat)
 	en
 endf
 
