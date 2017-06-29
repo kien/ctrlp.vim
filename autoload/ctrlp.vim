@@ -571,6 +571,7 @@ fu! s:MatchedItems(items, pat, limit)
 	let items = s:narrowable() ? s:matched + s:mdata[3] : a:items
 	let matcher = s:getextvar('matcher')
 	if empty(matcher) || type(matcher) != 4 || !has_key(matcher, 'match')
+		unlet matcher
 		let matcher = s:matcher
 	en
 	if matcher != {}
