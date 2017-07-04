@@ -2499,7 +2499,9 @@ endf
 fu! s:getextvar(key)
 	if s:itemtype >= len(s:coretypes) && len(g:ctrlp_ext_vars) > 0
 		let vars = g:ctrlp_ext_vars[s:itemtype - len(s:coretypes)]
-		retu has_key(vars, a:key) ? vars[a:key] : -1
+		if has_key(vars, a:key)
+			retu vars[a:key]
+		en
 	en
 	retu get(g:, 'ctrlp_' . s:matchtype . '_' . a:key, -1)
 endf
