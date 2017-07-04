@@ -1201,7 +1201,7 @@ fu! s:AcceptSelection(action)
 			let type = exttype == 'dict' ? exttype : 'list'
 		en
 	en
-	let actargs = type == 'dict' ? [{ 'action': md, 'line': line, 'icr': icr }]
+	let actargs = type == 'dict' ? [{ 'action': md, 'line': line, 'icr': icr, 'input': str}]
 		\ : [md, line]
 	cal call(actfunc, actargs)
 endf
