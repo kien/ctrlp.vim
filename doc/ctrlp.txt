@@ -872,12 +872,12 @@ COMMANDS                                                       *ctrlp-commands*
 
                                                                 *:CtrlPCurFile*
 :CtrlPCurFile
-    This acts like |:CtrlP| with |g:ctrlp_working_path_mode| = '' and ignores
+    This acts like |:CtrlP| with |g:ctrlp_working_path_mode| = 'c' and ignores
     the variable's current value.
 
                                                                   *:CtrlPCurWD*
 :CtrlPCurWD
-    This acts like |:CtrlP| with |g:ctrlp_working_path_mode| = '' and ignores
+    This acts like |:CtrlP| with |g:ctrlp_working_path_mode| = 'd' and ignores
     the variable's current value.
 
                                                                     *:CtrlPMRU*
