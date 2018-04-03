@@ -139,12 +139,12 @@ fu! s:exectags(cmd)
 endf
 
 fu! s:exectagsonfile(fname, ftype)
-	let [ags, ft] = ['-f - --sort=no --excmd=pattern --fields=nKs --extra= --file-scope=yes ', a:ftype]
+	let [ags, ft] = [get(g:, 'ctrlp_buffertag_options', '-f - --sort=no --excmd=pattern --fields=nKs --extra= --file-scope=yes'), a:ftype]
 	if type(s:types[ft]) == 1
-		let ags .= s:types[ft]
+		let ags .= ' ' . s:types[ft]
 		let bin = s:bin
 	elsei type(s:types[ft]) == 4
-		let ags = s:types[ft]['args']
+		let ags = ' ' . s:types[ft]['args']
 		let bin = expand(s:types[ft]['bin'], 1)
 	en
 	if empty(bin) | retu '' | en
