@@ -1151,6 +1151,7 @@ fu! ctrlp#acceptfile(...)
 			\ md == 't' || s:splitwin == 1 ? ( useb ? 'tab sb' : 'tabe' ) :
 			\ md == 'h' || s:splitwin == 2 ? ( useb ? 'sb' : 'new' ) :
 			\ md == 'v' || s:splitwin == 3 ? ( useb ? 'vert sb' : 'vne' ) :
+			\ &bt == 'help' ? 'b' :
 			\ call('ctrlp#normcmd', useb ? ['b', 'bo vert sb'] : ['e'])
 		" Reset &switchbuf option
 		let [swb, &swb] = [&swb, '']
