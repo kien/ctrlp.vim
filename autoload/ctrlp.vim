@@ -2619,6 +2619,7 @@ fu! ctrlp#init(type, ...)
 	en
 	cal ctrlp#setlines(s:settype(type))
 	cal ctrlp#syntax()
+	set ft=ctrlp
 	cal s:SetDefTxt()
 	let curName = s:CurTypeName()
 	let shouldExitSingle = index(s:opensingle, curName[0])>=0 || index(s:opensingle, curName[1])>=0
