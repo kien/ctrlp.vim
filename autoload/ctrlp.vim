@@ -2618,7 +2618,7 @@ fu! ctrlp#init(type, ...)
 		en
 	en
 	cal ctrlp#setlines(s:settype(type))
-	set ft=ctrlp
+	let &filetype = empty(&filetype) ? 'ctrlp' : 'ctrlp.' . &filetype
 	cal ctrlp#syntax()
 	cal s:SetDefTxt()
 	let curName = s:CurTypeName()
