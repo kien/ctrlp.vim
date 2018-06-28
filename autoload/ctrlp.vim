@@ -2602,7 +2602,7 @@ fu! s:IsBuiltin()
 endfu
 
 fu! s:DetectFileType(type, ft)
-	if s:IsBuiltin() || empty(a:ft)
+	if s:IsBuiltin() || empty(a:ft) || a:ft ==# 'ctrlp'
 		retu 'ctrlp'
 	el
 		retu 'ctrlp.' . a:ft
