@@ -1591,7 +1591,7 @@ fu! s:formatline(str)
 		let bufnr = s:bufnrfilpath(str)[0]
 		let parts = s:bufparts(bufnr)
 		let str = printf('%'.s:bufnr_width.'s', bufnr)
-		if s:has_conceal
+		if s:has_conceal && has('syntax_items')
 			let str .= printf(' %-13s %s%-36s',
 				\ '<bi>'.parts[0].'</bi>',
 				\ '<bn>'.parts[1], '{'.parts[2].'}</bn>')
