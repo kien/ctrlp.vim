@@ -330,6 +330,7 @@ fu! s:Open()
 endf
 
 fu! s:Close()
+	cal s:async_glob_abort()
 	cal s:buffunc(0)
 	if winnr('$') == 1
 		bw!
@@ -434,9 +435,39 @@ fu! s:GlobPath(dirs, depth)
 	en
 endf
 
-fu! ctrlp#addfile(ch, file)
+fu! ctrlp#async_glob_update_progress(timer)
+	let s:must_wait = 0
+	if exists('s:focus') && get(s:, 'setlines_post_ended', 0)
+		cal s:ForceUpdate()
+	en
+	if exists('s:timer')
+		sil! cal ctrlp#statusline(len(g:ctrlp_allfiles))
+	endif
+endf
+
+fu! ctrlp#async_glob_addfile(ch, file)
 	call add(g:ctrlp_allfiles, a:file)
-	cal s:BuildPrompt(1)
+endf
+
+fu! ctrlp#async_glob_onexit(ch, status)
+	let s:must_wait = 0
+	if exists('s:timer')
+		call timer_stop(s:timer)
+	en
+	if exists('s:focus') && get(s:, 'setlines_post_ended', 0)
+		sil! cal ctrlp#statusline()
+		cal s:ForceUpdate()
+	en
+endf
+
+fu! s:async_glob_abort()
+	if exists('s:job')
+		call job_stop(s:job)
+	en
+	if exists('s:timer')
+		call timer_stop(s:timer)
+	en
+	cal s:ForceUpdate()
 endf
 
 fu! s:safe_printf(format, ...)
@@ -467,7 +498,13 @@ fu! s:UserCmd(lscmd)
 			call job_stop(s:job)
 		en
 		let g:ctrlp_allfiles = []
-		let s:job = job_start([&shell, &shellcmdflag, printf(lscmd, path)], {'callback': 'ctrlp#addfile'})
+		let s:must_wait = 1
+		let s:job = job_start([&shell, &shellcmdflag, printf(lscmd, path)], 
+					\ {'callback': 'ctrlp#async_glob_addfile', 'exit_cb': 'ctrlp#async_glob_onexit'})
+		let s:timer = timer_start(250, 'ctrlp#async_glob_update_progress', {'repeat': -1})
+		while s:must_wait
+			sleep 50m
+		endwhile
 	elsei has('patch-7.4-597') && !(has('win32') || has('win64'))
 		let g:ctrlp_allfiles = systemlist(s:safe_printf(lscmd, path))
 	el
@@ -1054,6 +1091,7 @@ fu! s:ToggleByFname()
 endf
 
 fu! s:ToggleType(dir)
+	cal s:async_glob_abort()
 	let max = len(g:ctrlp_ext_vars) + len(s:coretypes) - 1
 	let next = s:walker(max, s:itemtype, a:dir)
 	cal ctrlp#setlines(next)
@@ -1526,7 +1564,7 @@ fu! s:compval(...)
 	retu a:1 - a:2
 endf
 " Statusline {{{2
-fu! ctrlp#statusline()
+fu! ctrlp#statusline(...)
 	if !exists('s:statypes')
 		let s:statypes = copy(s:coretypes)
 		if !empty(g:ctrlp_ext_vars)
@@ -1563,6 +1601,9 @@ fu! ctrlp#statusline()
 		let slider  = ' <'.prv.'>={'.item.'}=<'.nxt.'>'
 		let dir     = ' %=%<%#CtrlPMode2# %{getcwd()} %*'
 		let &l:stl  = focus.byfname.regex.slider.marked.dir
+		if a:0
+			let &l:stl = '%#CtrlPStats# '.a:1.' '.&l:stl
+		endif
 	en
 endf
 
@@ -2571,6 +2612,7 @@ endf
 fu! s:setlines_pre(...)
 	if a:0 | let s:itemtype = a:1 | en
 	cal s:modevar()
+	let s:setlines_post_ended = 0
 	let g:ctrlp_lines = []
 endf
 
@@ -2581,6 +2623,7 @@ fu! s:setlines_post()
 		cal map(copy(g:ctrlp_ext_vars), 'add(types, v:val["init"])')
 	en
 	let g:ctrlp_lines = eval(types[s:itemtype])
+	let s:setlines_post_ended = 1
 endf
 
 fu! ctrlp#setlines(...)
