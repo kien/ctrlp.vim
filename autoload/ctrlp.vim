@@ -391,8 +391,9 @@ fu! ctrlp#files()
 			en
 		el
 			sil! cal ctrlp#progress('Indexing...')
-			try | cal s:UserCmd(lscmd)
-			cat | retu [] | endt
+			" try |
+			cal s:UserCmd(lscmd)
+			" cat | retu [] | endt
 		en
 		" Remove base directory
 		cal ctrlp#rmbasedir(g:ctrlp_allfiles)
@@ -435,25 +436,35 @@ fu! s:GlobPath(dirs, depth)
 	en
 endf
 
-fu! ctrlp#async_glob_update_progress(timer)
+fu! s:async_glob_update_progress(timer)
 	let s:must_wait = 0
 	if exists('s:focus') && get(s:, 'setlines_post_ended', 0)
 		cal s:ForceUpdate()
 	en
 	if exists('s:timer')
-		sil! cal ctrlp#statusline(len(g:ctrlp_allfiles))
+		sil! cal ctrlp#statusline()
+	endif
+
+	if !exists('s:job')
+		timer_stop('s:timer')
+		unlet s:timer
 	endif
 endf
 
-fu! ctrlp#async_glob_addfile(ch, file)
-	call add(g:ctrlp_allfiles, a:file)
+fu! s:async_glob_on_stdout(job, data, ...)
+	if type(a:data) ==# type([])
+		call extend(g:ctrlp_allfiles, filter(a:data, 'v:val !=# ""'))
+	else
+		call add(g:ctrlp_allfiles, a:data)
+	endif
 endf
 
-fu! ctrlp#async_glob_onexit(ch, status)
+fu! s:async_glob_on_exit(...)
 	let s:must_wait = 0
-	if exists('s:timer')
-		call timer_stop(s:timer)
-	en
+	if exists('s:job')
+		unlet s:job
+	endif
+	cal s:stop_timer_if_exists()
 	if exists('s:focus') && get(s:, 'setlines_post_ended', 0)
 		sil! cal ctrlp#statusline()
 		cal s:ForceUpdate()
@@ -461,13 +472,27 @@ fu! ctrlp#async_glob_onexit(ch, status)
 endf
 
 fu! s:async_glob_abort()
-	if exists('s:job')
-		call job_stop(s:job)
-	en
+	cal s:stop_job_if_exists()
+	cal s:stop_timer_if_exists()
+	cal s:ForceUpdate()
+endf
+
+fu! s:stop_timer_if_exists()
 	if exists('s:timer')
 		call timer_stop(s:timer)
+		unlet s:timer
 	en
-	cal s:ForceUpdate()
+endf
+
+fu! s:stop_job_if_exists()
+	if exists('s:job')
+		if !has('nvim')
+			cal job_stop(s:job)
+		else
+			cal jobstop(s:job)
+		endif
+		unlet s:job
+	en
 endf
 
 fu! s:safe_printf(format, ...)
@@ -493,15 +518,23 @@ fu! s:UserCmd(lscmd)
 	if (has('win32') || has('win64')) && match(&shell, 'sh') != -1
 		let path = tr(path, '\', '/')
 	en
-	if s:usrcmdasync && v:version >= 800 && exists('*job_start')
-		if exists('s:job')
-			call job_stop(s:job)
-		en
+	if s:usrcmdasync && (v:version >= 800 || has('nvim')) && (exists('*job_start') || exists('*jobstart'))
+		cal s:stop_job_if_exists()
 		let g:ctrlp_allfiles = []
 		let s:must_wait = 1
-		let s:job = job_start([&shell, &shellcmdflag, printf(lscmd, path)], 
-					\ {'callback': 'ctrlp#async_glob_addfile', 'exit_cb': 'ctrlp#async_glob_onexit'})
-		let s:timer = timer_start(250, 'ctrlp#async_glob_update_progress', {'repeat': -1})
+		let argv = [&shell, &shellcmdflag, printf(lscmd, path)]
+		if !has('nvim')
+			let s:job = job_start(argv, {
+						\ 'out_cb': function('s:async_glob_on_stdout'), 
+						\ 'exit_cb': function('s:async_glob_on_exit')
+						\ })
+		else
+			let s:job = jobstart(argv, {
+						\ 'on_stdout': function('s:async_glob_on_stdout'),
+						\ 'on_exit': function('s:async_glob_on_exit')
+						\ })
+		endif
+		let s:timer = timer_start(250, function('s:async_glob_update_progress'), {'repeat': -1})
 		while s:must_wait
 			sleep 50m
 		endwhile
@@ -1564,7 +1597,7 @@ fu! s:compval(...)
 	retu a:1 - a:2
 endf
 " Statusline {{{2
-fu! ctrlp#statusline(...)
+fu! ctrlp#statusline()
 	if !exists('s:statypes')
 		let s:statypes = copy(s:coretypes)
 		if !empty(g:ctrlp_ext_vars)
@@ -1601,9 +1634,9 @@ fu! ctrlp#statusline(...)
 		let slider  = ' <'.prv.'>={'.item.'}=<'.nxt.'>'
 		let dir     = ' %=%<%#CtrlPMode2# %{getcwd()} %*'
 		let &l:stl  = focus.byfname.regex.slider.marked.dir
-		if a:0
-			let &l:stl = '%#CtrlPStats# '.a:1.' '.&l:stl
-		endif
+		if exists('s:timer')
+			let &l:stl = '%#CtrlPStats# '.len(g:ctrlp_allfiles).' '.&l:stl
+		en
 	en
 endf
 
