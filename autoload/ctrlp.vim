@@ -391,9 +391,8 @@ fu! ctrlp#files()
 			en
 		el
 			sil! cal ctrlp#progress('Indexing...')
-			" try |
-			cal s:UserCmd(lscmd)
-			" cat | retu [] | endt
+			try | cal s:UserCmd(lscmd)
+			cat | retu [] | endt
 		en
 		" Remove base directory
 		cal ctrlp#rmbasedir(g:ctrlp_allfiles)
