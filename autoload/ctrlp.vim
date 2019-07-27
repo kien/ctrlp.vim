@@ -445,8 +445,7 @@ fu! s:async_glob_update_progress(timer)
 	endif
 
 	if !exists('s:job')
-		call timer_stop(s:timer)
-		unlet s:timer
+		call s:stop_timer_if_exists()
 	endif
 endf
 
