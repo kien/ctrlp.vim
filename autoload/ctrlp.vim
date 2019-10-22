@@ -391,7 +391,12 @@ fu! s:UserCmd(lscmd)
 		let lscmd = substitute(lscmd, '\v(^|\&\&\s*)\zscd (/d)@!', 'cd /d ', '')
 	en
 	let path = exists('*shellescape') ? shellescape(path) : path
-	let g:ctrlp_allfiles = split(system(printf(lscmd, path)), "\n")
+	if lscmd =~ "%s"
+		let [full_lscmd] = [printf(lscmd, path)]
+	else
+		let [full_lscmd] = [lscmd]
+	en
+	let g:ctrlp_allfiles = split(system(full_lscmd), "\n")
 	if exists('+ssl') && exists('ssl')
 		let &ssl = ssl
 		cal map(g:ctrlp_allfiles, 'tr(v:val, "\\", "/")')
