@@ -79,13 +79,11 @@ fu! ctrlp#line#cmd(mode, ...)
 endf
 "}}}
 
-let s:i = 0
+let s:months= ["January","February","March","April","May","June","July","August","September","October","November","December"]
 fu! ctrlp#line#change()
-	let s:i += 1
-	echom s:i . ' ' . ctrlp#input()
-	if s:i == 10
-		call ctrlp#exit()
-	en
+	let l:input = ctrlp#input()
+	call ctrlp#set(filter(copy(s:months), 'v:val =~ l:input'))
+	call ctrlp#update()
 endf
 
 " vim:fen:fdm=marker:fmr={{{,}}}:fdl=0:fdc=1:ts=2:sw=2:sts=2

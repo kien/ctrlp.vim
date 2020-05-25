@@ -2753,6 +2753,18 @@ fu! s:notifyChange()
 	en
 endfu
 
+fu! ctrlp#set(lines)
+	let g:ctrlp_lines = a:lines
+endfu
+
+fu! ctrlp#get()
+	return g:ctrlp_lines
+endfu
+
+fu! ctrlp#update()
+	call s:ForceUpdate()
+endfu
+
 " - Autocmds {{{1
 if has('autocmd')
 	aug CtrlPAug
