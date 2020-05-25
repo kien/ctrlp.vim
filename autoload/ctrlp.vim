@@ -790,6 +790,9 @@ fu! s:BuildPrompt(upd)
 	if empty(prt[1]) && s:focus
 		exe 'echoh' hibase '| echon "_" | echoh None'
 	en
+	if a:upd
+		call s:notifyChange()
+	en
 endf
 " - SetDefTxt() {{{1
 fu! s:SetDefTxt()
@@ -2609,6 +2612,10 @@ fu! ctrlp#clearmarkedlist()
 	let s:marked = {}
 endf
 
+fu! ctrlp#input()
+	return s:getinput()
+endf
+
 fu! ctrlp#exit()
 	cal s:PrtExit()
 endf
@@ -2734,26 +2741,16 @@ fu! ctrlp#init(type, ...)
 		return 0
 	en
 	cal s:BuildPrompt(1)
-
-	call s:createEventContext()
-	call s:notifyEvent('init')
-
 	if s:keyloop | cal s:KeyLoop() | en
 	return 1
 endf
 
 " - Events {{{1
-fu! s:createEventContext()
-	let s:ectx = {}
-	let s:event = s:getextvar('event')
-endfu
-
-fu! s:notifyEvent(type)
-	if s:event != -1
-		let s:etype = a:type
-		call eval(s:event)
-		let s:etype = ''
-	endif
+fu! s:notifyChange()
+	let l:cb = s:getextvar('change')
+	if l:cb != -1
+		call eval(l:cb)
+	en
 endfu
 
 " - Autocmds {{{1

@@ -12,7 +12,7 @@ let g:loaded_ctrlp_line = 1
 
 cal add(g:ctrlp_ext_vars, {
 	\ 'init': 'ctrlp#line#init(s:crbufnr)',
-	\ 'event': 'ctrlp#line#event(s:etype, s:ectx)',
+	\ 'change': 'ctrlp#line#change()',
 	\ 'accept': 'ctrlp#line#accept',
 	\ 'act_farg' : 'dict',
 	\ 'lname': 'lines',
@@ -79,10 +79,13 @@ fu! ctrlp#line#cmd(mode, ...)
 endf
 "}}}
 
-fu! ctrlp#line#event(etype, ectx)
-	if a:etype == 'init'
-		call timer_start(2000, {t->ctrlp#exit()})
-  endif
+let s:i = 0
+fu! ctrlp#line#change()
+	let s:i += 1
+	echom s:i . ' ' . ctrlp#input()
+	if s:i == 10
+		call ctrlp#exit()
+	en
 endf
 
 " vim:fen:fdm=marker:fmr={{{,}}}:fdl=0:fdc=1:ts=2:sw=2:sts=2
