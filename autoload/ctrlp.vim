@@ -2734,9 +2734,28 @@ fu! ctrlp#init(type, ...)
 		return 0
 	en
 	cal s:BuildPrompt(1)
+
+	call s:createEventContext()
+	call s:notifyEvent('init')
+
 	if s:keyloop | cal s:KeyLoop() | en
 	return 1
 endf
+
+" - Events {{{1
+fu! s:createEventContext()
+	let s:ectx = {}
+	let s:event = s:getextvar('event')
+endfu
+
+fu! s:notifyEvent(type)
+	if s:event != -1
+		let s:etype = a:type
+		call eval(s:event)
+		let s:etype = ''
+	endif
+endfu
+
 " - Autocmds {{{1
 if has('autocmd')
 	aug CtrlPAug
