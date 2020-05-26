@@ -2758,7 +2758,7 @@ fu! ctrlp#set(lines)
 endfu
 
 fu! ctrlp#get()
-	return g:ctrlp_lines
+	retu g:ctrlp_lines
 endfu
 
 fu! ctrlp#update()
