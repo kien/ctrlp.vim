@@ -2613,7 +2613,7 @@ fu! ctrlp#clearmarkedlist()
 endf
 
 fu! ctrlp#input()
-	return s:getinput()
+	retu s:getinput()
 endf
 
 fu! ctrlp#exit()
