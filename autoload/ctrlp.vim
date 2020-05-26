@@ -2755,7 +2755,7 @@ endf
 
 fu! ctrlp#set(lines)
 	let g:ctrlp_lines = a:lines
-endfu
+endf
 
 fu! ctrlp#get()
 	retu g:ctrlp_lines
