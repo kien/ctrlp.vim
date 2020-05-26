@@ -2763,7 +2763,7 @@ endf
 
 fu! ctrlp#update()
 	cal s:ForceUpdate()
-endfu
+endf
 
 " - Autocmds {{{1
 if has('autocmd')
