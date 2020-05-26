@@ -2759,7 +2759,7 @@ endfu
 
 fu! ctrlp#get()
 	retu g:ctrlp_lines
-endfu
+endf
 
 fu! ctrlp#update()
 	cal s:ForceUpdate()
