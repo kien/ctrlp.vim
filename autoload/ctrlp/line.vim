@@ -12,7 +12,6 @@ let g:loaded_ctrlp_line = 1
 
 cal add(g:ctrlp_ext_vars, {
 	\ 'init': 'ctrlp#line#init(s:crbufnr)',
-	\ 'change': 'ctrlp#line#change()',
 	\ 'accept': 'ctrlp#line#accept',
 	\ 'act_farg' : 'dict',
 	\ 'lname': 'lines',
@@ -78,12 +77,5 @@ fu! ctrlp#line#cmd(mode, ...)
 	retu s:id
 endf
 "}}}
-
-let s:months= ["January","February","March","April","May","June","July","August","September","October","November","December"]
-fu! ctrlp#line#change()
-	let l:input = ctrlp#input()
-	call ctrlp#set(filter(copy(s:months), 'v:val =~ l:input'))
-	call ctrlp#update()
-endf
 
 " vim:fen:fdm=marker:fmr={{{,}}}:fdl=0:fdc=1:ts=2:sw=2:sts=2
