@@ -2753,14 +2753,6 @@ fu! s:notifyChange()
 	en
 endf
 
-fu! ctrlp#set(lines)
-	let g:ctrlp_lines = a:lines
-endf
-
-fu! ctrlp#get()
-	retu g:ctrlp_lines
-endf
-
 fu! ctrlp#update()
 	cal s:ForceUpdate()
 endf
