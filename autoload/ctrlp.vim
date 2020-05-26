@@ -791,7 +791,7 @@ fu! s:BuildPrompt(upd)
 		exe 'echoh' hibase '| echon "_" | echoh None'
 	en
 	if a:upd
-		cal s:notifyChange()
+		cal s:notifySearch()
 	en
 endf
 " - SetDefTxt() {{{1
@@ -2746,8 +2746,8 @@ fu! ctrlp#init(type, ...)
 endf
 
 " - Events {{{1
-fu! s:notifyChange()
-	let l:cb = s:getextvar('change')
+fu! s:notifySearch()
+	let l:cb = s:getextvar('search')
 	if l:cb != -1
 		cal eval(l:cb)
 	en
