@@ -2749,7 +2749,7 @@ endf
 fu! s:notifyChange()
 	let l:cb = s:getextvar('change')
 	if l:cb != -1
-		call eval(l:cb)
+		cal eval(l:cb)
 	en
 endfu
 
