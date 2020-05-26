@@ -2762,7 +2762,7 @@ fu! ctrlp#get()
 endfu
 
 fu! ctrlp#update()
-	call s:ForceUpdate()
+	cal s:ForceUpdate()
 endfu
 
 " - Autocmds {{{1
