@@ -2751,7 +2751,7 @@ fu! s:notifyChange()
 	if l:cb != -1
 		cal eval(l:cb)
 	en
-endfu
+endf
 
 fu! ctrlp#set(lines)
 	let g:ctrlp_lines = a:lines
