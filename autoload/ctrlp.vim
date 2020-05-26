@@ -791,7 +791,7 @@ fu! s:BuildPrompt(upd)
 		exe 'echoh' hibase '| echon "_" | echoh None'
 	en
 	if a:upd
-		call s:notifyChange()
+		cal s:notifyChange()
 	en
 endf
 " - SetDefTxt() {{{1
