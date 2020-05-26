@@ -2742,7 +2742,7 @@ fu! ctrlp#init(type, ...)
 	en
 	cal s:BuildPrompt(1)
 	if s:keyloop | cal s:KeyLoop() | en
-	return 1
+	retu 1
 endf
 
 " - Events {{{1
