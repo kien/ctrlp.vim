@@ -438,9 +438,9 @@ if exists('*readdirex')
 			el
 				cal extend(g:ctrlp_allfiles, [item])
 				if !s:maxf(len(g:ctrlp_allfiles)) && a:depth <= s:maxdepth
-	        if len(g:ctrlp_allfiles) % 100 == 0
+					if len(g:ctrlp_allfiles) % 100 == 0
 						sil! cal ctrlp#progress(len(g:ctrlp_allfiles), 1)
-	        en
+					en
 					let entries += [item]
 				en
 			en
