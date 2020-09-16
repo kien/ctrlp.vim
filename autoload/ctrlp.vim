@@ -425,15 +425,39 @@ fu! s:CloseCustomFuncs()
 	en
 endf
 
-fu! s:GlobPath(dirs, depth)
-	let entries = split(globpath(a:dirs, s:glob), "\n")
-	let [dnf, depth] = [ctrlp#dirnfile(entries), a:depth + 1]
-	cal extend(g:ctrlp_allfiles, dnf[1])
-	if !empty(dnf[0]) && !s:maxf(len(g:ctrlp_allfiles)) && depth <= s:maxdepth
-		sil! cal ctrlp#progress(len(g:ctrlp_allfiles), 1)
-		cal s:GlobPath(join(map(dnf[0], 's:fnesc(v:val, "g", ",")'), ','), depth)
-	en
-endf
+if exists('*readdirex')
+	fu! s:GlobPath(dirs, depth)
+		let entries = []
+		for item in readdir(a:dirs)
+			if item =~ '^\.'
+				con
+			en
+			let item = a:dirs . '/' . item
+			if isdirectory(item)
+				let entries += s:GlobPath(item, a:depth + 1)
+			el
+				cal extend(g:ctrlp_allfiles, [item])
+				if !s:maxf(len(g:ctrlp_allfiles)) && a:depth <= s:maxdepth
+	        if len(g:ctrlp_allfiles) % 100 == 0
+						sil! cal ctrlp#progress(len(g:ctrlp_allfiles), 1)
+	        en
+					let entries += [item]
+				en
+			en
+		endfor
+		retu entries
+	endf
+el
+	fu! s:GlobPath(dirs, depth)
+		let entries = split(globpath(a:dirs, s:glob), "\n")
+		let [dnf, depth] = [ctrlp#dirnfile(entries), a:depth + 1]
+		cal extend(g:ctrlp_allfiles, dnf[1])
+		if !empty(dnf[0]) && !s:maxf(len(g:ctrlp_allfiles)) && depth <= s:maxdepth
+			sil! cal ctrlp#progress(len(g:ctrlp_allfiles), 1)
+			cal s:GlobPath(join(map(dnf[0], 's:fnesc(v:val, "g", ",")'), ','), depth)
+		en
+  endf
+en
 
 fu! s:async_glob_update_progress(timer)
 	let s:must_wait = 0
@@ -442,26 +466,26 @@ fu! s:async_glob_update_progress(timer)
 	en
 	if exists('s:timer')
 		sil! cal ctrlp#statusline()
-	endif
+	en
 
 	if !exists('s:job')
 		call s:stop_timer_if_exists()
-	endif
+	en
 endf
 
 fu! s:async_glob_on_stdout(job, data, ...)
 	if type(a:data) ==# type([])
 		call extend(g:ctrlp_allfiles, filter(a:data, 'v:val !=# ""'))
-	else
+	el
 		call add(g:ctrlp_allfiles, a:data)
-	endif
+	en
 endf
 
 fu! s:async_glob_on_exit(...)
 	let s:must_wait = 0
 	if exists('s:job')
-		unlet s:job
-	endif
+		unl s:job
+	en
 	cal s:stop_timer_if_exists()
 	if exists('s:focus') && get(s:, 'setlines_post_ended', 0)
 		sil! cal ctrlp#statusline()
@@ -478,7 +502,7 @@ endf
 fu! s:stop_timer_if_exists()
 	if exists('s:timer')
 		call timer_stop(s:timer)
-		unlet s:timer
+		unl s:timer
 	en
 endf
 
@@ -486,10 +510,10 @@ fu! s:stop_job_if_exists()
 	if exists('s:job')
 		if !has('nvim')
 			cal job_stop(s:job)
-		else
+		el
 			cal jobstop(s:job)
-		endif
-		unlet s:job
+		en
+		unl s:job
 	en
 endf
 
@@ -526,12 +550,12 @@ fu! s:UserCmd(lscmd)
 						\ 'out_cb': function('s:async_glob_on_stdout'), 
 						\ 'exit_cb': function('s:async_glob_on_exit')
 						\ })
-		else
+		el
 			let s:job = jobstart(argv, {
 						\ 'on_stdout': function('s:async_glob_on_stdout'),
 						\ 'on_exit': function('s:async_glob_on_exit')
 						\ })
-		endif
+		en
 		let s:timer = timer_start(250, function('s:async_glob_update_progress'), {'repeat': -1})
 		while s:must_wait
 			sleep 50m
@@ -647,7 +671,7 @@ fu! s:MatchedItems(items, pat, limit)
 	let items = s:narrowable() ? s:matched + s:mdata[3] : a:items
 	let matcher = s:getextvar('matcher')
 	if empty(matcher) || type(matcher) != 4 || !has_key(matcher, 'match')
-		unlet matcher
+		unl matcher
 		let matcher = s:matcher
 	en
 	if matcher != {}
@@ -755,7 +779,7 @@ fu! s:Update(str)
 		\ : s:MatchedItems(g:ctrlp_lines, pat, s:mw_res)
 	if empty(str) | cal clearmatches() | en
 	cal s:Render(lines, pat)
-	return lines
+	retu lines
 endf
 
 fu! s:ForceUpdate()
@@ -1505,15 +1529,15 @@ fu! s:compmreb(...)
 	" By last entered time (bufnr)
 	let [id1, id2] = [index(s:mrbs, a:1), index(s:mrbs, a:2)]
 	if id1 == id2
-		return 0
-	endif
+		retu 0
+	en
 	if id1 < 0
-		return 1
-	endif
+		retu 1
+	en
 	if id2 < 0
-		return -1
-	endif
-	return id1 > id2 ? 1 : -1
+		retu -1
+	en
+	retu id1 > id2 ? 1 : -1
 endf
 
 fu! s:compmref(...)
@@ -2078,9 +2102,9 @@ endf
 
 fu! s:isabs(path)
 	if (has('win32') || has('win64'))
-		return a:path =~ '^\([a-zA-Z]:\)\{-}[/\\]'
+		retu a:path =~ '^\([a-zA-Z]:\)\{-}[/\\]'
 	el
-		return a:path =~ '^[/\\]'
+		retu a:path =~ '^[/\\]'
 	en
 endf
 
@@ -2510,7 +2534,7 @@ fu! s:buildpat(lst)
 endf
 
 fu! s:curtype()
-	return s:CurTypeName()[1]
+	retu s:CurTypeName()[1]
 endf
 
 fu! s:mfunc()
@@ -2672,9 +2696,9 @@ endf
 " Returns [lname, sname]
 fu! s:CurTypeName()
 	if s:itemtype < len(s:coretypes)
-		return filter(copy(s:coretypes), 'v:val[1]==g:ctrlp_types[s:itemtype]')[0]
+		retu filter(copy(s:coretypes), 'v:val[1]==g:ctrlp_types[s:itemtype]')[0]
 	el
-		return [s:getextvar("lname"), s:getextvar('sname')]
+		retu [s:getextvar("lname"), s:getextvar('sname')]
 	en
 endfu
 
@@ -2682,15 +2706,15 @@ fu! s:ExitIfSingleCandidate()
 	if len(s:Update(s:prompt[0])) == 1
 		call s:AcceptSelection('e')
 		call ctrlp#exit()
-		return 1
+		retu 1
 	en
-	return 0
+	retu 0
 endfu
 
 fu! s:IsBuiltin()
 	let builtins = ['tag', 'dir', 'bft', 'rts', 'bkd', 'lns', 'chs', 'mix', 'udo', 'qfx']
 	let curtype = s:getextvar('sname')
-	return s:itemtype < len(s:coretypes) || index(builtins, curtype) > -1
+	retu s:itemtype < len(s:coretypes) || index(builtins, curtype) > -1
 endfu
 
 fu! s:DetectFileType(type, ft)
@@ -2738,7 +2762,7 @@ fu! ctrlp#init(type, ...)
 	let curName = s:CurTypeName()
 	let shouldExitSingle = index(s:opensingle, curName[0])>=0 || index(s:opensingle, curName[1])>=0
 	if shouldExitSingle && s:ExitIfSingleCandidate()
-		return 0
+		retu 0
 	en
 	cal s:BuildPrompt(1)
 	if s:keyloop | cal s:KeyLoop() | en
@@ -2781,4 +2805,4 @@ fu! s:autocmds()
 endf
 "}}}
 
-" vim:fen:fdm=marker:fmr={{{,}}}:fdl=0:fdc=1:ts=2:sw=2:sts=2
+" vim1:fen:fdm=marker:fmr={{{,}}}:fdl=0:fdc=1:ts=2:sw=2:sts=2
