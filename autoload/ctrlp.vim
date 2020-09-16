@@ -428,20 +428,31 @@ endf
 if exists('*readdirex')
 	fu! s:GlobPath(dirs, depth)
 		let entries = []
-		for item in readdir(a:dirs)
-			if item =~ '^\.'
+		let slash = s:lash()
+		for item in readdirex(a:dirs)
+			let each = item['name']
+			let etype = item['type']
+			if !s:showhidden && each[0] == '.'
 				con
 			en
-			let item = a:dirs . '/' . item
-			if isdirectory(item)
-				let entries += s:GlobPath(item, a:depth + 1)
-			el
-				cal extend(g:ctrlp_allfiles, [item])
+			let each = a:dirs.slash.each
+			if s:igntype >= 0 && s:usrign(each, etype) | con | en
+			if etype == 'dir'
+				let entries += s:GlobPath(each, a:depth + 1)
+      elsei etype == 'link'
+				if s:folsym
+					let isfile = !isdirectory(each)
+					if s:folsym == 2 || !s:samerootsyml(each, isfile, cwd)
+					  let entries += [each]
+					en
+				en
+      elsei etype == 'file'
+				cal extend(g:ctrlp_allfiles, [each])
 				if !s:maxf(len(g:ctrlp_allfiles)) && a:depth <= s:maxdepth
 					if len(g:ctrlp_allfiles) % 100 == 0
 						sil! cal ctrlp#progress(len(g:ctrlp_allfiles), 1)
 					en
-					let entries += [item]
+					let entries += [each]
 				en
 			en
 		endfor
