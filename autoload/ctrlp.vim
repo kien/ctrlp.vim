@@ -431,10 +431,10 @@ if exists('*readdir')
 		for e in split(a:dirs, ',')
 			sil let files = readdir(e, '1', {'sort': 'none'})
 			if !s:showhidden | cal filter(files, 'v:val[0] != "."') | en
-			cal extend(entries, map(files, 'e.s:lash.v:val'))
+			let entries += map(files, 'e.s:lash.v:val')
 		endfo
 		let [dnf, depth] = [ctrlp#dirnfile(entries), a:depth + 1]
-		cal extend(g:ctrlp_allfiles, dnf[1])
+		let g:ctrlp_allfiles += dnf[1]
 		if !empty(dnf[0]) && !s:maxf(len(g:ctrlp_allfiles)) && depth <= s:maxdepth
 			sil! cal ctrlp#progress(len(g:ctrlp_allfiles), 1)
 			cal s:GlobPath(join(map(dnf[0], 's:fnesc(v:val, "g", ",")'), ','), depth)
@@ -444,7 +444,7 @@ el
 	fu! s:GlobPath(dirs, depth)
 		let entries = split(globpath(a:dirs, s:glob), "\n")
 		let [dnf, depth] = [ctrlp#dirnfile(entries), a:depth + 1]
-		cal extend(g:ctrlp_allfiles, dnf[1])
+		let g:ctrlp_allfiles += dnf[1]
 		if !empty(dnf[0]) && !s:maxf(len(g:ctrlp_allfiles)) && depth <= s:maxdepth
 			sil! cal ctrlp#progress(len(g:ctrlp_allfiles), 1)
 			cal s:GlobPath(join(map(dnf[0], 's:fnesc(v:val, "g", ",")'), ','), depth)
@@ -468,9 +468,9 @@ endf
 
 fu! s:async_glob_on_stdout(job, data, ...)
 	if type(a:data) ==# type([])
-		call extend(g:ctrlp_allfiles, filter(a:data, 'v:val !=# ""'))
+		let g:ctrlp_allfiles += filter(a:data, 'v:val !=# ""')
 	el
-		call add(g:ctrlp_allfiles, a:data)
+		let g:ctrlp_allfiles += [a:data]
 	en
 endf
 
@@ -494,7 +494,7 @@ endf
 
 fu! s:stop_timer_if_exists()
 	if exists('s:timer')
-		call timer_stop(s:timer)
+		cal timer_stop(s:timer)
 		unl s:timer
 	en
 endf
@@ -1376,7 +1376,7 @@ fu! s:MarkToOpen()
 		if exists('s:marked')
 			let vac = s:vacantdict(s:marked)
 			let key = empty(vac) ? len(s:marked) + 1 : vac[0]
-			let s:marked = extend(s:marked, { key : filpath })
+			cal extend(s:marked, { key : filpath })
 		el
 			let [key, s:marked] = [1, { 1 : filpath }]
 		en
@@ -1485,7 +1485,7 @@ fu! s:OpenNoMarks(md, line)
 	if a:md == 'a'
 		let [s:marked, key] = [{}, 1]
 		for line in s:lines
-			let s:marked = extend(s:marked, { key : fnamemodify(line, ':p') })
+			cal extend(s:marked, { key : fnamemodify(line, ':p') })
 			let key += 1
 		endfo
 		cal s:remarksigns()
@@ -1595,15 +1595,15 @@ fu! s:mixedsort2(ct, ...)
 	if s:ispath
 		let ms = []
 		if s:res_count < 21
-			cal add(ms, s:compfnlen(a:1, a:2))
-			if a:ct !~ '^\(buf\|mru\)$' | cal add(ms, s:comptime(a:1, a:2)) | en
-			if !s:itemtype | cal add(ms, s:comparent(a:1, a:2)) | en
+			let ms += [s:compfnlen(a:1, a:2)]
+			if a:ct !~ '^\(buf\|mru\)$' | let ms += [s:comptime(a:1, a:2)] | en
+			if !s:itemtype | let ms += [s:comparent(a:1, a:2)] | en
 		en
 		if a:ct =~ '^\(buf\|mru\)$'
-			cal add(ms, s:compmref(a:1, a:2))
+			let ms += [s:compmref(a:1, a:2)]
 			let cln = cml ? cln : 0
 		en
-		cal extend(ms, [cml, 0, 0, 0])
+		let ms += [cml, 0, 0, 0]
 		let mp = call('s:multipliers', ms[:3])
 		retu cln + ms[0] * mp[0] + ms[1] * mp[1] + ms[2] * mp[2] + ms[3] * mp[3]
 	en
@@ -1622,15 +1622,15 @@ fu! s:mixedsort(...)
 	if s:ispath
 		let ms = []
 		if s:res_count < 21
-			cal add(ms, s:compfnlen(a:1, a:2))
-			if ct !~ '^\(buf\|mru\)$' | cal add(ms, s:comptime(a:1, a:2)) | en
-			if !s:itemtype | cal add(ms, s:comparent(a:1, a:2)) | en
+			let ms += [s:compfnlen(a:1, a:2)]
+			if ct !~ '^\(buf\|mru\)$' | let ms += [s:comptime(a:1, a:2)] | en
+			if !s:itemtype | let ms += [s:comparent(a:1, a:2)] | en
 		en
 		if ct =~ '^\(buf\|mru\)$'
-			cal add(ms, s:compmref(a:1, a:2))
+			let ms += [s:compmref(a:1, a:2)]
 			let cln = cml ? cln : 0
 		en
-		cal extend(ms, [cml, 0, 0, 0])
+		let ms += [cml, 0, 0, 0]
 		let mp = call('s:multipliers', ms[:3])
 		retu cln + ms[0] * mp[0] + ms[1] * mp[1] + ms[2] * mp[2] + ms[3] * mp[3]
 	en
@@ -2454,7 +2454,7 @@ fu! s:delbuf()
 		cal s:unmarksigns()
 		unl s:marked
 	el
-		cal add(lines, ctrlp#getcline())
+		let lines += [ctrlp#getcline()]
 	en
 	for line in lines
 		let bufnr = s:bufnrfilpath(line)[0]
