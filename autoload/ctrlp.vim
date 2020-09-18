@@ -741,7 +741,7 @@ fu! s:Render(lines, pat)
 	if !s:nosort()
 		let s:compat = s:martcs.pat
 		if has('patch-8.1-0')
-			cal sort(lines, 's:mixedsort2', [s:curtype()])
+			cal sort(lines, function('s:mixedsort2', [s:curtype()]))
 		el
 			cal sort(lines, 's:mixedsort')
 		en
@@ -749,7 +749,11 @@ fu! s:Render(lines, pat)
 	en
 	if s:mw_order == 'btt' | cal reverse(lines) | en
 	let s:lines = copy(lines)
-	cal map(lines, s:flfunc)
+	if has('patch-8.1-0') && s:flfunc ==# 's:formatline(v:val)'
+		cal map(lines, function('s:formatline2', [s:curtype()]))
+	el
+		cal map(lines, s:flfunc)
+	en
 	cal setline(1, s:offset(lines, height))
 	cal s:unmarksigns()
 	cal s:remarksigns()
@@ -1580,7 +1584,7 @@ fu! s:shortest(lens)
 	retu min(map(values(a:lens), 'v:val[0]'))
 endf
 
-fu! s:mixedsort(ct, ...)
+fu! s:mixedsort2(ct, ...)
 	if a:ct == 'buf'
 		let pat = '[\/]\?\[\d\+\*No Name\]$'
 		if a:1 =~# pat && a:2 =~# pat | retu 0
@@ -1733,6 +1737,33 @@ fu! s:formatline(str)
 	let cond = ct != 'buf' &&s:ispath && ( s:winw - 4 ) < s:strwidth(str)
 	retu s:lineprefix.( cond ? s:pathshorten(str) : str )
 endf
+
+fu! s:formatline2(ct, str)
+	let str = a:str
+	if a:ct == 'buf'
+		let bufnr = s:bufnrfilpath(str)[0]
+		let parts = s:bufparts(bufnr)
+		let str = printf('%'.s:bufnr_width.'s', bufnr)
+		if s:has_conceal && has('syntax_items')
+			let str .= printf(' %-13s %s%-36s',
+				\ '<bi>'.parts[0].'</bi>',
+				\ '<bn>'.parts[1], '{'.parts[2].'}</bn>')
+			if (!empty(s:bufpath_mod))
+				let str .= printf('  %s', '<bp>'.parts[3].'</bp>')
+			en
+		el
+			let str .= printf(' %-5s %-30s',
+				\ parts[0],
+				\ parts[2])
+			if (!empty(s:bufpath_mod))
+				let str .= printf('  %s', parts[3])
+			en
+		en
+	en
+	let cond = a:ct != 'buf' &&s:ispath && ( s:winw - 4 ) < s:strwidth(str)
+	retu s:lineprefix.( cond ? s:pathshorten(str) : str )
+endf
+
 
 fu! s:pathshorten(str)
 	retu matchstr(a:str, '^.\{9}').'...'
