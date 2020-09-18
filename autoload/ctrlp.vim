@@ -740,7 +740,11 @@ fu! s:Render(lines, pat)
 	" Sorting
 	if !s:nosort()
 		let s:compat = s:martcs.pat
-		cal sort(lines, 's:mixedsort')
+		if has('patch-8.1-0')
+			cal sort(lines, 's:mixedsort2', [s:curtype()])
+		el
+			cal sort(lines, 's:mixedsort')
+		en
 		unl s:compat
 	en
 	if s:mw_order == 'btt' | cal reverse(lines) | en
@@ -1574,6 +1578,32 @@ endf
 
 fu! s:shortest(lens)
 	retu min(map(values(a:lens), 'v:val[0]'))
+endf
+
+fu! s:mixedsort(ct, ...)
+	if a:ct == 'buf'
+		let pat = '[\/]\?\[\d\+\*No Name\]$'
+		if a:1 =~# pat && a:2 =~# pat | retu 0
+		elsei a:1 =~# pat | retu 1
+		elsei a:2 =~# pat | retu -1 | en
+	en
+	let [cln, cml] = [ctrlp#complen(a:1, a:2), s:compmatlen(a:1, a:2)]
+	if s:ispath
+		let ms = []
+		if s:res_count < 21
+			cal add(ms, s:compfnlen(a:1, a:2))
+			if a:ct !~ '^\(buf\|mru\)$' | cal add(ms, s:comptime(a:1, a:2)) | en
+			if !s:itemtype | cal add(ms, s:comparent(a:1, a:2)) | en
+		en
+		if a:ct =~ '^\(buf\|mru\)$'
+			cal add(ms, s:compmref(a:1, a:2))
+			let cln = cml ? cln : 0
+		en
+		cal extend(ms, [cml, 0, 0, 0])
+		let mp = call('s:multipliers', ms[:3])
+		retu cln + ms[0] * mp[0] + ms[1] * mp[1] + ms[2] * mp[2] + ms[3] * mp[3]
+	en
+	retu cln + cml * 2
 endf
 
 fu! s:mixedsort(...)
