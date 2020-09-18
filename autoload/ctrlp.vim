@@ -650,7 +650,7 @@ fu! s:MatchIt(items, pat, limit, exc)
 		try
 			if (s:matchcrfile || !( s:ispath && item ==# a:exc )) &&
 						\call(s:mfunc, [item, pat]) >= 0
-				cal add(lines, item)
+				let lines += [item]
 			en
 		cat | brea | endt
 		if a:limit > 0 && len(lines) >= a:limit | brea | en
@@ -1831,19 +1831,19 @@ fu! ctrlp#dirnfile(entries)
 		if s:igntype >= 0 && s:usrign(each, etype) | con | en
 		if etype == 'dir'
 			if s:showhidden | if each !~ '[\/]\.\{1,2}$'
-				cal add(items[0], each)
+				let items[0] += [each]
 			en | el
-				cal add(items[0], each)
+				let items[0] += [each]
 			en
 		elsei etype == 'link'
 			if s:folsym
 				let isfile = !isdirectory(each)
 				if s:folsym == 2 || !s:samerootsyml(each, isfile, cwd)
-					cal add(items[isfile], each)
+					let items[isfile] += [each]
 				en
 			en
 		elsei etype == 'file'
-			cal add(items[1], each)
+			let items[1] += [each]
 		en
 	endfo
 	retu items
@@ -2102,7 +2102,7 @@ fu! s:ifilter(list, str)
 	for each in a:list
 		try
 			if eval(estr)
-				cal add(rlist, each)
+				let rlist += [each]
 			en
 		cat | con | endt
 	endfo
@@ -2127,7 +2127,7 @@ endf
 fu! s:sublist7071(l, s, e)
 	let [newlist, id, ae] = [[], a:s, a:e == -1 ? len(a:l) - 1 : a:e]
 	wh id <= ae
-		cal add(newlist, get(a:l, id))
+		let newlist += [get(a:l, id)]
 		let id += 1
 	endw
 	retu newlist
