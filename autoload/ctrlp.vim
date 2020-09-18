@@ -1574,7 +1574,7 @@ fu! s:matchlens(str, pat, ...)
 	if nr > 20 | retu {} | en
 	if match(a:str, a:pat, st) >= 0
 		let [mst, mnd] = [matchstr(a:str, a:pat, st), matchend(a:str, a:pat, st)]
-		let lens = extend(lens, { nr : [strlen(mst), mst] })
+		cal extend(lens, { nr : [strlen(mst), mst] })
 		let lens = s:matchlens(a:str, a:pat, mnd, lens, nr + 1)
 	en
 	retu lens
