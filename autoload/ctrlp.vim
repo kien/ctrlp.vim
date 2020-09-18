@@ -428,33 +428,17 @@ endf
 if exists('*readdirex')
 	fu! s:GlobPath(dirs, depth)
 		let entries = []
-		let slash = s:lash()
-		for item in readdirex(a:dirs, '1', {'sort': 'none'})
-			let each = item['name']
-			let etype = item['type']
-			if !s:showhidden && each[0] == '.'
-				con
-			en
-			let each = a:dirs.slash.each
-			if s:igntype >= 0 && s:usrign(each, etype) | con | en
-			if etype == 'dir'
-				cal extend(entries, s:GlobPath(each, a:depth + 1))
-			elsei etype == 'link' && s:folsym
-				let isfile = !isdirectory(each)
-				if s:folsym == 2 || !s:samerootsyml(each, isfile, cwd)
-					cal extend(entries, [each])
-				en
-			elsei etype == 'file'
-				cal extend(g:ctrlp_allfiles, [each])
-				if !s:maxf(len(g:ctrlp_allfiles)) && a:depth <= s:maxdepth
-					if len(g:ctrlp_allfiles) % 100 == 0
-						sil! cal ctrlp#progress(len(g:ctrlp_allfiles), 1)
-					en
-					cal extend(entries, [each])
-				en
-			en
-		endfor
-		retu entries
+		for e in split(a:dirs, ',')
+			sil let files = readdir(e, '1', {'sort': 'none'})
+			if !s:showhidden | cal filter(files, 'v:val[0] != "."') | en
+			let entries += map(files, 'e.s:lash.v:val')
+		endfo
+		let [dnf, depth] = [ctrlp#dirnfile(entries), a:depth + 1]
+		cal extend(g:ctrlp_allfiles, dnf[1])
+		if !empty(dnf[0]) && !s:maxf(len(g:ctrlp_allfiles)) && depth <= s:maxdepth
+			sil! cal ctrlp#progress(len(g:ctrlp_allfiles), 1)
+			cal s:GlobPath(join(map(dnf[0], 's:fnesc(v:val, "g", ",")'), ','), depth)
+		en
 	endf
 el
 	fu! s:GlobPath(dirs, depth)
@@ -465,7 +449,7 @@ el
 			sil! cal ctrlp#progress(len(g:ctrlp_allfiles), 1)
 			cal s:GlobPath(join(map(dnf[0], 's:fnesc(v:val, "g", ",")'), ','), depth)
 		en
-  endf
+	endf
 en
 
 fu! s:async_glob_update_progress(timer)
