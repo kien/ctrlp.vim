@@ -431,7 +431,7 @@ if exists('*readdirex')
 		for e in split(a:dirs, ',')
 			sil let files = readdir(e, '1', {'sort': 'none'})
 			if !s:showhidden | cal filter(files, 'v:val[0] != "."') | en
-			let entries += map(files, 'e.s:lash.v:val')
+			cal extend(entries, map(files, 'e.s:lash.v:val'))
 		endfo
 		let [dnf, depth] = [ctrlp#dirnfile(entries), a:depth + 1]
 		cal extend(g:ctrlp_allfiles, dnf[1])
