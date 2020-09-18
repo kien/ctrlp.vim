@@ -2865,4 +2865,4 @@ fu! s:autocmds()
 endf
 "}}}
 
-" vim1:fen:fdm=marker:fmr={{{,}}}:fdl=0:fdc=1:ts=2:sw=2:sts=2
+" vim:fen:fdm=marker:fmr={{{,}}}:fdl=0:fdc=1:ts=2:sw=2:sts=2
