@@ -2362,9 +2362,15 @@ fu! s:getinput(...)
 	retu spi == 'c' ? prt[0] : join(prt, '')
 endf
 
-fu! s:strwidth(str)
-	retu exists('*strdisplaywidth') ? strdisplaywidth(a:str) : strlen(a:str)
-endf
+if exists('*strdisplaywidth')
+	fu! s:strwidth(str)
+		retu strdisplaywidth(a:str)
+	endf
+el
+	fu! s:strwidth(str)
+		retu strlen(a:str)
+	endf
+en
 
 fu! ctrlp#j2l(nr)
 	exe 'norm!' a:nr.'G'
