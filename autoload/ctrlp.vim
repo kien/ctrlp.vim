@@ -425,7 +425,7 @@ fu! s:CloseCustomFuncs()
 	en
 endf
 
-if exists('*readdirex')
+if exists('*readdir')
 	fu! s:GlobPath(dirs, depth)
 		let entries = []
 		for e in split(a:dirs, ',')
@@ -1588,15 +1588,15 @@ fu! s:mixedsort(...)
 	if s:ispath
 		let ms = []
 		if s:res_count < 21
-			let ms += [s:compfnlen(a:1, a:2)]
-			if ct !~ '^\(buf\|mru\)$' | let ms += [s:comptime(a:1, a:2)] | en
-			if !s:itemtype | let ms += [s:comparent(a:1, a:2)] | en
+			cal add(ms, s:compfnlen(a:1, a:2))
+			if ct !~ '^\(buf\|mru\)$' | cal add(ms, s:comptime(a:1, a:2)) | en
+			if !s:itemtype | cal add(ms, s:comparent(a:1, a:2)) | en
 		en
 		if ct =~ '^\(buf\|mru\)$'
-			let ms += [s:compmref(a:1, a:2)]
+			cal add(ms, s:compmref(a:1, a:2))
 			let cln = cml ? cln : 0
 		en
-		let ms += [cml, 0, 0, 0]
+		cal extend(ms, [cml, 0, 0, 0])
 		let mp = call('s:multipliers', ms[:3])
 		retu cln + ms[0] * mp[0] + ms[1] * mp[1] + ms[2] * mp[2] + ms[3] * mp[3]
 	en
@@ -2387,7 +2387,7 @@ fu! s:delbuf()
 		cal s:unmarksigns()
 		unl s:marked
 	el
-		let lines += [ctrlp#getcline()]
+		cal add(lines, ctrlp#getcline())
 	en
 	for line in lines
 		let bufnr = s:bufnrfilpath(line)[0]
