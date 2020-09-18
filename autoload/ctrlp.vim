@@ -436,7 +436,7 @@ if exists('*readdirex')
 		let [dnf, depth] = [ctrlp#dirnfile(entries), a:depth + 1]
 		cal extend(g:ctrlp_allfiles, dnf[1])
 		if !empty(dnf[0]) && !s:maxf(len(g:ctrlp_allfiles)) && depth <= s:maxdepth
-			sil! cal ctrlp#progress(len(g:ctrlp_allfiles), 1)
+			if len(g:ctrlp_allfiles) % 100 == 0 | sil! cal ctrlp#progress(len(g:ctrlp_allfiles), 1) | en
 			cal s:GlobPath(join(map(dnf[0], 's:fnesc(v:val, "g", ",")'), ','), depth)
 		en
 	endf
