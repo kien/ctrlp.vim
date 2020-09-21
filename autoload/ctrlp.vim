@@ -425,7 +425,7 @@ fu! s:CloseCustomFuncs()
 	en
 endf
 
-if exists('*readdir')
+if has('patch-8.2-0995')
 	fu! s:GlobPath(dirs, depth)
 		let entries = []
 		for e in split(a:dirs, ',')
