@@ -1853,9 +1853,9 @@ fu! s:usrign(item, type)
 	if s:igntype == 1 | retu a:item =~ s:usrign | en
 	if s:igntype == 2 | retu call(s:usrign, [a:item, a:type]) | en
 	if s:igntype == 4
-		if has_key(s:usrign, a:type) && s:usrign[a:type] != ''
+		if get(s:usrign, a:type, '') != ''
 			retu a:item =~ s:usrign[a:type]
-		elsei has_key(s:usrign, 'func') && s:usrign['func'] != ''
+		elsei get(s:usrign, 'func', '') != ''
 			retu call(s:usrign['func'], [a:item, a:type])
 		en
 	en
