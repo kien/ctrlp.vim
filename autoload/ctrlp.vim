@@ -1852,16 +1852,13 @@ endf
 fu! s:usrign(item, type)
 	if s:igntype == 1 | retu a:item =~ s:usrign | en
 	if s:igntype == 2
-		if call(s:usrign, [a:item, a:type])
-			retu 1
-		en
+		retu call(s:usrign, [a:item, a:type])
 	elsei s:igntype == 4
 		if has_key(s:usrign, a:type) && s:usrign[a:type] != ''
 					\ && a:item =~ s:usrign[a:type]
 			retu 1
 		elsei has_key(s:usrign, 'func') && s:usrign['func'] != ''
-					\ && call(s:usrign['func'], [a:item, a:type])
-			retu 1
+			retu call(s:usrign['func'], [a:item, a:type])
 		en
 	en
 	retu 0
