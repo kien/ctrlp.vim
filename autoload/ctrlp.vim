@@ -587,7 +587,7 @@ fu! s:lsCmd()
 		retu cmd[1]
 	elsei type(cmd) == 4 && ( has_key(cmd, 'types') || has_key(cmd, 'fallback') )
 		let fndroot = []
-    if get(cmd, 'types', {}) != {}
+		if get(cmd, 'types', {}) != {}
 			let [markrs, cmdtypes] = [[], values(cmd['types'])]
 			for pair in cmdtypes
 				cal add(markrs, pair[0])
