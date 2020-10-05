@@ -414,13 +414,13 @@ fu! ctrlp#files()
 endf
 
 fu! s:InitCustomFuncs()
-	if s:igntype == 4 && has_key(s:usrign, 'func-init') && s:usrign['func-init'] != ''
+	if s:igntype == 4 && get(s:usrign, 'func-init', '') != ''
 		exe call(s:usrign['func-init'], [])
 	en
 endf
 
 fu! s:CloseCustomFuncs()
-	if s:igntype == 4 && has_key(s:usrign, 'func-close') && s:usrign['func-close'] != ''
+	if s:igntype == 4 && get(s:usrign, 'func-close', '') != ''
 		exe call(s:usrign['func-close'], [])
 	en
 endf
@@ -521,7 +521,7 @@ endf
 fu! s:UserCmd(lscmd)
 	let [path, lscmd] = [s:dyncwd, a:lscmd]
 	let do_ign =
-		\ type(s:usrcmd) == 4 && has_key(s:usrcmd, 'ignore') && s:usrcmd['ignore']
+		\ type(s:usrcmd) == 4 && get(s:usrcmd, 'ignore', 0)
 	if do_ign && ctrlp#igncwd(s:cwd) | retu | en
 	if exists('+ssl') && &ssl && &shell !~ 'sh'
 		let [ssl, &ssl, path] = [&ssl, 0, tr(path, '/', '\')]
@@ -587,7 +587,7 @@ fu! s:lsCmd()
 		retu cmd[1]
 	elsei type(cmd) == 4 && ( has_key(cmd, 'types') || has_key(cmd, 'fallback') )
 		let fndroot = []
-		if has_key(cmd, 'types') && cmd['types'] != {}
+		if get(cmd, 'types', {}) != {}
 			let [markrs, cmdtypes] = [[], values(cmd['types'])]
 			for pair in cmdtypes
 				cal add(markrs, pair[0])
@@ -595,7 +595,7 @@ fu! s:lsCmd()
 			let fndroot = s:findroot(s:dyncwd, markrs, 0, 1)
 		en
 		if fndroot == []
-			retu has_key(cmd, 'fallback') ? cmd['fallback'] : ''
+			retu get(cmd, 'fallback', '')
 		en
 		for pair in cmdtypes
 			if pair[0] == fndroot[0] | brea | en
@@ -669,7 +669,7 @@ fu! s:MatchedItems(items, pat, limit)
 	en
 	if matcher != {}
 		let argms =
-			\ has_key(matcher, 'arg_type') && matcher['arg_type'] == 'dict' ? [{
+			\ get(matcher, 'arg_type', '') == 'dict' ? [{
 			\ 'items':  items,
 			\ 'str':    a:pat,
 			\ 'limit':  a:limit,
@@ -1187,10 +1187,10 @@ fu! s:SetWD(args)
 		\ && exists('s:dyncwd')
 		cal ctrlp#setdir(s:dyncwd) | retu
 	en
-	if has_key(a:args, 'dir') && a:args['dir'] != ''
+	if get(a:args, 'dir', '') != ''
 		cal ctrlp#setdir(a:args['dir']) | retu
 	en
-	let pmodes = has_key(a:args, 'mode') ? a:args['mode'] : s:pathmode
+	let pmodes = get(a:args, 'mode', s:pathmode)
 	let [s:crfilerel, s:dyncwd] = [fnamemodify(s:crfile, ':.'), getcwd()]
 	if (!type(pmodes))
 		let pmodes =
@@ -1209,7 +1209,7 @@ fu! ctrlp#acceptfile(...)
 	let useb = 0
 	if a:0 == 1 && type(a:1) == 4
 		let [md, line] = [a:1['action'], a:1['line']]
-		let atl = has_key(a:1, 'tail') ? a:1['tail'] : ''
+		let atl = get(a:1, 'tail', '')
 	el
 		let [md, line] = [a:1, a:2]
 		let atl = a:0 > 2 ? a:3 : ''
@@ -1301,7 +1301,7 @@ fu! s:AcceptSelection(action)
 	" Do something with it
 	if s:openfunc != {} && has_key(s:openfunc, s:ctype)
 		let actfunc = s:openfunc[s:ctype]
-		let type = has_key(s:openfunc, 'arg_type') ? s:openfunc['arg_type'] : 'list'
+		let type = get(s:openfunc, 'arg_type', 'list')
 	el
 		if s:itemtype < len(s:coretypes)
 			let [actfunc, type] = ['ctrlp#acceptfile', 'dict']
@@ -1491,7 +1491,7 @@ fu! s:OpenNoMarks(md, line)
 		cal s:remarksigns()
 		cal s:BuildPrompt(0)
 	elsei a:md == 'x'
-		let type = has_key(s:openfunc, 'arg_type') ? s:openfunc['arg_type'] : 'dict'
+		let type = get(s:openfunc, 'arg_type', 'dict')
 		let argms = type == 'dict' ? [{ 'action': a:md, 'line': a:line }]
 			\ : [a:md, a:line]
 		cal call(s:openfunc[s:ctype], argms, s:openfunc)
@@ -1668,7 +1668,7 @@ fu! ctrlp#statusline()
 		\ exists('s:marked') ? ' <'.s:dismrk().'>' : ' <->' : ''
 	if s:status != {}
 		let argms =
-			\ has_key(s:status, 'arg_type') && s:status['arg_type'] == 'dict' ? [{
+			\ get(s:status, 'arg_type', '') == 'dict' ? [{
 			\ 'focus':   focus,
 			\ 'byfname': byfname,
 			\ 'regex':   s:regexp,
@@ -1701,7 +1701,7 @@ fu! ctrlp#progress(enum, ...)
 	if has('macunix') || has('mac') | sl 1m | en
 	let txt = a:0 ? '(press ctrl-c to abort)' : ''
 	if s:status != {}
-		let argms = has_key(s:status, 'arg_type') && s:status['arg_type'] == 'dict'
+		let argms = get(s:status, 'arg_type', '') == 'dict'
 			\ ? [{ 'str': a:enum }] : [a:enum]
 		let &l:stl = call(s:status['prog'], argms, s:status)
 	el
@@ -1851,17 +1851,12 @@ endf
 
 fu! s:usrign(item, type)
 	if s:igntype == 1 | retu a:item =~ s:usrign | en
-	if s:igntype == 2
-		if call(s:usrign, [a:item, a:type])
-			retu 1
-		en
-	elsei s:igntype == 4
-		if has_key(s:usrign, a:type) && s:usrign[a:type] != ''
-					\ && a:item =~ s:usrign[a:type]
-			retu 1
-		elsei has_key(s:usrign, 'func') && s:usrign['func'] != ''
-					\ && call(s:usrign['func'], [a:item, a:type])
-			retu 1
+	if s:igntype == 2 | retu call(s:usrign, [a:item, a:type]) | en
+	if s:igntype == 4
+		if get(s:usrign, a:type, '') != ''
+			retu a:item =~ s:usrign[a:type]
+		elsei get(s:usrign, 'func', '') != ''
+			retu call(s:usrign['func'], [a:item, a:type])
 		en
 	en
 	retu 0
@@ -2370,14 +2365,14 @@ endf
 fu! s:getinput(...)
 	let [prt, spi] = [s:prompt, ( a:0 ? a:1 : '' )]
 	if s:abbrev != {}
-		let gmd = has_key(s:abbrev, 'gmode') ? s:abbrev['gmode'] : ''
+		let gmd = get(s:abbrev, 'gmode', '')
 		let str = ( gmd =~ 't' && !a:0 ) || spi == 'c' ? prt[0] : join(prt, '')
 		if gmd =~ 't' && gmd =~ 'k' && !a:0 && matchstr(str, '.$') =~ '\k'
 			retu join(prt, '')
 		en
 		let [pf, rz] = [( s:byfname() ? 'f' : 'p' ), ( s:regexp ? 'r' : 'z' )]
 		for dict in s:abbrev['abbrevs']
-			let dmd = has_key(dict, 'mode') ? dict['mode'] : ''
+			let dmd = get(dict, 'mode', '')
 			let pat = escape(dict['pattern'], '~')
 			if ( dmd == '' || ( dmd =~ pf && dmd =~ rz && !a:0 )
 				\ || dmd =~ '['.spi.']' ) && str =~ pat
