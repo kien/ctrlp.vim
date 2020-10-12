@@ -2832,8 +2832,11 @@ fu! s:NotifySearch()
 	en
 endf
 
-fu! ctrlp#update()
+fu! ctrlp#update(...)
 	cal s:ForceUpdate()
+	if a:0 && a:1
+		cal s:BuildPrompt(1)
+	en
 endf
 
 " - Autocmds {{{1
