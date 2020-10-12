@@ -2834,9 +2834,7 @@ endf
 
 fu! ctrlp#update(...)
 	cal s:ForceUpdate()
-	if a:0 && a:1
-		cal s:BuildPrompt(1)
-	en
+	if a:0 | cal s:BuildPrompt(a:1) | en
 endf
 
 " - Autocmds {{{1
