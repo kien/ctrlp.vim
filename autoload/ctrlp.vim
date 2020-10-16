@@ -434,6 +434,7 @@ if has('patch-8.2-0995')
 			let entries += map(files, 'e.s:lash.v:val')
 		endfo
 		let [dnf, depth] = [ctrlp#dirnfile(entries), a:depth + 1]
+		if &wig != '' | cal filter(dnf[1], 'glob(v:val) != ""') | en
 		let g:ctrlp_allfiles += dnf[1]
 		if !empty(dnf[0]) && !s:maxf(len(g:ctrlp_allfiles)) && depth <= s:maxdepth
 			sil! cal ctrlp#progress(len(g:ctrlp_allfiles), 1)
