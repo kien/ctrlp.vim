@@ -437,7 +437,7 @@ if has('patch-8.2-0995')
 		let g:ctrlp_allfiles += dnf[1]
 		if !empty(dnf[0]) && !s:maxf(len(g:ctrlp_allfiles)) && depth <= s:maxdepth
 			sil! cal ctrlp#progress(len(g:ctrlp_allfiles), 1)
-			cal s:GlobPath(join(map(dnf[0], 's:fnesc(v:val, "g", ",")'), ','), depth)
+			cal s:GlobPath(join(dnf[0], ','), depth)
 		en
 	endf
 el
