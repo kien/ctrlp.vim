@@ -1739,7 +1739,7 @@ fu! s:formatline(str)
 	retu s:lineprefix.( cond ? s:pathshorten(str) : str )
 endf
 
-fu! s:formatline2(ct, str)
+fu! s:formatline2(ct, key, str)
 	let str = a:str
 	if a:ct == 'buf'
 		let bufnr = s:bufnrfilpath(str)[0]
