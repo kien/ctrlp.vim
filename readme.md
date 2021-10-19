@@ -88,4 +88,4 @@ Use your favorite method or check the homepage for a [quick installation guide][
 
 [1]: http://i.imgur.com/yIynr.png
 [2]: https://github.com/kien/ctrlp.vim/tree/extensions
-[3]: http://kien.github.com/ctrlp.vim#installation
+[3]: http://kien.github.io/ctrlp.vim#installation
