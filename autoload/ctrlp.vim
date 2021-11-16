@@ -428,7 +428,7 @@ endf
 if has('patch-8.2-0995')
 	fu! s:GlobPath(dirs, depth)
 		let entries = []
-		let dirs = substitute(a:dirs, '\\\([%#]\)', '\1', 'g')
+		let dirs = substitute(a:dirs, '\\\([%# ]\)', '\1', 'g')
 		for e in split(dirs, ',')
 			sil let files = readdir(e, '1', {'sort': 'none'})
 			if !s:showhidden | cal filter(files, 'v:val[0] != "."') | en
