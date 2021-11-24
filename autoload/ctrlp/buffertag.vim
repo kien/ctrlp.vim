@@ -203,10 +203,14 @@ endf
 
 fu! s:parseline(line)
 	let vals = matchlist(a:line,
-		\ '\v^([^\t]+)\t(.+)\t[?/]\^?(.{-1,})\$?[?/]\;\"\t(.+)\tline(no)?\:(\d+)')
+		\ '\v^([^\t]+)\t(.+)\t[?/]\^?(.{-1,})\$?[?/]\;\"\t(.+)\tline(no)?\:(\d+)\t?([^\t]*)')
 	if vals == [] | retu '' | en
 	let [bufnr, bufname] = [bufnr('^'.vals[2].'$'), fnamemodify(vals[2], ':p:t')]
-	retu vals[1].'	'.vals[4].'|'.bufnr.':'.bufname.'|'.vals[6].'| '.vals[3]
+	if len(vals) > 7 && vals[7] != ''
+		retu vals[1].'	'.vals[4].'|'.bufnr.':'.bufname.'|'.vals[6].'|'.vals[7].'| '.vals[3]
+	else
+		retu vals[1].'	'.vals[4].'|'.bufnr.':'.bufname.'|'.vals[6].'| '.vals[3]
+	en
 endf
 
 fu! s:syntax()
