@@ -253,7 +253,7 @@ endf
 
 fu! ctrlp#buffertag#accept(mode, str)
 	let vals = matchlist(a:str,
-		\ '\v^[^\t]+\t+[^\t|]+\|(\d+)\:[^\t|]+\|(\d+)\|\s(.+)$')
+		\ '\v^[^\t]+\t+[^\t|]+\|(\d+)\:[^\t|]+\|(\d+)%(\|[^\t|]+)?\|\s(.+)$')
 	let bufnr = str2nr(get(vals, 1))
 	if bufnr
 		cal ctrlp#acceptfile(a:mode, bufnr)
