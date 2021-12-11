@@ -2714,6 +2714,15 @@ fu! ctrlp#nosy()
 	retu !( has('syntax') && exists('g:syntax_on') )
 endf
 
+fu! s:hiupdate()
+	for [ke, va] in items(s:hlgrps)
+		let ke = 'CtrlP' . ke
+		if hlexists(ke)
+			exe 'hi link' ke va
+		en
+	endfo
+endf
+
 fu! ctrlp#hicheck(grp, defgrp)
 	if !hlexists(a:grp)
 		exe 'hi link' a:grp a:defgrp
@@ -2847,6 +2856,7 @@ if has('autocmd')
 		au BufEnter ControlP cal s:checkbuf()
 		au BufLeave ControlP noa cal s:Close()
 		au VimLeavePre * cal s:leavepre()
+		au ColorScheme * cal s:hiupdate()
 	aug END
 en
 
