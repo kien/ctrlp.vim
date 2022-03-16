@@ -330,7 +330,7 @@ fu! s:Open()
 endf
 
 fu! s:Close()
-	cal s:async_glob_abort()
+	cal s:async_glob_abort(0)
 	cal s:buffunc(0)
 	if winnr('$') == 1
 		bw!
@@ -488,10 +488,12 @@ fu! s:async_glob_on_exit(...)
 	en
 endf
 
-fu! s:async_glob_abort()
+fu! s:async_glob_abort(upd)
 	cal s:stop_job_if_exists()
 	cal s:stop_timer_if_exists()
-	cal s:ForceUpdate()
+	if a:upd
+		cal s:ForceUpdate()
+	en
 endf
 
 fu! s:stop_timer_if_exists()
@@ -1152,7 +1154,7 @@ fu! s:ToggleByFname()
 endf
 
 fu! s:ToggleType(dir)
-	cal s:async_glob_abort()
+	cal s:async_glob_abort(1)
 	let max = len(g:ctrlp_ext_vars) + len(s:coretypes) - 1
 	let next = s:walker(max, s:itemtype, a:dir)
 	cal ctrlp#setlines(next)
